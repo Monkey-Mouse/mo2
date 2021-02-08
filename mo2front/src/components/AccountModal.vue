@@ -6,22 +6,40 @@
     autocomplete="off"
   >
     <v-card>
-      <v-card-title> 登录 </v-card-title>
-      <v-card-text>
-        <v-text-field label="Email" v-model="email" :rules="validateEmail()">
-          <v-icon slot="append" color="gray"> mdi-email </v-icon>
-        </v-text-field>
-        <v-text-field
-          label="Password"
-          v-model="password"
-          :type="showPasswd ? 'text' : 'password'"
-          :append-icon="showPasswd ? 'mdi-eye-off' : 'mdi-eye'"
-          @click:append="showPasswd = !showPasswd"
-          hint="长度最小为8"
-          :rules="validatePasswd()"
-        >
-        </v-text-field>
-      </v-card-text>
+      <v-container>
+        <v-row>
+          <v-col cols="12">
+            <v-card-title> 登录 </v-card-title>
+          </v-col>
+        </v-row>
+        <v-card-text>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                label="Email"
+                v-model="email"
+                :rules="validateEmail()"
+              >
+                <v-icon slot="append" color="gray"> mdi-email </v-icon>
+              </v-text-field>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field
+                label="Password"
+                v-model="password"
+                :type="showPasswd ? 'text' : 'password'"
+                :append-icon="showPasswd ? 'mdi-eye-off' : 'mdi-eye'"
+                @click:append="showPasswd = !showPasswd"
+                hint="长度最小为8"
+                :rules="validatePasswd()"
+              >
+              </v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </v-container>
     </v-card>
   </v-dialog>
 </template>
