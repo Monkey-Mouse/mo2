@@ -1,8 +1,15 @@
-package main
+package demo
 
-import "mo2"
+import (
+	"fmt"
+)
 
-func main() {
-	mo2.Welcome()
+func Welcome() {
+	fmt.Println("welcome to mo2")
 	connectMongoDB()
+	test()
+
+	find()
+	disconnectMongoDB()
+
 }
