@@ -1,22 +1,35 @@
 <template>
-  <div class="modal is-active">
-    <div class="modal-background"></div>
-    <div class="modal-card">
-      <div class="modal-card-body">
+  <v-dialog
+    :value="enable"
+    @click:outside="close"
+    max-width="600px"
+    autocomplete="off"
+  >
+    <v-card>
+      <v-card-title> 登录 </v-card-title>
+      <v-card-text>
         <v-text-field label="Email" v-model="email" :rules="validateEmail()">
           <v-icon slot="append" color="gray"> mdi-email </v-icon>
         </v-text-field>
-        <v-text-field label="Password" v-model="email" :rules="validateEmail()">
-          <v-icon slot="append" color="gray"> mdi-email </v-icon>
+        <v-text-field
+          label="Password"
+          v-model="password"
+          :type="showPasswd ? 'text' : 'password'"
+          :append-icon="showPasswd ? 'mdi-eye-off' : 'mdi-eye'"
+          @click:append="showPasswd = !showPasswd"
+          hint="长度最小为8"
+          :rules="validatePasswd()"
+        >
         </v-text-field>
-      </div>
-    </div>
-  </div>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
+import { Prop } from "vue-property-decorator";
 import {
   required,
   minLength,
@@ -26,13 +39,38 @@ import {
 
 @Component({})
 export default class AccountModal extends Vue {
+  @Prop()
+  enable!: boolean;
   email: string = "";
+  password: string = "";
   validator = {
+    password: {
+      required: required,
+      min: minLength(8),
+    },
     email: {
       required: required,
       email: email,
     },
   };
+  showPasswd: boolean = false;
+  created() {
+    this.email = "";
+    this.password = "";
+  }
+  close() {
+    this.$emit("update:enable", false);
+  }
+
+  validatePasswd() {
+    this.$v.password.$touch();
+
+    return [
+      () => this.$v.password.required || "密码不可为空",
+      () => this.$v.password.min || "密码长度不小于8",
+    ];
+  }
+
   validateEmail() {
     this.$v.email.$touch();
 

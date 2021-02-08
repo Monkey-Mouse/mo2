@@ -1,10 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
+    <v-app-bar app color="primary" dark>
       <div class="d-flex align-center">
         <v-img
           alt="Vuetify Logo"
@@ -38,26 +34,36 @@
     </v-app-bar>
 
     <v-main>
-      <account-modal/>
+      <v-container>
+        <v-btn @click="showLogin()">Login</v-btn>
+        <account-modal :enable.sync="enable" />
+        <hello-world dialog="true" />
+      </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import Vue from "vue";
+import HelloWorld from "./components/HelloWorld.vue";
 import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
-import Component from 'vue-class-component';
-import "bulma/bulma.sass";
-
+import Component from "vue-class-component";
+// import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 
 @Component({
   components: {
     AccountModal,
+    HelloWorld,
   },
 })
-export default class App extends Vue {}
-
+export default class App extends Vue {
+  enable = false;
+  showLogin() {
+    this.enable = true;
+  }
+}
 </script>
+<style>
+</style>
