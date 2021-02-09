@@ -44,7 +44,7 @@
           <v-card-actions class="pa-4">
             Rate this
             <v-spacer></v-spacer>
-            <span class="grey--text text--lighten-2 caption mr-2">
+            <span class="text--lighten-2 caption mr-2">
               ({{ blog.rate }})
             </span>
             <v-rating
