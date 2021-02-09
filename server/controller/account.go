@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/swag/example/celler/httputil"
+	//"github.com/swaggo/swag/example/celler/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"log"
+	"mo2/database"
 	"mo2/examples"
+	"mo2/server/model"
 	"net/http"
 	"strconv"
 )
@@ -28,12 +31,48 @@ func SayHello(c *gin.Context) {
 // @Description 为新用户创建信息，加入数据库
 // @Produce  json
 // @Success 200 {string} json
-// @Router /addUser [get]
-func AddMo2User(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "great",
+// @Router /api/accounts/addUser [post]
+func (c *Controller) AddMo2User(ctx *gin.Context) {
+	message := ctx.PostForm("message")
+	nick := ctx.DefaultPostForm("nick", "anonymous")
+	ctx.JSON(http.StatusOK, gin.H{
+		"action":  "posted",
+		"message": message,
+		"nick":    nick,
 	})
 
+}
+
+// AddAccount godoc
+// @Summary Add an account
+// @Description add by json account
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+//// @Param account body model.AddAccount true "Add account"
+// @Success 200 {object} model.Account
+// @Router /api/accounts [post]
+func (c *Controller) AddAccount(ctx *gin.Context) {
+	var addAccount model.AddAccount
+	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
+		httputil.NewError(ctx, http.StatusBadRequest, err)
+		return
+	}
+	if err := addAccount.Validation(); err != nil {
+		httputil.NewError(ctx, http.StatusBadRequest, err)
+		return
+	}
+	/*account := model.Account{
+		Name: addAccount.Name,
+	}
+	lastID, err := account.Insert()*/
+	account, err := database.AddAccount(addAccount)
+	if err != nil {
+		httputil.NewError(ctx, http.StatusBadRequest, err)
+		return
+	}
+	//account.ID = lastID
+	ctx.JSON(http.StatusOK, account)
 }
 
 // ShowAccount godoc
@@ -45,11 +84,12 @@ func AddMo2User(c *gin.Context) {
 // @Param id path int true "Account ID"
 // @Success 200 {string} json
 // @Header 200 {string} Token "qwerty"
-
-// @Router /accounts/{id} [get]
+// @Router /api/accounts/{id} [get]
 func (c *Controller) ShowAccount(ctx *gin.Context) {
 
+	demo.Find()
 	id := ctx.Param("id")
+
 	aid, err := strconv.Atoi(id)
 
 	fmt.Println(aid)
@@ -59,12 +99,18 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 	}
 	cli := demo.GetClient()
 	col := cli.Database("test").Collection("trainers")
-	result := col.FindOne(context.TODO(), bson.D{{"Name", "Ash"}})
+
+	filter := bson.D{{"name", "Ash"}}
+
+	result := col.FindOne(context.TODO(), filter)
 	//account, err := model.AccountOne(aid)
 	if err != nil {
 		httputil.NewError(ctx, http.StatusNotFound, err)
 		return
 	}
+	fmt.Println(result)
+	fmt.Println(result.Decode(demo.Trainer{}))
+
 	ctx.JSON(http.StatusOK, result.Decode(demo.Trainer{}))
 
 }
