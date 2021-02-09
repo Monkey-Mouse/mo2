@@ -1,0 +1,117 @@
+basePath: /
+definitions:
+  model.Account:
+    properties:
+      email:
+        example: email@qq.com
+        type: string
+      hashedPassword:
+        example: sdfsfx
+        type: string
+      id:
+        example: 1
+        format: int64
+        type: integer
+      userName:
+        example: account name
+        type: string
+      uuid:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        format: uuid
+        type: string
+    type: object
+  model.AddAccount:
+    properties:
+      email:
+        example: email@qq.com
+        type: string
+      password:
+        example: p@ssword
+        type: string
+      userName:
+        example: account name
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a Mo2 server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Mo2
+  version: "1.0"
+paths:
+  /api/accounts:
+    post:
+      consumes:
+      - application/json
+      description: add by json account
+      parameters:
+      - description: Add account
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/model.AddAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Account'
+      summary: Add an account
+      tags:
+      - accounts
+  /api/accounts/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      operationId: get-string-by-int
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            Token:
+              description: qwerty
+              type: string
+          schema:
+            type: string
+      summary: Show a account
+  /api/accounts/addUser:
+    post:
+      description: 为新用户创建信息，加入数据库
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 新增用户
+  /sayHello:
+    get:
+      description: 为新用户创建信息，加入数据库
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 新增用户
+swagger: "2.0"
