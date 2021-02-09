@@ -3,7 +3,7 @@
     <v-timeline-item
       v-for="(blog, i) in blogs"
       :key="i"
-      :color="displayColors[i]"
+      :color="displayColors[i % displayColors.length]"
       large
     >
       <v-lazy
@@ -19,7 +19,10 @@
             <v-col sm="6" cols="12">
               <v-card-title>
                 <div>
-                  <div :class="`${displayColors[i]}--text`" class="headline">
+                  <div
+                    :class="`${displayColors[i % displayColors.length]}--text`"
+                    class="headline"
+                  >
                     {{ blog.title }}
                   </div>
                   <div class="subtitle-1">{{ blog.author }}</div>
