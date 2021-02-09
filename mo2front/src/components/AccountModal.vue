@@ -39,6 +39,12 @@
             </v-col>
           </v-row>
         </v-card-text>
+        <v-card-actions>
+          <v-switch label="记住我"></v-switch>
+          <v-spacer></v-spacer>
+          <v-btn outlined text>登录</v-btn>
+          <v-btn color="red">取消</v-btn>
+        </v-card-actions>
       </v-container>
     </v-card>
   </v-dialog>

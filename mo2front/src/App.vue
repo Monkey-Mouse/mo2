@@ -2,7 +2,6 @@
   <v-app>
     <v-app-bar
       id="appBarElm"
-      app
       scroll-target="#scrolling-techniques-6"
       color="primary"
       dark
@@ -16,7 +15,7 @@
           transition="scale-transition"
           width="40"
         />
-        <v-app-bar-title>MO2</v-app-bar-title>
+        <div class="text-h4">MO2</div>
         <!-- <v-img
           alt="Vuetify Name"
           class="shrink mt-1 hidden-sm-and-down"
@@ -36,6 +35,7 @@
       bottom
       permanent
       :mini-variant.sync="sideNavVisible"
+      expand-on-hover
     >
       <v-list-item class="px-2" :style="`height: ${appBarHeight}px`">
         <v-list-item-avatar>
@@ -65,6 +65,17 @@
     </v-navigation-drawer>
 
     <v-main>
+      <v-parallax
+        src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
+        height="200"
+      >
+        <v-row align="center" justify="center">
+          <v-col class="text-center" cols="12">
+            <h1 class="display-1 font-weight-thin mb-4">MO2</h1>
+            <h4 class="subheading">Monkey ❤ Mouse</h4>
+          </v-col>
+        </v-row>
+      </v-parallax>
       <v-container>
         <router-view />
         <!-- <home /> -->
