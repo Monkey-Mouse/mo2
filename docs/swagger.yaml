@@ -6,7 +6,7 @@ definitions:
         example: email@qq.com
         type: string
       hashedPassword:
-        example: sdfsfx
+        example: $2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i
         type: string
       id:
         example: 1
@@ -32,7 +32,16 @@ definitions:
         example: account name
         type: string
     type: object
-host: localhost:8080
+  model.LoginAccount:
+    properties:
+      password:
+        example: p@ssword
+        type: string
+      userNameOrEmail:
+        example: account name/email@qq.com
+        type: string
+    type: object
+host: localhost:5000
 info:
   contact:
     email: support@swagger.io
@@ -103,6 +112,28 @@ paths:
           schema:
             type: string
       summary: 新增用户
+  /api/accounts/login:
+    post:
+      consumes:
+      - application/json
+      description: add by json account
+      parameters:
+      - description: login account
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Account'
+      summary: Add an account
+      tags:
+      - accounts
   /sayHello:
     get:
       description: 为新用户创建信息，加入数据库

@@ -26,7 +26,10 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	collection.Indexes().CreateMany(context.TODO(), model)
+	_, err = collection.Indexes().CreateMany(context.TODO(), model)
+	if err != nil {
+		log.Fatal(err)
+	}
 	//var account model.Account
 	// find the maxId in mongoDB
 	account.ID = GetMaxID("accounts")
@@ -46,4 +49,41 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 
 	_, err = collection.InsertOne(context.TODO(), account)
 	return
+}
+
+//verify an account
+func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
+
+	//first use username, then use email to verify
+	//var
+	collection := GetCollection("accounts")
+	userNameOrEmail := info.UserNameOrEmail
+	err = collection.FindOne(context.TODO(), bson.D{{"username", userNameOrEmail}}).Decode(&account)
+
+	if err != nil {
+		//then verify email
+		if err == mongo.ErrNoDocuments {
+			log.Println(err)
+			err = collection.FindOne(context.TODO(), bson.D{{"email", userNameOrEmail}}).Decode(&account)
+			if err != nil {
+				// no chance
+				return
+			}
+		}
+		if err != mongo.ErrNoDocuments {
+			log.Fatal(err)
+			return
+		}
+
+	}
+	password := info.Password
+	hashedPassword := account.HashedPwd
+	//judge hash with hashed password
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	return
+
 }

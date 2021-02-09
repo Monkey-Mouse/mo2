@@ -84,6 +84,40 @@ var doc = `{
                 }
             }
         },
+        "/api/accounts/login": {
+            "post": {
+                "description": "add by json account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Add an account",
+                "parameters": [
+                    {
+                        "description": "login account",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.LoginAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Account"
+                        }
+                    }
+                }
+            }
+        },
         "/api/accounts/{id}": {
             "get": {
                 "description": "get string by ID",
@@ -148,7 +182,7 @@ var doc = `{
                 },
                 "hashedPassword": {
                     "type": "string",
-                    "example": "sdfsfx"
+                    "example": "$2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i"
                 },
                 "id": {
                     "type": "integer",
@@ -182,6 +216,19 @@ var doc = `{
                     "example": "account name"
                 }
             }
+        },
+        "model.LoginAccount": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "p@ssword"
+                },
+                "userNameOrEmail": {
+                    "type": "string",
+                    "example": "account name/email@qq.com"
+                }
+            }
         }
     }
 }`
@@ -198,7 +245,7 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
-	Host:        "localhost:8080",
+	Host:        "localhost:5000",
 	BasePath:    "/",
 	Schemes:     []string{},
 	Title:       "Mo2",

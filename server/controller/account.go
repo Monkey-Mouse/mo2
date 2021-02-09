@@ -62,16 +62,41 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		httputil.NewError(ctx, http.StatusBadRequest, err)
 		return
 	}
-	/*account := model.Account{
-		Name: addAccount.Name,
-	}
-	lastID, err := account.Insert()*/
 	account, err := database.AddAccount(addAccount)
 	if err != nil {
 		httputil.NewError(ctx, http.StatusBadRequest, err)
 		return
 	}
-	//account.ID = lastID
+	ctx.JSON(http.StatusOK, account)
+}
+
+// LoginAccount godoc
+// @Summary Add an account
+// @Description add by json account
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+//// @Param account body model.LoginAccount true "login account"
+// @Success 200 {object} model.Account
+// @Failure 404 {object} error
+// @Router /api/accounts/login [post]
+func (c *Controller) LoginAccount(ctx *gin.Context) {
+	var loginAccount model.LoginAccount
+	if err := ctx.ShouldBindJSON(&loginAccount); err != nil {
+		ctx.JSON(http.StatusNotFound, err)
+		return
+	}
+	if err := loginAccount.Validation(); err != nil {
+		ctx.JSON(http.StatusNotFound, err)
+		return
+	}
+	account, err := database.VerifyAccount(loginAccount)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, err)
+		return
+	}
+	//login success: to record the state
+	//TODO in login state
 	ctx.JSON(http.StatusOK, account)
 }
 

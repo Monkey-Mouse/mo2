@@ -21,6 +21,7 @@ func RunServer() {
 			accounts.GET(":id", c.ShowAccount)
 			//accounts.POST("addUser",c.AddMo2User)
 			accounts.POST("", c.AddAccount)
+			accounts.POST("login", c.LoginAccount)
 
 			/*accounts.GET("", c.ListAccounts)
 			accounts.POST("", c.AddAccount)
@@ -31,5 +32,5 @@ func RunServer() {
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	r.Run()
+	r.Run(":5000")
 }

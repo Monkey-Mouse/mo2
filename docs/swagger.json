@@ -15,7 +15,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "localhost:5000",
     "basePath": "/",
     "paths": {
         "/api/accounts": {
@@ -64,6 +64,40 @@
                         "description": "OK",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/login": {
+            "post": {
+                "description": "add by json account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Add an account",
+                "parameters": [
+                    {
+                        "description": "login account",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.LoginAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Account"
                         }
                     }
                 }
@@ -133,7 +167,7 @@
                 },
                 "hashedPassword": {
                     "type": "string",
-                    "example": "sdfsfx"
+                    "example": "$2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i"
                 },
                 "id": {
                     "type": "integer",
@@ -165,6 +199,19 @@
                 "userName": {
                     "type": "string",
                     "example": "account name"
+                }
+            }
+        },
+        "model.LoginAccount": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "p@ssword"
+                },
+                "userNameOrEmail": {
+                    "type": "string",
+                    "example": "account name/email@qq.com"
                 }
             }
         }
