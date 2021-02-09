@@ -113,7 +113,7 @@ export default class App extends Vue {
   sideNavVisible = true;
   items = [
     { title: "Home", icon: "mdi-home-city", href: "/" },
-    { title: "My Account", icon: "mdi-account", href: "/about" },
+    { title: "About", icon: "mdi-alpha-a-circle", href: "/about" },
     { title: "Users", icon: "mdi-account-group-outline", href: "/users" },
   ];
   created() {
