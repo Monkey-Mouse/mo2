@@ -149,7 +149,7 @@ export default class AccountModal extends Vue {
   validateName() {
     this.$v.name.$touch();
 
-    return [() => this.$v.name.required || "密码不可为空"];
+    return [() => this.$v.name.required || "名字不可为空"];
   }
 
   validatePasswd() {

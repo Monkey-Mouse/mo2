@@ -5,6 +5,7 @@
       scroll-target="#scrolling-techniques-6"
       color="primary"
       dark
+      app
     >
       <div class="d-flex align-center">
         <v-img
@@ -52,7 +53,7 @@
       <v-divider></v-divider>
 
       <v-list dense>
-        <v-list-item v-for="item in items" :key="item.title" link>
+        <v-list-item v-for="item in items" :key="item.title" :to="item.href">
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
@@ -66,7 +67,7 @@
 
     <v-main>
       <v-parallax
-        src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
+        src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
         height="200"
       >
         <v-row align="center" justify="center">
@@ -111,9 +112,9 @@ export default class App extends Vue {
   enable = false;
   sideNavVisible = true;
   items = [
-    { title: "Home", icon: "mdi-home-city" },
-    { title: "My Account", icon: "mdi-account" },
-    { title: "Users", icon: "mdi-account-group-outline" },
+    { title: "Home", icon: "mdi-home-city", href: "/" },
+    { title: "My Account", icon: "mdi-account", href: "/about" },
+    { title: "Users", icon: "mdi-account-group-outline", href: "/users" },
   ];
   created() {
     window.addEventListener("resize", () => {
