@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	_ "mo2/docs"
 	"mo2/examples"
 	"mo2/server"
@@ -27,5 +28,7 @@ func main() {
 	demo.GetClient()
 
 	demo.Welcome()
+
+	fmt.Println("great")
 
 }
