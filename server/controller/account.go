@@ -107,18 +107,16 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 }
 
 // LogoutAccount godoc
-// @Summary login an account
-// @Description login by json model.LoginAccount and set cookies
+// @Summary logout
+// @Description logout and delete cookies
 // @Tags accounts
-// @Accept  json
 // @Produce  json
-// @Param account body model.LoginAccount true "login account"
-// @Success 200 {object} model.Account
-// @Failure 404 {object} error
-// @Router /api/accounts/login [post]
+// @Success 200 {object} json
+// @Router /api/accounts/logout [get]
 func (c *Controller) LogoutAccount(ctx *gin.Context) {
-	ctx.SetCookie("login", "true", -1, "/", "localhost", false, true)
 
+	ctx.SetCookie("login", "true", -1, "/", "localhost", false, true)
+	ctx.JSON(http.StatusOK, gin.H{"message": "logout success"})
 }
 
 // ShowAccount godoc
