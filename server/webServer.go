@@ -1,13 +1,15 @@
 package server
 
 import (
+	_ "mo2/docs"
+	"mo2/server/controller"
+
+	"mo2/server/middleware"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "mo2/docs"
-	"mo2/server/controller"
-	"mo2/server/middleware"
-	"net/http"
 )
 
 func RunServer() {
@@ -30,6 +32,10 @@ func RunServer() {
 			accounts.DELETE(":id", c.DeleteAccount)
 			accounts.PATCH(":id", c.UpdateAccount)
 			accounts.POST(":id/images", c.UploadAccountImage)*/
+		}
+		blogs := v1.Group("/blogs")
+		{
+			blogs.POST("", c.PublishBlog)
 		}
 
 	}

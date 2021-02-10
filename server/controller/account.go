@@ -3,16 +3,19 @@ package controller
 import (
 	"context"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/swag/example/celler/httputil"
+
 	//"github.com/swaggo/swag/example/celler/model"
-	"go.mongodb.org/mongo-driver/bson"
 	"log"
 	"mo2/database"
-	"mo2/examples"
+	demo "mo2/examples"
 	"mo2/server/model"
 	"net/http"
 	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // @Summary simple test
@@ -78,7 +81,6 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 // @Produce  json
 // @Param account body model.LoginAccount true "login account"
 // @Success 200 {object} model.Account
-// @Failure 404 {object} error
 // @Router /api/accounts/login [post]
 func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var loginAccount model.LoginAccount
