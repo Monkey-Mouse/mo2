@@ -21,13 +21,10 @@ import (
 // @BasePath /
 // @query.collection.format multi
 func main() {
-	//server.Auth()
 	server.RunServer()
 
 	//demo.GetClient()
 
 	//demo.Welcome()
-
-	//fmt.Println("great")
 
 }

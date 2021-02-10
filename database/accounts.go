@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	uuid "github.com/gofrs/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -32,7 +31,7 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 	}
 	//var account model.Account
 	// find the maxId in mongoDB
-	account.ID = GetMaxID("accounts")
+
 	account.Email = newAccount.Email
 	account.UserName = newAccount.UserName
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(newAccount.Password), bcrypt.DefaultCost)
@@ -41,7 +40,6 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 		return
 	}
 	account.HashedPwd = string(hashedPwd)
-	account.UUID, err = uuid.NewV4()
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -69,8 +67,7 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 				// no chance
 				return
 			}
-		}
-		if err != mongo.ErrNoDocuments {
+		} else {
 			log.Fatal(err)
 			return
 		}
