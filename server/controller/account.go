@@ -62,16 +62,45 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		httputil.NewError(ctx, http.StatusBadRequest, err)
 		return
 	}
-	/*account := model.Account{
-		Name: addAccount.Name,
-	}
-	lastID, err := account.Insert()*/
 	account, err := database.AddAccount(addAccount)
 	if err != nil {
 		httputil.NewError(ctx, http.StatusBadRequest, err)
 		return
 	}
-	//account.ID = lastID
+	ctx.JSON(http.StatusOK, account)
+}
+
+// LoginAccount godoc
+// @Summary Add an account
+// @Description add by json account
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+//// @Param account body model.LoginAccount true "login account"
+// @Success 200 {object} model.Account
+// @Failure 404 {object} error
+// @Router /api/accounts/login [post]
+func (c *Controller) LoginAccount(ctx *gin.Context) {
+	var loginAccount model.LoginAccount
+	if err := ctx.ShouldBindJSON(&loginAccount); err != nil {
+		ctx.JSON(http.StatusNotFound, err)
+		return
+	}
+	if err := loginAccount.Validation(); err != nil {
+		ctx.JSON(http.StatusNotFound, err)
+		return
+	}
+	account, err := database.VerifyAccount(loginAccount)
+	if err != nil {
+		ctx.JSON(http.StatusNotFound, err)
+		return
+	}
+	//login success: to record the state
+	//TODO in login state
+	ctx.SetCookie("login", "true", 60, "/", "localhost", false, true)
+	ctx.SetCookie("user", account.UserName, 60, "/", "localhost", false, true)
+	//SetCookie("user", "anonymous", 3600, "/", "localhost", false, true)
+
 	ctx.JSON(http.StatusOK, account)
 }
 
@@ -123,7 +152,6 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 // @Param q query string false "name search by q"
 // @Success 200 {string} json
 // @Header 200 {string} Token "qwerty"
-
 // @Router /accounts [get]
 func (c *Controller) ListAccounts(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{

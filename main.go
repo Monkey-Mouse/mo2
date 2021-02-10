@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	_ "mo2/docs"
-	"mo2/examples"
 	"mo2/server"
 )
 
@@ -19,16 +17,14 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
+// @host localhost:5000
 // @BasePath /
 // @query.collection.format multi
 func main() {
 	server.RunServer()
 
-	demo.GetClient()
+	//demo.GetClient()
 
-	demo.Welcome()
-
-	fmt.Println("great")
+	//demo.Welcome()
 
 }
