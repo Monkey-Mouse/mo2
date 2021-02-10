@@ -97,6 +97,10 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 	}
 	//login success: to record the state
 	//TODO in login state
+	ctx.SetCookie("login", "true", 60, "/", "localhost", false, true)
+	ctx.SetCookie("user", account.UserName, 60, "/", "localhost", false, true)
+	//SetCookie("user", "anonymous", 3600, "/", "localhost", false, true)
+
 	ctx.JSON(http.StatusOK, account)
 }
 
@@ -148,7 +152,6 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 // @Param q query string false "name search by q"
 // @Success 200 {string} json
 // @Header 200 {string} Token "qwerty"
-
 // @Router /accounts [get]
 func (c *Controller) ListAccounts(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
