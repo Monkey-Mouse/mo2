@@ -105,6 +105,40 @@
                 }
             }
         },
+        "/api/blogs": {
+            "post": {
+                "description": "add by json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "Publish Blog",
+                "parameters": [
+                    {
+                        "description": "Add blog",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    }
+                }
+            }
+        },
         "/sayHello": {
             "get": {
                 "description": "为新用户创建信息，加入数据库",
@@ -165,6 +199,61 @@
                 "userName": {
                     "type": "string",
                     "example": "account name"
+                }
+            }
+        },
+        "model.Blog": {
+            "type": "object",
+            "properties": {
+                "authorId": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "content": {
+                    "type": "string",
+                    "example": "xxxx\nxxxx"
+                },
+                "cover": {
+                    "type": "string",
+                    "example": "https://xxx/xxx"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "mouse ❤ monkey"
+                },
+                "entityInfo": {
+                    "$ref": "#/definitions/model.Entity"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "keyWords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "xxx",
+                        "xxx"
+                    ]
+                },
+                "title": {
+                    "type": "string",
+                    "example": "mouse ❤ monkey"
+                }
+            }
+        },
+        "model.Entity": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "string",
+                    "example": "2020-10-1"
+                },
+                "updateTime": {
+                    "type": "string",
+                    "example": "2020-10-1"
                 }
             }
         }

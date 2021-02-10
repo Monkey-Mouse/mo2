@@ -32,6 +32,47 @@ definitions:
         example: account name
         type: string
     type: object
+  model.Blog:
+    properties:
+      authorId:
+        example: xxxxxxxxxxxxx==
+        type: string
+      content:
+        example: |-
+          xxxx
+          xxxx
+        type: string
+      cover:
+        example: https://xxx/xxx
+        type: string
+      description:
+        example: mouse ❤ monkey
+        type: string
+      entityInfo:
+        $ref: '#/definitions/model.Entity'
+      id:
+        example: xxxxxxxxxxxxx==
+        type: string
+      keyWords:
+        example:
+        - xxx
+        - xxx
+        items:
+          type: string
+        type: array
+      title:
+        example: mouse ❤ monkey
+        type: string
+    type: object
+  model.Entity:
+    properties:
+      createTime:
+        example: "2020-10-1"
+        type: string
+      updateTime:
+        example: "2020-10-1"
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -103,6 +144,28 @@ paths:
           schema:
             type: string
       summary: 新增用户
+  /api/blogs:
+    post:
+      consumes:
+      - application/json
+      description: add by json
+      parameters:
+      - description: Add blog
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/model.Blog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Blog'
+      summary: Publish Blog
+      tags:
+      - blogs
   /sayHello:
     get:
       description: 为新用户创建信息，加入数据库
