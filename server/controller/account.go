@@ -15,8 +15,8 @@ import (
 	"strconv"
 )
 
-// @Summary 新增用户
-// @Description 为新用户创建信息，加入数据库
+// @Summary simple test
+// @Description say something
 // @Produce  json
 // @Success 200 {string} json
 // @Router /sayHello [get]
@@ -71,12 +71,12 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 }
 
 // LoginAccount godoc
-// @Summary Add an account
-// @Description add by json account
+// @Summary login an account
+// @Description login by json model.LoginAccount and set cookies
 // @Tags accounts
 // @Accept  json
 // @Produce  json
-//// @Param account body model.LoginAccount true "login account"
+// @Param account body model.LoginAccount true "login account"
 // @Success 200 {object} model.Account
 // @Failure 404 {object} error
 // @Router /api/accounts/login [post]
@@ -102,6 +102,21 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 	//SetCookie("user", "anonymous", 3600, "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, account)
+}
+
+// LogoutAccount godoc
+// @Summary login an account
+// @Description login by json model.LoginAccount and set cookies
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param account body model.LoginAccount true "login account"
+// @Success 200 {object} model.Account
+// @Failure 404 {object} error
+// @Router /api/accounts/login [post]
+func (c *Controller) LogoutAccount(ctx *gin.Context) {
+	ctx.SetCookie("login", "true", -1, "/", "localhost", false, true)
+
 }
 
 // ShowAccount godoc
