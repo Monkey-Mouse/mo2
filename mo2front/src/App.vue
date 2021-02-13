@@ -51,7 +51,7 @@
 
         <v-list-item-title>{{ user.name }}</v-list-item-title>
 
-        <v-btn icon @click.stop=""> 登录 </v-btn>
+        <v-btn icon @click="showLogin()"> 登录 </v-btn>
       </v-list-item>
 
       <v-divider></v-divider>
@@ -70,6 +70,24 @@
       <template v-slot:append>
         <v-list-item>
           <v-list-item-icon>
+            <v-icon>mdi-theme-light-dark</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>
+              <v-switch
+                dense
+                :hide-details="true"
+                class="pl-3 ma-0"
+                @change="changeTheme"
+                v-model="$vuetify.theme.dark"
+                label="dark mode"
+              ></v-switch>
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-icon>
             <v-icon>mdi-account-cog</v-icon>
           </v-list-item-icon>
 
@@ -81,6 +99,7 @@
     </v-navigation-drawer>
     <v-main>
       <router-view :user="user" />
+      <account-modal :enable.sync="enable" />
       <!-- <v-btn @click="showLogin()">Login</v-btn>
       <account-modal :enable.sync="enable" />
       <v-btn @click="$vuetify.theme.dark = !$vuetify.theme.dark"
@@ -123,6 +142,9 @@ export default class App extends Vue {
     { title: "About", icon: "mdi-alpha-a-circle", href: "/about" },
   ];
   created() {
+    try {
+      this.$vuetify.theme.dark = Boolean(localStorage.getItem("darkTheme"));
+    } catch (err) {}
     window.addEventListener("resize", () => {
       setTimeout(() => {
         this.onResize(false);
@@ -152,7 +174,11 @@ export default class App extends Vue {
     this.onResize(false);
   }
   showLogin() {
+    this.drawer = false;
     this.enable = true;
+  }
+  changeTheme() {
+    localStorage.setItem("darkTheme", String(this.$vuetify.theme.dark));
   }
   appBarHeight = 64;
 }
