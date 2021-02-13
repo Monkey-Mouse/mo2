@@ -43,6 +43,8 @@ func RunServer() {
 	auth := r.Group("/auth", middleware.BasicAuth())
 	{
 		auth.GET("home", func(ctx *gin.Context) {
+
+			//TODO change the info generate way
 			user, err := ctx.Cookie("user")
 			if err != nil {
 				ctx.JSON(http.StatusForbidden, "login first!")

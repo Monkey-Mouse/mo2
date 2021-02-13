@@ -3,6 +3,7 @@ package main
 import (
 	_ "mo2/docs"
 	"mo2/server"
+	//"time"
 )
 
 // @title Mo2
@@ -21,6 +22,10 @@ import (
 // @BasePath /
 // @query.collection.format multi
 func main() {
+	//expTime:=time.Date(2021,2,14,12,0,0,0,time.UTC).Unix()
+
+	//middleware.GenerateJwtCode()
+
 	server.RunServer()
 
 	//demo.GetClient()

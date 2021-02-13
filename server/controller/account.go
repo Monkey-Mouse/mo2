@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"mo2/server/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/swag/example/celler/httputil"
@@ -97,13 +98,12 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, err)
 		return
 	}
+	jwtToken := middleware.GenerateJwtCode(account.UserName)
 	//login success: to record the state
 	//TODO in login state
-	ctx.SetCookie("login", "true", 60, "/", "localhost", false, true)
-	ctx.SetCookie("user", account.UserName, 60, "/", "localhost", false, true)
-	//SetCookie("user", "anonymous", 3600, "/", "localhost", false, true)
+	ctx.SetCookie("jwtToken", jwtToken, 60, "/", "localhost", false, true)
 
-	ctx.JSON(http.StatusOK, account)
+	ctx.JSON(http.StatusOK, gin.H{"account": account, "jwtToken": jwtToken})
 }
 
 // LogoutAccount godoc
