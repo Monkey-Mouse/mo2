@@ -16,3 +16,12 @@ export interface User {
     site?: string;
     avatar: string;
 }
+export interface InputProp {
+    errorMsg: { [name: string]: string };
+    col?: number;
+    type?: string;
+    icon?: string;
+    label?: string;
+    default: any;
+    iconClick?: (prop: InputProp) => void;
+}
