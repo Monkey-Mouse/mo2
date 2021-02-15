@@ -184,4 +184,7 @@ export default class App extends Vue {
 }
 </script>
 <style>
+.clickable {
+  cursor: pointer;
+}
 </style>
