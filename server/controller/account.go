@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/swaggo/swag/example/celler/httputil"
 	dto "mo2/dto"
 	"mo2/server/middleware"
 	//"github.com/swaggo/swag/example/celler/model"
@@ -79,7 +78,6 @@ func (c *Controller) Log(ctx *gin.Context) {
 			log.Fatal(err)
 		}
 	}
-	//ctx.Set("account",s)
 	ctx.JSON(http.StatusOK, s)
 }
 
@@ -95,16 +93,16 @@ func (c *Controller) Log(ctx *gin.Context) {
 func (c *Controller) AddAccount(ctx *gin.Context) {
 	var addAccount model.AddAccount
 	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		httputil.NewError(ctx, http.StatusBadRequest, err)
+		ctx.JSON(http.StatusUnauthorized, setResponseError(err))
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
-		httputil.NewError(ctx, http.StatusBadRequest, err)
+		ctx.JSON(http.StatusUnauthorized, setResponseError(err))
 		return
 	}
 	account, err := database.AddAccount(addAccount)
 	if err != nil {
-		httputil.NewError(ctx, http.StatusBadRequest, err)
+		ctx.JSON(http.StatusUnauthorized, setResponseError(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, account)
@@ -122,17 +120,14 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var loginAccount model.LoginAccount
 	if err := ctx.ShouldBindJSON(&loginAccount); err != nil {
-		ctx.JSON(http.StatusNotFound, err)
-		return
+		ctx.JSON(http.StatusNotFound, setResponseError(err))
 	}
 	if err := loginAccount.Validation(); err != nil {
-		ctx.JSON(http.StatusNotFound, err)
-		return
+		ctx.JSON(http.StatusNotFound, setResponseError(err))
 	}
 	account, err := database.VerifyAccount(loginAccount)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, err)
-		return
+		ctx.JSON(http.StatusNotFound, setResponseError(err))
 	}
 	var s = dto.Account2SuccessLogin(account)
 	jwtToken := middleware.GenerateJwtCode(account.UserName, s)
@@ -184,7 +179,7 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 	result := col.FindOne(context.TODO(), filter)
 	//account, err := model.AccountOne(aid)
 	if err != nil {
-		httputil.NewError(ctx, http.StatusNotFound, err)
+		ctx.JSON(http.StatusNotFound, setResponseError(err))
 		return
 	}
 	fmt.Println(result)
