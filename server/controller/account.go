@@ -68,15 +68,11 @@ func (c *Controller) Log(ctx *gin.Context) {
 		ctx.SetCookie("jwtToken", jwtToken, 60, "/", "localhost", false, true)
 	} else {
 		//parse jwtToken and get user info
-		userInfo, infos, err := middleware.ParseJwt(jwtToken)
+		userInfo, err := middleware.ParseJwt(jwtToken)
 		if err != nil {
 			log.Println(err)
 		}
-		fmt.Println(userInfo, infos)
-		//s.UserName=infos.(map[string]interface{}).
-		// json
 		err = json.Unmarshal(userInfo.Infos, &s)
-
 		if err != nil {
 			log.Fatal(err)
 		}

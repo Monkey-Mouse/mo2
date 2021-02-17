@@ -71,7 +71,7 @@ func VerifyJwt(tokenString string) (userInfo UserInfo, err error) {
 
 //add jwt to generate token for user
 //if token is valid, return nil
-func ParseJwt(tokenString string) (userInfo UserInfo, infos interface{}, err error) {
+func ParseJwt(tokenString string) (userInfo UserInfo, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte("mo2"), nil
 	})
