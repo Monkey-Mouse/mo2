@@ -19,6 +19,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+const cookieExpiredTime int = 300000
+
 // @Summary simple test
 // @Description say something
 // @Produce  json
@@ -65,7 +67,7 @@ func (c *Controller) Log(ctx *gin.Context) {
 		s = dto.Account2SuccessLogin(account)
 		jwtToken = middleware.GenerateJwtCode(account.UserName, s)
 		//login success: to record the state
-		ctx.SetCookie("jwtToken", jwtToken, 60, "/", "localhost", false, true)
+		ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", "localhost", false, true)
 	} else {
 		//parse jwtToken and get user info
 		userInfo, err := middleware.ParseJwt(jwtToken)
@@ -135,7 +137,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var s = dto.Account2SuccessLogin(account)
 	jwtToken := middleware.GenerateJwtCode(account.UserName, s)
 	//login success: to record the state
-	ctx.SetCookie("jwtToken", jwtToken, 60, "/", "localhost", false, true)
+	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{"account": s, "jwtToken": jwtToken})
 }
 
