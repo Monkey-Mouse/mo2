@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"encoding/json"
 	"fmt"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -12,11 +13,11 @@ import (
 type UserInfo struct {
 	UserName string `json:"user_name"`
 	Login    bool   `json:"login"`
+	Infos    []byte `json:"infos"`
 }
 
 type JwtClaims struct {
-	UserInfo UserInfo    `json:"user_info"`
-	Infos    interface{} `json:"infos"`
+	UserInfo UserInfo `json:"user_info"`
 	jwt.StandardClaims
 }
 
@@ -76,9 +77,8 @@ func ParseJwt(tokenString string) (userInfo UserInfo, infos interface{}, err err
 	})
 
 	if claims, ok := token.Claims.(*JwtClaims); ok && token.Valid {
-		fmt.Printf("%v %v", claims.Infos, claims.StandardClaims.ExpiresAt)
+		fmt.Printf("%v %v", claims.UserInfo, claims.StandardClaims.ExpiresAt)
 		userInfo = claims.UserInfo
-		infos = claims.Infos
 		fmt.Println(claims.StandardClaims)
 		err = nil
 	} else {
@@ -125,12 +125,16 @@ func verifyJwt2(tokenString string, claims interface{}) (err error) {
 func GenerateJwtCode(info string, infos interface{}) string {
 	//TODO change the key
 	hmacSampleSecret := []byte("mo2")
+	infosByte, err := json.Marshal(infos)
+	if err != nil {
+		log.Fatal(err)
+	}
 	claims := JwtClaims{
 		UserInfo: UserInfo{
 			UserName: info,
 			Login:    true,
+			Infos:    infosByte,
 		},
-		Infos: infos,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Date(2021, 2, 19, 12, 0, 0, 0, time.UTC).Unix(),
 		},

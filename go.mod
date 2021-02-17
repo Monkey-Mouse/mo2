@@ -12,6 +12,7 @@ require (
 	github.com/go-openapi/spec v0.20.3 // indirect
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mitchellh/mapstructure v1.4.1
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.3.0
