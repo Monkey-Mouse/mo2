@@ -7,9 +7,9 @@ import (
 func Welcome() {
 	fmt.Println("welcome to mo2")
 	connectMongoDB()
-	test()
+	//test()
 
-	find()
-	disconnectMongoDB()
+	Find()
+	defer disconnectMongoDB()
 
 }

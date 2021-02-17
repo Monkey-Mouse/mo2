@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
-	"log"
-
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 )
 
 type Trainer struct {
@@ -54,8 +53,9 @@ func disconnectMongoDB() {
 	}
 	fmt.Println("Connection to MongoDB closed.")
 }
-func find() {
-	collection := globalClient.Database("test").Collection("trainers")
+func Find() {
+	cli := GetClient()
+	collection := cli.Database("test").Collection("trainers")
 
 	// Pass these options to the Find method
 	findOptions := options.Find()
@@ -98,11 +98,24 @@ func find() {
 	}
 
 	fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
+
+	//col := cli.Database("test").Collection("trainers")
+	//result:=make(Trainer)
+	var result Trainer //bson.M
+	filter := bson.D{{"age", 11}}
+
+	err = collection.FindOne(context.TODO(), filter).Decode(&result)
+	//account, err := model.AccountOne(aid)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	fmt.Println(result)
 }
 
 func test() {
 	collection := globalClient.Database("test").Collection("trainers")
-	collection.DeleteMany(context.TODO(), Trainer{})
+	collection.DeleteMany(context.TODO(), bson.D{{}})
 
 	ash := Trainer{"Ash", 10, "Pallet Town"}
 	collection.InsertOne(context.TODO(), ash)

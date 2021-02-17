@@ -1,5 +1,5 @@
 <template>
-  <v-timeline :dense="$vuetify.breakpoint.sm || $vuetify.breakpoint.xs">
+  <v-timeline :dense="this.$vuetify.breakpoint.smAndDown">
     <v-timeline-item
       v-for="(blog, i) in blogs"
       :key="i"
@@ -35,7 +35,7 @@
                 class="shrink ma-3"
                 contain
                 height="125px"
-                src="https://picsum.photos/500/300?image=40"
+                :src="blog.cover"
                 style="flex-basis: 125px"
               ></v-img>
             </v-col>
@@ -44,7 +44,7 @@
           <v-card-actions class="pa-4">
             Rate this
             <v-spacer></v-spacer>
-            <span class="grey--text text--lighten-2 caption mr-2">
+            <span class="text--lighten-2 caption mr-2">
               ({{ blog.rate }})
             </span>
             <v-rating

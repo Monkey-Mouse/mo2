@@ -2,8 +2,8 @@ package main
 
 import (
 	_ "mo2/docs"
-	"mo2/examples"
 	"mo2/server"
+	//"time"
 )
 
 // @title Mo2
@@ -18,14 +18,18 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
+// @host localhost:5000
 // @BasePath /
 // @query.collection.format multi
 func main() {
+	//expTime:=time.Date(2021,2,14,12,0,0,0,time.UTC).Unix()
+
+	//middleware.GenerateJwtCode()
+
 	server.RunServer()
 
-	demo.GetClient()
+	//demo.GetClient()
 
-	demo.Welcome()
+	//demo.Welcome()
 
 }
