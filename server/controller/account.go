@@ -2,12 +2,12 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/swag/example/celler/httputil"
 	dto "mo2/dto"
 	"mo2/server/middleware"
-
 	//"github.com/swaggo/swag/example/celler/model"
 	"log"
 	"mo2/database"
@@ -73,7 +73,13 @@ func (c *Controller) Log(ctx *gin.Context) {
 			log.Println(err)
 		}
 		fmt.Println(userInfo, infos)
-		s = infos.(dto.SuccessLogin)
+		//s.UserName=infos.(map[string]interface{}).
+		// json
+		err = json.Unmarshal(userInfo.Infos, &s)
+
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	//ctx.Set("account",s)
 	ctx.JSON(http.StatusOK, s)
@@ -146,7 +152,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 // @Router /api/accounts/logout [get]
 func (c *Controller) LogoutAccount(ctx *gin.Context) {
 
-	ctx.SetCookie("login", "true", -1, "/", "localhost", false, true)
+	ctx.SetCookie("jwtToken", "true", -1, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{"message": "logout success"})
 }
 
