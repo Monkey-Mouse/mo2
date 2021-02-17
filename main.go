@@ -3,7 +3,7 @@ package main
 import (
 	"mo2/config"
 	_ "mo2/docs"
-	demo "mo2/examples"
+	"mo2/server"
 	"os"
 	//"time"
 )
@@ -26,9 +26,8 @@ import (
 func main() {
 	//expTime:=time.Date(2021,2,14,12,0,0,0,time.UTC).Unix()
 
-	//middleware.GenerateJwtCode()
-	demo.SendEmail()
-	//server.RunServer()
+	//demo.SendEmail()
+	server.RunServer()
 
 	//demo.GetClient()
 

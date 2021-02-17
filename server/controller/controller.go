@@ -17,12 +17,12 @@ type Message struct {
 }
 
 type ResponseError struct {
-	time   time.Time `json:"time"`
-	reason string    `json:"reason"`
+	Time   time.Time `json:"time"`
+	Reason string    `json:"reason"`
 }
 
 func setResponseError(err error) (r ResponseError) {
-	r.reason = err.Error()
-	r.time = time.Now()
+	r.Reason = err.Error()
+	r.Time = time.Now()
 	return
 }
