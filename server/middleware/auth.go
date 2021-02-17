@@ -59,7 +59,6 @@ func VerifyJwt(tokenString string) (userInfo UserInfo, err error) {
 	})
 
 	if claims, ok := token.Claims.(*JwtClaims); ok && token.Valid {
-		fmt.Printf("%v %v", claims.UserInfo, claims.StandardClaims.ExpiresAt)
 		userInfo = claims.UserInfo
 		err = nil
 	} else {
@@ -77,9 +76,7 @@ func ParseJwt(tokenString string) (userInfo UserInfo, err error) {
 	})
 
 	if claims, ok := token.Claims.(*JwtClaims); ok && token.Valid {
-		fmt.Printf("%v %v", claims.UserInfo, claims.StandardClaims.ExpiresAt)
 		userInfo = claims.UserInfo
-		fmt.Println(claims.StandardClaims)
 		err = nil
 	} else {
 		log.Println("can not parse with JwtClaims")
