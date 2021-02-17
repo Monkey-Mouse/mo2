@@ -156,7 +156,7 @@ export default class App extends Vue {
     { title: "About", icon: "mdi-alpha-a-circle", href: "/about", show: true },
   ];
   get isUser() {
-    return this.user.roles.length > 0;
+    return this.user.roles && this.user.roles.length > 0;
   }
   get initials(): string {
     return GetInitials(this.user.name);
