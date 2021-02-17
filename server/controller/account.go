@@ -146,7 +146,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 // @Router /api/accounts/logout [get]
 func (c *Controller) LogoutAccount(ctx *gin.Context) {
 
-	ctx.SetCookie("login", "true", -1, "/", "localhost", false, true)
+	ctx.SetCookie("jwtToken", "true", -1, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{"message": "logout success"})
 }
 
