@@ -6,12 +6,21 @@ import (
 	//"fmt"
 )
 
+type Erole = string
+
+const (
+	GeneralAdmin Erole = "GeneralAdmin"
+	OdinaryUser  Erole = "OdinaryUser"
+)
+
 // Account example
 type Account struct {
 	ID        primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
 	UserName  string             `json:"userName" example:"account name"`
 	Email     string             `json:"email" example:"email@qq.com"`
 	HashedPwd string             `json:"hashedPassword" example:"$2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i"`
+	Roles     []Erole            `json:"roles" example:"odinaryUser"  `
+	Infos     map[string]string  `json:"infos" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'" bson:"omitempty"`
 }
 
 // AddAccount example
