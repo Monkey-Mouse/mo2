@@ -28,26 +28,30 @@
       </div>
 
       <v-spacer></v-spacer>
+      <v-app-bar-nav-icon
+        v-if="$vuetify.breakpoint.smAndDown"
+        @click.stop="
+          () => {
+            drawer = !drawer;
+          }
+        "
+      ></v-app-bar-nav-icon>
     </v-app-bar>
     <v-navigation-drawer
       style="z-index: 99999"
       right
       fixed
-      bottom
-      permanent
-      :mini-variant.sync="sideNavVisible"
-      expand-on-hover
+      :expand-on-hover="this.$vuetify.breakpoint.mdAndUp"
+      v-model="drawerProp"
     >
       <v-list-item class="px-2" :style="`height: ${appBarHeight}px`">
         <v-list-item-avatar>
-          <v-img src="https://randomuser.me/api/portraits/men/85.jpg"></v-img>
+          <v-img :src="user.avatar"></v-img>
         </v-list-item-avatar>
 
-        <v-list-item-title>John Leider</v-list-item-title>
+        <v-list-item-title>{{ user.name }}</v-list-item-title>
 
-        <v-btn icon @click.stop="sideNavVisible = !sideNavVisible">
-          <v-icon>mdi-chevron-left</v-icon>
-        </v-btn>
+        <v-btn icon @click="showLogin()"> 登录 </v-btn>
       </v-list-item>
 
       <v-divider></v-divider>
@@ -63,75 +67,124 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
-    </v-navigation-drawer>
+      <template v-slot:append>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-icon>mdi-theme-light-dark</v-icon>
+          </v-list-item-icon>
 
+          <v-list-item-content>
+            <v-list-item-title>
+              <v-switch
+                dense
+                :hide-details="true"
+                class="pl-3 ma-0"
+                @change="changeTheme"
+                v-model="$vuetify.theme.dark"
+                label="dark mode"
+              ></v-switch>
+            </v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item>
+          <v-list-item-icon>
+            <v-icon>mdi-account-cog</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Settings</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </template>
+    </v-navigation-drawer>
     <v-main>
-      <v-parallax
-        src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
-        height="200"
+      <router-view :user="user" />
+      <account-modal :enable.sync="enable" />
+      <!-- <v-btn @click="showLogin()">Login</v-btn>
+      <account-modal :enable.sync="enable" />
+      <v-btn @click="$vuetify.theme.dark = !$vuetify.theme.dark"
+        >switch theme</v-btn
       >
-        <v-row align="center" justify="center">
-          <v-col class="text-center" cols="12">
-            <h1 class="display-1 font-weight-thin mb-4">MO2</h1>
-            <h4 class="subheading">Monkey ❤ Mouse</h4>
-          </v-col>
-        </v-row>
-      </v-parallax>
-      <v-container>
-        <router-view />
-        <!-- <home /> -->
-        <v-btn @click="showLogin()">Login</v-btn>
-        <account-modal :enable.sync="enable" />
-        <v-btn @click="$vuetify.theme.dark = !$vuetify.theme.dark"
-          >switch theme</v-btn
-        >
-        <v-btn @click="sideNavVisible = !sideNavVisible">show side bar</v-btn>
-      </v-container>
+      <v-btn @click="sideNavVisible = !sideNavVisible">show side bar</v-btn> -->
     </v-main>
   </v-app>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import HelloWorld from "./components/HelloWorld.vue";
 import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
-import Home from "./views/Home.vue";
+import { User } from "./models";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 
 @Component({
   components: {
     AccountModal,
-    HelloWorld,
-    Home,
   },
 })
 export default class App extends Vue {
+  drawer = false;
+  user: User = {
+    name: "leezeeyee",
+    email: "easilylazy@mo2.com",
+    description: "all work no play made me a dull girl",
+    site: "www.mo2.pro",
+    createTime: "2020-1-1",
+    id: "xxxxxxxxxxxxxxx",
+    avatar: "https://randomuser.me/api/portraits/men/85.jpg",
+  };
   enable = false;
-  sideNavVisible = true;
   items = [
     { title: "Home", icon: "mdi-home-city", href: "/" },
+    { title: "My Home", icon: "mdi-account", href: "/account" },
     { title: "About", icon: "mdi-alpha-a-circle", href: "/about" },
-    { title: "Users", icon: "mdi-account-group-outline", href: "/users" },
   ];
   created() {
+    try {
+      this.$vuetify.theme.dark = Boolean(localStorage.getItem("darkTheme"));
+    } catch (err) {}
     window.addEventListener("resize", () => {
       setTimeout(() => {
-        this.appBarHeight = document.getElementById("appBarElm").clientHeight;
+        this.onResize(false);
       }, 500);
     });
   }
-  mounted() {
-    this.$vuetify.application.right = 58;
+
+  get drawerProp(): boolean {
+    return this.drawer || this.$vuetify.breakpoint.mdAndUp;
+  }
+  set drawerProp(value: boolean) {
+    if (this.$vuetify.breakpoint.mdAndUp) {
+      this.drawer = false;
+    } else this.drawer = value;
+  }
+  onResize(setdrawer: boolean) {
     this.appBarHeight = document.getElementById("appBarElm").clientHeight;
+    if (this.$vuetify.breakpoint.smAndDown) {
+      this.$vuetify.application.right = 0;
+      if (setdrawer) this.drawer = false;
+    } else {
+      if (setdrawer) this.drawer = true;
+      this.$vuetify.application.right = 57;
+    }
+  }
+  mounted() {
+    this.onResize(false);
   }
   showLogin() {
+    this.drawer = false;
     this.enable = true;
+  }
+  changeTheme() {
+    localStorage.setItem("darkTheme", String(this.$vuetify.theme.dark));
   }
   appBarHeight = 64;
 }
 </script>
 <style>
+.clickable {
+  cursor: pointer;
+}
 </style>
