@@ -14,8 +14,8 @@ import (
 //if add a newAccount success, return account info
 func AddAccount(newAccount model.AddAccount) (account model.Account, err error) {
 	collection := GetCollection("accounts")
-	//collection.Distinct()
-	model := []mongo.IndexModel{
+	//ensure index
+	indexModel := []mongo.IndexModel{
 		{
 			Keys:    bson.D{{"username", 1}},
 			Options: options.Index().SetUnique(true),
@@ -25,16 +25,17 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	_, err = collection.Indexes().CreateMany(context.TODO(), model)
+	_, err = collection.Indexes().CreateMany(context.TODO(), indexModel)
 	if err != nil {
 		log.Fatal(err)
 	}
 	//var account model.Account
-	// find the maxId in mongoDB
-
 	account.Email = newAccount.Email
 	account.UserName = newAccount.UserName
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(newAccount.Password), bcrypt.DefaultCost)
+	account.EntityInfo = model.InitEntity()
+	account.Roles = append(account.Roles, model.OrdinaryUser)     // default role: OrdinaryUser
+	account.Infos["avatar"] = "https://cdn.limfx.pro/img/ran/970" // default pic
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -44,7 +45,6 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 		log.Fatal(err)
 		return
 	}
-
 	_, err = collection.InsertOne(context.TODO(), account)
 	return
 }
