@@ -164,7 +164,9 @@ export default class App extends Vue {
 
   created() {
     try {
-      this.$vuetify.theme.dark = Boolean(localStorage.getItem("darkTheme"));
+      this.$vuetify.theme.dark = JSON.parse(
+        localStorage.getItem("darkTheme")
+      ) as boolean;
     } catch (err) {}
     window.addEventListener("resize", () => {
       setTimeout(() => {
