@@ -15,7 +15,8 @@ type UserInfo struct {
 }
 
 type JwtClaims struct {
-	UserInfo UserInfo `json:"user_info"`
+	UserInfo UserInfo    `json:"user_info"`
+	Infos    interface{} `json:"infos"`
 	jwt.StandardClaims
 }
 
@@ -33,10 +34,11 @@ func BasicAuth() gin.HandlerFunc {
 		jwtToken, err := c.Cookie("jwtToken")
 		if err != nil {
 			log.Println(err)
-			c.JSON(http.StatusForbidden, gin.H{"info": "need to login first"})
-		}
-		userInfo, err := verifyJwt(jwtToken)
+			//c.JSON(http.StatusForbidden, gin.H{"info": "need to login first"})
 
+		}
+		userInfo, err := VerifyJwt(jwtToken)
+		c.Keys[""] = ""
 		if userInfo.Login {
 			c.JSON(http.StatusOK, gin.H{"user": userInfo.UserName})
 		} else {
@@ -50,8 +52,7 @@ func BasicAuth() gin.HandlerFunc {
 
 //add jwt to generate token for user
 //if token is valid, return nil
-func verifyJwt(tokenString string) (userInfo UserInfo, err error) {
-
+func VerifyJwt(tokenString string) (userInfo UserInfo, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte("mo2"), nil
 	})
@@ -59,6 +60,25 @@ func verifyJwt(tokenString string) (userInfo UserInfo, err error) {
 	if claims, ok := token.Claims.(*JwtClaims); ok && token.Valid {
 		fmt.Printf("%v %v", claims.UserInfo, claims.StandardClaims.ExpiresAt)
 		userInfo = claims.UserInfo
+		err = nil
+	} else {
+		log.Println("can not parse with JwtClaims")
+	}
+	return
+
+}
+
+//add jwt to generate token for user
+//if token is valid, return nil
+func ParseJwt(tokenString string) (userInfo UserInfo, infos interface{}, err error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JwtClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("mo2"), nil
+	})
+
+	if claims, ok := token.Claims.(*JwtClaims); ok && token.Valid {
+		fmt.Printf("%v %v", claims.Infos, claims.StandardClaims.ExpiresAt)
+		userInfo = claims.UserInfo
+		infos = claims.Infos
 		fmt.Println(claims.StandardClaims)
 		err = nil
 	} else {
@@ -101,9 +121,8 @@ func verifyJwt2(tokenString string, claims interface{}) (err error) {
 
 // generate jwt token with claim in type JwtClaims
 // for info
-// TODO use interface
 // jwtToken string
-func GenerateJwtCode(info string) string {
+func GenerateJwtCode(info string, infos interface{}) string {
 	//TODO change the key
 	hmacSampleSecret := []byte("mo2")
 	claims := JwtClaims{
@@ -111,8 +130,9 @@ func GenerateJwtCode(info string) string {
 			UserName: info,
 			Login:    true,
 		},
+		Infos: infos,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Date(2021, 2, 15, 12, 0, 0, 0, time.UTC).Unix(),
+			ExpiresAt: time.Date(2021, 2, 19, 12, 0, 0, 0, time.UTC).Unix(),
 		},
 	}
 
@@ -126,7 +146,7 @@ func GenerateJwtCode(info string) string {
 	return tokenString
 }
 
-func VerifyJwt() {
+func VerifyJwtExample() {
 	//	var tokenString = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJleHAiOjE1MDAwLCJpc3MiOiJ0ZXN0In0.HE7fK0xOQwFEr4WDgRWj4teRPZ6i3GLwD5YCm6Pwu_c"
 	var tokenString = "JhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJuYmYiOjE0NDQ0Nzg0MDB9.gB7MbL6QovrUe1d7AJIo_MZ5NZmIp30g7eeG8ZeQWz8"
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {

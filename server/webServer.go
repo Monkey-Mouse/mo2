@@ -20,6 +20,10 @@ func RunServer() {
 	c := controller.NewController()
 	v1 := r.Group("/api")
 	{
+		logs := v1.Group("/logs")
+		{
+			logs.GET("", c.Log)
+		}
 		accounts := v1.Group("/accounts")
 		{
 			//accounts.GET(":id", c.ShowAccount)

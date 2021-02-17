@@ -5,9 +5,10 @@ import (
 	"mo2/server/model"
 )
 
+//todo implement error
 type SuccessLogin struct {
 	ID       primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
-	UserName string             `json:"userName" example:"account name"`
+	UserName string             `json:"name" example:"account name"`
 	Email    string             `json:"email" example:"email@qq.com"`
 	Roles    []model.Erole      `json:"roles" example:"ordinaryUser"  bson:"roles"`
 }

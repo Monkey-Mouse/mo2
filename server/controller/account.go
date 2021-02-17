@@ -3,10 +3,10 @@ package controller
 import (
 	"context"
 	"fmt"
-	"mo2/server/middleware"
-
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/swag/example/celler/httputil"
+	dto "mo2/dto"
+	"mo2/server/middleware"
 
 	//"github.com/swaggo/swag/example/celler/model"
 	"log"
@@ -47,6 +47,38 @@ func (c *Controller) AddMo2User(ctx *gin.Context) {
 
 }
 
+// Log godoc
+// @Summary get user info
+// @Description get by check cookies
+// @Tags logs
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} dto.SuccessLogin
+// @Router /api/logs [get]
+func (c *Controller) Log(ctx *gin.Context) {
+
+	jwtToken, err := ctx.Cookie("jwtToken")
+	var s dto.SuccessLogin
+	if err != nil {
+		//allocate an anonymous account
+		account := database.CreateAnonymousAccount()
+		s = dto.Account2SuccessLogin(account)
+		jwtToken = middleware.GenerateJwtCode(account.UserName, s)
+		//login success: to record the state
+		ctx.SetCookie("jwtToken", jwtToken, 60, "/", "localhost", false, true)
+	} else {
+		//parse jwtToken and get user info
+		userInfo, infos, err := middleware.ParseJwt(jwtToken)
+		if err != nil {
+			log.Println(err)
+		}
+		fmt.Println(userInfo, infos)
+		s = infos.(dto.SuccessLogin)
+	}
+	//ctx.Set("account",s)
+	ctx.JSON(http.StatusOK, s)
+}
+
 // AddAccount godoc
 // @Summary Add an account
 // @Description add by json account
@@ -81,7 +113,7 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param account body model.LoginAccount true "login account"
-// @Success 200 {object} model.Account
+// @Success 200 {object} dto.SuccessLogin
 // @Router /api/accounts/login [post]
 func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var loginAccount model.LoginAccount
@@ -98,12 +130,11 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, err)
 		return
 	}
-	jwtToken := middleware.GenerateJwtCode(account.UserName)
+	var s = dto.Account2SuccessLogin(account)
+	jwtToken := middleware.GenerateJwtCode(account.UserName, s)
 	//login success: to record the state
-	//TODO in login state
 	ctx.SetCookie("jwtToken", jwtToken, 60, "/", "localhost", false, true)
-
-	ctx.JSON(http.StatusOK, gin.H{"account": account, "jwtToken": jwtToken})
+	ctx.JSON(http.StatusOK, gin.H{"account": s, "jwtToken": jwtToken})
 }
 
 // LogoutAccount godoc
@@ -111,7 +142,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 // @Description logout and delete cookies
 // @Tags accounts
 // @Produce  json
-// @Success 200 {object} json
+// @Success 200
 // @Router /api/accounts/logout [get]
 func (c *Controller) LogoutAccount(ctx *gin.Context) {
 

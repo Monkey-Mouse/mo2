@@ -3,10 +3,12 @@ package database
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"math/rand"
 	"mo2/server/model"
 )
 
@@ -46,6 +48,20 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 		return
 	}
 	_, err = collection.InsertOne(context.TODO(), account)
+	return
+}
+
+//create an anonymous account
+func CreateAnonymousAccount() (a model.Account) {
+	a = model.Account{
+		ID:         primitive.NewObjectID(),
+		UserName:   "visitor",
+		Email:      string(rand.Int()) + "@mo2.com",
+		HashedPwd:  "#2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i",
+		EntityInfo: model.InitEntity(),
+		Roles:      nil,
+		Infos:      nil,
+	}
 	return
 }
 
