@@ -15,6 +15,7 @@ export interface User {
     createTime: string;
     site?: string;
     avatar: string;
+    roles: string[];
 }
 export interface InputProp {
     errorMsg: { [name: string]: string };

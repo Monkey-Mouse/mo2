@@ -16,3 +16,13 @@ export function Copy<T>(mainObject: T) {
 export async function GetUserData(uid: string): Promise<User> {
     throw new Error("Not implement yet");
 }
+
+export function GetInitials(name: string) {
+    let rgx = new RegExp(/(\p{L}{1})\p{L}+/, 'gu');
+
+    let initials = [...name.matchAll(rgx)] || [];
+
+    return (
+        (initials.shift()?.[1] || '') + (initials.pop()?.[1] || '')
+    ).toUpperCase();
+}

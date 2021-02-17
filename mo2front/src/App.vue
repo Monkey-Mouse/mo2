@@ -45,19 +45,24 @@
       v-model="drawerProp"
     >
       <v-list-item class="px-2" :style="`height: ${appBarHeight}px`">
-        <v-list-item-avatar>
-          <v-img :src="user.avatar"></v-img>
-        </v-list-item-avatar>
+        <avatar :user="user" />
 
-        <v-list-item-title>{{ user.name }}</v-list-item-title>
+        <v-list-item-title>{{
+          isUser ? user.name : "未登录"
+        }}</v-list-item-title>
 
-        <v-btn icon @click="showLogin()"> 登录 </v-btn>
+        <v-btn icon v-if="!isUser" @click="showLogin()"> 登录 </v-btn>
       </v-list-item>
 
       <v-divider></v-divider>
 
       <v-list dense>
-        <v-list-item v-for="item in items" :key="item.title" :to="item.href">
+        <v-list-item
+          v-for="item in items"
+          :key="item.title"
+          :to="item.href"
+          v-show="item.show"
+        >
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
@@ -116,12 +121,15 @@ import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
 import { User } from "./models";
+import { GetInitials } from "./utils";
+import Avatar from "./components/UserAvatar.vue";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 
 @Component({
   components: {
     AccountModal,
+    Avatar,
   },
 })
 export default class App extends Vue {
@@ -133,14 +141,27 @@ export default class App extends Vue {
     site: "www.mo2.pro",
     createTime: "2020-1-1",
     id: "xxxxxxxxxxxxxxx",
-    avatar: "https://randomuser.me/api/portraits/men/85.jpg",
+    avatar: "",
+    roles: ["user"],
   };
   enable = false;
   items = [
-    { title: "Home", icon: "mdi-home-city", href: "/" },
-    { title: "My Home", icon: "mdi-account", href: "/account" },
-    { title: "About", icon: "mdi-alpha-a-circle", href: "/about" },
+    { title: "Home", icon: "mdi-home-city", href: "/", show: true },
+    {
+      title: "My Home",
+      icon: "mdi-account",
+      href: "/account",
+      show: this.isUser,
+    },
+    { title: "About", icon: "mdi-alpha-a-circle", href: "/about", show: true },
   ];
+  get isUser() {
+    return this.user.roles.length > 0;
+  }
+  get initials(): string {
+    return GetInitials(this.user.name);
+  }
+
   created() {
     try {
       this.$vuetify.theme.dark = Boolean(localStorage.getItem("darkTheme"));

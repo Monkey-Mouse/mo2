@@ -123,7 +123,7 @@ export default class AccountModal extends Vue {
   email: string = "";
   name: string = "";
   password: string = "";
-  tabkey = 1;
+  tabkey = 0;
   validator = {
     password: {
       required: required,
