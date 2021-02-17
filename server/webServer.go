@@ -20,12 +20,17 @@ func RunServer() {
 	c := controller.NewController()
 	v1 := r.Group("/api")
 	{
+		logs := v1.Group("/logs")
+		{
+			logs.GET("", c.Log)
+		}
 		accounts := v1.Group("/accounts")
 		{
-			accounts.GET(":id", c.ShowAccount)
+			//accounts.GET(":id", c.ShowAccount)
 			//accounts.POST("addUser",c.AddMo2User)
 			accounts.POST("", c.AddAccount)
 			accounts.POST("login", c.LoginAccount)
+			accounts.GET("logout", c.LogoutAccount)
 
 			/*accounts.GET("", c.ListAccounts)
 			accounts.POST("", c.AddAccount)
@@ -42,11 +47,13 @@ func RunServer() {
 	auth := r.Group("/auth", middleware.BasicAuth())
 	{
 		auth.GET("home", func(ctx *gin.Context) {
+
+			//TODO change the info generate way
 			user, err := ctx.Cookie("user")
 			if err != nil {
 				ctx.JSON(http.StatusForbidden, "login first!")
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"home": user + "welcome to your home"})
+				ctx.JSON(http.StatusOK, gin.H{"home": user + " Welcome to your home"})
 
 			}
 		})
