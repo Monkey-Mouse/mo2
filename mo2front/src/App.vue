@@ -104,7 +104,7 @@
     </v-navigation-drawer>
     <v-main>
       <router-view :user="user" />
-      <account-modal :enable.sync="enable" />
+      <account-modal :enable.sync="enable" :user.sync="user" />
       <!-- <v-btn @click="showLogin()">Login</v-btn>
       <account-modal :enable.sync="enable" />
       <v-btn @click="$vuetify.theme.dark = !$vuetify.theme.dark"
@@ -121,7 +121,7 @@ import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
 import { User } from "./models";
-import { GetInitials } from "./utils";
+import { GetInitials, GetUserInfoAsync } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
@@ -163,6 +163,10 @@ export default class App extends Vue {
   }
 
   created() {
+    GetUserInfoAsync().then((u) => {
+      this.user = u;
+      this.items[1].show = this.isUser;
+    });
     try {
       this.$vuetify.theme.dark = JSON.parse(
         localStorage.getItem("darkTheme")

@@ -1,4 +1,5 @@
 import { User } from '@/models/index'
+import axios, { AxiosError } from 'axios';
 
 export function randomProperty(obj: any) {
     const keys = Object.keys(obj);
@@ -25,4 +26,14 @@ export function GetInitials(name: string) {
     return (
         (initials.shift()?.[1] || '') + (initials.pop()?.[1] || '')
     ).toUpperCase();
+}
+export async function GetUserInfoAsync() {
+    let re = await axios.get<User>('/api/logs');
+    return re.data
+}
+export async function RegisterAsync(userInfo: { email: string, password: string, userName: string }) {
+    return (await axios.post<User>('/api/accounts', userInfo)).data;
+}
+export async function LoginAsync(userInfo: { userNameOrEmail: string, password: string }) {
+    return (await axios.post<User>('/api/accounts/login', userInfo)).data;
 }

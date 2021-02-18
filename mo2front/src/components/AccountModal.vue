@@ -5,7 +5,7 @@
     max-width="600px"
     autocomplete="off"
   >
-    <v-card>
+    <v-card :loading="processing" :disabled="processing">
       <v-container>
         <v-row>
           <v-col cols="12">
@@ -18,7 +18,7 @@
           </v-col>
         </v-row>
         <v-tabs-items v-model="tabkey">
-          <v-tab-item :key="1">
+          <v-tab-item @focus="regerror = ''" :key="1">
             <v-card-text>
               <v-row>
                 <v-col cols="12">
@@ -49,7 +49,7 @@
             <v-card-actions>
               <v-switch label="记住我"></v-switch>
               <v-spacer></v-spacer>
-              <v-btn outlined text>{{ reg ? "注册&" : "" }}登录</v-btn>
+              <v-btn outlined text @click="login">登录</v-btn>
               <v-btn @click="close" color="red">取消</v-btn>
             </v-card-actions>
           </v-tab-item>
@@ -91,11 +91,22 @@
                   </v-text-field>
                 </v-col>
               </v-row>
+              <v-row v-if="regerror !== ''">
+                <v-alert dense outlined type="error" class="col-12">{{
+                  regerror
+                }}</v-alert></v-row
+              >
             </v-card-text>
             <v-card-actions>
               <v-switch label="记住我"></v-switch>
               <v-spacer></v-spacer>
-              <v-btn outlined text>注册&登录</v-btn>
+              <v-btn
+                :disabled="this.$v.$anyError"
+                outlined
+                text
+                @click="register"
+                >注册&登录</v-btn
+              >
               <v-btn @click="close" color="red">取消</v-btn>
             </v-card-actions>
           </v-tab-item>
@@ -106,6 +117,9 @@
 </template>
 
 <script lang="ts">
+import { User } from "@/models";
+import { LoginAsync, RegisterAsync } from "@/utils";
+import { AxiosError } from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop } from "vue-property-decorator";
@@ -115,11 +129,16 @@ import {
   maxLength,
   email,
 } from "vuelidate/lib/validators";
+import { VForm } from "vuetify/lib";
 
 @Component({})
 export default class AccountModal extends Vue {
   @Prop()
   enable!: boolean;
+  @Prop()
+  user!: User;
+  regerror: string = "";
+  processing = false;
   email: string = "";
   name: string = "";
   password: string = "";
@@ -137,7 +156,6 @@ export default class AccountModal extends Vue {
       required: required,
     },
   };
-  reg = false;
   showPasswd: boolean = false;
   created() {
     this.email = "";
@@ -146,12 +164,51 @@ export default class AccountModal extends Vue {
   close() {
     this.$emit("update:enable", false);
   }
+  login() {
+    LoginAsync({
+      userNameOrEmail: this.email,
+      password: this.password,
+    })
+      .then((u) => {
+        this.$emit("update:user", u);
+        this.close();
+        this.processing = false;
+      })
+      .catch((err) => {
+        this.processing = false;
+        this.regerror = (err as AxiosError).response.data;
+        if (this.regerror === "") {
+          this.regerror = "Unknown Error";
+        }
+      });
+  }
   validateName() {
     this.$v.name.$touch();
 
     return [() => this.$v.name.required || "名字不可为空"];
   }
-
+  register() {
+    this.$v.$touch();
+    if (this.$v.$anyError) return;
+    this.processing = true;
+    RegisterAsync({
+      email: this.email,
+      userName: this.name,
+      password: this.password,
+    })
+      .then((u) => {
+        this.$emit("update:user", u);
+        this.close();
+        this.processing = false;
+      })
+      .catch((err) => {
+        this.processing = false;
+        this.regerror = (err as AxiosError).response.data;
+        if (this.regerror === "") {
+          this.regerror = "Unknown Error";
+        }
+      });
+  }
   validatePasswd() {
     this.$v.password.$touch();
 
