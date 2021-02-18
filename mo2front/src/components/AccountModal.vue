@@ -45,11 +45,24 @@
                   </v-text-field>
                 </v-col>
               </v-row>
+              <v-row v-if="loginerr !== ''">
+                <v-alert dense outlined type="error" class="col-12">{{
+                  loginerr
+                }}</v-alert></v-row
+              >
             </v-card-text>
             <v-card-actions>
               <v-switch label="记住我"></v-switch>
               <v-spacer></v-spacer>
-              <v-btn outlined text @click="login">登录</v-btn>
+              <v-btn
+                outlined
+                text
+                :disabled="
+                  this.$v.password.$anyError || this.$v.email.$anyError
+                "
+                @click="login"
+                >登录</v-btn
+              >
               <v-btn @click="close" color="red">取消</v-btn>
             </v-card-actions>
           </v-tab-item>
@@ -138,6 +151,7 @@ export default class AccountModal extends Vue {
   @Prop()
   user!: User;
   regerror: string = "";
+  loginerr = "";
   processing = false;
   email: string = "";
   name: string = "";
@@ -165,6 +179,9 @@ export default class AccountModal extends Vue {
     this.$emit("update:enable", false);
   }
   login() {
+    this.$v.$touch();
+    if (this.$v.password.$anyError || this.$v.email.$anyError) return;
+    this.processing = true;
     LoginAsync({
       userNameOrEmail: this.email,
       password: this.password,
@@ -176,9 +193,10 @@ export default class AccountModal extends Vue {
       })
       .catch((err) => {
         this.processing = false;
-        this.regerror = (err as AxiosError).response.data;
-        if (this.regerror === "") {
-          this.regerror = "Unknown Error";
+        this.loginerr = (err as AxiosError).response.data;
+        if (this.loginerr === "") {
+          this.loginerr = "Unknown Error";
+          console.log(this.loginerr);
         }
       });
   }

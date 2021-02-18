@@ -142,7 +142,7 @@ export default class App extends Vue {
     createTime: "2020-1-1",
     id: "xxxxxxxxxxxxxxx",
     avatar: "",
-    roles: ["user"],
+    roles: [],
   };
   enable = false;
   items = [
