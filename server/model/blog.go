@@ -13,5 +13,5 @@ type Blog struct {
 	Content     string             `json:"content,omitempty" example:"xxxx\nxxxx" bson:"content,omitempty"`
 	EntityInfo  Entity             `json:"entityInfo,omitempty" bson:"entity_info,omitempty"`
 	Cover       string             `json:"cover,omitempty" example:"https://xxx/xxx" bson:"cover,omitempty"`
-	KetWords    []string           `json:"keyWords,omitempty" example:"xxx,xxx" bson:"key_words,omitempty"`
+	KeyWords    []string           `json:"keyWords,omitempty" example:"xxx,xxx" bson:"key_words,omitempty"`
 }

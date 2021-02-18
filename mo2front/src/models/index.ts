@@ -15,6 +15,7 @@ export interface User {
     createTime: string;
     site?: string;
     avatar: string;
+    roles?: string[];
 }
 export interface InputProp {
     errorMsg: { [name: string]: string };
@@ -24,4 +25,8 @@ export interface InputProp {
     label?: string;
     default: any;
     iconClick?: (prop: InputProp) => void;
+}
+export interface ApiError {
+    reason: string;
+    time: string;
 }

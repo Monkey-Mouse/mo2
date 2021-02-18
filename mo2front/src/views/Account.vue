@@ -7,7 +7,8 @@
     >
       <v-row align="center" justify="center">
         <v-col class="text-center" cols="12">
-          <v-img class="v-avatar" :src="displayUser.avatar"></v-img>
+          <avatar :size="80" :user="displayUser" />
+          <!-- <v-img class="v-avatar" :src="displayUser.avatar"></v-img> -->
           <h1 class="display-1 font-weight-thin mb-4">
             {{ displayUser.name }}
           </h1>
@@ -31,9 +32,11 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop } from "vue-property-decorator";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
+import Avatar from "../components/UserAvatar.vue";
 @Component({
   components: {
     BlogTimeLineList,
+    Avatar,
   },
 })
 export default class Account extends Vue {
