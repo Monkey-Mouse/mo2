@@ -26,3 +26,7 @@ export interface InputProp {
     default: any;
     iconClick?: (prop: InputProp) => void;
 }
+export interface ApiError {
+    reason: string;
+    time: string;
+}

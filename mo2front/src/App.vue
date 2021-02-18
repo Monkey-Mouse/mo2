@@ -104,7 +104,7 @@
     </v-navigation-drawer>
     <v-main>
       <router-view :user="user" />
-      <account-modal :enable.sync="enable" :user.sync="user" />
+      <account-modal :enable.sync="enable" :user.sync="userdata" />
       <!-- <v-btn @click="showLogin()">Login</v-btn>
       <account-modal :enable.sync="enable" />
       <v-btn @click="$vuetify.theme.dark = !$vuetify.theme.dark"
@@ -144,6 +144,16 @@ export default class App extends Vue {
     avatar: "",
     roles: [],
   };
+
+  get userdata() {
+    return this.user;
+  }
+
+  set userdata(v: User) {
+    this.user = v;
+    this.items[1].show = this.isUser;
+  }
+
   enable = false;
   items = [
     { title: "Home", icon: "mdi-home-city", href: "/", show: true },

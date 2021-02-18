@@ -131,7 +131,7 @@
 
 <script lang="ts">
 import { User } from "@/models";
-import { LoginAsync, RegisterAsync } from "@/utils";
+import { GetErrorMsg, LoginAsync, RegisterAsync } from "@/utils";
 import { AxiosError } from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
@@ -193,11 +193,7 @@ export default class AccountModal extends Vue {
       })
       .catch((err) => {
         this.processing = false;
-        this.loginerr = (err as AxiosError).response.data;
-        if (this.loginerr === "") {
-          this.loginerr = "Unknown Error";
-          console.log(this.loginerr);
-        }
+        this.loginerr = GetErrorMsg(err);
       });
   }
   validateName() {
@@ -215,16 +211,11 @@ export default class AccountModal extends Vue {
       password: this.password,
     })
       .then((u) => {
-        this.$emit("update:user", u);
-        this.close();
-        this.processing = false;
+        this.login();
       })
       .catch((err) => {
         this.processing = false;
-        this.regerror = (err as AxiosError).response.data;
-        if (this.regerror === "") {
-          this.regerror = "Unknown Error";
-        }
+        this.regerror = GetErrorMsg(err);
       });
   }
   validatePasswd() {

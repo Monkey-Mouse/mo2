@@ -4,9 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	dto "mo2/dto"
 	"mo2/server/middleware"
+	"strings"
+	"time"
+
+	"github.com/gin-gonic/gin"
+
 	//"github.com/swaggo/swag/example/celler/model"
 	"log"
 	"mo2/database"
@@ -100,9 +104,17 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, setResponseError(err))
 		return
 	}
+	nano := time.Now().Nanosecond()
 	account, err := database.AddAccount(addAccount)
+
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, setResponseError(err))
+		if strings.Contains(err.Error(), "username") {
+			fmt.Println(time.Now().Nanosecond() - nano)
+			ctx.JSON(http.StatusUnauthorized, setResponseReason("用户名已被使用"))
+		} else {
+			ctx.JSON(http.StatusUnauthorized, setResponseReason("email已被使用"))
+		}
+
 		return
 	}
 	ctx.JSON(http.StatusOK, account)
@@ -120,20 +132,23 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var loginAccount model.LoginAccount
 	if err := ctx.ShouldBindJSON(&loginAccount); err != nil {
-		ctx.JSON(http.StatusNotFound, setResponseError(err))
+		ctx.JSON(http.StatusBadRequest, setResponseError(err))
+		return
 	}
 	if err := loginAccount.Validation(); err != nil {
-		ctx.JSON(http.StatusNotFound, setResponseError(err))
+		ctx.JSON(http.StatusBadRequest, setResponseError(err))
+		return
 	}
 	account, err := database.VerifyAccount(loginAccount)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, setResponseError(err))
+		ctx.JSON(http.StatusUnauthorized, setResponseReason("用户名或密码错误"))
+		return
 	}
 	var s = dto.Account2SuccessLogin(account)
 	jwtToken := middleware.GenerateJwtCode(account.UserName, s)
 	//login success: to record the state
 	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", "localhost", false, true)
-	ctx.JSON(http.StatusOK, gin.H{"account": s, "jwtToken": jwtToken})
+	ctx.JSON(http.StatusOK, s)
 }
 
 // LogoutAccount godoc

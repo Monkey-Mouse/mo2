@@ -1,4 +1,4 @@
-import { User } from '@/models/index'
+import { User, ApiError } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 
 export function randomProperty(obj: any) {
@@ -36,4 +36,11 @@ export async function RegisterAsync(userInfo: { email: string, password: string,
 }
 export async function LoginAsync(userInfo: { userNameOrEmail: string, password: string }) {
     return (await axios.post<User>('/api/accounts/login', userInfo)).data;
+}
+export function GetErrorMsg(apiError: any) {
+    try {
+        return (apiError as AxiosError<ApiError>).response.data.reason
+    } catch (error) {
+        return 'Unknown Error'
+    }
 }
