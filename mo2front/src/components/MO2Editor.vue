@@ -1,9 +1,113 @@
 <template>
   <v-container>
     <v-row justify="center">
-      <v-col cols="8" class="mo2editor">
-        <div class="editor" spellcheck="false">
-          <editor-content class="editor__content" :editor="editor" />
+      <v-col cols="12" lg="8" class="mo2editor">
+        <editor-menu-bubble
+          :editor="editor"
+          :keep-in-bounds="true"
+          v-slot="{ commands, isActive, menu }"
+          class="grey"
+        >
+          <div
+            class="menububble"
+            :class="{ 'is-active': menu.isActive }"
+            :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`"
+          >
+            <button
+              class="menububble__button"
+              :class="{ 'is-active': isActive.bold() }"
+              @click="commands.bold"
+            >
+              <v-icon>mdi-format-bold</v-icon>
+            </button>
+
+            <button
+              class="menububble__button"
+              :class="{ 'is-active': isActive.italic() }"
+              @click="commands.italic"
+            >
+              <v-icon>mdi-format-italic</v-icon>
+            </button>
+
+            <button
+              class="menububble__button"
+              :class="{ 'is-active': isActive.code() }"
+              @click="commands.code"
+            >
+              <v-icon>mdi-code-tags</v-icon>
+            </button>
+          </div>
+        </editor-menu-bubble>
+        <editor-floating-menu
+          :editor="editor"
+          v-slot="{ commands, isActive, menu }"
+        >
+          <div
+            class="editor__floating-menu"
+            :class="{ 'is-active': menu.isActive }"
+            :style="`top: ${menu.top}px`"
+          >
+            <button
+              class="menubar__button"
+              :class="{ 'is-active': isActive.heading({ level: 1 }) }"
+              @click="commands.heading({ level: 1 })"
+            >
+              <v-icon>mdi-format-header-1</v-icon>
+            </button>
+
+            <button
+              class="menubar__button"
+              :class="{ 'is-active': isActive.heading({ level: 2 }) }"
+              @click="commands.heading({ level: 2 })"
+            >
+              <v-icon>mdi-format-header-2</v-icon>
+            </button>
+
+            <button
+              class="menubar__button"
+              :class="{ 'is-active': isActive.heading({ level: 3 }) }"
+              @click="commands.heading({ level: 3 })"
+            >
+              <v-icon>mdi-format-header-3</v-icon>
+            </button>
+
+            <button
+              class="menubar__button"
+              :class="{ 'is-active': isActive.bullet_list() }"
+              @click="commands.bullet_list"
+            >
+              <v-icon>mdi-format-list-bulleted</v-icon>
+            </button>
+
+            <button
+              class="menubar__button"
+              :class="{ 'is-active': isActive.ordered_list() }"
+              @click="commands.ordered_list"
+            >
+              <v-icon>mdi-format-list-numbered</v-icon>
+            </button>
+            <button class="menubar__button" @click="commands.todo_list">
+              <v-icon>mdi-format-list-checks</v-icon>
+            </button>
+            <button
+              class="menubar__button"
+              :class="{ 'is-active': isActive.blockquote() }"
+              @click="commands.blockquote"
+            >
+              <v-icon>mdi-comment-quote</v-icon>
+            </button>
+
+            <button
+              class="menubar__button"
+              :class="{ 'is-active': isActive.code_block() }"
+              @click="commands.code_block"
+            >
+              <v-icon>mdi-code-braces</v-icon>
+            </button>
+          </div>
+        </editor-floating-menu>
+        <div class="mo2content" spellcheck="false">
+          <editor-content :editor="editor" />
         </div>
       </v-col>
     </v-row>
@@ -13,7 +117,12 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import { Editor, EditorContent } from "tiptap";
+import {
+  Editor,
+  EditorContent,
+  EditorFloatingMenu,
+  EditorMenuBubble,
+} from "tiptap";
 import {
   Blockquote,
   CodeBlock,
@@ -32,6 +141,7 @@ import {
   Underline,
   History,
   CodeBlockHighlight,
+  Placeholder,
 } from "tiptap-extensions";
 import onec from "highlight.js/lib/languages/1c";
 import abnf from "highlight.js/lib/languages/abnf";
@@ -228,6 +338,8 @@ import zephir from "highlight.js/lib/languages/zephir";
 @Component({
   components: {
     EditorContent,
+    EditorFloatingMenu,
+    EditorMenuBubble,
   },
 })
 export default class MO2Editor extends Vue {
@@ -240,7 +352,9 @@ export default class MO2Editor extends Vue {
       new BulletList(),
       new OrderedList(),
       new ListItem(),
-      new TodoItem(),
+      new TodoItem({
+        nested: true,
+      }),
       new TodoList(),
       new Bold(),
       new Code(),
@@ -249,6 +363,13 @@ export default class MO2Editor extends Vue {
       new Strike(),
       new Underline(),
       new History(),
+      new Placeholder({
+        emptyEditorClass: "is-editor-empty",
+        emptyNodeClass: "is-empty",
+        emptyNodeText: "Write something …",
+        showOnlyWhenEditable: true,
+        showOnlyCurrent: true,
+      }),
       new CodeBlockHighlight({
         languages: {
           onec,
@@ -446,10 +567,13 @@ export default class MO2Editor extends Vue {
       }),
     ],
     content: `
-          <h1>Yay Headlines!</h1>
-          <p>All these <strong>cool tags</strong> are working now.</p>
+          <h1>Title</h1>
+          <p>your awesome article</p>
         `,
   });
+  mounted() {
+    console.log(this.editor.commands);
+  }
   beforeDestroy() {
     this.editor.destroy();
   }
@@ -512,4 +636,6 @@ pre {
     }
   }
 }
+</style>
+<style lang="scss">
 </style>

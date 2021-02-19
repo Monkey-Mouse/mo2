@@ -1,6 +1,5 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
     <editor />
     <v-dialog :value="false" max-width="600px">
       <v-card>

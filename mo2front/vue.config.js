@@ -19,7 +19,7 @@ module.exports = {
   // 多页面
   pages: undefined,
   // 是否使用包含运行时编译器的 Vue 构建版本。设置为 true 后你就可以在 Vue 组件中使用 template 选项了，但是这会让你的应用额外增加 10kb 左右。
-  runtimeCompiler: false,
+  runtimeCompiler: true,
   // 默认情况下 babel-loader 会忽略所有 node_modules 中的文件。如果你想要通过 Babel 显式转译一个依赖，可以在这个选项中列出来。
   transpileDependencies: [],
   // 如果你不需要生产环境的 source map，可以将其设置为 false 以加速生产环境构建。
