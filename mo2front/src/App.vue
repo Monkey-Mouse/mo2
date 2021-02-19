@@ -46,7 +46,9 @@
       v-model="drawerProp"
     >
       <v-list-item class="px-2" :style="`height: ${appBarHeight}px`">
-        <avatar :user="user" />
+        <v-list-item-avatar>
+          <avatar :size="40" :user="user" />
+        </v-list-item-avatar>
 
         <v-list-item-title>{{
           isUser ? user.name : "未登录"
@@ -220,8 +222,10 @@ export default class App extends Vue {
   appBarHeight = 64;
 }
 </script>
+<style lang="scss">
+@import "./assets/main.scss";
+</style>
 <style>
-@import "./assets/main.css";
 .clickable {
   cursor: pointer;
 }

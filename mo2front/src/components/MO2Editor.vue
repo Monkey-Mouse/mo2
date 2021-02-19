@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row justify="center">
-      <v-col cols="8">
+      <v-col cols="8" class="mo2editor">
         <div class="editor" spellcheck="false">
           <editor-content class="editor__content" :editor="editor" />
         </div>
