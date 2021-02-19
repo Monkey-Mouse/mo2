@@ -1,0 +1,29 @@
+@import "./variables";
+// .button {
+//     font-weight: bold;
+//     display: inline-flex;
+//     background: transparent;
+//     border: 0;
+//     color: $color-black;
+//     padding: 0.2rem 0.5rem;
+//     margin-right: 0.2rem;
+//     border-radius: 3px;
+//     cursor: pointer;
+//     background-color: rgba($color-black, 0.1);
+//     &:hover {
+//         background-color: rgba($color-black, 0.15);
+//     }
+// }
+
+.message {
+    background-color: rgba($color-black, 0.05);
+    color: rgba($color-black, 0.7);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+}
+
+@import "./editor";
+@import "./menubar";
+@import "./menububble";

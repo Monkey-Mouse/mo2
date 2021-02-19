@@ -29,7 +29,7 @@
 
       <v-spacer></v-spacer>
       <v-app-bar-nav-icon
-        v-if="$vuetify.breakpoint.smAndDown"
+        v-if="!this.$vuetify.breakpoint.mdAndUp"
         @click.stop="
           () => {
             drawer = !drawer;
@@ -41,6 +41,7 @@
       style="z-index: 99999"
       right
       fixed
+      :permanent="this.$vuetify.breakpoint.mdAndUp"
       :expand-on-hover="this.$vuetify.breakpoint.mdAndUp"
       v-model="drawerProp"
     >
@@ -183,9 +184,10 @@ export default class App extends Vue {
       ) as boolean;
     } catch (err) {}
     window.addEventListener("resize", () => {
-      setTimeout(() => {
-        this.onResize(false);
-      }, 500);
+      this.onResize();
+      // setTimeout(() => {
+      //   this.onResize();
+      // }, 500);
     });
   }
 
@@ -197,18 +199,16 @@ export default class App extends Vue {
       this.drawer = false;
     } else this.drawer = value;
   }
-  onResize(setdrawer: boolean) {
+  onResize() {
     this.appBarHeight = document.getElementById("appBarElm").clientHeight;
-    if (this.$vuetify.breakpoint.smAndDown) {
+    if (!this.$vuetify.breakpoint.mdAndUp) {
       this.$vuetify.application.right = 0;
-      if (setdrawer) this.drawer = false;
     } else {
-      if (setdrawer) this.drawer = true;
       this.$vuetify.application.right = 57;
     }
   }
   mounted() {
-    this.onResize(false);
+    this.onResize();
   }
   showLogin() {
     this.drawer = false;
@@ -221,6 +221,7 @@ export default class App extends Vue {
 }
 </script>
 <style>
+@import "./assets/main.css";
 .clickable {
   cursor: pointer;
 }
