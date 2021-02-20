@@ -2,11 +2,13 @@ package server
 
 import (
 	_ "mo2/docs"
+	"mo2/mo2utils"
 	"mo2/server/controller"
-
 	"mo2/server/middleware"
+
 	"net/http"
 
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -15,8 +17,10 @@ import (
 func RunServer() {
 
 	r := gin.Default()
-	r.GET("/sayHello", controller.SayHello)
+	r.Use(static.Serve("/", static.LocalFile("dist", true)))
 
+	r.Use(middleware.AuthMiddlware)
+	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
 	v1 := r.Group("/api")
 	{
@@ -44,7 +48,7 @@ func RunServer() {
 		}
 
 	}
-	auth := r.Group("/auth", middleware.BasicAuth())
+	auth := r.Group("/auth", mo2utils.BasicAuth())
 	{
 		auth.GET("home", func(ctx *gin.Context) {
 
@@ -60,5 +64,12 @@ func RunServer() {
 	}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.NoRoute(func(c *gin.Context) {
+		http.ServeFile(c.Writer, c.Request, "dist/index.html")
+	})
+	// r.GET("/", func(c *gin.Context) {
+	// 	http.ServeFile(c.Writer, c.Request, "dist/index.html")
+	// })
+	// r.Static("/static", "dist/static")
 	r.Run(":5000")
 }

@@ -29,7 +29,7 @@
 
       <v-spacer></v-spacer>
       <v-app-bar-nav-icon
-        v-if="$vuetify.breakpoint.smAndDown"
+        v-if="!this.$vuetify.breakpoint.mdAndUp"
         @click.stop="
           () => {
             drawer = !drawer;
@@ -41,23 +41,31 @@
       style="z-index: 99999"
       right
       fixed
+      :permanent="this.$vuetify.breakpoint.mdAndUp"
       :expand-on-hover="this.$vuetify.breakpoint.mdAndUp"
       v-model="drawerProp"
     >
       <v-list-item class="px-2" :style="`height: ${appBarHeight}px`">
         <v-list-item-avatar>
-          <v-img :src="user.avatar"></v-img>
+          <avatar :size="40" :user="user" />
         </v-list-item-avatar>
 
-        <v-list-item-title>{{ user.name }}</v-list-item-title>
+        <v-list-item-title>{{
+          isUser ? user.name : "未登录"
+        }}</v-list-item-title>
 
-        <v-btn icon @click="showLogin()"> 登录 </v-btn>
+        <v-btn icon v-if="!isUser" @click="showLogin()"> 登录 </v-btn>
       </v-list-item>
 
       <v-divider></v-divider>
 
       <v-list dense>
-        <v-list-item v-for="item in items" :key="item.title" :to="item.href">
+        <v-list-item
+          v-for="item in items"
+          :key="item.title"
+          :to="item.href"
+          v-show="item.show"
+        >
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
@@ -99,7 +107,7 @@
     </v-navigation-drawer>
     <v-main>
       <router-view :user="user" />
-      <account-modal :enable.sync="enable" />
+      <account-modal :enable.sync="enable" :user.sync="userdata" />
       <!-- <v-btn @click="showLogin()">Login</v-btn>
       <account-modal :enable.sync="enable" />
       <v-btn @click="$vuetify.theme.dark = !$vuetify.theme.dark"
@@ -116,12 +124,15 @@ import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
 import { User } from "./models";
+import { GetInitials, GetUserInfoAsync } from "./utils";
+import Avatar from "./components/UserAvatar.vue";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 
 @Component({
   components: {
     AccountModal,
+    Avatar,
   },
 })
 export default class App extends Vue {
@@ -133,22 +144,52 @@ export default class App extends Vue {
     site: "www.mo2.pro",
     createTime: "2020-1-1",
     id: "xxxxxxxxxxxxxxx",
-    avatar: "https://randomuser.me/api/portraits/men/85.jpg",
+    avatar: "",
+    roles: [],
   };
+
+  get userdata() {
+    return this.user;
+  }
+
+  set userdata(v: User) {
+    this.user = v;
+    this.items[1].show = this.isUser;
+  }
+
   enable = false;
   items = [
-    { title: "Home", icon: "mdi-home-city", href: "/" },
-    { title: "My Home", icon: "mdi-account", href: "/account" },
-    { title: "About", icon: "mdi-alpha-a-circle", href: "/about" },
+    { title: "Home", icon: "mdi-home-city", href: "/", show: true },
+    {
+      title: "My Home",
+      icon: "mdi-account",
+      href: "/account",
+      show: this.isUser,
+    },
+    { title: "About", icon: "mdi-alpha-a-circle", href: "/about", show: true },
   ];
+  get isUser() {
+    return this.user.roles && this.user.roles.length > 0;
+  }
+  get initials(): string {
+    return GetInitials(this.user.name);
+  }
+
   created() {
+    GetUserInfoAsync().then((u) => {
+      this.user = u;
+      this.items[1].show = this.isUser;
+    });
     try {
-      this.$vuetify.theme.dark = Boolean(localStorage.getItem("darkTheme"));
+      this.$vuetify.theme.dark = JSON.parse(
+        localStorage.getItem("darkTheme")
+      ) as boolean;
     } catch (err) {}
     window.addEventListener("resize", () => {
-      setTimeout(() => {
-        this.onResize(false);
-      }, 500);
+      this.onResize();
+      // setTimeout(() => {
+      //   this.onResize();
+      // }, 500);
     });
   }
 
@@ -160,18 +201,16 @@ export default class App extends Vue {
       this.drawer = false;
     } else this.drawer = value;
   }
-  onResize(setdrawer: boolean) {
+  onResize() {
     this.appBarHeight = document.getElementById("appBarElm").clientHeight;
-    if (this.$vuetify.breakpoint.smAndDown) {
+    if (!this.$vuetify.breakpoint.mdAndUp) {
       this.$vuetify.application.right = 0;
-      if (setdrawer) this.drawer = false;
     } else {
-      if (setdrawer) this.drawer = true;
       this.$vuetify.application.right = 57;
     }
   }
   mounted() {
-    this.onResize(false);
+    this.onResize();
   }
   showLogin() {
     this.drawer = false;
@@ -183,6 +222,9 @@ export default class App extends Vue {
   appBarHeight = 64;
 }
 </script>
+<style lang="scss">
+@import "./assets/main.scss";
+</style>
 <style>
 .clickable {
   cursor: pointer;

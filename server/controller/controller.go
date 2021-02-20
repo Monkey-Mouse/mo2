@@ -21,8 +21,13 @@ type ResponseError struct {
 	Reason string    `json:"reason"`
 }
 
-func setResponseError(err error) (r ResponseError) {
+func SetResponseError(err error) (r ResponseError) {
 	r.Reason = err.Error()
+	r.Time = time.Now()
+	return
+}
+func SetResponseReason(err string) (r ResponseError) {
+	r.Reason = err
 	r.Time = time.Now()
 	return
 }

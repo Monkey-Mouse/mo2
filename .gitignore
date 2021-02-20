@@ -15,3 +15,7 @@
 # vendor/
 docs/*
 limfx*.json
+.idea
+dist/*
+dist
+docs
