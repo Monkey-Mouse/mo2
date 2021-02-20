@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	dto "mo2/dto"
-	"mo2/server/middleware"
+	"mo2/mo2utils"
 	"strings"
 	"time"
 
@@ -68,12 +68,12 @@ func (c *Controller) Log(ctx *gin.Context) {
 		//allocate an anonymous account
 		account := database.CreateAnonymousAccount()
 		s = dto.Account2SuccessLogin(account)
-		jwtToken = middleware.GenerateJwtCode(account.UserName, s)
+		jwtToken = mo2utils.GenerateJwtCode(account.UserName, s)
 		//login success: to record the state
-		ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", "localhost", false, true)
+		ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
 	} else {
 		//parse jwtToken and get user info
-		userInfo, err := middleware.ParseJwt(jwtToken)
+		userInfo, err := mo2utils.ParseJwt(jwtToken)
 		if err != nil {
 			log.Println(err)
 		}
@@ -97,11 +97,11 @@ func (c *Controller) Log(ctx *gin.Context) {
 func (c *Controller) AddAccount(ctx *gin.Context) {
 	var addAccount model.AddAccount
 	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		ctx.JSON(http.StatusUnauthorized, setResponseError(err))
+		ctx.JSON(http.StatusUnauthorized, SetResponseError(err))
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
-		ctx.JSON(http.StatusUnauthorized, setResponseError(err))
+		ctx.JSON(http.StatusUnauthorized, SetResponseError(err))
 		return
 	}
 	nano := time.Now().Nanosecond()
@@ -110,9 +110,9 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 	if err != nil {
 		if strings.Contains(err.Error(), "username") {
 			fmt.Println(time.Now().Nanosecond() - nano)
-			ctx.JSON(http.StatusUnauthorized, setResponseReason("用户名已被使用"))
+			ctx.JSON(http.StatusUnauthorized, SetResponseReason("用户名已被使用"))
 		} else {
-			ctx.JSON(http.StatusUnauthorized, setResponseReason("email已被使用"))
+			ctx.JSON(http.StatusUnauthorized, SetResponseReason("email已被使用"))
 		}
 
 		return
@@ -132,22 +132,22 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var loginAccount model.LoginAccount
 	if err := ctx.ShouldBindJSON(&loginAccount); err != nil {
-		ctx.JSON(http.StatusBadRequest, setResponseError(err))
+		ctx.JSON(http.StatusBadRequest, SetResponseError(err))
 		return
 	}
 	if err := loginAccount.Validation(); err != nil {
-		ctx.JSON(http.StatusBadRequest, setResponseError(err))
+		ctx.JSON(http.StatusBadRequest, SetResponseError(err))
 		return
 	}
 	account, err := database.VerifyAccount(loginAccount)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, setResponseReason("用户名或密码错误"))
+		ctx.JSON(http.StatusUnauthorized, SetResponseReason("用户名或密码错误"))
 		return
 	}
 	var s = dto.Account2SuccessLogin(account)
-	jwtToken := middleware.GenerateJwtCode(account.UserName, s)
+	jwtToken := mo2utils.GenerateJwtCode(account.UserName, s)
 	//login success: to record the state
-	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", "localhost", false, true)
+	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
 	ctx.JSON(http.StatusOK, s)
 }
 
@@ -160,7 +160,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 // @Router /api/accounts/logout [get]
 func (c *Controller) LogoutAccount(ctx *gin.Context) {
 
-	ctx.SetCookie("jwtToken", "true", -1, "/", "localhost", false, true)
+	ctx.SetCookie("jwtToken", "true", -1, "/", ctx.Request.Host, false, true)
 	ctx.JSON(http.StatusOK, gin.H{"message": "logout success"})
 }
 
@@ -194,7 +194,7 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 	result := col.FindOne(context.TODO(), filter)
 	//account, err := model.AccountOne(aid)
 	if err != nil {
-		ctx.JSON(http.StatusNotFound, setResponseError(err))
+		ctx.JSON(http.StatusNotFound, SetResponseError(err))
 		return
 	}
 	fmt.Println(result)

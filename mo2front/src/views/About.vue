@@ -1,6 +1,6 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
+    <editor />
     <v-dialog :value="false" max-width="600px">
       <v-card>
         <v-container>
@@ -23,6 +23,7 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import InputList from "../components/InputList.vue";
 import Cropper from "../components/ImageCropper.vue";
+import Editor from "../components/MO2Editor.vue";
 import {
   required,
   minLength,
@@ -34,6 +35,7 @@ import { InputProp } from "@/models";
   components: {
     InputList,
     Cropper,
+    Editor,
   },
 })
 export default class About extends Vue {

@@ -1,5 +1,5 @@
 <template>
-  <v-list-item-avatar :size="size" color="brown">
+  <v-avatar :size="size" color="brown">
     <v-img
       v-if="
         user.avatar !== null && user.avatar !== undefined && user.avatar !== ''
@@ -9,7 +9,7 @@
     <span v-else class="white--text headline">{{
       isUser ? initials : "A"
     }}</span>
-  </v-list-item-avatar>
+  </v-avatar>
 </template>
 
 <script lang="ts">
