@@ -256,6 +256,8 @@ import {
   TableCell,
   TableRow,
 } from "tiptap-extensions";
+import Title from "./title";
+import DOC from "./doc";
 import onec from "highlight.js/lib/languages/1c";
 import abnf from "highlight.js/lib/languages/abnf";
 import accesslog from "highlight.js/lib/languages/accesslog";
@@ -481,9 +483,14 @@ export default class MO2Editor extends Vue {
       new Placeholder({
         emptyEditorClass: "is-editor-empty",
         emptyNodeClass: "is-empty",
-        emptyNodeText: "Write something …",
         showOnlyWhenEditable: true,
-        showOnlyCurrent: true,
+        showOnlyCurrent: false,
+        emptyNodeText: (node) => {
+          if (node.type.name === "title") {
+            return "Your title";
+          }
+          return "Your awesome content";
+        },
       }),
       new HorizontalRule(),
       new TrailingNode({
@@ -493,9 +500,11 @@ export default class MO2Editor extends Vue {
       new Table({
         resizable: true,
       }),
+      new DOC(),
       new TableHeader(),
       new TableCell(),
       new TableRow(),
+      new Title(),
       new CodeBlockHighlight({
         languages: {
           onec,
@@ -693,8 +702,6 @@ export default class MO2Editor extends Vue {
       }),
     ],
     content: `
-          <h1>Title</h1>
-          <p>your awesome article</p>
         `,
   });
   mounted() {
@@ -784,5 +791,14 @@ pre {
   }
 }
 </style>
-<style lang="scss">
+<style>
+*.is-empty:nth-child(1)::before,
+*.is-empty:nth-child(2)::before {
+  content: attr(data-empty-text);
+  float: left;
+  color: #aaa;
+  pointer-events: none;
+  height: 0;
+  font-style: italic;
+}
 </style>
