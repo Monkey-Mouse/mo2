@@ -1,4 +1,5 @@
 .mo2content {
+    margin-top: 50px !important;
     @import url('https://fonts.googleapis.com/css?family=Lato:400,700|Lora|Playfair+Display:700i,900');
 
     html,
@@ -277,7 +278,7 @@
         border-radius: 3px
     }
 
-    .editor__content table {
+    table {
         border-collapse: collapse;
         table-layout: fixed;
         width: 100%;
@@ -285,8 +286,8 @@
         overflow: hidden
     }
 
-    .editor__content table td,
-    .editor__content table th {
+    table td,
+    table th {
         min-width: 1em;
         border: 2px solid #ddd;
         padding: 3px 5px;
@@ -296,17 +297,17 @@
         position: relative
     }
 
-    .editor__content table td>*,
-    .editor__content table th>* {
+    table td>*,
+    table th>* {
         margin-bottom: 0
     }
 
-    .editor__content table th {
+    table th {
         font-weight: 700;
         text-align: left
     }
 
-    .editor__content table .selectedCell:after {
+    table .selectedCell:after {
         z-index: 2;
         position: absolute;
         content: "";
@@ -318,7 +319,7 @@
         pointer-events: none
     }
 
-    .editor__content table .column-resize-handle {
+    table .column-resize-handle {
         position: absolute;
         right: -2px;
         top: 0;
@@ -329,12 +330,12 @@
         pointer-events: none
     }
 
-    .editor__content .tableWrapper {
+    .tableWrapper {
         margin: 1em 0;
         overflow-x: auto
     }
 
-    .editor__content .resize-cursor {
+    .resize-cursor {
         cursor: ew-resize;
         cursor: col-resize
     }

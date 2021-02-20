@@ -2,40 +2,131 @@
   <v-container>
     <v-row justify="center">
       <v-col cols="12" lg="8" class="mo2editor">
+        <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
+          <div class="menubar">
+            <div class="toolbar">
+              <span v-if="isActive.table()">
+                <button class="menubar__button" @click="commands.deleteTable">
+                  <v-icon>mdi-table-large-remove</v-icon>
+                </button>
+                <button
+                  class="menubar__button"
+                  @click="commands.addColumnBefore"
+                >
+                  <v-icon>mdi-table-column-plus-before</v-icon>
+                </button>
+                <button
+                  class="menubar__button"
+                  @click="commands.addColumnAfter"
+                >
+                  <v-icon>mdi-table-column-plus-after</v-icon>
+                </button>
+                <button class="menubar__button" @click="commands.deleteColumn">
+                  <v-icon>mdi-table-column-remove</v-icon>
+                </button>
+                <button class="menubar__button" @click="commands.addRowBefore">
+                  <v-icon>mdi-table-row-plus-before</v-icon>
+                </button>
+                <button class="menubar__button" @click="commands.addRowAfter">
+                  <v-icon>mdi-table-row-plus-after</v-icon>
+                </button>
+                <button class="menubar__button" @click="commands.deleteRow">
+                  <v-icon>mdi-table-row-remove</v-icon>
+                </button>
+              </span>
+            </div>
+          </div>
+        </editor-menu-bar>
         <editor-menu-bubble
           :editor="editor"
           :keep-in-bounds="true"
-          v-slot="{ commands, isActive, menu }"
-          class="grey"
+          v-slot="{ commands, isActive, menu, getMarkAttrs }"
+          class="accent"
         >
           <div
             class="menububble"
             :class="{ 'is-active': menu.isActive }"
             :style="`left: ${menu.left}px; bottom: ${menu.bottom}px;`"
           >
-            <button
-              class="menububble__button"
-              :class="{ 'is-active': isActive.bold() }"
-              @click="commands.bold"
-            >
-              <v-icon>mdi-format-bold</v-icon>
-            </button>
+            <div v-if="!linkMenuIsActive">
+              <button
+                class="menububble__button"
+                :class="{ 'is-active': isActive.bold() }"
+                @click="commands.bold"
+              >
+                <v-icon>mdi-format-bold</v-icon>
+              </button>
 
-            <button
-              class="menububble__button"
-              :class="{ 'is-active': isActive.italic() }"
-              @click="commands.italic"
-            >
-              <v-icon>mdi-format-italic</v-icon>
-            </button>
+              <button
+                class="menububble__button"
+                :class="{ 'is-active': isActive.italic() }"
+                @click="commands.italic"
+              >
+                <v-icon>mdi-format-italic</v-icon>
+              </button>
+              <button
+                class="menububble__button"
+                :class="{ 'is-active': isActive.underline() }"
+                @click="commands.underline"
+              >
+                <v-icon>mdi-format-underline</v-icon>
+              </button>
+              <button
+                class="menububble__button"
+                :class="{ 'is-active': isActive.strike() }"
+                @click="commands.strike"
+              >
+                <v-icon>mdi-format-strikethrough-variant</v-icon>
+              </button>
 
-            <button
-              class="menububble__button"
-              :class="{ 'is-active': isActive.code() }"
-              @click="commands.code"
+              <button
+                class="menububble__button"
+                :class="{ 'is-active': isActive.code() }"
+                @click="commands.code"
+              >
+                <v-icon>mdi-code-tags</v-icon>
+              </button>
+              <button
+                v-if="isActive.table()"
+                class="menubar__button"
+                @click="commands.toggleCellMerge"
+              >
+                <v-icon>mdi-table-merge-cells</v-icon>/
+                <v-icon>mdi-table-split-cell</v-icon>
+              </button>
+            </div>
+            <form
+              class="menububble__form"
+              v-if="linkMenuIsActive"
+              @submit.prevent="setLinkUrl(commands.link, linkUrl)"
             >
-              <v-icon>mdi-code-tags</v-icon>
-            </button>
+              <input
+                class="menububble__input"
+                type="text"
+                v-model="linkUrl"
+                placeholder="https://"
+                ref="linkInput"
+                @keydown.esc="hideLinkMenu"
+              />
+              <button
+                class="menububble__button"
+                @click="setLinkUrl(commands.link, null)"
+                type="button"
+              >
+                <v-icon>mdi-close</v-icon>
+              </button>
+            </form>
+
+            <template v-else>
+              <button
+                class="menububble__button"
+                @click="showLinkMenu(getMarkAttrs('link'))"
+                :class="{ 'is-active': isActive.link() }"
+              >
+                <span>{{ isActive.link() ? "Update Link" : "Add Link" }}</span>
+                <v-icon>mdi-link-variant-plus</v-icon>
+              </button>
+            </template>
           </div>
         </editor-menu-bubble>
         <editor-floating-menu
@@ -104,6 +195,21 @@
             >
               <v-icon>mdi-code-braces</v-icon>
             </button>
+            <button class="menubar__button" @click="commands.horizontal_rule">
+              <v-icon>mdi-minus</v-icon>
+            </button>
+            <button
+              class="menubar__button"
+              @click="
+                commands.createTable({
+                  rowsCount: 3,
+                  colsCount: 3,
+                  withHeaderRow: false,
+                })
+              "
+            >
+              <v-icon>mdi-table-large</v-icon>
+            </button>
           </div>
         </editor-floating-menu>
         <div class="mo2content" spellcheck="false">
@@ -122,6 +228,7 @@ import {
   EditorContent,
   EditorFloatingMenu,
   EditorMenuBubble,
+  EditorMenuBar,
 } from "tiptap";
 import {
   Blockquote,
@@ -142,6 +249,12 @@ import {
   History,
   CodeBlockHighlight,
   Placeholder,
+  TrailingNode,
+  HorizontalRule,
+  Table,
+  TableHeader,
+  TableCell,
+  TableRow,
 } from "tiptap-extensions";
 import onec from "highlight.js/lib/languages/1c";
 import abnf from "highlight.js/lib/languages/abnf";
@@ -340,9 +453,11 @@ import zephir from "highlight.js/lib/languages/zephir";
     EditorContent,
     EditorFloatingMenu,
     EditorMenuBubble,
+    EditorMenuBar,
   },
 })
 export default class MO2Editor extends Vue {
+  linkMenuIsActive = false;
   editor: Editor = new Editor({
     extensions: [
       new Blockquote(),
@@ -370,6 +485,17 @@ export default class MO2Editor extends Vue {
         showOnlyWhenEditable: true,
         showOnlyCurrent: true,
       }),
+      new HorizontalRule(),
+      new TrailingNode({
+        node: "paragraph",
+        notAfter: ["paragraph"],
+      }),
+      new Table({
+        resizable: true,
+      }),
+      new TableHeader(),
+      new TableCell(),
+      new TableRow(),
       new CodeBlockHighlight({
         languages: {
           onec,
@@ -572,13 +698,34 @@ export default class MO2Editor extends Vue {
         `,
   });
   mounted() {
-    console.log(this.editor.commands);
+    console.log(this.editor);
   }
   beforeDestroy() {
     this.editor.destroy();
   }
+  linkUrl = null;
+  showLinkMenu(attrs) {
+    this.linkUrl = attrs.href;
+    this.linkMenuIsActive = true;
+    this.$nextTick(() => {
+      (this.$refs.linkInput as any).focus();
+    });
+  }
+  hideLinkMenu() {
+    this.linkUrl = null;
+    this.linkMenuIsActive = false;
+  }
+  setLinkUrl(command, url) {
+    command({ href: url });
+    this.hideLinkMenu();
+  }
 }
 </script>
+<style>
+.menubar {
+  position: fixed;
+}
+</style>
 <style lang="scss">
 pre {
   &::before {
