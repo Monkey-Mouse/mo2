@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	dto "mo2/dto"
 	"mo2/mo2utils"
@@ -58,28 +57,24 @@ func (c *Controller) AddMo2User(ctx *gin.Context) {
 // @Tags logs
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} dto.SuccessLogin
+// @Success 200 {object} dto.LoginUserInfo
 // @Router /api/logs [get]
 func (c *Controller) Log(ctx *gin.Context) {
 
 	jwtToken, err := ctx.Cookie("jwtToken")
-	var s dto.SuccessLogin
+	var s dto.LoginUserInfo
 	if err != nil {
 		//allocate an anonymous account
 		account := database.CreateAnonymousAccount()
 		s = dto.Account2SuccessLogin(account)
-		jwtToken = mo2utils.GenerateJwtCode(account.UserName, s)
+		jwtToken = mo2utils.GenerateJwtCode(s)
 		//login success: to record the state
 		ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
 	} else {
 		//parse jwtToken and get user info
-		userInfo, err := mo2utils.ParseJwt(jwtToken)
+		s, err = mo2utils.ParseJwt(jwtToken)
 		if err != nil {
 			log.Println(err)
-		}
-		err = json.Unmarshal(userInfo.Infos, &s)
-		if err != nil {
-			log.Fatal(err)
 		}
 	}
 	ctx.JSON(http.StatusOK, s)
@@ -127,7 +122,7 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param account body model.LoginAccount true "login account"
-// @Success 200 {object} dto.SuccessLogin
+// @Success 200 {object} dto.LoginUserInfo
 // @Router /api/accounts/login [post]
 func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var loginAccount model.LoginAccount
@@ -145,7 +140,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 		return
 	}
 	var s = dto.Account2SuccessLogin(account)
-	jwtToken := mo2utils.GenerateJwtCode(account.UserName, s)
+	jwtToken := mo2utils.GenerateJwtCode(s)
 	//login success: to record the state
 	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
 	ctx.JSON(http.StatusOK, s)
