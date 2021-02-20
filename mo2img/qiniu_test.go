@@ -14,7 +14,7 @@ func TestGenerateUploadToken(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotToken := GenerateUploadToken()
+			gotToken := GenerateUploadToken("test")
 
 			if match, err := regexp.MatchString(tt.wantToken, gotToken); err != nil || !match {
 				t.Errorf("GenerateUploadToken() = %v, want %v", gotToken, tt.wantToken)
