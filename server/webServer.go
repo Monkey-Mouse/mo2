@@ -53,7 +53,7 @@ func RunServer() {
 		auth.GET("home", func(ctx *gin.Context) {
 
 			//TODO change the info generate way
-			user, err := ctx.Cookie("user")
+			user, err := ctx.Cookie("jwtToken")
 			if err != nil {
 				ctx.JSON(http.StatusForbidden, "login first!")
 			} else {
