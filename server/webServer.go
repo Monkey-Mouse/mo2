@@ -2,9 +2,10 @@ package server
 
 import (
 	_ "mo2/docs"
+	"mo2/mo2utils"
 	"mo2/server/controller"
-
 	"mo2/server/middleware"
+
 	"net/http"
 
 	"github.com/gin-contrib/static"
@@ -17,8 +18,9 @@ func RunServer() {
 
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
-	r.GET("/sayHello", controller.SayHello)
 
+	r.Use(middleware.AuthMiddlware)
+	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
 	v1 := r.Group("/api")
 	{
@@ -46,7 +48,7 @@ func RunServer() {
 		}
 
 	}
-	auth := r.Group("/auth", middleware.BasicAuth())
+	auth := r.Group("/auth", mo2utils.BasicAuth())
 	{
 		auth.GET("home", func(ctx *gin.Context) {
 
