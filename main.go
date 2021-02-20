@@ -1,10 +1,8 @@
 package main
 
 import (
-	"mo2/config"
 	_ "mo2/docs"
 	"mo2/server"
-	"os"
 	//"time"
 )
 
@@ -24,7 +22,6 @@ import (
 // @BasePath /
 // @query.collection.format multi
 func main() {
-	//expTime:=time.Date(2021,2,14,12,0,0,0,time.UTC).Unix()
 
 	//demo.SendEmail()
 	server.RunServer()
@@ -33,10 +30,4 @@ func main() {
 
 	//demo.Welcome()
 
-}
-func init() {
-	//config.SaveConfig("../config/config.yaml")
-	c := config.LoadConfig("../config/config.yaml")
-	os.Setenv("emailAddr", c.EmailAddr)
-	os.Setenv("emailPass", c.EmailPass)
 }
