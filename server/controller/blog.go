@@ -17,7 +17,7 @@ import (
 // @Produce  json
 // @Param account body model.Blog true "Add blog"
 // @Success 200 {object} model.Blog
-// @Router /api/blogs [post]
+// @Router /api/blogs/publish [post]
 func (c *Controller) PublishBlog(ctx *gin.Context) {
 	b := model.Blog{}
 	if err := ctx.ShouldBindJSON(&b); err != nil {

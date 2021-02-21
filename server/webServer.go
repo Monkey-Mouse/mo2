@@ -45,7 +45,7 @@ func RunServer() {
 		}
 		blogs := v1.Group("/blogs")
 		{
-			blogs.POST("", c.PublishBlog)
+			blogs.POST("publish", c.PublishBlog)
 		}
 
 	}
