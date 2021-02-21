@@ -25,15 +25,8 @@ func AddBlog(b *model.Blog) (success bool, err error) {
 	entity := model.InitEntity()
 	b.EntityInfo = entity
 	if b.ID == primitive.NilObjectID {
-		result, err := blogCol.InsertOne(context.TODO(), bson.M{
-			"_id":         primitive.NewObjectID(),
-			"author_id":   b.AuthorID,
-			"title":       b.Title,
-			"description": b.Description,
-			"content":     b.Content,
-			"cover":       b.Cover,
-			"key_words":   b.KeyWords,
-		})
+		b.ID = primitive.NewObjectID()
+		result, err := blogCol.InsertOne(context.TODO(), b)
 		if err != nil {
 			log.Fatal(err)
 		}
