@@ -1,9 +1,24 @@
 package dto
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"mo2/server/model"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+// Contains test slice contain string
+func Contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+
+	return false
+}
+func (user LoginUserInfo) IsUserInRole(role model.Erole) bool {
+	return Contains(user.Roles, role)
+}
 
 //todo implement error
 type LoginUserInfo struct {

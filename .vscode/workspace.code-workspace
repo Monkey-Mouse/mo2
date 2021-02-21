@@ -2,9 +2,6 @@
 	"folders": [
 		{
 			"path": "..\\mo2front"
-		},
-		{
-			"path": ".."
 		}
 	],
 	"settings": {}
