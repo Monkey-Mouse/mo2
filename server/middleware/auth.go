@@ -14,13 +14,14 @@ func AuthMiddlware(c *gin.Context) {
 		c.Next()
 		return
 	}
+
 	cookieStr, err := c.Cookie("jwtToken")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("Unauthorized!"))
 		return
 	}
 	uinfo, err := mo2utils.ParseJwt(cookieStr)
-	c.Set("User", uinfo)
+	c.Set(mo2utils.UserInfoKey, uinfo)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("Unauthorized!"))
 		return

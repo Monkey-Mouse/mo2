@@ -30,3 +30,7 @@ export interface ApiError {
     reason: string;
     time: string;
 }
+export interface ImgToken {
+    token: string;
+    file_key: string;
+}

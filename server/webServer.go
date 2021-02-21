@@ -24,6 +24,7 @@ func RunServer() {
 	c := controller.NewController()
 	v1 := r.Group("/api")
 	{
+		v1.GET("/img/:filename", c.GenUploadToken)
 		logs := v1.Group("/logs")
 		{
 			logs.GET("", c.Log)

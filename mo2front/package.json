@@ -16,6 +16,7 @@
     "core-js": "^3.6.5",
     "highlight.js": "^10.6.0",
     "medium.css": "^1.0.2",
+    "qiniu-js": "^3.1.2",
     "register-service-worker": "^1.7.1",
     "tiptap": "^1.32.1",
     "tiptap-extensions": "^1.35.1",

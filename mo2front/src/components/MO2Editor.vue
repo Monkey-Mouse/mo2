@@ -4,7 +4,7 @@
       <v-col cols="12" lg="8" class="mo2editor">
         <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
           <div class="menubar">
-            <div class="toolbar">
+            <div class="toolbar row">
               <span v-if="isActive.table()">
                 <button class="menubar__button" @click="commands.deleteTable">
                   <v-icon>mdi-table-large-remove</v-icon>
@@ -37,6 +37,13 @@
             </div>
           </div>
         </editor-menu-bar>
+        <v-progress-circular
+          v-if="isuploading"
+          class="offset-10 offset-lg-7"
+          style="position: fixed; z-index: 999"
+          indeterminate
+          color="amber"
+        ></v-progress-circular>
         <editor-menu-bubble
           :editor="editor"
           :keep-in-bounds="true"
@@ -255,9 +262,12 @@ import {
   TableHeader,
   TableCell,
   TableRow,
+  Image,
 } from "tiptap-extensions";
 import Title from "./title";
 import DOC from "./doc";
+let that: any = {};
+//#region hljs
 import onec from "highlight.js/lib/languages/1c";
 import abnf from "highlight.js/lib/languages/abnf";
 import accesslog from "highlight.js/lib/languages/accesslog";
@@ -449,7 +459,8 @@ import xml from "highlight.js/lib/languages/xml";
 import xquery from "highlight.js/lib/languages/xquery";
 import yaml from "highlight.js/lib/languages/yaml";
 import zephir from "highlight.js/lib/languages/zephir";
-
+import { Prop } from "vue-property-decorator";
+//#endregion
 @Component({
   components: {
     EditorContent,
@@ -459,7 +470,14 @@ import zephir from "highlight.js/lib/languages/zephir";
   },
 })
 export default class MO2Editor extends Vue {
+  @Prop()
+  uploadImgs: (
+    blobs: File[],
+    callback: (imgprop: { src: string }) => void
+  ) => Promise<void>;
+  isuploading = false;
   linkMenuIsActive = false;
+  load = false;
   editor: Editor = new Editor({
     extensions: [
       new Blockquote(),
@@ -497,14 +515,9 @@ export default class MO2Editor extends Vue {
         node: "paragraph",
         notAfter: ["paragraph"],
       }),
-      new Table({
-        resizable: true,
-      }),
       new DOC(),
-      new TableHeader(),
-      new TableCell(),
-      new TableRow(),
       new Title(),
+      new Image(),
       new CodeBlockHighlight({
         languages: {
           onec,
@@ -700,12 +713,49 @@ export default class MO2Editor extends Vue {
           zephir,
         },
       }),
+      new Table({
+        resizable: true,
+      }),
+      new TableHeader(),
+      new TableCell(),
+      new TableRow(),
     ],
     content: `
-        `,
+    `,
+    onUpdate() {},
+    onPaste(editorview, event, slice) {
+      var items = (event.clipboardData || event.originalEvent.clipboardData)
+        .items;
+      console.log({ items }); // will give you the mime types
+      var files = [];
+      for (let index = 0; index < items.length; index++) {
+        var item = items[index];
+        if (item.kind === "file") {
+          var blob = item.getAsFile();
+          files = files.concat(blob);
+          // var reader = new FileReader();
+          // reader.onload = function(event){
+          //   console.log(event.target.result)}; // data url!
+          // reader.readAsDataURL(blob);
+        }
+      }
+      console.log({ files });
+      if (files.length === 0) {
+        return;
+      }
+      (event as Event).preventDefault();
+      console.log(that.isuploading);
+      that.isuploading = true;
+      that
+        .uploadImgs(files, this.commands.image)
+        .then(() => (that.isuploading = false))
+        .catch(() => {
+          that.isuploading = false;
+        });
+    },
   });
   mounted() {
-    console.log(this.editor);
+    that = this;
   }
   beforeDestroy() {
     this.editor.destroy();
@@ -792,6 +842,9 @@ pre {
 }
 </style>
 <style>
+.mo2editor img {
+  width: 100%;
+}
 *.is-empty:nth-child(1)::before,
 *.is-empty:nth-child(2)::before {
   content: attr(data-empty-text);
