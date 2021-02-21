@@ -34,3 +34,23 @@ func (c *Controller) PublishBlog(ctx *gin.Context) {
 	database.AddBlog(&b)
 	ctx.JSON(http.StatusOK, &b)
 }
+
+// FindBlogsByUser godoc
+// @Summary find Blog
+// @Description add by json
+// @Tags blogs
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} []model.Blog
+// @Router /api/blogs/find/byUser [get]
+func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
+	// get user info due to cookie information
+	info, ext := mo2utils.GetUserInfo(ctx)
+	if !ext {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
+		return
+	}
+
+	blogs := database.FindBlogs(info)
+	ctx.JSON(http.StatusOK, blogs)
+}

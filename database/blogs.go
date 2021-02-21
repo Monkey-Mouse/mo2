@@ -4,6 +4,7 @@ import (
 	"context"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"mo2/dto"
 	"mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -45,6 +46,17 @@ func AddBlog(b *model.Blog) (new bool, err error) {
 	if result.UpsertedCount != 0 {
 		new = true //create new blog
 		b.ID = result.UpsertedID.(primitive.ObjectID)
+	}
+	return
+}
+
+//find blog
+func FindBlogs(u dto.LoginUserInfo) (b []model.Blog) {
+	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
+	cursor, err := blogCol.Find(context.TODO(), bson.D{{"author_id", u.ID}}, opts)
+	err = cursor.All(context.TODO(), &b)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return
 }
