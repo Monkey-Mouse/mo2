@@ -19,7 +19,7 @@
             </v-col>
             <v-spacer />
             <v-btn plain small>
-              <v-icon>mdi-file-document-edit</v-icon>
+              <v-icon @click="edit">mdi-file-document-edit</v-icon>
             </v-btn>
             <v-btn plain small>
               <v-icon>mdi-delete</v-icon>
@@ -41,14 +41,14 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import Editor from "../components/MO2Editor.vue";
-import { UploadImgToQiniu } from "@/utils";
+import { globaldic, UploadImgToQiniu } from "@/utils";
 import hljs from "highlight.js";
 @Component({
   components: {
     Editor,
   },
 })
-export default class About extends Vue {
+export default class ReadArticle extends Vue {
   title = "dsadsaad";
   html = `
   <p>dsadasdada</p><p>dsadad</p><ul><li><p>dasda</p></li><li><p>dasda</p></li><li><p>dada</p><ul><li><p>dasdsa</p></li></ul></li></ul><table><tbody><tr><td><p>dasdasda</p></td><td><p>dsadas</p></td><td><p>dsada</p></td></tr><tr><td><p>dasdas</p></td><td><p>dasda</p></td><td><p>dad</p></td></tr><tr><td><p></p></td><td><p></p></td><td><p>dasda</p></td></tr></tbody></table><pre><code>let a = "aaa"</code></pre><p><code>console.log('fuck')</code></p>
@@ -69,7 +69,11 @@ export default class About extends Vue {
           hljs.highlightBlock(block);
         });
       }, 500);
-    }, 3000);
+    }, 1000);
+  }
+  edit() {
+    globaldic.article = `<h1>${this.title}</h1>${this.html}`;
+    this.$router.push("/edit");
   }
 }
 </script>

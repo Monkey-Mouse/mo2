@@ -71,3 +71,4 @@ export const UploadImgToQiniu = async (
     await Promise.all(promises)
 
 }
+export var globaldic: any = {};
