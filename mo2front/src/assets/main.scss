@@ -1,4 +1,28 @@
+.mo2title {
+    @import url('https://fonts.googleapis.com/css?family=Lato:400,700|Lora|Playfair+Display:700i,900');
+
+
+    h1 .first-letter,
+    .authorName a {
+        text-rendering: optimizeLegibility;
+    }
+
+    h1 {
+        font-family: "Playfair Display", serif;
+        font-size: 64px;
+        text-align: left;
+        margin-bottom: 8px;
+    }
+
+}
+
+.theme--light.v-application pre>code {
+    background-color: #424242 !important;
+    color: white;
+}
+
 .mo2content {
+
     margin-top: 50px !important;
     @import url('https://fonts.googleapis.com/css?family=Lato:400,700|Lora|Playfair+Display:700i,900');
 
@@ -661,6 +685,89 @@ $color-black: #000000;
 $color-white: #ffffff;
 $color-grey: #dddddd;
 
+.mo2editor img {
+    width: 100%;
+}
+
+*.is-empty:nth-child(1)::before,
+*.is-empty:nth-child(2)::before {
+    content: attr(data-empty-text);
+    float: left;
+    color: #aaa;
+    pointer-events: none;
+    height: 0;
+    font-style: italic;
+}
+
+pre {
+    &::before {
+        content: attr(data-language);
+        text-transform: uppercase;
+        display: block;
+        text-align: right;
+        font-weight: bold;
+        font-size: 0.6rem;
+    }
+
+    code {
+
+        .hljs-comment,
+        .hljs-quote {
+            color: #999999;
+        }
+
+        .hljs-variable,
+        .hljs-template-variable,
+        .hljs-attribute,
+        .hljs-tag,
+        .hljs-name,
+        .hljs-regexp,
+        .hljs-link,
+        .hljs-name,
+        .hljs-selector-id,
+        .hljs-selector-class {
+            color: #f2777a;
+        }
+
+        .hljs-number,
+        .hljs-meta,
+        .hljs-built_in,
+        .hljs-builtin-name,
+        .hljs-literal,
+        .hljs-type,
+        .hljs-params {
+            color: #f99157;
+        }
+
+        .hljs-string,
+        .hljs-symbol,
+        .hljs-bullet {
+            color: #99cc99;
+        }
+
+        .hljs-title,
+        .hljs-section {
+            color: #ffcc66;
+        }
+
+        .hljs-keyword,
+        .hljs-selector-tag {
+            color: #6699cc;
+        }
+
+        .hljs-emphasis {
+            font-style: italic;
+        }
+
+        .hljs-strong {
+            font-weight: 700;
+        }
+    }
+}
+
+.menubar {
+    position: fixed;
+}
 
 .editor {
     position: relative;
