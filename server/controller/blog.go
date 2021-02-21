@@ -21,7 +21,7 @@ import (
 func (c *Controller) PublishBlog(ctx *gin.Context) {
 	b := model.Blog{}
 	if err := ctx.ShouldBindJSON(&b); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("有误，请检查"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("内容含非法字符，请检查"))
 		return
 	}
 	// set blog's author due to cookie information

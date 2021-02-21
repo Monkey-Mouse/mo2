@@ -10,7 +10,7 @@ import (
 )
 
 func AuthMiddlware(c *gin.Context) {
-	if !strings.Contains(c.Request.URL.Path, "api") || strings.Contains(c.Request.URL.Path, "logs") {
+	if !strings.Contains(c.Request.URL.Path, "api") || strings.Contains(c.Request.URL.Path, "/logs") {
 		c.Next()
 		return
 	}

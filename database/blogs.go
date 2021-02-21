@@ -26,7 +26,13 @@ func AddBlog(b *model.Blog) (new bool, err error) {
 	result, err := blogCol.UpdateOne(
 		context.TODO(),
 		bson.D{{"_id", b.ID}},
-		b,
+		bson.D{{"$set", bson.M{
+			"title":       b.Title,
+			"description": b.Description,
+			"content":     b.Content,
+			"cover":       b.Cover,
+			"key_words":   b.KeyWords,
+		}}},
 		options.Update().SetUpsert(true),
 	)
 
