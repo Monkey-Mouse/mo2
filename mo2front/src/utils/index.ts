@@ -1,5 +1,6 @@
-import { User, ApiError } from '@/models/index'
+import { User, ApiError, ImgToken } from '@/models/index'
 import axios, { AxiosError } from 'axios';
+import * as qiniu from 'qiniu-js';
 
 export function randomProperty(obj: any) {
     const keys = Object.keys(obj);
@@ -43,4 +44,30 @@ export function GetErrorMsg(apiError: any) {
     } catch (error) {
         return 'Unknown Error'
     }
+}
+export async function GetUploadToken(fname: string) {
+    return (await axios.get<ImgToken>('/api/img/' + fname)).data
+}
+export const UploadImgToQiniu = async (
+    blobs: File[],
+    callback: (imgprop: { src: string }) => void
+) => {
+    const promises: Promise<void>[] = []
+    for (let index = 0; index < blobs.length; index++) {
+        const element = blobs[index];
+        const promise = new Promise<void>((resolve, reject) => {
+            GetUploadToken(element.name).then(val => {
+                var ob = qiniu.upload(element, val.file_key, val.token);
+                ob.subscribe(null, (err) => {
+                    reject(err)
+                }, res => {
+                    callback({ src: '//qotwmtnjo.hn-bkt.clouddn.com/' + res.key })
+                    resolve();
+                })
+            })
+        })
+        promises.push(promise)
+    }
+    await Promise.all(promises)
+
 }

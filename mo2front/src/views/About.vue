@@ -1,6 +1,6 @@
 <template>
   <div class="about">
-    <editor />
+    <editor :uploadImgs="uploadImgs" />
     <v-dialog :value="false" max-width="600px">
       <v-card>
         <v-container>
@@ -31,6 +31,7 @@ import {
   email,
 } from "vuelidate/lib/validators";
 import { InputProp } from "@/models";
+import { UploadImgToQiniu } from "@/utils";
 @Component({
   components: {
     InputList,
@@ -39,6 +40,7 @@ import { InputProp } from "@/models";
   },
 })
 export default class About extends Vue {
+  uploadImgs = UploadImgToQiniu;
   validator = {
     password: {
       required: required,
