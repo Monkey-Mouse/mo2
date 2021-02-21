@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"mo2/database"
 	"mo2/mo2utils"
 	"mo2/server/model"
@@ -31,8 +32,15 @@ func (c *Controller) PublishBlog(ctx *gin.Context) {
 		return
 	}
 	b.AuthorID = info.ID
-	database.AddBlog(&b)
-	ctx.JSON(http.StatusOK, &b)
+	success, err := database.AddBlog(&b)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if success {
+		ctx.JSON(http.StatusOK, &b)
+	} else {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("网络繁忙，请稍后重试"))
+	}
 }
 
 // FindBlogsByUser godoc
@@ -52,5 +60,24 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 	}
 
 	blogs := database.FindBlogs(info)
+	ctx.JSON(http.StatusOK, blogs)
+}
+
+// FindAllBlogs godoc
+// @Summary find all Blogs
+// @Description find
+// @Tags blogs
+// @Produce  json
+// @Success 200 {object} []model.Blog
+// @Router /api/blogs/find/all [get]
+func (c *Controller) FindAllBlogs(ctx *gin.Context) {
+	// get user info due to cookie information
+	//info, ext := mo2utils.GetUserInfo(ctx)
+	//if !ext {
+	//	ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
+	//	return
+	//}
+
+	blogs := database.FindAllBlogs()
 	ctx.JSON(http.StatusOK, blogs)
 }

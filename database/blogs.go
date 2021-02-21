@@ -21,32 +21,47 @@ func ensureBlogIndex() {
 }
 
 // AddBlog add
-func AddBlog(b *model.Blog) (new bool, err error) {
+func AddBlog(b *model.Blog) (success bool, err error) {
 	entity := model.InitEntity()
 	b.EntityInfo = entity
-	result, err := blogCol.UpdateOne(
-		context.TODO(),
-		bson.D{{"_id", b.ID}},
-		bson.D{{"$set", bson.M{
+	if b.ID == primitive.NilObjectID {
+		result, err := blogCol.InsertOne(context.TODO(), bson.M{
+			"_id":         primitive.NewObjectID(),
+			"author_id":   b.AuthorID,
 			"title":       b.Title,
 			"description": b.Description,
 			"content":     b.Content,
 			"cover":       b.Cover,
 			"key_words":   b.KeyWords,
-		}}},
-		options.Update().SetUpsert(true),
-	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	if result.MatchedCount != 0 {
-		new = false // already exists
-	}
-	if result.UpsertedCount != 0 {
-		new = true //create new blog
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+		b.ID = result.InsertedID.(primitive.ObjectID)
+	} else {
+		result, err := blogCol.UpdateOne(
+			context.TODO(),
+			bson.D{{"_id", b.ID}},
+			bson.D{{"$set", bson.M{
+				"title":       b.Title,
+				"description": b.Description,
+				"content":     b.Content,
+				"cover":       b.Cover,
+				"key_words":   b.KeyWords,
+			}}},
+			//options.Update().SetUpsert(true),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if result.MatchedCount == 0 {
+			log.Println("blog id do not match in database")
+			success = false
+			return success, err
+		}
 		b.ID = result.UpsertedID.(primitive.ObjectID)
 	}
+	success = true
 	return
 }
 
@@ -54,6 +69,17 @@ func AddBlog(b *model.Blog) (new bool, err error) {
 func FindBlogs(u dto.LoginUserInfo) (b []model.Blog) {
 	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
 	cursor, err := blogCol.Find(context.TODO(), bson.D{{"author_id", u.ID}}, opts)
+	err = cursor.All(context.TODO(), &b)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return
+}
+
+//find blog
+func FindAllBlogs() (b []model.Blog) {
+	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
+	cursor, err := blogCol.Find(context.TODO(), bson.D{{}}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		log.Fatal(err)

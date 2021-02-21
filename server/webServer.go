@@ -49,6 +49,7 @@ func RunServer() {
 			find := blogs.Group("/find")
 			{
 				find.GET("byUser", c.FindBlogsByUser)
+				find.GET("all", c.FindAllBlogs)
 
 			}
 
