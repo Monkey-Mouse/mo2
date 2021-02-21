@@ -48,7 +48,8 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 		log.Fatal(err)
 		return
 	}
-	_, err = collection.InsertOne(context.TODO(), account)
+	insertResult, err := collection.InsertOne(context.TODO(), account)
+	account.ID = insertResult.InsertedID.(primitive.ObjectID)
 	return
 }
 

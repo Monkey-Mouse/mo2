@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"mo2/server/model"
 
@@ -19,12 +20,25 @@ func ensureBlogIndex() {
 }
 
 // AddBlog add
-func AddBlog(b *model.Blog) {
+func AddBlog(b *model.Blog) (new bool, err error) {
 	entity := model.InitEntity()
 	b.EntityInfo = entity
-	result, err := blogCol.InsertOne(context.TODO(), b)
+	result, err := blogCol.UpdateOne(
+		context.TODO(),
+		bson.D{{"_id", b.ID}},
+		b,
+		options.Update().SetUpsert(true),
+	)
+
 	if err != nil {
 		log.Fatal(err)
 	}
-	b.ID = result.InsertedID.(primitive.ObjectID)
+	if result.MatchedCount != 0 {
+		new = false // already exists
+	}
+	if result.UpsertedCount != 0 {
+		new = true //create new blog
+		b.ID = result.UpsertedID.(primitive.ObjectID)
+	}
+	return
 }
