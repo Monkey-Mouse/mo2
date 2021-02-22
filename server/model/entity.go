@@ -24,3 +24,14 @@ func InitEntity() Entity {
 	t := time.Now()
 	return Entity{t, t}
 }
+
+// Create create entity
+func (e *Entity) Create() {
+	e.CreateTime = time.Now()
+	e.UpdateTime = e.CreateTime
+}
+
+// Update update entity
+func (e *Entity) Update() {
+	e.UpdateTime = time.Now()
+}
