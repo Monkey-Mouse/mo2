@@ -2,17 +2,17 @@ package database
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"mo2/dto"
 	"mo2/server/model"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var blogCol *mongo.Collection = GetCollection("blog")
+var draftCol *mongo.Collection = GetCollection("draft")
 
 func ensureBlogIndex() {
 	blogCol.Indexes().CreateMany(context.TODO(), append([]mongo.IndexModel{
@@ -20,29 +20,33 @@ func ensureBlogIndex() {
 	}, model.IndexModels...))
 }
 
-// AddBlog add
-func AddBlog(b *model.Blog) (success bool, err error) {
-	entity := model.InitEntity()
-	b.EntityInfo = entity
+// InsertBlog insert
+func insertBlog(b *model.Blog) {
+	b.Init()
+	_, err := blogCol.InsertOne(context.TODO(), b)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// UpsertBlog upsert
+func UpsertBlog(b *model.Blog) (success bool) {
+
 	if b.ID == primitive.NilObjectID {
-		b.ID = primitive.NewObjectID()
-		result, err := blogCol.InsertOne(context.TODO(), b)
-		if err != nil {
-			log.Fatal(err)
-		}
-		b.ID = result.InsertedID.(primitive.ObjectID)
+		insertBlog(b)
 	} else {
+		b.EntityInfo.Update()
 		result, err := blogCol.UpdateOne(
 			context.TODO(),
 			bson.D{{"_id", b.ID}},
 			bson.D{{"$set", bson.M{
+				"entity_info": b.EntityInfo,
 				"title":       b.Title,
 				"description": b.Description,
 				"content":     b.Content,
 				"cover":       b.Cover,
 				"key_words":   b.KeyWords,
 			}}},
-			//options.Update().SetUpsert(true),
 		)
 		if err != nil {
 			log.Fatal(err)
@@ -50,7 +54,52 @@ func AddBlog(b *model.Blog) (success bool, err error) {
 		if result.MatchedCount == 0 {
 			log.Println("blog id do not match in database")
 			success = false
-			return success, err
+			return success
+		}
+	}
+	success = true
+	return
+}
+
+// InsertDraft insert
+func InsertDraft(d *model.Draft) {
+	d.Init()
+	draftCol.InsertOne(context.TODO(), d)
+	return
+}
+
+// UpsertDraft upsert
+func UpsertDraft(d *model.Draft) (success bool) {
+	b := d.BlogObj
+	if d.ID == primitive.NilObjectID {
+		d.Init()
+		// blog not exist
+		if b.ID == primitive.NilObjectID {
+			// insert new blog and update draft
+			success = UpsertBlog(&b)
+			d.BlogObj = b
+			if !success {
+				return
+			}
+		}
+		InsertDraft(d)
+	} else {
+		d.EntityInfo.Update()
+		result, err := draftCol.UpdateOne(
+			context.TODO(),
+			bson.D{{"_id", d.ID}},
+			bson.D{{"$set", bson.M{
+				"blog_obj":    d.BlogObj,
+				"entity_info": d.EntityInfo,
+			}}},
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if result.MatchedCount == 0 {
+			log.Println("blog id do not match in database")
+			success = false
+			return
 		}
 		b.ID = result.UpsertedID.(primitive.ObjectID)
 	}
