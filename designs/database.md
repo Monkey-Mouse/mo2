@@ -18,6 +18,9 @@ type Account struct {
 ```
 
 ## Blog
+Blog和draft使用同一种model  
+draft仅仅当作blog的备份，不具备其它功能。**它只给用户使用，不与其它后端的功能相关**  
+  
 ```go
 type Blog struct {
 	ID          primitive.ObjectID `json:"id,omitempty" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
@@ -30,17 +33,14 @@ type Blog struct {
 	KeyWords    []string           `json:"keyWords,omitempty" example:"xxx,xxx" bson:"key_words,omitempty"`
 }
 ```
-```go
-type BlogDraft struct {
-	ID          primitive.ObjectID `json:"id,omitempty" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
-	ArticleID    primitive.ObjectID `json:"articleId,omitempty" example:"xxxxxxxxxxxxx==" bson:"article_id"`
-	Title       string             `json:"title,omitempty" example:"mouse ❤ monkey" bson:"title,omitempty"`
-	Description string             `json:"description,omitempty" example:"mouse ❤ monkey" bson:"description,omitempty"`
-	Content     string             `json:"content,omitempty" example:"xxxx\nxxxx" bson:"content,omitempty"`
-	EntityInfo  Entity             `json:"entityInfo,omitempty" bson:"entity_info,omitempty"`
-	Cover       string             `json:"cover,omitempty" example:"https://xxx/xxx" bson:"cover,omitempty"`
-	KeyWords    []string           `json:"keyWords,omitempty" example:"xxx,xxx" bson:"key_words,omitempty"`
-}
+### upsertBlog api
+参数：  
+- `draft` type: bool paramType: queryString
+- `blog` type: Blog paramType: body
+```mermaid
+graph LR
+    A["开始"]--draft is true-->B["Upsert draft"]
+	A--draft is false-->C["Upsert blog"]
 ```
 
 
