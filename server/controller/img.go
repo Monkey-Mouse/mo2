@@ -5,7 +5,6 @@ import (
 	"mo2/dto"
 	"mo2/mo2img"
 	"mo2/mo2utils"
-	"mo2/server/model"
 	"net/http"
 	"time"
 
@@ -22,11 +21,7 @@ import (
 // @Success 200 {object} dto.ImgUploadToken
 // @Router /api/img/{filename} [get]
 func (c *Controller) GenUploadToken(ctx *gin.Context) {
-	user, ext := mo2utils.GetUserInfo(ctx)
-	if !ext || !user.IsUserInRole(model.OrdinaryUser) {
-		ctx.AbortWithStatusJSON(http.StatusForbidden, SetResponseReason("Unauthorized"))
-		return
-	}
+	user, _ := mo2utils.GetUserInfo(ctx)
 	fileKey := ctx.Param("filename")
 	savekey := fmt.Sprintf("%s/%v%v", user.ID.Hex(), time.Now().UnixNano(), fileKey)
 	token := mo2img.GenerateUploadToken(savekey)

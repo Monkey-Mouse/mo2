@@ -5,6 +5,7 @@ import (
 	"mo2/mo2utils"
 	"mo2/server/controller"
 	"mo2/server/middleware"
+	"mo2/server/model"
 
 	"net/http"
 
@@ -14,21 +15,30 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+func setupHandlers(c *controller.Controller) {
+	api := middleware.H.Group("/api")
+	{
+		api.Get("/logs", c.Log)
+		api.Get("/img/:filename", c.GenUploadToken, model.OrdinaryUser)
+	}
+}
+
 func RunServer() {
 
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
-
 	r.Use(middleware.AuthMiddlware)
 	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
+	setupHandlers(c)
+	middleware.H.RegisterMapedHandlers(r)
 	v1 := r.Group("/api")
 	{
-		v1.GET("/img/:filename", c.GenUploadToken)
-		logs := v1.Group("/logs")
-		{
-			logs.GET("", c.Log)
-		}
+		// v1.GET("/img/:filename", c.GenUploadToken)
+		// logs := v1.Group("/logs")
+		// {
+		// 	logs.GET("", c.Log)
+		// }
 		accounts := v1.Group("/accounts")
 		{
 			//accounts.GET(":id", c.ShowAccount)
