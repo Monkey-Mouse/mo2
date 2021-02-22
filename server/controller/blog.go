@@ -43,7 +43,7 @@ func (c *Controller) PublishBlog(ctx *gin.Context) {
 // SaveDraft godoc
 // @Summary save Draft
 // @Description add by json
-// @Tags blogs
+// @Tags drafts
 // @Accept  json
 // @Produce  json
 // @Param account body model.Draft true "Save draft"
@@ -74,7 +74,7 @@ func (c *Controller) SaveDraft(ctx *gin.Context) {
 
 // FindBlogsByUser godoc
 // @Summary find Blog
-// @Description add by json
+// @Description
 // @Tags blogs
 // @Accept  json
 // @Produce  json
@@ -88,8 +88,72 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 		return
 	}
 
-	blogs := database.FindBlogs(info)
+	blogs := database.FindBlogsByUser(info)
 	ctx.JSON(http.StatusOK, blogs)
+}
+
+// FindBlogsByUserId godoc
+// @Summary find Blog by userid
+// @Description
+// @Tags blogs
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} []model.Blog
+// @Router /api/blogs/find/byUser [get]
+func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
+	// get user info due to cookie information
+	info, ext := mo2utils.GetUserInfo(ctx)
+	if !ext {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
+		return
+	}
+
+	blogs := database.FindBlogsByUser(info)
+	ctx.JSON(http.StatusOK, blogs)
+}
+
+// FindBlogById godoc
+// @Summary find Blog by id
+// @Description
+// @Tags blogs
+// @Accept  json
+// @Produce  json
+// @Param account body primitive.ObjectID true "Save draft"
+// @Success 200 {object} model.Blog
+// @Router /api/blogs/find/id [post]
+func (c *Controller) FindBlogById(ctx *gin.Context) {
+	id := primitive.ObjectID{}
+	if err := ctx.ShouldBindJSON(&id); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+		return
+	}
+	// todo check if the user has right
+	// get user info due to cookie information
+
+	blog := database.FindBlogById(id)
+	ctx.JSON(http.StatusOK, blog)
+}
+
+// FindDraftById godoc
+// @Summary find Blog by
+// @Description
+// @Tags drafts
+// @Accept  json
+// @Produce  json
+// @Param account body primitive.ObjectID true "Save draft"
+// @Success 200 {object} model.Draft
+// @Router /api/blogs/find/draftId [post]
+func (c *Controller) FindDraftById(ctx *gin.Context) {
+	id := primitive.ObjectID{}
+	if err := ctx.ShouldBindJSON(&id); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+		return
+	}
+	// todo check if the user has right
+	// get user info due to cookie information
+
+	draft := database.FindDraftById(id)
+	ctx.JSON(http.StatusOK, draft)
 }
 
 // FindAllBlogs godoc
@@ -100,13 +164,18 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Success 200 {object} []model.Blog
 // @Router /api/blogs/find/all [get]
 func (c *Controller) FindAllBlogs(ctx *gin.Context) {
-	// get user info due to cookie information
-	//info, ext := mo2utils.GetUserInfo(ctx)
-	//if !ext {
-	//	ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
-	//	return
-	//}
-
 	blogs := database.FindAllBlogs()
 	ctx.JSON(http.StatusOK, blogs)
+}
+
+// FindAllDrafts godoc
+// @Summary find all drafts
+// @Description find
+// @Tags drafts
+// @Produce  json
+// @Success 200 {object} []model.Draft
+// @Router /api/blogs/find/allDrafts [get]
+func (c *Controller) FindAllDrafts(ctx *gin.Context) {
+	drafts := database.FindAllDrafts()
+	ctx.JSON(http.StatusOK, drafts)
 }

@@ -52,6 +52,10 @@ func RunServer() {
 			{
 				find.GET("byUser", c.FindBlogsByUser)
 				find.GET("all", c.FindAllBlogs)
+				find.POST("id", c.FindBlogById)
+
+				find.GET("allDrafts", c.FindAllDrafts)
+				find.POST("draftId", c.FindDraftById)
 
 			}
 
