@@ -19,28 +19,26 @@ func ensureBlogIndex() {
 		{Keys: bson.M{"ket_words": 1}},
 	}, model.IndexModels...))
 }
+func chooseCol(isDraft bool) (col *mongo.Collection) {
+	col = draftCol
+	if !isDraft {
+		col = blogCol
+	}
+	return
+}
 
 // InsertBlog insert
 func insertBlog(b *model.Blog, isDraft bool) {
 	b.Init()
-	if isDraft {
-		if _, err := draftCol.InsertOne(context.TODO(), b); err != nil {
-			log.Fatal(err)
-		}
-
-	} else {
-		if _, err := blogCol.InsertOne(context.TODO(), b); err != nil {
-			log.Fatal(err)
-		}
+	col := chooseCol(isDraft)
+	if _, err := col.InsertOne(context.TODO(), b); err != nil {
+		log.Fatal(err)
 	}
 }
 
 // upsertBlog
 func upsertBlog(b *model.Blog, isDraft bool) {
-	col := draftCol
-	if !isDraft {
-		col = blogCol
-	}
+	col := chooseCol(isDraft)
 	b.EntityInfo.Update()
 	result, err := col.UpdateOne(
 		context.TODO(),
@@ -74,9 +72,10 @@ func UpsertBlog(b *model.Blog, isDraft bool) {
 }
 
 //find blog by user
-func FindBlogsByUser(u dto.LoginUserInfo) (b []model.Blog) {
+func FindBlogsByUser(u dto.LoginUserInfo, isDraft bool) (b []model.Blog) {
+	col := chooseCol(isDraft)
 	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
-	cursor, err := blogCol.Find(context.TODO(), bson.D{{"author_id", u.ID}}, opts)
+	cursor, err := col.Find(context.TODO(), bson.D{{"author_id", u.ID}}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		log.Fatal(err)
@@ -85,8 +84,9 @@ func FindBlogsByUser(u dto.LoginUserInfo) (b []model.Blog) {
 }
 
 //find blog by id
-func FindBlogById(id primitive.ObjectID) (b model.Blog) {
-	err := blogCol.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&b)
+func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
+	col := chooseCol(isDraft)
+	err := col.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&b)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,30 +94,11 @@ func FindBlogById(id primitive.ObjectID) (b model.Blog) {
 }
 
 //find blog
-func FindAllBlogs() (b []model.Blog) {
+func FindAllBlogs(isDraft bool) (b []model.Blog) {
+	col := chooseCol(isDraft)
 	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
-	cursor, err := blogCol.Find(context.TODO(), bson.D{{}}, opts)
+	cursor, err := col.Find(context.TODO(), bson.D{{}}, opts)
 	err = cursor.All(context.TODO(), &b)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return
-}
-
-//find draft
-func FindAllDrafts() (d []model.Draft) {
-	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
-	cursor, err := draftCol.Find(context.TODO(), bson.D{{}}, opts)
-	err = cursor.All(context.TODO(), &d)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return
-}
-
-//find draft by id
-func FindDraftById(id primitive.ObjectID) (d model.Draft) {
-	err := draftCol.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&d)
 	if err != nil {
 		log.Fatal(err)
 	}

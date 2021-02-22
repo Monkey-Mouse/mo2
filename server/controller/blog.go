@@ -50,9 +50,12 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 // @Tags blogs
 // @Accept  json
 // @Produce  json
+// @Param draft query bool false "bool false" false
 // @Success 200 {object} []model.Blog
 // @Router /api/blogs/find/byUser [get]
 func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
+	isDraftStr := ctx.DefaultQuery("draft", "true")
+	isDraft := parseString2Bool(isDraftStr)
 	// get user info due to cookie information
 	info, ext := mo2utils.GetUserInfo(ctx)
 	if !ext {
@@ -60,7 +63,7 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 		return
 	}
 
-	blogs := database.FindBlogsByUser(info)
+	blogs := database.FindBlogsByUser(info, isDraft)
 	ctx.JSON(http.StatusOK, blogs)
 }
 
@@ -70,9 +73,12 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Tags blogs
 // @Accept  json
 // @Produce  json
+// @Param draft query bool false "bool false" false
 // @Success 200 {object} []model.Blog
 // @Router /api/blogs/find/byUser [get]
 func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
+	isDraftStr := ctx.DefaultQuery("draft", "true")
+	isDraft := parseString2Bool(isDraftStr)
 	// get user info due to cookie information
 	info, ext := mo2utils.GetUserInfo(ctx)
 	if !ext {
@@ -80,7 +86,7 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 		return
 	}
 
-	blogs := database.FindBlogsByUser(info)
+	blogs := database.FindBlogsByUser(info, isDraft)
 	ctx.JSON(http.StatusOK, blogs)
 }
 
@@ -90,10 +96,13 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 // @Tags blogs
 // @Accept  json
 // @Produce  json
+// @Param draft query bool false "bool false" false
 // @Param account body primitive.ObjectID true "Save draft"
 // @Success 200 {object} model.Blog
 // @Router /api/blogs/find/id [post]
 func (c *Controller) FindBlogById(ctx *gin.Context) {
+	isDraftStr := ctx.DefaultQuery("draft", "true")
+	isDraft := parseString2Bool(isDraftStr)
 	id := primitive.ObjectID{}
 	if err := ctx.ShouldBindJSON(&id); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
@@ -102,7 +111,7 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 	// todo check if the user has right
 	// get user info due to cookie information
 
-	blog := database.FindBlogById(id)
+	blog := database.FindBlogById(id, isDraft)
 	ctx.JSON(http.StatusOK, blog)
 }
 
@@ -111,9 +120,22 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 // @Description find
 // @Tags blogs
 // @Produce  json
+// @Param draft query bool false "bool false" false
 // @Success 200 {object} []model.Blog
 // @Router /api/blogs/find/all [get]
 func (c *Controller) FindAllBlogs(ctx *gin.Context) {
-	blogs := database.FindAllBlogs()
+	isDraftStr := ctx.DefaultQuery("draft", "true")
+	isDraft := parseString2Bool(isDraftStr)
+
+	blogs := database.FindAllBlogs(isDraft)
 	ctx.JSON(http.StatusOK, blogs)
+}
+func parseString2Bool(s string) (b bool) {
+
+	if s == "false" {
+		b = false
+	} else {
+		b = true
+	}
+	return
 }
