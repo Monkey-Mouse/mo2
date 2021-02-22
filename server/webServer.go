@@ -15,11 +15,12 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func setupHandlers(c controller.Controller) {
-	middleware.Handlers[middleware.HandlerKey{"/api/logs", http.MethodGet}] = middleware.HandlerProp{
-		Handler: c.Log, NeedRoles: []string{}}
-	middleware.Handlers[middleware.HandlerKey{"/api/img/:filename", http.MethodGet}] = middleware.HandlerProp{
-		Handler: c.GenUploadToken, NeedRoles: []string{model.OrdinaryUser}}
+func setupHandlers(c *controller.Controller) {
+	api := middleware.H.Group("/api")
+	{
+		api.Get("/logs", c.Log)
+		api.Get("/img/:filename", c.GenUploadToken, model.OrdinaryUser)
+	}
 }
 
 func RunServer() {
@@ -29,13 +30,15 @@ func RunServer() {
 	r.Use(middleware.AuthMiddlware)
 	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
+	setupHandlers(c)
+	middleware.H.RegisterMapedHandlers(r)
 	v1 := r.Group("/api")
 	{
-		v1.GET("/img/:filename", c.GenUploadToken)
-		logs := v1.Group("/logs")
-		{
-			logs.GET("", c.Log)
-		}
+		// v1.GET("/img/:filename", c.GenUploadToken)
+		// logs := v1.Group("/logs")
+		// {
+		// 	logs.GET("", c.Log)
+		// }
 		accounts := v1.Group("/accounts")
 		{
 			//accounts.GET(":id", c.ShowAccount)
