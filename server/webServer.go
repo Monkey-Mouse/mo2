@@ -46,6 +46,8 @@ func RunServer() {
 		blogs := v1.Group("/blogs")
 		{
 			blogs.POST("publish", c.PublishBlog)
+			blogs.POST("saveDraft", c.SaveDraft)
+
 			find := blogs.Group("/find")
 			{
 				find.GET("byUser", c.FindBlogsByUser)
