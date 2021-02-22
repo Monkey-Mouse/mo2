@@ -21,89 +21,56 @@ func ensureBlogIndex() {
 }
 
 // InsertBlog insert
-func insertBlog(b *model.Blog) {
+func insertBlog(b *model.Blog, isDraft bool) {
 	b.Init()
-	_, err := blogCol.InsertOne(context.TODO(), b)
+	if isDraft {
+		if _, err := draftCol.InsertOne(context.TODO(), b); err != nil {
+			log.Fatal(err)
+		}
+
+	} else {
+		if _, err := blogCol.InsertOne(context.TODO(), b); err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
+// upsertBlog
+func upsertBlog(b *model.Blog, isDraft bool) {
+	col := draftCol
+	if !isDraft {
+		col = blogCol
+	}
+	b.EntityInfo.Update()
+	result, err := col.UpdateOne(
+		context.TODO(),
+		bson.D{{"_id", b.ID}},
+		bson.D{{"$set", bson.M{
+			"entity_info": b.EntityInfo,
+			"title":       b.Title,
+			"description": b.Description,
+			"content":     b.Content,
+			"cover":       b.Cover,
+			"key_words":   b.KeyWords,
+		}}},
+		options.Update().SetUpsert(true),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
+	if result.MatchedCount == 0 {
+		log.Println("blog id do not match in database")
+	}
 }
 
-// UpsertBlog upsert
-func UpsertBlog(b *model.Blog) (success bool) {
+// UpsertBlog upsert blog or draft
+func UpsertBlog(b *model.Blog, isDraft bool) {
 
 	if b.ID == primitive.NilObjectID {
-		insertBlog(b)
+		insertBlog(b, isDraft)
 	} else {
-		b.EntityInfo.Update()
-		result, err := blogCol.UpdateOne(
-			context.TODO(),
-			bson.D{{"_id", b.ID}},
-			bson.D{{"$set", bson.M{
-				"entity_info": b.EntityInfo,
-				"title":       b.Title,
-				"description": b.Description,
-				"content":     b.Content,
-				"cover":       b.Cover,
-				"key_words":   b.KeyWords,
-			}}},
-		)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if result.MatchedCount == 0 {
-			log.Println("blog id do not match in database")
-			success = false
-			return success
-		}
+		upsertBlog(b, isDraft)
 	}
-	success = true
-	return
-}
-
-// InsertDraft insert
-func InsertDraft(d *model.Draft) {
-	d.Init()
-	draftCol.InsertOne(context.TODO(), d)
-	return
-}
-
-// UpsertDraft upsert
-func UpsertDraft(d *model.Draft) (success bool) {
-	b := d.BlogObj
-	if d.ID == primitive.NilObjectID {
-		d.Init()
-		// blog not exist
-		if b.ID == primitive.NilObjectID {
-			// insert new blog and update draft
-			success = UpsertBlog(&b)
-			d.BlogObj = b
-			if !success {
-				return
-			}
-		}
-		InsertDraft(d)
-	} else {
-		d.EntityInfo.Update()
-		result, err := draftCol.UpdateOne(
-			context.TODO(),
-			bson.D{{"_id", d.ID}},
-			bson.D{{"$set", bson.M{
-				"blog_obj":    d.BlogObj,
-				"entity_info": d.EntityInfo,
-			}}},
-		)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if result.MatchedCount == 0 {
-			log.Println("blog id do not match in database")
-			success = false
-			return
-		}
-	}
-	success = true
-	return
 }
 
 //find blog by user

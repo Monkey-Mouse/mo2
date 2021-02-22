@@ -55,17 +55,13 @@ func RunServer() {
 		}
 		blogs := v1.Group("/blogs")
 		{
-			blogs.POST("publish", c.PublishBlog)
-			blogs.POST("saveDraft", c.SaveDraft)
+			blogs.POST("publish", c.UpsertBlog)
 
 			find := blogs.Group("/find")
 			{
 				find.GET("byUser", c.FindBlogsByUser)
 				find.GET("all", c.FindAllBlogs)
 				find.POST("id", c.FindBlogById)
-
-				find.GET("allDrafts", c.FindAllDrafts)
-				find.POST("draftId", c.FindDraftById)
 
 			}
 
