@@ -10,19 +10,20 @@ import (
 )
 
 func AuthMiddlware(c *gin.Context) {
+	cookieStr, err := c.Cookie("jwtToken")
+	uinfo, jwterr := mo2utils.ParseJwt(cookieStr)
+	c.Set(mo2utils.UserInfoKey, uinfo)
 	key := HandlerKey{c.FullPath(), c.Request.Method}
 	prop, ok := handlers[key]
 	if !ok || prop.NeedRoles == nil || len(prop.NeedRoles) == 0 {
 		c.Next()
 		return
 	}
-	cookieStr, err := c.Cookie("jwtToken")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("Unauthorized!"))
 		return
 	}
-	uinfo, err := mo2utils.ParseJwt(cookieStr)
-	if err != nil {
+	if jwterr != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("Unauthorized!"))
 		return
 	}
@@ -32,7 +33,6 @@ func AuthMiddlware(c *gin.Context) {
 			return
 		}
 	}
-	c.Set(mo2utils.UserInfoKey, uinfo)
 	c.Next()
 }
 

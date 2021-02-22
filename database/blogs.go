@@ -2,66 +2,80 @@ package database
 
 import (
 	"context"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"mo2/dto"
 	"mo2/server/model"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var blogCol *mongo.Collection = GetCollection("blog")
+var draftCol *mongo.Collection = GetCollection("draft")
 
 func ensureBlogIndex() {
 	blogCol.Indexes().CreateMany(context.TODO(), append([]mongo.IndexModel{
 		{Keys: bson.M{"ket_words": 1}},
 	}, model.IndexModels...))
 }
-
-// AddBlog add
-func AddBlog(b *model.Blog) (success bool, err error) {
-	entity := model.InitEntity()
-	b.EntityInfo = entity
-	if b.ID == primitive.NilObjectID {
-		b.ID = primitive.NewObjectID()
-		result, err := blogCol.InsertOne(context.TODO(), b)
-		if err != nil {
-			log.Fatal(err)
-		}
-		b.ID = result.InsertedID.(primitive.ObjectID)
-	} else {
-		result, err := blogCol.UpdateOne(
-			context.TODO(),
-			bson.D{{"_id", b.ID}},
-			bson.D{{"$set", bson.M{
-				"title":       b.Title,
-				"description": b.Description,
-				"content":     b.Content,
-				"cover":       b.Cover,
-				"key_words":   b.KeyWords,
-			}}},
-			//options.Update().SetUpsert(true),
-		)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if result.MatchedCount == 0 {
-			log.Println("blog id do not match in database")
-			success = false
-			return success, err
-		}
-		b.ID = result.UpsertedID.(primitive.ObjectID)
+func chooseCol(isDraft bool) (col *mongo.Collection) {
+	col = draftCol
+	if !isDraft {
+		col = blogCol
 	}
-	success = true
 	return
 }
 
-//find blog
-func FindBlogs(u dto.LoginUserInfo) (b []model.Blog) {
+// InsertBlog insert
+func insertBlog(b *model.Blog, isDraft bool) {
+	b.Init()
+	col := chooseCol(isDraft)
+	if _, err := col.InsertOne(context.TODO(), b); err != nil {
+		log.Fatal(err)
+	}
+}
+
+// upsertBlog
+func upsertBlog(b *model.Blog, isDraft bool) {
+	col := chooseCol(isDraft)
+	b.EntityInfo.Update()
+	result, err := col.UpdateOne(
+		context.TODO(),
+		bson.D{{"_id", b.ID}},
+		bson.D{{"$set", bson.M{
+			"entity_info": b.EntityInfo,
+			"title":       b.Title,
+			"description": b.Description,
+			"content":     b.Content,
+			"cover":       b.Cover,
+			"key_words":   b.KeyWords,
+		}}},
+		options.Update().SetUpsert(true),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if result.MatchedCount == 0 {
+		log.Println("blog id do not match in database")
+	}
+}
+
+// UpsertBlog upsert blog or draft
+func UpsertBlog(b *model.Blog, isDraft bool) {
+
+	if b.ID == primitive.NilObjectID {
+		insertBlog(b, isDraft)
+	} else {
+		upsertBlog(b, isDraft)
+	}
+}
+
+//find blog by user
+func FindBlogsByUser(u dto.LoginUserInfo, isDraft bool) (b []model.Blog) {
+	col := chooseCol(isDraft)
 	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
-	cursor, err := blogCol.Find(context.TODO(), bson.D{{"author_id", u.ID}}, opts)
+	cursor, err := col.Find(context.TODO(), bson.D{{"author_id", u.ID}}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		log.Fatal(err)
@@ -69,10 +83,21 @@ func FindBlogs(u dto.LoginUserInfo) (b []model.Blog) {
 	return
 }
 
+//find blog by id
+func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
+	col := chooseCol(isDraft)
+	err := col.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&b)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return
+}
+
 //find blog
-func FindAllBlogs() (b []model.Blog) {
+func FindAllBlogs(isDraft bool) (b []model.Blog) {
+	col := chooseCol(isDraft)
 	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
-	cursor, err := blogCol.Find(context.TODO(), bson.D{{}}, opts)
+	cursor, err := col.Find(context.TODO(), bson.D{{}}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		log.Fatal(err)

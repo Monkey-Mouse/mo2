@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"log"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"mo2/database"
 	"mo2/mo2utils"
 	"mo2/server/model"
@@ -10,48 +10,52 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// PublishBlog godoc
+// UpsertBlog godoc
 // @Summary Publish Blog
 // @Description add by json
 // @Tags blogs
 // @Accept  json
 // @Produce  json
+// @Param draft query bool false "bool false" false
 // @Param account body model.Blog true "Add blog"
 // @Success 200 {object} model.Blog
 // @Router /api/blogs/publish [post]
-func (c *Controller) PublishBlog(ctx *gin.Context) {
-	b := model.Blog{}
+func (c *Controller) UpsertBlog(ctx *gin.Context) {
+	isDraftStr := ctx.DefaultQuery("draft", "true")
+	isDraft := true
+	if isDraftStr == "false" {
+		isDraft = false
+	}
+	var b model.Blog
 	if err := ctx.ShouldBindJSON(&b); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("内容含非法字符，请检查"))
 		return
 	}
-	// set blog's author due to cookie information
-	info, ext := mo2utils.GetUserInfo(ctx)
-	if !ext {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
-		return
+	if b.AuthorID == primitive.NilObjectID {
+		userInfo, exist := mo2utils.GetUserInfo(ctx)
+		if exist {
+			b.AuthorID = userInfo.ID
+		} else {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
+			return
+		}
 	}
-	b.AuthorID = info.ID
-	success, err := database.AddBlog(&b)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if success {
-		ctx.JSON(http.StatusOK, &b)
-	} else {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("网络繁忙，请稍后重试"))
-	}
+	database.UpsertBlog(&b, isDraft)
+	ctx.JSON(http.StatusOK, b)
 }
 
 // FindBlogsByUser godoc
 // @Summary find Blog
-// @Description add by json
+// @Description
 // @Tags blogs
 // @Accept  json
 // @Produce  json
+// @Param draft query bool false "bool false" false
 // @Success 200 {object} []model.Blog
 // @Router /api/blogs/find/byUser [get]
 func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
+	isDraftStr := ctx.DefaultQuery("draft", "true")
+	isDraft := parseString2Bool(isDraftStr)
 	// get user info due to cookie information
 	info, ext := mo2utils.GetUserInfo(ctx)
 	if !ext {
@@ -59,8 +63,56 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 		return
 	}
 
-	blogs := database.FindBlogs(info)
+	blogs := database.FindBlogsByUser(info, isDraft)
 	ctx.JSON(http.StatusOK, blogs)
+}
+
+// FindBlogsByUserId godoc
+// @Summary find Blog by userid
+// @Description
+// @Tags blogs
+// @Accept  json
+// @Produce  json
+// @Param draft query bool false "bool false" false
+// @Success 200 {object} []model.Blog
+// @Router /api/blogs/find/byUser [get]
+func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
+	isDraftStr := ctx.DefaultQuery("draft", "true")
+	isDraft := parseString2Bool(isDraftStr)
+	// get user info due to cookie information
+	info, ext := mo2utils.GetUserInfo(ctx)
+	if !ext {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
+		return
+	}
+
+	blogs := database.FindBlogsByUser(info, isDraft)
+	ctx.JSON(http.StatusOK, blogs)
+}
+
+// FindBlogById godoc
+// @Summary find Blog by id
+// @Description
+// @Tags blogs
+// @Accept  json
+// @Produce  json
+// @Param draft query bool false "bool false" false
+// @Param account body primitive.ObjectID true "Save draft"
+// @Success 200 {object} model.Blog
+// @Router /api/blogs/find/id [post]
+func (c *Controller) FindBlogById(ctx *gin.Context) {
+	isDraftStr := ctx.DefaultQuery("draft", "true")
+	isDraft := parseString2Bool(isDraftStr)
+	id := primitive.ObjectID{}
+	if err := ctx.ShouldBindJSON(&id); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+		return
+	}
+	// todo check if the user has right
+	// get user info due to cookie information
+
+	blog := database.FindBlogById(id, isDraft)
+	ctx.JSON(http.StatusOK, blog)
 }
 
 // FindAllBlogs godoc
@@ -68,16 +120,22 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Description find
 // @Tags blogs
 // @Produce  json
+// @Param draft query bool false "bool false" false
 // @Success 200 {object} []model.Blog
 // @Router /api/blogs/find/all [get]
 func (c *Controller) FindAllBlogs(ctx *gin.Context) {
-	// get user info due to cookie information
-	//info, ext := mo2utils.GetUserInfo(ctx)
-	//if !ext {
-	//	ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
-	//	return
-	//}
+	isDraftStr := ctx.DefaultQuery("draft", "true")
+	isDraft := parseString2Bool(isDraftStr)
 
-	blogs := database.FindAllBlogs()
+	blogs := database.FindAllBlogs(isDraft)
 	ctx.JSON(http.StatusOK, blogs)
+}
+func parseString2Bool(s string) (b bool) {
+
+	if s == "false" {
+		b = false
+	} else {
+		b = true
+	}
+	return
 }
