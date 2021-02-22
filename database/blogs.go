@@ -101,7 +101,6 @@ func UpsertDraft(d *model.Draft) (success bool) {
 			success = false
 			return
 		}
-		b.ID = result.UpsertedID.(primitive.ObjectID)
 	}
 	success = true
 	return
