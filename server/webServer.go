@@ -25,7 +25,7 @@ func setupHandlers(c *controller.Controller) {
 		{
 			blogs.Post("addCategory", c.UpsertCategory)
 			blogs.Get("findAllCategories", c.FindAllCategories)
-
+			blogs.Post("addBlogs2Categories", c.AddBlogs2Categories)
 		}
 	}
 }

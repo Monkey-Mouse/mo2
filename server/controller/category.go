@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"mo2/database"
+	"mo2/dto"
 	"mo2/server/model"
 	"net/http"
 )
@@ -28,10 +29,9 @@ func (c *Controller) UpsertCategory(ctx *gin.Context) {
 }
 
 // FindAllCategories godoc
-// @Summary find all categories
+// @Summary find categories
 // @Description 若id为空，返回所有categories；若id不为空，返回该id的category
 // @Tags category
-// @Accept  json
 // @Produce  json
 // @Param id query string false "string ObjectID" ""
 // @Success 200 {object} []model.Category
@@ -51,5 +51,24 @@ func (c *Controller) FindAllCategories(ctx *gin.Context) {
 		cats = database.FindCategories(ids)
 	}
 	ctx.JSON(http.StatusOK, cats)
+
+}
+
+// AddBlogs2Categories godoc
+// @Summary add blogs to chosen categories
+// @Description blogs 与 categories皆为id列表，方便批量操作
+// @Tags category
+// @Accept  json
+// @Produce  json
+// @Param id body dto.AddBlogs2Categories true "dto.AddBlogs2Categories"
+// @Success 200 {object} []dto.QueryBlog
+// @Router /api/blogs/addBlogs2Categories [post]
+func (c *Controller) AddBlogs2Categories(ctx *gin.Context) {
+	var ab2c dto.AddBlogs2Categories
+	if err := ctx.ShouldBindJSON(&ab2c); err != nil {
+		ctx.JSON(http.StatusBadRequest, SetResponseReason("非法参数"))
+	}
+	results := database.AddBlogs2Categories(ab2c)
+	ctx.JSON(http.StatusOK, results)
 
 }
