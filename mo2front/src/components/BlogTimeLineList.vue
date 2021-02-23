@@ -26,7 +26,7 @@
                     {{ blog.title }}
                   </div>
                   <div class="subtitle-1">{{ blog.author }}</div>
-                  <div class="subtitle-2">{{ blog.createTime }}</div>
+                  <div class="subtitle-2">{{ blog.entityInfo.createTime }}</div>
                 </div>
               </v-card-title>
             </v-col>

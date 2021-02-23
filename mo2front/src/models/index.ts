@@ -4,8 +4,19 @@ export interface BlogBrief {
     cover: string;
     rate: number;
     description: string;
-    createTime: string;
+    entityInfo: EntityInfo;
     author: string;
+}
+export interface EntityInfo {
+    createTime: string;
+    updateTime: string;
+}
+export interface BlogUpsert {
+    content: string,
+    cover: string,
+    description: string,
+    keyWords: string[],
+    title: string
 }
 export interface User {
     id: string;
