@@ -15,9 +15,22 @@ type CategoryUser struct {
 func (c *Category) UpdateParent(parent Category) {
 	c.ParentID = parent.ID
 }
+func (c *Category) UpdateParentId(id primitive.ObjectID) {
+	c.ParentID = id
+}
 func (c *Category) UpdateName(name string) {
 	c.Name = name
 }
 func (c *Category) Init() {
 	c.ID = primitive.NewObjectID()
+}
+func (c *Category) InitWithName(name string) {
+	c.Init()
+	c.UpdateName(name)
+}
+func (c *Category) InitWithNameAndParent(name string, parentId primitive.ObjectID) {
+	c.Init()
+	c.UpdateName(name)
+	c.UpdateParentId(parentId)
+
 }
