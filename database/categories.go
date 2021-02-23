@@ -12,6 +12,7 @@ import (
 )
 
 var catCol = GetCollection("category")
+var catUserCol = GetCollection("userCategory")
 
 func UpsertCategory(c *model.Category) {
 	if c.ID.IsZero() {
@@ -48,13 +49,13 @@ func FindCategories(ids []primitive.ObjectID) (cs []model.Category) {
 	return
 }
 
-func SortCategories(c model.Category, m map[model.Category][]model.Category) {
+func SortCategories(c model.Category, m map[string][]model.Category) {
 	var cs []model.Category
 	cs = FindSubCategories(c)
 	if len(cs) == 0 {
 		return
 	} else {
-		m[c] = cs
+		m[c.ID.Hex()] = cs
 		for _, category := range cs {
 			SortCategories(category, m)
 		}
@@ -112,4 +113,60 @@ func AddBlogs2Categories(ab2cs dto.AddBlogs2Categories) (results []dto.QueryBlog
 func AddBlog2Categories(blog *model.Blog, categories []model.Category, isDraft bool) {
 	blog.Categories = append(blog.Categories, categories...)
 	upsertBlog(blog, isDraft)
+}
+func AddCategory2User(category model.Category, userId primitive.ObjectID) {
+	if !category.IsValid() {
+		category.Init()
+	}
+	AddCategoryId2User(category.ID, userId)
+}
+func AddCategoryIdStr2User(catIdStr string, userId primitive.ObjectID) {
+	catId, err := primitive.ObjectIDFromHex(catIdStr)
+	var c model.Category
+	if err != nil {
+		// not exist, create one category first
+		UpsertCategory(&c)
+		catId = c.ID
+	}
+	AddCategoryId2User(catId, userId)
+}
+func AddCategoryId2User(catId primitive.ObjectID, userId primitive.ObjectID) {
+	catUser := model.CategoryUser{
+		UserID:     userId,
+		CategoryID: catId,
+	}
+	//todo check if valid
+	catUserCol.InsertOne(context.TODO(), catUser)
+}
+
+//find category by userid
+func FindCategoryByUserId(id primitive.ObjectID) (c model.Category) {
+	var cu model.CategoryUser
+	err := catUserCol.FindOne(context.TODO(), bson.D{{"user_id", id}}).Decode(&cu)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return
+		}
+		log.Fatal(err)
+	}
+	if err = catCol.FindOne(context.TODO(), bson.D{{"_id", cu.CategoryID}}).Decode(&c); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return
+		}
+		log.Fatal(err)
+	}
+	return
+}
+
+//find categories by user id
+func FindCategoriesByUserId(id primitive.ObjectID) (m map[string][]model.Category) {
+	c := FindCategoryByUserId(id)
+	if c.ID.IsZero() {
+		return
+	}
+	m = make(map[string][]model.Category)
+	SortCategories(c, m)
+
+	return
+
 }

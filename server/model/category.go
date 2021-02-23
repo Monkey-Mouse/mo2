@@ -8,8 +8,8 @@ type Category struct {
 	Name     string             `json:"name,omitempty" example:"records" bson:"name,omitempty"`
 }
 type CategoryUser struct {
-	ID     primitive.ObjectID `json:"id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"_id,omitempty"`
-	UserID primitive.ObjectID `json:"user_id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"user_id,omitempty"`
+	UserID     primitive.ObjectID `json:"user_id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"user_id,omitempty"`
+	CategoryID primitive.ObjectID `json:"category_id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"category_id,omitempty"`
 }
 
 func (c *Category) UpdateParent(parent Category) {

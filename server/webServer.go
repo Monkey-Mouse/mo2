@@ -20,12 +20,16 @@ func setupHandlers(c *controller.Controller) {
 	{
 		api.Get("/logs", c.Log)
 		api.Get("/img/:filename", c.GenUploadToken, model.OrdinaryUser)
-		api.Get("/blogs/query", c.QueryBlogs)
 		blogs := api.Group("blogs")
 		{
+			blogs.Get("query", c.QueryBlogs)
 			blogs.Post("addCategory", c.UpsertCategory)
 			blogs.Get("findAllCategories", c.FindAllCategories)
 			blogs.Post("addBlogs2Categories", c.AddBlogs2Categories)
+			blogs.Get("findCategoryByUserId", c.FindCategoryByUserId)
+			blogs.Post("addCategory2User", c.AddCategory2User)
+			blogs.Get("findCategoriesByUserId", c.FindCategoriesByUserId)
+			blogs.Post("addCategory2Category", c.AddCategory2Category)
 		}
 	}
 }
