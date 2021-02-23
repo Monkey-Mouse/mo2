@@ -13,6 +13,7 @@ type QueryBlog struct {
 	EntityInfo  model.Entity       `json:"entityInfo,omitempty"`
 	Cover       string             `json:"cover,omitempty" example:"https://xxx/xxx" `
 	KeyWords    []string           `json:"keyWords,omitempty" example:"xxx,xxx"`
+	Categories  []model.Category   `json:"categories,omitempty" bson:"categories,omitempty"`
 }
 type QueryBlogs struct {
 	blogs []QueryBlog `json:"blogs,omitempty"`
@@ -26,6 +27,7 @@ func MapBlog2QueryBlog(b model.Blog) (q QueryBlog) {
 	q.EntityInfo = b.EntityInfo
 	q.Cover = b.Cover
 	q.KeyWords = b.KeyWords
+	q.Categories = b.Categories
 	return
 }
 func (qs *QueryBlogs) Init(bs []model.Blog) {
