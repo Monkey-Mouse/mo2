@@ -31,3 +31,16 @@ func FindSubCategories(c model.Category) (cs []model.Category) {
 	}
 	return
 }
+
+func FindCategories(c model.Category, m map[model.Category][]model.Category) {
+	var cs []model.Category
+	cs = FindSubCategories(c)
+	if len(cs) == 0 {
+		return
+	} else {
+		m[c] = cs
+		for _, category := range cs {
+			FindCategories(category, m)
+		}
+	}
+}
