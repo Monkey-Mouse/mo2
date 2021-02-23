@@ -27,7 +27,14 @@
         /> -->
       </div>
 
-      <v-spacer></v-spacer>
+      <v-spacer />
+      <v-btn
+        v-if="$route.path.indexOf('/edit') === 0"
+        outlined
+        color="green"
+        @click="publishClick"
+        >publish</v-btn
+      >
       <v-app-bar-nav-icon
         v-if="!this.$vuetify.breakpoint.mdAndUp"
         @click.stop="
@@ -106,7 +113,7 @@
       </template>
     </v-navigation-drawer>
     <v-main>
-      <router-view :user="user" />
+      <router-view ref="view" :user="user" />
       <account-modal :enable.sync="enable" :user.sync="userdata" />
       <!-- <v-btn @click="showLogin()">Login</v-btn>
       <account-modal :enable.sync="enable" />
@@ -174,7 +181,9 @@ export default class App extends Vue {
   get initials(): string {
     return GetInitials(this.user.name);
   }
-
+  publishClick() {
+    (this.$refs["view"] as any).publish();
+  }
   created() {
     GetUserInfoAsync().then((u) => {
       this.user = u;

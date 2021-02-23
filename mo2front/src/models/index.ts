@@ -12,11 +12,11 @@ export interface EntityInfo {
     updateTime: string;
 }
 export interface BlogUpsert {
-    content: string,
-    cover: string,
-    description: string,
-    keyWords: string[],
-    title: string
+    content?: string,
+    cover?: string,
+    description?: string,
+    keyWords?: string[],
+    title?: string
 }
 export interface User {
     id: string;

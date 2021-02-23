@@ -1,4 +1,4 @@
-import { User, ApiError, ImgToken } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 
@@ -72,3 +72,17 @@ export const UploadImgToQiniu = async (
 
 }
 export var globaldic: any = {};
+export function ParseQuery(query: { [key: string]: string }) {
+    let queryStr = '?';
+    const queryList: string[] = [];
+    for (const key in query) {
+        if (Object.prototype.hasOwnProperty.call(query, key)) {
+            const element = query[key];
+            queryList.push(`${key}=${element}`)
+        }
+    }
+    queryStr = queryStr + queryList.join('&');
+}
+export const GetArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
+    return (await axios.get<BlogBrief[]>('/api/blogs/find/all')).data
+}
