@@ -57,6 +57,7 @@ export default class About extends Vue {
   }
   confirm() {
     this.$emit("confirm", (this.$refs["inputs"] as InputList).Model);
+    this.close();
   }
   setModel(model: any) {
     setTimeout(() => {

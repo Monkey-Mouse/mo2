@@ -7,11 +7,15 @@ export interface BlogBrief {
     entityInfo: EntityInfo;
     author: string;
 }
+export interface Blog extends BlogBrief {
+    content: string;
+}
 export interface EntityInfo {
     createTime: string;
     updateTime: string;
 }
 export interface BlogUpsert {
+    id?: string;
     content?: string,
     cover?: string,
     description?: string,

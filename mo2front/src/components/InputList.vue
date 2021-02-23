@@ -12,6 +12,13 @@
           :type="value['type']"
           :append-icon="value.icon"
         />
+        <img-selector
+          v-else-if="value['type'] === 'imgselector'"
+          :imgs="imgVals[key]"
+          :title="value.label"
+          :appendIcon="value.icon"
+          @imgselect="(img) => (model[key] = img)"
+        />
         <v-text-field
           v-else
           :label="value.label"
@@ -42,8 +49,13 @@ import { InputProp } from "@/models";
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
+import ImgSelector from "./ImgSelector.vue";
 
-@Component({})
+@Component({
+  components: {
+    ImgSelector,
+  },
+})
 export default class InputList extends Vue {
   model: any = {};
   @Prop()
@@ -52,10 +64,13 @@ export default class InputList extends Vue {
   inputProps!: { [name: string]: InputProp };
   @Prop()
   anyError: boolean;
+  imgVals: any = {};
   constructor() {
     super();
     for (let key in this.inputProps) {
-      this.model[key] = this.inputProps[key].default;
+      if (this.inputProps[key].type === "imgselector") {
+        this.imgVals[key] = this.inputProps[key].default;
+      } else this.model[key] = this.inputProps[key].default;
     }
   }
   mounted() {
@@ -79,7 +94,20 @@ export default class InputList extends Vue {
   }
   setModel(model: any) {
     for (const key in this.model) {
-      this.model[key] = model[key];
+      if (model[key]) {
+        this.model[key] = model[key];
+      }
+    }
+    for (const key in this.imgVals) {
+      if (model[key]) {
+        this.imgVals[key] = model[key];
+        for (let index = 0; index < model[key].length; index++) {
+          const element = model[key][index];
+          if (element.active) {
+            this.model[key] = element.src;
+          }
+        }
+      }
     }
   }
 

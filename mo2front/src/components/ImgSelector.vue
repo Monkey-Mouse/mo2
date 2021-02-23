@@ -1,5 +1,10 @@
 <template>
   <v-container>
+    <v-row class="grey--text">
+      <v-col>{{ title }}</v-col>
+      <v-spacer />
+      <v-icon>{{ appendIcon }}</v-icon>
+    </v-row>
     <v-row>
       <v-col
         v-for="(img, n) in imgs"
@@ -8,7 +13,7 @@
         cols="4"
       >
         <v-img
-          @click="imgClick(img)"
+          @click="imgClick(img, n)"
           :src="img.src"
           aspect-ratio="1"
           class="black lighten-2 clickable is-clickable"
@@ -40,18 +45,28 @@ export default class ImgSelector extends Vue {
   multiple!: boolean;
   @Prop()
   imgs: { src: string; active: boolean }[];
-  prevImg = { src: "", active: false };
-  imgClick(img: { src: string; active: boolean }) {
-    if (this.multiple) {
-      if (img.active) {
-        img.active = false;
+  @Prop()
+  title: string;
+  @Prop()
+  appendIcon: string;
+  prevImg = 0;
+  created() {
+    for (let index = 0; index < this.imgs.length; index++) {
+      const element = this.imgs[index];
+      if (element.active) {
+        this.prevImg = index;
       }
+    }
+  }
+  imgClick(img: { src: string; active: boolean }, n: number) {
+    if (this.multiple) {
+      img.active = !img.active;
       return;
     }
-    this.prevImg.active = false;
+    this.imgs[this.prevImg].active = false;
     img.active = true;
-    this.prevImg = img;
-    this.$emit("select", img.src);
+    this.prevImg = n;
+    this.$emit("imgselect", img.src);
   }
 }
 </script>
