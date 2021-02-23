@@ -14,9 +14,16 @@ type Blog struct {
 	EntityInfo  Entity             `json:"entityInfo,omitempty" bson:"entity_info,omitempty"`
 	Cover       string             `json:"cover,omitempty" example:"https://xxx/xxx" bson:"cover,omitempty"`
 	KeyWords    []string           `json:"keyWords,omitempty" example:"xxx,xxx" bson:"key_words,omitempty"`
+	Categories  []Category         `json:"categories,omitempty" bson:"categories,omitempty"`
 }
 
 func (b *Blog) Init() {
 	b.ID = primitive.NewObjectID()
 	b.EntityInfo = InitEntity()
+}
+func (b *Blog) Add2Category(category Category) {
+	b.Categories = append(b.Categories, category)
+}
+func (b *Blog) Add2Categories(categories []Category) {
+	b.Categories = append(b.Categories, categories...)
 }
