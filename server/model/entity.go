@@ -33,5 +33,18 @@ func (e *Entity) Create() {
 
 // Update update entity
 func (e *Entity) Update() {
-	e.UpdateTime = time.Now()
+	if IsTimeValid(e.CreateTime) {
+		e.UpdateTime = time.Now()
+	} else {
+		e.Create()
+	}
+}
+
+// Judge whether time exists
+func IsTimeValid(time2 time.Time) (valid bool) {
+	valid = false
+	if time2.After(time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)) {
+		valid = true
+	}
+	return
 }
