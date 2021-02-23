@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"mo2/server/model"
@@ -28,6 +30,19 @@ func FindSubCategories(c model.Category) (cs []model.Category) {
 	}
 	if err = results.All(context.TODO(), &cs); err != nil {
 		log.Fatal(err)
+	}
+	return
+}
+func FindCategories(ids []primitive.ObjectID) (cs []model.Category) {
+	var c model.Category
+	for _, id := range ids {
+		err := catCol.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&c)
+		if err != nil {
+			if err != mongo.ErrNoDocuments {
+				log.Fatal(err)
+			}
+		}
+		cs = append(cs, c)
 	}
 	return
 }
