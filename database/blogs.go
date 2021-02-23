@@ -73,9 +73,14 @@ func UpsertBlog(b *model.Blog, isDraft bool) {
 
 //find blog by user
 func FindBlogsByUser(u dto.LoginUserInfo, isDraft bool) (b []model.Blog) {
+	return FindBlogsByUserId(u.ID, isDraft)
+}
+
+//find blog by userId
+func FindBlogsByUserId(id primitive.ObjectID, isDraft bool) (b []model.Blog) {
 	col := chooseCol(isDraft)
 	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
-	cursor, err := col.Find(context.TODO(), bson.D{{"author_id", u.ID}}, opts)
+	cursor, err := col.Find(context.TODO(), bson.D{{"author_id", id}}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		log.Fatal(err)
@@ -88,6 +93,9 @@ func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
 	col := chooseCol(isDraft)
 	err := col.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&b)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return
+		}
 		log.Fatal(err)
 	}
 	return
