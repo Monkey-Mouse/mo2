@@ -18,7 +18,7 @@ import (
 // @Tags blogs
 // @Accept  json
 // @Produce  json
-// @Param draft query bool false "bool false" false
+// @Param draft query bool false "bool true" true
 // @Param account body model.Blog true "Add blog"
 // @Success 200 {object} model.Blog
 // @Router /api/blogs/publish [post]
@@ -52,10 +52,22 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 // @Tags blogs
 // @Accept  json
 // @Produce  json
-// @Param draft query bool false "bool false" false
-// @Success 200 {object} []model.Blog
+// @Param draft query bool false "bool true" true
+// @Param page query int false "int 0" 0
+// @Param pageSize query int false "int 5" 5
+// @Success 200 {object} []dto.QueryBlogs
 // @Router /api/blogs/find/own [get]
 func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
+	pageStr := ctx.DefaultQuery("page", "0")
+	pageSizeStr := ctx.DefaultQuery("pageSize", "5")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("query with page"))
+	}
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("query with pageSize"))
+	}
 	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := parseString2Bool(isDraftStr)
 	// get user info due to cookie information
@@ -66,7 +78,10 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 	}
 
 	blogs := database.FindBlogsByUser(info, isDraft)
-	ctx.JSON(http.StatusOK, blogs)
+	qBlogs := dto.QueryBlogs{}
+	qBlogs.Init(blogs)
+	results, _ := qBlogs.Query(page, pageSize)
+	ctx.JSON(http.StatusOK, results.GetBlogs())
 }
 
 // FindBlogsByUserId godoc
@@ -75,21 +90,38 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Tags blogs
 // @Accept  json
 // @Produce  json
-// @Param draft query bool false "bool false" false
-// @Success 200 {object} []model.Blog
+// @Param draft query bool false "bool true" true
+// @Param id query string false "string xxxxxxxx" "xxxxxxx"
+// @Param page query int false "int 0" 0
+// @Param pageSize query int false "int 5" 5
+// @Success 200 {object} []dto.QueryBlogs
 // @Router /api/blogs/find/userId [get]
 func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
+	pageStr := ctx.DefaultQuery("page", "0")
+	pageSizeStr := ctx.DefaultQuery("pageSize", "5")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("query with page"))
+	}
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("query with pageSize"))
+	}
 	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := parseString2Bool(isDraftStr)
-	// get user info due to cookie information
-	info, ext := mo2utils.GetUserInfo(ctx)
-	if !ext {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
+	idStr := ctx.Query("id")
+	id, err := primitive.ObjectIDFromHex(idStr)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
 		return
 	}
-
-	blogs := database.FindBlogsByUser(info, isDraft)
-	ctx.JSON(http.StatusOK, blogs)
+	// todo check if the user has right
+	// get user info due to cookie information
+	blogs := database.FindBlogsByUserId(id, isDraft)
+	qBlogs := dto.QueryBlogs{}
+	qBlogs.Init(blogs)
+	results, _ := qBlogs.Query(page, pageSize)
+	ctx.JSON(http.StatusOK, results.GetBlogs())
 }
 
 // FindBlogById godoc
@@ -98,7 +130,7 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 // @Tags blogs
 // @Accept  json
 // @Produce  json
-// @Param draft query bool false "bool false" false
+// @Param draft query bool false "bool true" true
 // @Param id query string false "string xxxxxxxx" "xxxxxxx"
 // @Success 200 {object} model.Blog
 // @Router /api/blogs/find/id [get]
@@ -122,7 +154,7 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 // @Description find
 // @Tags blogs
 // @Produce  json
-// @Param draft query bool false "bool false" false
+// @Param draft query bool false "bool true" true
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlog
@@ -145,10 +177,7 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 	blogs := database.FindAllBlogs(isDraft)
 	qBlogs := dto.QueryBlogs{}
 	qBlogs.Init(blogs)
-	results, exist := qBlogs.Query(page, pageSize)
-	if !exist {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("索引超出范围"))
-	}
+	results, _ := qBlogs.Query(page, pageSize)
 	ctx.JSON(http.StatusOK, results.GetBlogs())
 }
 
