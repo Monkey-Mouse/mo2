@@ -20,6 +20,7 @@ func setupHandlers(c *controller.Controller) {
 	{
 		api.Get("/logs", c.Log)
 		api.Get("/img/:filename", c.GenUploadToken, model.OrdinaryUser)
+		api.Get("/blogs/query", c.QueryBlogs)
 	}
 }
 
@@ -59,9 +60,10 @@ func RunServer() {
 
 			find := blogs.Group("/find")
 			{
-				find.GET("byUser", c.FindBlogsByUser)
-				find.GET("all", c.FindAllBlogs)
-				find.POST("id", c.FindBlogById)
+				find.GET("own", c.FindBlogsByUser)
+				find.GET("userId", c.FindBlogsByUserId)
+
+				find.GET("id", c.FindBlogById)
 
 			}
 

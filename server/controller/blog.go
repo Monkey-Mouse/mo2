@@ -3,9 +3,11 @@ package controller
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"mo2/database"
+	"mo2/dto"
 	"mo2/mo2utils"
 	"mo2/server/model"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -52,7 +54,7 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 // @Produce  json
 // @Param draft query bool false "bool false" false
 // @Success 200 {object} []model.Blog
-// @Router /api/blogs/find/byUser [get]
+// @Router /api/blogs/find/own [get]
 func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := parseString2Bool(isDraftStr)
@@ -75,7 +77,7 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Produce  json
 // @Param draft query bool false "bool false" false
 // @Success 200 {object} []model.Blog
-// @Router /api/blogs/find/byUser [get]
+// @Router /api/blogs/find/userId [get]
 func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := parseString2Bool(isDraftStr)
@@ -97,39 +99,59 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param draft query bool false "bool false" false
-// @Param account body primitive.ObjectID true "Save draft"
+// @Param id query string false "string xxxxxxxx" "xxxxxxx"
 // @Success 200 {object} model.Blog
-// @Router /api/blogs/find/id [post]
+// @Router /api/blogs/find/id [get]
 func (c *Controller) FindBlogById(ctx *gin.Context) {
 	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := parseString2Bool(isDraftStr)
-	id := primitive.ObjectID{}
-	if err := ctx.ShouldBindJSON(&id); err != nil {
+	idStr := ctx.Query("id")
+	id, err := primitive.ObjectIDFromHex(idStr)
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
 		return
 	}
 	// todo check if the user has right
 	// get user info due to cookie information
-
 	blog := database.FindBlogById(id, isDraft)
 	ctx.JSON(http.StatusOK, blog)
 }
 
-// FindAllBlogs godoc
+// QueryBlogs godoc
 // @Summary find all Blogs
 // @Description find
 // @Tags blogs
 // @Produce  json
 // @Param draft query bool false "bool false" false
-// @Success 200 {object} []model.Blog
-// @Router /api/blogs/find/all [get]
-func (c *Controller) FindAllBlogs(ctx *gin.Context) {
+// @Param page query int false "int 0" 0
+// @Param pageSize query int false "int 5" 5
+// @Success 200 {object} []dto.QueryBlog
+// @Router /api/blogs/query [get]
+func (c *Controller) QueryBlogs(ctx *gin.Context) {
+	pageStr := ctx.DefaultQuery("page", "0")
+	pageSizeStr := ctx.DefaultQuery("pageSize", "5")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("query with page"))
+	}
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("query with pageSize"))
+	}
+
 	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := parseString2Bool(isDraftStr)
 
 	blogs := database.FindAllBlogs(isDraft)
-	ctx.JSON(http.StatusOK, blogs)
+	qBlogs := dto.QueryBlogs{}
+	qBlogs.Init(blogs)
+	results, exist := qBlogs.Query(page, pageSize)
+	if !exist {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("索引超出范围"))
+	}
+	ctx.JSON(http.StatusOK, results.GetBlogs())
 }
+
 func parseString2Bool(s string) (b bool) {
 
 	if s == "false" {
