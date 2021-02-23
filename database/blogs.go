@@ -88,6 +88,9 @@ func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
 	col := chooseCol(isDraft)
 	err := col.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&b)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return
+		}
 		log.Fatal(err)
 	}
 	return
