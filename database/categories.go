@@ -32,7 +32,7 @@ func FindSubCategories(c model.Category) (cs []model.Category) {
 	return
 }
 
-func FindCategories(c model.Category, m map[model.Category][]model.Category) {
+func SortCategories(c model.Category, m map[model.Category][]model.Category) {
 	var cs []model.Category
 	cs = FindSubCategories(c)
 	if len(cs) == 0 {
@@ -40,7 +40,18 @@ func FindCategories(c model.Category, m map[model.Category][]model.Category) {
 	} else {
 		m[c] = cs
 		for _, category := range cs {
-			FindCategories(category, m)
+			SortCategories(category, m)
 		}
 	}
+}
+func FindAllCategories() (cs []model.Category) {
+	results, err := catCol.Find(context.TODO(), bson.D{{}})
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = results.All(context.TODO(), &cs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return
 }
