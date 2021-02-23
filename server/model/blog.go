@@ -5,6 +5,8 @@ import (
 )
 
 // Blog example
+// 若修改字段，需注意依赖此model的使用地方
+// important: dto.QueryBlog UpsertBlog()
 type Blog struct {
 	ID          primitive.ObjectID `json:"id,omitempty" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
 	AuthorID    primitive.ObjectID `json:"authorId,omitempty" example:"xxxxxxxxxxxxx==" bson:"author_id"`
