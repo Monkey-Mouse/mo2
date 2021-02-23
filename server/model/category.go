@@ -34,3 +34,10 @@ func (c *Category) InitWithNameAndParent(name string, parentId primitive.ObjectI
 	c.UpdateParentId(parentId)
 
 }
+func (c *Category) IsValid() (valid bool) {
+	valid = true
+	if c.ID.IsZero() {
+		valid = false
+	}
+	return
+}

@@ -27,3 +27,10 @@ func (b *Blog) Add2Category(category Category) {
 func (b *Blog) Add2Categories(categories []Category) {
 	b.Categories = append(b.Categories, categories...)
 }
+func (b *Blog) IsValid() (valid bool) {
+	valid = true
+	if b.ID.IsZero() {
+		valid = false
+	}
+	return
+}
