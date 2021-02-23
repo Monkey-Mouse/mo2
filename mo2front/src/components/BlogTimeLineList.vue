@@ -92,7 +92,7 @@
           min-height="200"
           transition="fade-transition"
         >
-          <div class="py-4">
+          <div class="py-4 text-break">
             <div>
               {{ blog.description }}
             </div>

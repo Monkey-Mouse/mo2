@@ -83,8 +83,11 @@ export function ParseQuery(query: { [key: string]: any }) {
     return queryStr
 }
 export const GetArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
-    return (await axios.get<BlogBrief[]>('/api/blogs/find/all' + ParseQuery(query))).data
+    return (await axios.get<BlogBrief[]>('/api/blogs/query' + ParseQuery(query))).data
 }
 export async function UpsertBlog(query: { draft: boolean }, blog: BlogUpsert) {
     return (await axios.post<Blog>('/api/blogs/publish' + ParseQuery(query), blog)).data
+}
+export async function GetArticle(query: { id: string, draft: boolean }) {
+    return (await axios.get<Blog>('/api/blogs/find/id' + ParseQuery(query))).data
 }

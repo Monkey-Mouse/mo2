@@ -4,17 +4,17 @@
       <v-col cols="12" lg="7" class="mo2editor">
         <v-skeleton-loader
           class="mb-10 mt-10"
-          v-if="loading"
+          v-if="loading || !editorLoaded"
           type="heading"
         ></v-skeleton-loader>
         <v-skeleton-loader
-          v-if="loading"
+          v-if="loading || !editorLoaded"
           type="paragraph@9"
         ></v-skeleton-loader>
       </v-col>
     </v-row>
     <editor
-      v-show="!loading"
+      v-show="!(loading || !editorLoaded)"
       :uploadImgs="uploadImgs"
       :content="content"
       @loaded="editorLoad"
@@ -36,7 +36,7 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import Editor from "../components/MO2Editor.vue";
 import MO2Dialog from "../components/MO2Dialog.vue";
-import { globaldic, UploadImgToQiniu, UpsertBlog } from "@/utils";
+import { GetArticle, globaldic, UploadImgToQiniu, UpsertBlog } from "@/utils";
 import { BlogUpsert, InputProp } from "@/models";
 import { required, minLength, email } from "vuelidate/lib/validators";
 @Component({
@@ -94,12 +94,33 @@ export default class EditArticle extends Vue {
       },
     };
   }
+  created() {
+    this.content = globaldic.article ?? "";
+    globaldic.article = "";
+    console.log(this.content, this.$route.params["id"]);
+    if (this.content !== "") {
+      this.loading = false;
+      this.blog.id = this.$route.params["id"];
+    } else if (this.$route.params["id"]) {
+      this.blog.id = this.$route.params["id"];
+      GetArticle({ id: this.blog.id, draft: true }).then((val) => {
+        if (val.content === undefined) {
+          GetArticle({ id: this.blog.id, draft: false }).then((val) => {
+            this.blog = val;
+            this.content = val.content;
+            this.loading = false;
+          });
+          return;
+        }
+        this.blog = val;
+        this.content = val.content;
+        this.loading = false;
+      });
+    }
+  }
   editorLoad(editor: Editor) {
     this.editor = editor;
     this.editorLoaded = true;
-    if (!this.$route.params["id"] || this.content !== "") {
-      this.loading = false;
-    }
   }
   publish() {
     const titleElm = document.querySelector("h1");
@@ -137,6 +158,7 @@ export default class EditArticle extends Vue {
     }
     var data = await UpsertBlog({ draft: false }, this.blog);
     this.blog.id = data.id;
+    this.$router.push("/article/" + this.blog.id);
   }
 }
 </script>

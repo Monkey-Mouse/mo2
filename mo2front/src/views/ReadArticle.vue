@@ -41,39 +41,46 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import Editor from "../components/MO2Editor.vue";
-import { globaldic, UploadImgToQiniu } from "@/utils";
+import { GetArticle, globaldic, UploadImgToQiniu } from "@/utils";
 import hljs from "highlight.js";
+import { Blog } from "@/models";
 @Component({
   components: {
     Editor,
   },
 })
 export default class ReadArticle extends Vue {
-  title = "dsadsaad";
-  html = `
-  <p>dsadasdada</p><p>dsadad</p><ul><li><p>dasda</p></li><li><p>dasda</p></li><li><p>dada</p><ul><li><p>dasdsa</p></li></ul></li></ul><table><tbody><tr><td><p>dasdasda</p></td><td><p>dsadas</p></td><td><p>dsada</p></td></tr><tr><td><p>dasdas</p></td><td><p>dasda</p></td><td><p>dad</p></td></tr><tr><td><p></p></td><td><p></p></td><td><p>dasda</p></td></tr></tbody></table><pre><code>let a = "aaa"</code></pre><p><code>console.log('fuck')</code></p>
-  `;
+  title = "";
+  html = "";
   attrs = {
     class: "mb-6 mt-6",
     boilerplate: false,
     elevation: 0,
   };
   loading = true;
-  mounted() {
-    setTimeout(() => {
+  blog: Blog;
+  created() {
+    var draft = false;
+    if (this.$route.query["draft"]) {
+      draft = (this.$route.query["draft"] as string) === "true";
+    }
+    GetArticle({ id: this.$route.params["id"], draft: draft }).then((val) => {
       this.loading = false;
+      this.blog = val;
+      this.title = val.title;
+      this.html = val.content;
       setTimeout(() => {
         // first, find all the code blocks
         document.querySelectorAll("code").forEach((block) => {
           // then highlight each
           hljs.highlightBlock(block);
         });
-      }, 500);
-    }, 1000);
+      }, 50);
+    });
   }
   edit() {
     globaldic.article = `<h1>${this.title}</h1>${this.html}`;
-    this.$router.push("/edit");
+    this.$router.push("/edit/" + this.blog.id);
   }
 }
 </script>
