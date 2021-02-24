@@ -146,6 +146,10 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 	// todo check if the user has right
 	// get user info due to cookie information
 	blog := database.FindBlogById(id, isDraft)
+	if blog.ID.IsZero() {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("页面找不到了"))
+		return
+	}
 	ctx.JSON(http.StatusOK, blog)
 }
 
