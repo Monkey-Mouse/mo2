@@ -27,19 +27,16 @@
         /> -->
       </div>
       <v-spacer />
-      <div v-if="autoSaving" class="grey--text">Saving...</div>
-      <div v-else-if="autoSaving === null" class="red--text">
-        Auto Save Failed!
+      <div v-if="$route.path.indexOf('/edit') === 0">
+        <div v-if="autoSaving" class="grey--text">Saving...</div>
+        <div v-else-if="autoSaving === null" class="red--text">
+          Auto Save Failed!
+        </div>
+        <div v-else class="green--text">Saved!</div>
+        <v-btn class="ml-10" outlined color="green" @click="publishClick"
+          >publish</v-btn
+        >
       </div>
-      <div v-else class="green--text">Saved!</div>
-      <v-btn
-        class="ml-10"
-        v-if="$route.path.indexOf('/edit') === 0"
-        outlined
-        color="green"
-        @click="publishClick"
-        >publish</v-btn
-      >
       <v-app-bar-nav-icon
         v-if="!this.$vuetify.breakpoint.mdAndUp"
         @click.stop="
@@ -50,7 +47,6 @@
       ></v-app-bar-nav-icon>
     </v-app-bar>
     <v-navigation-drawer
-      style="z-index: 99999"
       right
       fixed
       :permanent="this.$vuetify.breakpoint.mdAndUp"
