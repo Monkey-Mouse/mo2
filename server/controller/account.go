@@ -158,11 +158,12 @@ func (c *Controller) LogoutAccount(ctx *gin.Context) {
 // ShowAccount godoc
 // @Summary Show a account's info
 // @Description get string by ID
+// @Tags accounts
 // @ID get-string-by-int
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Account ID"
-// @Success 200 {object} model.Account
+// @Success 200 {object} dto.UserInfo
 // @Router /api/accounts/detail/{id} [get]
 func (c *Controller) ShowAccount(ctx *gin.Context) {
 	idStr := ctx.Param("id")
@@ -171,8 +172,8 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
 		return
 	}
-	result := database.FindAccount(id)
-	if !result.IsValid() {
+	result, exist := database.FindAccountInfo(id)
+	if !exist {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
 		return
 	}
@@ -182,6 +183,7 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 // ListAccountsInfo godoc
 // @Summary List accounts brief info
 // @Description from a list of user ids
+// @Tags accounts
 // @Accept  json
 // @Produce  json
 // @Param userIDs body []primitive.ObjectID false "user IDs list"

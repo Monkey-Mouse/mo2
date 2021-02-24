@@ -107,21 +107,33 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 }
 
 // FindAccount find
-func FindAccount(id primitive.ObjectID) (a model.Account) {
+func FindAccount(id primitive.ObjectID) (a model.Account, exist bool) {
+	exist = false
 	if err := accCol.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
 		if err != mongo.ErrNoDocuments {
 			log.Fatal(err)
 		}
 	}
+	if a.IsValid() {
+		exist = true
+	}
+	return
+}
 
+// FindAccountInfo find
+func FindAccountInfo(id primitive.ObjectID) (u dto.UserInfo, exist bool) {
+	a, exist := FindAccount(id)
+	if exist {
+		u = dto.Account2UserInfo(a)
+	}
 	return
 }
 
 // FindAccounts find from a list of id
 func FindAccounts(ids []primitive.ObjectID) (bs []dto.UserInfoBrief) {
 	for _, id := range ids {
-		a := FindAccount(id)
-		if a.IsValid() {
+		a, exist := FindAccount(id)
+		if exist {
 			bs = append(bs, dto.MapAccount2InfoBrief(a))
 		}
 	}
