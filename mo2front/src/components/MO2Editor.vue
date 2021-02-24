@@ -763,11 +763,15 @@ export default class MO2Editor extends Vue {
       this.editor.setContent(this.content);
     }
     this.$emit("loaded", this);
-    setInterval(() => {
+    this.startAutoSave();
+  }
+  startAutoSave() {
+    setTimeout(() => {
       if ((that as MO2Editor).update) {
         (that as MO2Editor).update = false;
         (that as MO2Editor).$emit("autosave");
       }
+      this.startAutoSave();
     }, 5000);
   }
 
