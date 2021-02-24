@@ -759,7 +759,7 @@ export default class MO2Editor extends Vue {
     if (this.content) {
       this.editor.setContent(this.content);
     }
-    this.$emit("loaded");
+    this.$emit("loaded", this);
   }
 
   @Watch("content")
@@ -795,7 +795,7 @@ export default class MO2Editor extends Vue {
     });
   }
   public GetHTML() {
-    return this.editor.getHTML();
+    return this.editor.getHTML() as string;
   }
 }
 </script>

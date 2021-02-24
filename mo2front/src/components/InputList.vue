@@ -2,7 +2,25 @@
   <v-card-text>
     <v-row>
       <v-col v-for="(value, key) in inputProps" :key="key" :cols="value['col']">
+        <v-textarea
+          v-if="value['type'] === 'textarea'"
+          outlined
+          auto-grow
+          :label="value.label"
+          v-model="model[key]"
+          :rules="buildValidationRoles(key)"
+          :type="value['type']"
+          :append-icon="value.icon"
+        />
+        <img-selector
+          v-else-if="value['type'] === 'imgselector'"
+          :imgs="imgVals[key]"
+          :title="value.label"
+          :appendIcon="value.icon"
+          @imgselect="(img) => (model[key] = img)"
+        />
         <v-text-field
+          v-else
           :label="value.label"
           v-model="model[key]"
           :rules="buildValidationRoles(key)"
@@ -30,20 +48,33 @@
 import { InputProp } from "@/models";
 import Vue from "vue";
 import Component from "vue-class-component";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
+import ImgSelector from "./ImgSelector.vue";
 
-@Component({})
+@Component({
+  components: {
+    ImgSelector,
+  },
+})
 export default class InputList extends Vue {
   model: any = {};
   @Prop()
   validator!: any;
   @Prop()
   inputProps!: { [name: string]: InputProp };
+  @Prop()
+  anyError: boolean;
+  imgVals: any = {};
   constructor() {
     super();
     for (let key in this.inputProps) {
-      this.model[key] = this.inputProps[key].default;
+      if (this.inputProps[key].type === "imgselector") {
+        this.imgVals[key] = this.inputProps[key].default;
+      } else this.model[key] = this.inputProps[key].default;
     }
+  }
+  mounted() {
+    this.$emit("update:anyError", this.$v.$anyError);
   }
   buildValidationRoles(prop: string) {
     const errmsgs = this.inputProps[prop].errorMsg;
@@ -56,6 +87,28 @@ export default class InputList extends Vue {
       });
     }
     return rules;
+  }
+  @Watch("$v.$anyError")
+  errorChange() {
+    this.$emit("update:anyError", this.$v.$anyError);
+  }
+  setModel(model: any) {
+    for (const key in this.model) {
+      if (model[key]) {
+        this.model[key] = model[key];
+      }
+    }
+    for (const key in this.imgVals) {
+      if (model[key]) {
+        this.imgVals[key] = model[key];
+        for (let index = 0; index < model[key].length; index++) {
+          const element = model[key][index];
+          if (element.active) {
+            this.model[key] = element.src;
+          }
+        }
+      }
+    }
   }
 
   validations() {

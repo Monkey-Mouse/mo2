@@ -14,7 +14,11 @@
         min-height="200"
         transition="fade-transition"
       >
-        <v-card class="mx-auto elevation-20" style="max-width: 400px">
+        <v-card
+          @click="gotoArticle(blog.id)"
+          class="clickable mx-auto elevation-20"
+          style="max-width: 400px"
+        >
           <v-row justify="space-between">
             <v-col sm="6" cols="12">
               <v-card-title>
@@ -26,7 +30,9 @@
                     {{ blog.title }}
                   </div>
                   <div class="subtitle-1">{{ blog.author }}</div>
-                  <div class="subtitle-2">{{ blog.createTime }}</div>
+                  <div class="subtitle-2">
+                    {{ blog.entityInfo.createTime.substr(0, 10) }}
+                  </div>
                 </div>
               </v-card-title>
             </v-col>
@@ -36,12 +42,29 @@
                 contain
                 height="125px"
                 :src="blog.cover"
+                lazy-src="https://picsum.photos/id/11/100/60"
                 style="flex-basis: 125px"
+              >
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular
+                      indeterminate
+                      color="grey lighten-5"
+                    ></v-progress-circular>
+                  </v-row> </template
               ></v-img>
             </v-col>
           </v-row>
           <v-divider dark></v-divider>
-          <v-card-actions class="pa-4">
+          <v-card-actions
+            v-on:click.prevent
+            v-on:click.stop
+            class="pa-4 unclickable"
+          >
             Rate this
             <v-spacer></v-spacer>
             <span class="text--lighten-2 caption mr-2">
@@ -69,7 +92,7 @@
           min-height="200"
           transition="fade-transition"
         >
-          <div class="py-4">
+          <div class="py-4 text-break">
             <div>
               {{ blog.description }}
             </div>
@@ -106,5 +129,13 @@ export default class BlogTimeLineList extends Vue {
   rateChange(blog: BlogBrief) {
     // to be implemented
   }
+  gotoArticle(id: string) {
+    this.$router.push("/article/" + id);
+  }
 }
 </script>
+<style>
+.unclickable {
+  cursor: default;
+}
+</style>

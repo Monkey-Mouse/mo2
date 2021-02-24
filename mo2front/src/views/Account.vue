@@ -51,7 +51,7 @@ export default class Account extends Vue {
     rate: 4.3,
     description:
       "Lorem ipsum dolor sit amet, no nam oblique veritus. Commune scaevola imperdiet nec ut, sed euismod convenire principes at. Est et nobis iisque percipit, an vim zril disputando voluptatibus, vix an salutandi sententiae.",
-    createTime: "2021/2/9",
+    entityInfo: { createTime: "2021/2/9", updateTime: "2021/2/9" },
     author: "Leezeeyee",
   });
   created() {
