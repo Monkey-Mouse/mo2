@@ -36,3 +36,14 @@ func Account2SuccessLogin(a model.Account) (s LoginUserInfo) {
 
 	return s
 }
+
+type UserInfoBrief struct {
+	ID   primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
+	Name string             `json:"name" example:"account name"`
+}
+
+func MapAccount2InfoBrief(a model.Account) (b UserInfoBrief) {
+	b.ID = a.ID
+	b.Name = a.UserName
+	return b
+}

@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"context"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	dto "mo2/dto"
 	"mo2/mo2utils"
 	"strings"
@@ -13,12 +13,8 @@ import (
 	//"github.com/swaggo/swag/example/celler/model"
 	"log"
 	"mo2/database"
-	demo "mo2/examples"
 	"mo2/server/model"
 	"net/http"
-	"strconv"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 const cookieExpiredTime int = 300000
@@ -86,7 +82,7 @@ func (c *Controller) Log(ctx *gin.Context) {
 // @Tags accounts
 // @Accept  json
 // @Produce  json
-//// @Param account body model.AddAccount true "Add account"
+// @Param account body model.AddAccount true "add new account info"
 // @Success 200 {object} model.Account
 // @Router /api/accounts [post]
 func (c *Controller) AddAccount(ctx *gin.Context) {
@@ -160,56 +156,43 @@ func (c *Controller) LogoutAccount(ctx *gin.Context) {
 }
 
 // ShowAccount godoc
-// @Summary Show a account
+// @Summary Show a account's info
 // @Description get string by ID
 // @ID get-string-by-int
 // @Accept  json
 // @Produce  json
-// @Param id path int true "Account ID"
-// @Success 200 {string} json
-// @Header 200 {string} Token "qwerty"
-// @Router /api/accounts/{id} [get]
+// @Param id path string true "Account ID"
+// @Success 200 {object} model.Account
+// @Router /api/accounts/detail/{id} [get]
 func (c *Controller) ShowAccount(ctx *gin.Context) {
-
-	demo.Find()
-	id := ctx.Param("id")
-
-	aid, err := strconv.Atoi(id)
-
-	fmt.Println(aid)
+	idStr := ctx.Param("id")
+	id, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
-		log.Fatal(err)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
 		return
 	}
-	cli := demo.GetClient()
-	col := cli.Database("test").Collection("trainers")
-
-	filter := bson.D{{"name", "Ash"}}
-
-	result := col.FindOne(context.TODO(), filter)
-	//account, err := model.AccountOne(aid)
-	if err != nil {
-		ctx.JSON(http.StatusNotFound, SetResponseError(err))
+	result := database.FindAccount(id)
+	if !result.IsValid() {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
 		return
 	}
-	fmt.Println(result)
-	fmt.Println(result.Decode(demo.Trainer{}))
-
-	ctx.JSON(http.StatusOK, result.Decode(demo.Trainer{}))
-
+	ctx.JSON(http.StatusOK, result)
 }
 
-/*// ListAccounts godoc
-// @Summary List accounts
-// @Description get accounts
+// ListAccountsInfo godoc
+// @Summary List accounts brief info
+// @Description from a list of user ids
 // @Accept  json
 // @Produce  json
-// @Param q query string false "name search by q"
-// @Success 200 {string} json
-// @Header 200 {string} Token "qwerty"
-// @Router /accounts [get]
-func (c *Controller) ListAccounts(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "list",
-	})
-}*/
+// @Param userIDs body []primitive.ObjectID false "user IDs list"
+// @Success 200 {object} []dto.UserInfoBrief
+// @Router /api/accounts/listBrief [post]
+func (c *Controller) ListAccountsInfo(ctx *gin.Context) {
+	var userIDs []primitive.ObjectID
+	if err := ctx.ShouldBindJSON(&userIDs); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+		return
+	}
+	bs := database.FindAccounts(userIDs)
+	ctx.JSON(http.StatusOK, bs)
+}

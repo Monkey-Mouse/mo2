@@ -9,8 +9,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"math/rand"
+	"mo2/dto"
 	"mo2/server/model"
 )
+
+var accCol = GetCollection("accounts")
 
 //already check the validation in controller
 //if add a newAccount success, return account info
@@ -101,4 +104,26 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 	}
 	return
 
+}
+
+// FindAccount find
+func FindAccount(id primitive.ObjectID) (a model.Account) {
+	if err := accCol.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
+		if err != mongo.ErrNoDocuments {
+			log.Fatal(err)
+		}
+	}
+
+	return
+}
+
+// FindAccounts find from a list of id
+func FindAccounts(ids []primitive.ObjectID) (bs []dto.UserInfoBrief) {
+	for _, id := range ids {
+		a := FindAccount(id)
+		if a.IsValid() {
+			bs = append(bs, dto.MapAccount2InfoBrief(a))
+		}
+	}
+	return
 }

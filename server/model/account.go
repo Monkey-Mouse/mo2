@@ -38,6 +38,14 @@ type LoginAccount struct {
 	Password        string `json:"password" example:"p@ssword"`
 }
 
+func (a *Account) IsValid() (valid bool) {
+	valid = true
+	if a.ID.IsZero() {
+		valid = false
+	}
+	return
+}
+
 // Validation example
 func (a AddAccount) Validation() error {
 	switch {
