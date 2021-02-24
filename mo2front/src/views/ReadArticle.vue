@@ -41,7 +41,7 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import Editor from "../components/MO2Editor.vue";
-import { GetArticle, globaldic, UploadImgToQiniu } from "@/utils";
+import { GetArticle, globaldic, UploadImgToQiniu, UpsertBlog } from "@/utils";
 import hljs from "highlight.js";
 import { Blog } from "@/models";
 @Component({
@@ -80,6 +80,7 @@ export default class ReadArticle extends Vue {
   }
   edit() {
     globaldic.article = `<h1>${this.title}</h1>${this.html}`;
+    // UpsertBlog({ draft: true }, this.blog);
     this.$router.push("/edit/" + this.blog.id);
   }
 }

@@ -26,9 +26,14 @@
           width="100"
         /> -->
       </div>
-
       <v-spacer />
+      <div v-if="autoSaving" class="grey--text">Saving...</div>
+      <div v-else-if="autoSaving === null" class="red--text">
+        Auto Save Failed!
+      </div>
+      <div v-else class="green--text">Saved!</div>
       <v-btn
+        class="ml-10"
         v-if="$route.path.indexOf('/edit') === 0"
         outlined
         color="green"
@@ -113,7 +118,7 @@
       </template>
     </v-navigation-drawer>
     <v-main>
-      <router-view ref="view" :user="user" />
+      <router-view ref="view" :autoSaving.sync="autoSaving" :user="user" />
       <account-modal :enable.sync="enable" :user.sync="userdata" />
       <!-- <v-btn @click="showLogin()">Login</v-btn>
       <account-modal :enable.sync="enable" />
@@ -154,7 +159,7 @@ export default class App extends Vue {
     avatar: "",
     roles: [],
   };
-
+  autoSaving = false;
   get userdata() {
     return this.user;
   }

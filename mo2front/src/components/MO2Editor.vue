@@ -266,7 +266,7 @@ import {
 } from "tiptap-extensions";
 import Title from "./title";
 import DOC from "./doc";
-let that: any = {};
+let that: MO2Editor | any = {};
 //#region hljs
 import onec from "highlight.js/lib/languages/1c";
 import abnf from "highlight.js/lib/languages/abnf";
@@ -479,6 +479,7 @@ export default class MO2Editor extends Vue {
   ) => Promise<void>;
   isuploading = false;
   linkMenuIsActive = false;
+  update = false;
   editable = true;
   load = false;
   editor: Editor = new Editor({
@@ -725,7 +726,9 @@ export default class MO2Editor extends Vue {
     ],
     content: `
     `,
-    onUpdate() {},
+    onUpdate() {
+      (that as MO2Editor).update = true;
+    },
     onPaste(editorview, event, slice) {
       var items = (event.clipboardData || event.originalEvent.clipboardData)
         .items;
@@ -760,6 +763,12 @@ export default class MO2Editor extends Vue {
       this.editor.setContent(this.content);
     }
     this.$emit("loaded", this);
+    setInterval(() => {
+      if ((that as MO2Editor).update) {
+        (that as MO2Editor).update = false;
+        (that as MO2Editor).$emit("autosave");
+      }
+    }, 5000);
   }
 
   @Watch("content")
