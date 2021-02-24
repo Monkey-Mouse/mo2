@@ -7,12 +7,14 @@ services:
     volumes:
       - "mongodata:/data/db"
   mo2:
-    image: mo2
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    image: chronostasys/mo2:latest
+    env_file:
+      - var.env
+    environment:
+      - qiniuak=${qiniuak}
+      - qiniusk=${qiniusk}
     ports:
-      - 5000:5000
+      - 5001:5001
     depends_on:
       - "mongodb"
 

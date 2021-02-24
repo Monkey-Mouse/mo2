@@ -27,4 +27,4 @@ ENV GIN_MODE=release
 ENV MO2_MONGO_URL=mongodb://mongodb:27017
 ENTRYPOINT /app/mo2
 LABEL Name=mo2 Version=0.0.1
-EXPOSE 5000
+EXPOSE 5001
