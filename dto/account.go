@@ -22,10 +22,10 @@ func (user LoginUserInfo) IsUserInRole(role model.Erole) bool {
 
 //todo implement error
 type LoginUserInfo struct {
-	ID    primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
+	ID    primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" `
 	Name  string             `json:"name" example:"account name"`
 	Email string             `json:"email" example:"email@qq.com"`
-	Roles []model.Erole      `json:"roles" example:"ordinaryUser"  bson:"roles"`
+	Roles []model.Erole      `json:"roles" example:"ordinaryUser" `
 }
 
 func Account2SuccessLogin(a model.Account) (s LoginUserInfo) {
@@ -37,8 +37,25 @@ func Account2SuccessLogin(a model.Account) (s LoginUserInfo) {
 	return s
 }
 
+type UserInfo struct {
+	ID    primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx=="`
+	Name  string             `json:"name" example:"account name"`
+	Email string             `json:"email" example:"email@qq.com"`
+	Roles []model.Erole      `json:"roles" example:"ordinaryUser"  `
+	Infos map[string]string  `json:"infos" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'`
+}
+
+func Account2UserInfo(a model.Account) (u UserInfo) {
+	u.ID = a.ID
+	u.Name = a.UserName
+	u.Roles = a.Roles
+	u.Email = a.Email
+	u.Infos = a.Infos
+	return u
+}
+
 type UserInfoBrief struct {
-	ID   primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
+	ID   primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx=="`
 	Name string             `json:"name" example:"account name"`
 }
 
