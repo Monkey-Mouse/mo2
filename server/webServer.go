@@ -39,7 +39,7 @@ func setupHandlers(c *controller.Controller) {
 			accounts.Post("login", c.LoginAccount)
 			accounts.Get("logout", c.LogoutAccount)
 			accounts.Get("detail/:id", c.ShowAccount)
-			accounts.Post("listBrief", c.ListAccountsInfo)
+			accounts.Get("listBrief", c.ListAccountsInfo)
 
 			/*accounts.GET("", c.ListAccounts)
 			accounts.POST("", c.AddAccount)

@@ -31,22 +31,6 @@ func SayHello(c *gin.Context) {
 
 }
 
-// @Summary 新增用户
-// @Description 为新用户创建信息，加入数据库
-// @Produce  json
-// @Success 200 {string} json
-// @Router /api/accounts/addUser [post]
-func (c *Controller) AddMo2User(ctx *gin.Context) {
-	message := ctx.PostForm("message")
-	nick := ctx.DefaultPostForm("nick", "anonymous")
-	ctx.JSON(http.StatusOK, gin.H{
-		"action":  "posted",
-		"message": message,
-		"nick":    nick,
-	})
-
-}
-
 // Log godoc
 // @Summary get user info
 // @Description get by check cookies
@@ -156,45 +140,53 @@ func (c *Controller) LogoutAccount(ctx *gin.Context) {
 }
 
 // ShowAccount godoc
-// @Summary Show a account's info
-// @Description get string by ID
+// @Summary Show account's info
+// @Description get string by ID；若id为空，返回所有用户信息
 // @Tags accounts
 // @ID get-string-by-int
 // @Accept  json
 // @Produce  json
-// @Param id path string true "Account ID"
-// @Success 200 {object} dto.UserInfo
+// @Param id path string false "Account ID"
+// @Success 200 {object} []dto.UserInfo
 // @Router /api/accounts/detail/{id} [get]
 func (c *Controller) ShowAccount(ctx *gin.Context) {
 	idStr := ctx.Param("id")
-	id, err := primitive.ObjectIDFromHex(idStr)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
-		return
+	var us []dto.UserInfo
+	if idStr == "undefined" {
+		us = database.FindAllAccountsInfo()
+	} else {
+		id, err := primitive.ObjectIDFromHex(idStr)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+			return
+		}
+		result, exist := database.FindAccountInfo(id)
+		if !exist {
+			ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
+			return
+		}
+		us = append(us, result)
 	}
-	result, exist := database.FindAccountInfo(id)
-	if !exist {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
-		return
-	}
-	ctx.JSON(http.StatusOK, result)
+
+	ctx.JSON(http.StatusOK, us)
 }
 
 // ListAccountsInfo godoc
 // @Summary List accounts brief info
-// @Description from a list of user ids
+// @Description from a list of user ids [usage]:/api/accounts/listBrief?id=60223d4042d6febff9f276f0&id=60236866d2a68483adaccc38
 // @Tags accounts
 // @Accept  json
 // @Produce  json
-// @Param userIDs body []primitive.ObjectID false "user IDs list"
+// @Param userIDs path array true "user IDs list"
 // @Success 200 {object} []dto.UserInfoBrief
-// @Router /api/accounts/listBrief [post]
+// @Router /api/accounts/listBrief [get]
 func (c *Controller) ListAccountsInfo(ctx *gin.Context) {
-	var userIDs []primitive.ObjectID
-	if err := ctx.ShouldBindJSON(&userIDs); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
-		return
+	userIDstrs, exist := ctx.GetQueryArray("id")
+	var bs []dto.UserInfoBrief
+	if !exist {
+		bs = database.ListAllAccountsBrief()
+	} else {
+		bs = database.ListAccountsBrief(userIDstrs)
 	}
-	bs := database.FindAccounts(userIDs)
 	ctx.JSON(http.StatusOK, bs)
 }
