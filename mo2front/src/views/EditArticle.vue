@@ -14,7 +14,7 @@
       </v-col>
     </v-row>
     <editor
-      v-show="!(loading || !editorLoaded)"
+      v-show="!loading && editorLoaded"
       :uploadImgs="uploadImgs"
       :content="content"
       @loaded="editorLoad"
@@ -133,7 +133,7 @@ export default class EditArticle extends Vue {
               .catch((err) => {});
           }
         });
-    }
+    } else this.loading = false;
     window.addEventListener("beforeunload", () => {
       this.getTitleAndContent();
       UpSertBlogSync({ draft: true }, this.blog);
