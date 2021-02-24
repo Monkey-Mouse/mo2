@@ -88,6 +88,12 @@ export const GetArticles = async (query: { page: number, pageSize: number, draft
 export async function UpsertBlog(query: { draft: boolean }, blog: BlogUpsert) {
     return (await axios.post<Blog>('/api/blogs/publish' + ParseQuery(query), blog)).data
 }
+export function UpSertBlogSync(query: { draft: boolean }, blog: BlogUpsert) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/blogs/publish" + ParseQuery(query), false);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify(blog));
+}
 export async function GetArticle(query: { id: string, draft: boolean }) {
     return (await axios.get<Blog>('/api/blogs/find/id' + ParseQuery(query))).data
 }

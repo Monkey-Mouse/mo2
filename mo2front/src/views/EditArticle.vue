@@ -44,6 +44,7 @@ import {
   globaldic,
   UploadImgToQiniu,
   UpsertBlog,
+  UpSertBlogSync,
 } from "@/utils";
 import { BlogUpsert, InputProp } from "@/models";
 import { required, minLength, email } from "vuelidate/lib/validators";
@@ -118,7 +119,7 @@ export default class EditArticle extends Vue {
       GetArticle({ id: this.blog.id, draft: true })
         .then((val) => {
           this.blog = val;
-          this.content = val.content;
+          this.content = `<h1>${val.title}</h1>${val.content}`;
           this.loading = false;
         })
         .catch((reason: AxiosError) => {
@@ -126,7 +127,7 @@ export default class EditArticle extends Vue {
             GetArticle({ id: this.blog.id, draft: false })
               .then((val) => {
                 this.blog = val;
-                this.content = val.content;
+                this.content = `<h1>${val.title}</h1>${val.content}`;
                 this.loading = false;
               })
               .catch((err) => {});
@@ -135,7 +136,7 @@ export default class EditArticle extends Vue {
     }
     window.addEventListener("beforeunload", () => {
       this.getTitleAndContent();
-      this.postBlog({}, true);
+      UpSertBlogSync({ draft: true }, this.blog);
     });
   }
   editorLoad(editor: Editor) {
