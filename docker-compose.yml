@@ -5,9 +5,9 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - "mongodata:/data/db"
+      - "mongodata:/var/lib/mongodb"
   mo2:
-    image: chronostasys/mo2:latest
+    image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2:latest
     env_file:
       - var.env
     environment:
