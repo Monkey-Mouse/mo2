@@ -44,16 +44,7 @@ export default class Account extends Vue {
   user!: User;
   displayUser: User;
   uid!: string;
-  blogs: BlogBrief[] = Array<BlogBrief>(10).fill({
-    id: "string",
-    title: "MO2",
-    cover: "https://picsum.photos/500/300?image=40",
-    rate: 4.3,
-    description:
-      "Lorem ipsum dolor sit amet, no nam oblique veritus. Commune scaevola imperdiet nec ut, sed euismod convenire principes at. Est et nobis iisque percipit, an vim zril disputando voluptatibus, vix an salutandi sententiae.",
-    entityInfo: { createTime: "2021/2/9", updateTime: "2021/2/9" },
-    author: "Leezeeyee",
-  });
+  blogs: BlogBrief[] = [];
   created() {
     this.uid = this.$route.params["id"];
     if (this.uid === undefined || this.uid === this.user.id) {
