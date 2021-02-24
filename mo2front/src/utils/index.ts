@@ -97,3 +97,10 @@ export function UpSertBlogSync(query: { draft: boolean }, blog: BlogUpsert) {
 export async function GetArticle(query: { id: string, draft: boolean }) {
     return (await axios.get<Blog>('/api/blogs/find/id' + ParseQuery(query))).data
 }
+export const GetOwnArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
+    return (await axios.get<BlogBrief[]>('/api/blogs/find/own' + ParseQuery(query))).data
+}
+
+export const GetUserArticles = async (query: { page: number, pageSize: number, draft: boolean, id: string }) => {
+    return (await axios.get<BlogBrief[]>('/api/blogs/find/userId' + ParseQuery(query))).data
+}

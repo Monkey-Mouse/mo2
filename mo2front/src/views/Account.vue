@@ -27,7 +27,7 @@
 
 <script lang="ts">
 import { BlogBrief, User } from "@/models";
-import { Copy, GetUserData } from "@/utils";
+import { Copy, GetOwnArticles, GetUserArticles, GetUserData } from "@/utils";
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop } from "vue-property-decorator";
@@ -56,12 +56,23 @@ export default class Account extends Vue {
   });
   created() {
     this.uid = this.$route.params["id"];
-    if (this.uid === undefined) {
+    if (this.uid === undefined || this.uid === this.user.id) {
       this.uid = this.user.id;
       this.displayUser = Copy(this.user);
+      GetOwnArticles({ page: 0, pageSize: 10, draft: false }).then((data) => {
+        this.blogs = data;
+      });
     } else {
       GetUserData(this.uid).then((u) => {
         this.displayUser = u;
+        GetUserArticles({
+          page: 0,
+          pageSize: 10,
+          draft: false,
+          id: this.uid,
+        }).then((data) => {
+          this.blogs = data;
+        });
       });
     }
   }
