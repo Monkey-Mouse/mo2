@@ -30,6 +30,8 @@ func setupHandlers(c *controller.Controller) {
 			blogs.Get("findCategoriesByUserId", c.FindCategoriesByUserId)
 			blogs.Post("addCategory2Category", c.AddCategory2Category)
 			blogs.Post("publish", c.UpsertBlog)
+			blogs.Delete(":id", c.DeleteBlog)
+			blogs.Put(":id", c.RestoreBlog)
 			find := blogs.Group("/find")
 			{
 				find.Get("own", c.FindBlogsByUser)

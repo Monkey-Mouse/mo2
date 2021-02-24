@@ -21,7 +21,7 @@ type Blog struct {
 
 func (b *Blog) Init() {
 	b.ID = primitive.NewObjectID()
-	b.EntityInfo = InitEntity()
+	b.EntityInfo.Create()
 }
 func (b *Blog) Add2Category(categoryID primitive.ObjectID) {
 	b.CategoryIDs = append(b.CategoryIDs, categoryID)
