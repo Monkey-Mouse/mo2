@@ -26,8 +26,17 @@
           width="100"
         /> -->
       </div>
-
-      <v-spacer></v-spacer>
+      <v-spacer />
+      <div v-if="$route.path.indexOf('/edit') === 0">
+        <div v-if="autoSaving" class="grey--text">Saving...</div>
+        <div v-else-if="autoSaving === null" class="red--text">
+          Auto Save Failed!
+        </div>
+        <div v-else class="green--text">Saved!</div>
+        <v-btn class="ml-10" outlined color="green" @click="publishClick"
+          >publish</v-btn
+        >
+      </div>
       <v-app-bar-nav-icon
         v-if="!this.$vuetify.breakpoint.mdAndUp"
         @click.stop="
@@ -38,7 +47,6 @@
       ></v-app-bar-nav-icon>
     </v-app-bar>
     <v-navigation-drawer
-      style="z-index: 99999"
       right
       fixed
       :permanent="this.$vuetify.breakpoint.mdAndUp"
@@ -106,7 +114,7 @@
       </template>
     </v-navigation-drawer>
     <v-main>
-      <router-view :user="user" />
+      <router-view ref="view" :autoSaving.sync="autoSaving" :user="user" />
       <account-modal :enable.sync="enable" :user.sync="userdata" />
       <!-- <v-btn @click="showLogin()">Login</v-btn>
       <account-modal :enable.sync="enable" />
@@ -147,7 +155,7 @@ export default class App extends Vue {
     avatar: "",
     roles: [],
   };
-
+  autoSaving = false;
   get userdata() {
     return this.user;
   }
@@ -174,7 +182,9 @@ export default class App extends Vue {
   get initials(): string {
     return GetInitials(this.user.name);
   }
-
+  publishClick() {
+    (this.$refs["view"] as any).publish();
+  }
   created() {
     GetUserInfoAsync().then((u) => {
       this.user = u;

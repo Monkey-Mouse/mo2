@@ -8,8 +8,21 @@
           </v-col>
         </v-row>
         <v-card-text>
-          <input-list :validator="validator" :inputProps="inputProps" />
+          <input-list
+            :anyError.sync="anyError"
+            ref="inputs"
+            :validator="validator"
+            :inputProps="inputProps"
+            :uploadImgs="uploadImgs"
+          />
         </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn :disabled="anyError" outlined text @click="confirm">{{
+            confirmText
+          }}</v-btn>
+          <v-btn @click="close" color="red">取消</v-btn>
+        </v-card-actions>
       </v-container>
     </v-card>
   </v-dialog>
@@ -37,9 +50,27 @@ export default class About extends Vue {
   inputProps!: { [name: string]: InputProp };
   @Prop()
   show!: boolean;
+  @Prop()
+  confirmText!: string;
+  @Prop()
+  uploadImgs: (
+    blobs: File[],
+    callback: (imgprop: { src: string }) => void
+  ) => Promise<void>;
+  anyError = true;
   close() {
     this.$emit("update:show", false);
   }
+  confirm() {
+    this.$emit("confirm", (this.$refs["inputs"] as InputList).Model);
+    this.close();
+  }
+  setModel(model: any) {
+    setTimeout(() => {
+      (this.$refs["inputs"] as InputList).setModel(model);
+    }, 100);
+  }
+
   // validator = {
   //   password: {
   //     required: required,

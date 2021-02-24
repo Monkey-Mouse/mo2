@@ -27,7 +27,7 @@
 
 <script lang="ts">
 import { BlogBrief, User } from "@/models";
-import { Copy, GetUserData } from "@/utils";
+import { Copy, GetOwnArticles, GetUserArticles, GetUserData } from "@/utils";
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop } from "vue-property-decorator";
@@ -44,24 +44,26 @@ export default class Account extends Vue {
   user!: User;
   displayUser: User;
   uid!: string;
-  blogs: BlogBrief[] = Array<BlogBrief>(10).fill({
-    id: "string",
-    title: "MO2",
-    cover: "https://picsum.photos/500/300?image=40",
-    rate: 4.3,
-    description:
-      "Lorem ipsum dolor sit amet, no nam oblique veritus. Commune scaevola imperdiet nec ut, sed euismod convenire principes at. Est et nobis iisque percipit, an vim zril disputando voluptatibus, vix an salutandi sententiae.",
-    createTime: "2021/2/9",
-    author: "Leezeeyee",
-  });
+  blogs: BlogBrief[] = [];
   created() {
     this.uid = this.$route.params["id"];
-    if (this.uid === undefined) {
+    if (this.uid === undefined || this.uid === this.user.id) {
       this.uid = this.user.id;
       this.displayUser = Copy(this.user);
+      GetOwnArticles({ page: 0, pageSize: 10, draft: false }).then((data) => {
+        this.blogs = data;
+      });
     } else {
       GetUserData(this.uid).then((u) => {
         this.displayUser = u;
+        GetUserArticles({
+          page: 0,
+          pageSize: 10,
+          draft: false,
+          id: this.uid,
+        }).then((data) => {
+          this.blogs = data;
+        });
       });
     }
   }

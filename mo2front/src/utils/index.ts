@@ -1,4 +1,4 @@
-import { User, ApiError, ImgToken } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 
@@ -72,3 +72,35 @@ export const UploadImgToQiniu = async (
 
 }
 export var globaldic: any = {};
+export function ParseQuery(query: { [key: string]: any }) {
+    let queryStr = '?';
+    const queryList: string[] = [];
+    for (const key in query) {
+        const element = query[key];
+        queryList.push(`${key}=${element}`)
+    }
+    queryStr = queryStr + queryList.join('&');
+    return queryStr
+}
+export const GetArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
+    return (await axios.get<BlogBrief[]>('/api/blogs/query' + ParseQuery(query))).data
+}
+export async function UpsertBlog(query: { draft: boolean }, blog: BlogUpsert) {
+    return (await axios.post<Blog>('/api/blogs/publish' + ParseQuery(query), blog)).data
+}
+export function UpSertBlogSync(query: { draft: boolean }, blog: BlogUpsert) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/blogs/publish" + ParseQuery(query), false);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify(blog));
+}
+export async function GetArticle(query: { id: string, draft: boolean }) {
+    return (await axios.get<Blog>('/api/blogs/find/id' + ParseQuery(query))).data
+}
+export const GetOwnArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
+    return (await axios.get<BlogBrief[]>('/api/blogs/find/own' + ParseQuery(query))).data
+}
+
+export const GetUserArticles = async (query: { page: number, pageSize: number, draft: boolean, id: string }) => {
+    return (await axios.get<BlogBrief[]>('/api/blogs/find/userId' + ParseQuery(query))).data
+}
