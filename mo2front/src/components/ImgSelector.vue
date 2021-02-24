@@ -29,7 +29,19 @@
           </template>
         </v-img>
       </v-col>
+      <v-col>
+        <v-btn
+          @click="addImgFromFile"
+          fab
+          dark
+          color="indigo"
+          class="d-flex child-flex"
+        >
+          <v-icon dark> mdi-plus </v-icon>
+        </v-btn></v-col
+      >
     </v-row>
+    <input @change="changeFile" type="file" style="display: none" id="picker" />
   </v-container>
 </template>
 
@@ -49,6 +61,11 @@ export default class ImgSelector extends Vue {
   title: string;
   @Prop()
   appendIcon: string;
+  @Prop()
+  uploadImgs: (
+    blobs: File[],
+    callback: (imgprop: { src: string }) => void
+  ) => Promise<void>;
   prevImg = 0;
   created() {
     for (let index = 0; index < this.imgs.length; index++) {
@@ -67,6 +84,20 @@ export default class ImgSelector extends Vue {
     img.active = true;
     this.prevImg = n;
     this.$emit("imgselect", img.src);
+  }
+  addImgFromFile() {
+    (document.getElementById("picker") as HTMLInputElement).click();
+  }
+  changeFile() {
+    const fs = (document.getElementById("picker") as HTMLInputElement).files;
+    const files = [];
+    for (let index = 0; index < fs.length; index++) {
+      const element = fs[index];
+      files.push(element);
+    }
+    this.uploadImgs(files, (s) => {
+      this.imgs.push({ src: s.src, active: false });
+    });
   }
 }
 </script>

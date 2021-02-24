@@ -28,6 +28,7 @@
       :validator="validator"
       ref="dialog"
       @confirm="confirm"
+      :uploadImgs="uploadImgs"
     />
   </div>
 </template>
