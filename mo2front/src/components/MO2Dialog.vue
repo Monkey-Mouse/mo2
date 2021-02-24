@@ -13,6 +13,7 @@
             ref="inputs"
             :validator="validator"
             :inputProps="inputProps"
+            :uploadImgs="uploadImgs"
           />
         </v-card-text>
         <v-card-actions>
@@ -51,6 +52,11 @@ export default class About extends Vue {
   show!: boolean;
   @Prop()
   confirmText!: string;
+  @Prop()
+  uploadImgs: (
+    blobs: File[],
+    callback: (imgprop: { src: string }) => void
+  ) => Promise<void>;
   anyError = true;
   close() {
     this.$emit("update:show", false);

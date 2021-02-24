@@ -17,6 +17,7 @@
           :imgs="imgVals[key]"
           :title="value.label"
           :appendIcon="value.icon"
+          :uploadImgs="uploadImgs"
           @imgselect="(img) => (model[key] = img)"
         />
         <v-text-field
@@ -64,6 +65,11 @@ export default class InputList extends Vue {
   inputProps!: { [name: string]: InputProp };
   @Prop()
   anyError: boolean;
+  @Prop()
+  uploadImgs: (
+    blobs: File[],
+    callback: (imgprop: { src: string }) => void
+  ) => Promise<void>;
   imgVals: any = {};
   constructor() {
     super();
