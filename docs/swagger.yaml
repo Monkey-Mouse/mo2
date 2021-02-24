@@ -1,0 +1,634 @@
+basePath: /
+definitions:
+  dto.AddBlogs2Categories:
+    properties:
+      blog_ids:
+        items:
+          type: string
+        type: array
+      category_ids:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.AddCategory2Category:
+    properties:
+      category_id:
+        $ref: '#/definitions/model.Category'
+      parent_id:
+        example: xxxxxxx
+        type: string
+    type: object
+  dto.AddCategory2User:
+    properties:
+      category_id:
+        example: xxxxxxx
+        type: string
+      user_id:
+        type: string
+    type: object
+  dto.ImgUploadToken:
+    properties:
+      file_key:
+        type: string
+      token:
+        type: string
+    type: object
+  dto.LoginUserInfo:
+    properties:
+      email:
+        example: email@qq.com
+        type: string
+      id:
+        example: xxxxxxxxxxxxx==
+        type: string
+      name:
+        example: account name
+        type: string
+      roles:
+        example:
+        - ordinaryUser
+        items:
+          type: string
+        type: array
+    type: object
+  dto.QueryBlog:
+    properties:
+      authorId:
+        example: xxxxxxxxxxxxx==
+        type: string
+      categories:
+        items:
+          $ref: '#/definitions/model.Category'
+        type: array
+      cover:
+        example: https://xxx/xxx
+        type: string
+      description:
+        example: mouse ❤ monkey
+        type: string
+      entityInfo:
+        $ref: '#/definitions/model.Entity'
+      id:
+        example: xxxxxxxxxxxxx==
+        type: string
+      keyWords:
+        example:
+        - xxx
+        - xxx
+        items:
+          type: string
+        type: array
+      title:
+        example: mouse ❤ monkey
+        type: string
+    type: object
+  dto.QueryBlogs:
+    type: object
+  model.Account:
+    properties:
+      email:
+        example: email@qq.com
+        type: string
+      entityInfo:
+        $ref: '#/definitions/model.Entity'
+      hashedPassword:
+        example: $2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i
+        type: string
+      id:
+        example: xxxxxxxxxxxxx==
+        type: string
+      infos:
+        additionalProperties:
+          type: string
+        example:
+          '''avatar''': ' ''www.avatar.com/account_name'''
+          '''site''': '''www.limfx.com'''
+        type: object
+      roles:
+        example:
+        - ordinaryUser
+        items:
+          type: string
+        type: array
+      userName:
+        example: account name
+        type: string
+    type: object
+  model.AddAccount:
+    properties:
+      email:
+        example: email@qq.com
+        type: string
+      password:
+        example: p@ssword
+        type: string
+      userName:
+        example: account name
+        type: string
+    type: object
+  model.Blog:
+    properties:
+      authorId:
+        example: xxxxxxxxxxxxx==
+        type: string
+      categories:
+        items:
+          $ref: '#/definitions/model.Category'
+        type: array
+      content:
+        example: |-
+          xxxx
+          xxxx
+        type: string
+      cover:
+        example: https://xxx/xxx
+        type: string
+      description:
+        example: mouse ❤ monkey
+        type: string
+      entityInfo:
+        $ref: '#/definitions/model.Entity'
+      id:
+        example: xxxxxxxxxxxxx==
+        type: string
+      keyWords:
+        example:
+        - xxx
+        - xxx
+        items:
+          type: string
+        type: array
+      title:
+        example: mouse ❤ monkey
+        type: string
+    type: object
+  model.Category:
+    properties:
+      id:
+        example: xxxxxxxxxxxxxx==
+        type: string
+      name:
+        example: records
+        type: string
+      parent_id:
+        example: xxxxxxxxxxxxxx==
+        type: string
+    type: object
+  model.Entity:
+    properties:
+      createTime:
+        example: "2020-10-1"
+        type: string
+      updateTime:
+        example: "2020-10-1"
+        type: string
+    type: object
+  model.LoginAccount:
+    properties:
+      password:
+        example: p@ssword
+        type: string
+      userNameOrEmail:
+        example: account name/email@qq.com
+        type: string
+    type: object
+host: localhost:5000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a Mo2 server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Mo2
+  version: "1.0"
+paths:
+  /api/accounts:
+    post:
+      consumes:
+      - application/json
+      description: add by json account
+      parameters:
+      - description: Add account
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/model.AddAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Account'
+      summary: Add an account
+      tags:
+      - accounts
+  /api/accounts/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get string by ID
+      operationId: get-string-by-int
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          headers:
+            Token:
+              description: qwerty
+              type: string
+          schema:
+            type: string
+      summary: Show a account
+  /api/accounts/addUser:
+    post:
+      description: 为新用户创建信息，加入数据库
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: 新增用户
+  /api/accounts/login:
+    post:
+      consumes:
+      - application/json
+      description: login by json model.LoginAccount and set cookies
+      parameters:
+      - description: login account
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/model.LoginAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LoginUserInfo'
+      summary: login an account
+      tags:
+      - accounts
+  /api/accounts/logout:
+    get:
+      description: logout and delete cookies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: logout
+      tags:
+      - accounts
+  /api/blogs/addBlogs2Categories:
+    post:
+      consumes:
+      - application/json
+      description: blogs 与 categories皆为id列表，方便批量操作
+      parameters:
+      - description: dto.AddBlogs2Categories
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddBlogs2Categories'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.QueryBlog'
+            type: array
+      summary: add blogs to chosen categories
+      tags:
+      - category
+  /api/blogs/addCategory:
+    post:
+      consumes:
+      - application/json
+      description: add by json
+      parameters:
+      - description: Add category
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/model.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Category'
+      summary: upsert category
+      tags:
+      - category
+  /api/blogs/addCategory2Category:
+    post:
+      consumes:
+      - application/json
+      description: category为model.Category(若id存在，直接存放；否则新建) parent category 为id
+      parameters:
+      - description: category info and parent id
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddCategory2Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Category'
+      summary: add category to parent category
+      tags:
+      - category
+  /api/blogs/addCategory2User:
+    post:
+      consumes:
+      - application/json
+      description: user 与 category 皆为id
+      parameters:
+      - description: category id and user id
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddCategory2User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AddCategory2User'
+      summary: add category to user
+      tags:
+      - category
+  /api/blogs/find/id:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: bool true
+        in: query
+        name: draft
+        type: boolean
+      - description: string xxxxxxxx
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Blog'
+      summary: find Blog by id
+      tags:
+      - blogs
+  /api/blogs/find/own:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: bool true
+        in: query
+        name: draft
+        type: boolean
+      - description: int 0
+        in: query
+        name: page
+        type: integer
+      - description: int 5
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.QueryBlogs'
+            type: array
+      summary: find Blog
+      tags:
+      - blogs
+  /api/blogs/find/userId:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: bool true
+        in: query
+        name: draft
+        type: boolean
+      - description: string xxxxxxxx
+        in: query
+        name: id
+        type: string
+      - description: int 0
+        in: query
+        name: page
+        type: integer
+      - description: int 5
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.QueryBlogs'
+            type: array
+      summary: find Blog by userid
+      tags:
+      - blogs
+  /api/blogs/findAllCategories:
+    get:
+      description: 若id为空，返回所有categories；若id不为空，返回该id的category
+      parameters:
+      - description: string ObjectID
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Category'
+            type: array
+      summary: find categories
+      tags:
+      - category
+  /api/blogs/findCategoriesByUserId:
+    get:
+      description: return (main category)个人的主存档 于前端不可见，用于后端存储
+      parameters:
+      - description: string ObjectID
+        in: query
+        name: userId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/model.Category'
+              type: array
+            type: object
+      summary: find categories by user id
+      tags:
+      - category
+  /api/blogs/findCategoryByUserId:
+    get:
+      description: return (main category)个人的主存档 于前端不可见，用于后端存储
+      parameters:
+      - description: string ObjectID
+        in: query
+        name: userId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Category'
+      summary: find category by user id
+      tags:
+      - category
+  /api/blogs/publish:
+    post:
+      consumes:
+      - application/json
+      description: add by json
+      parameters:
+      - description: bool true
+        in: query
+        name: draft
+        type: boolean
+      - description: Add blog
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/model.Blog'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Blog'
+      summary: Publish Blog
+      tags:
+      - blogs
+  /api/blogs/query:
+    get:
+      description: find
+      parameters:
+      - description: bool true
+        in: query
+        name: draft
+        type: boolean
+      - description: int 0
+        in: query
+        name: page
+        type: integer
+      - description: int 5
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.QueryBlog'
+            type: array
+      summary: find all Blogs
+      tags:
+      - blogs
+  /api/img/{filename}:
+    get:
+      description: add by json
+      parameters:
+      - description: file name
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ImgUploadToken'
+      summary: Gen img token
+      tags:
+      - img
+  /api/logs:
+    get:
+      consumes:
+      - application/json
+      description: get by check cookies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.LoginUserInfo'
+      summary: get user info
+      tags:
+      - logs
+  /sayHello:
+    get:
+      description: say something
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: simple test
+swagger: "2.0"
