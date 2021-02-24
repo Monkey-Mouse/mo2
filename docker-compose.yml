@@ -1,6 +1,11 @@
-version: '3.4'
-
+version: "3"
 services:
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - "mongodata:/data/db"
   mo2:
     image: mo2
     build:
@@ -8,3 +13,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 5000:5000
+    depends_on:
+      - "mongodb"
+
+volumes:
+  mongodata:

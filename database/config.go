@@ -3,16 +3,18 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 )
 
 var dbName = "mo2"
 
 func connectMongoDB() {
 	// 设置客户端连接配置
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI(os.Getenv("MO2_MONGO_URL"))
 
 	// 连接到MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
