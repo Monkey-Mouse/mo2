@@ -734,7 +734,15 @@ export default class MO2Editor extends Vue {
         .items;
       var files = [];
       for (let index = 0; index < items.length; index++) {
-        var item = items[index];
+        var item = items[index] as DataTransferItem;
+        if (
+          item.type === "text/html" &&
+          items.length >= index + 1 &&
+          items[index + 1].kind === "file"
+        ) {
+          index++;
+          continue;
+        }
         if (item.kind === "file") {
           var blob = item.getAsFile();
           files = files.concat(blob);
@@ -747,6 +755,9 @@ export default class MO2Editor extends Vue {
       if (files.length === 0) {
         return;
       }
+      console.log(files, event);
+      (event as Event).stopImmediatePropagation();
+      (event as Event).stopPropagation();
       (event as Event).preventDefault();
       that.isuploading = true;
       that
