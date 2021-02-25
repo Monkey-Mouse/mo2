@@ -36,20 +36,7 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("内容含非法字符，请检查"))
 		return
 	}
-	userInfo, exist := mo2utils.GetUserInfo(ctx)
-	if b.AuthorID == primitive.NilObjectID {
-		if exist {
-			b.AuthorID = userInfo.ID
-		} else {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
-			return
-		}
-	} else {
-		if b.AuthorID != userInfo.ID {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("没有权限修改文章"))
-			return
-		}
-	}
+	JudgeAuthorize(ctx, &b)
 	if success := database.UpsertBlog(&b, isDraft); success {
 		ctx.Header("location", ctx.FullPath())
 		ctx.JSON(http.StatusCreated, b)
@@ -67,7 +54,11 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 // @Produce  json
 // @Param draft path bool true "bool true" true
 // @Param id path string false "string xxxxxxxx" "xxxxxxx"
-// @Success 200 {object} model.Blog
+// @Success 202
+// @Failure 204
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
 // @Router /api/blogs/{id} [delete]
 func (c *Controller) DeleteBlog(ctx *gin.Context) {
 	isDraftStr := ctx.Param("draft")
@@ -86,18 +77,29 @@ func (c *Controller) DeleteBlog(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("页面找不到了"))
 		return
 	}
+	JudgeAuthorize(ctx, &blog)
+	blog.EntityInfo.IsDeleted = true
+	if success := database.UpsertBlog(&blog, isDraft); success {
+		ctx.Status(http.StatusAccepted)
+	} else {
+		ctx.Status(http.StatusNoContent)
+	}
+}
+func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) {
+	userInfo, exist := mo2utils.GetUserInfo(ctx)
 	if blog.AuthorID == primitive.NilObjectID {
-		userInfo, exist := mo2utils.GetUserInfo(ctx)
 		if exist {
 			blog.AuthorID = userInfo.ID
 		} else {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足"))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
+			return
+		}
+	} else {
+		if blog.AuthorID != userInfo.ID {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("没有权限修改文章"))
 			return
 		}
 	}
-	blog.EntityInfo.IsDeleted = true
-	database.UpsertBlog(&blog, isDraft)
-	ctx.JSON(http.StatusOK, blog)
 }
 
 // RestoreBlog godoc
