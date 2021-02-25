@@ -13,14 +13,19 @@
     </v-parallax>
     <v-container>
       <blog-time-line-list v-if="!firstloading" :blogs="blogs" />
-      <blog-skeleton v-else :num="3" />
+      <blog-skeleton v-if="loading" :num="pagesize" />
     </v-container>
   </div>
 </template>
 
 <script lang="ts">
 import { BlogBrief } from "@/models";
-import { GetArticles } from "@/utils";
+import {
+  GetArticles,
+  BlogAutoLoader,
+  AddMore,
+  ElmReachedButtom,
+} from "@/utils";
 import axios from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
@@ -32,7 +37,7 @@ import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
     BlogSkeleton,
   },
 })
-export default class Home extends Vue {
+export default class Home extends Vue implements BlogAutoLoader {
   blogs: BlogBrief[] = [];
   loading = true;
   firstloading = true;
@@ -50,26 +55,10 @@ export default class Home extends Vue {
     });
   }
   addMore(val: BlogBrief[]) {
-    if (val.length < this.pagesize) {
-      this.nomore = true;
-    }
-    for (let index = 0; index < val.length; index++) {
-      const element = val[index];
-      this.blogs.push(element);
-    }
-    this.loading = false;
+    AddMore(this, val);
   }
   public ReachedButtom() {
-    if (this.loading === false && !this.nomore) {
-      this.loading = true;
-      GetArticles({
-        page: this.page++,
-        pageSize: this.pagesize,
-        draft: false,
-      }).then((val) => {
-        this.addMore(val);
-      });
-    }
+    ElmReachedButtom(this, GetArticles);
   }
 }
 </script>

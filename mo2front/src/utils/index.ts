@@ -112,3 +112,38 @@ export const GetUserArticles = async (query: { page: number, pageSize: number, d
 export function ReachedBottom(): boolean {
     return (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight;
 }
+export interface BlogAutoLoader {
+    blogs: BlogBrief[],
+    loading: boolean,
+    firstloading: boolean;
+    page: number,
+    pagesize: number,
+    nomore: boolean,
+    ReachedButtom: () => void,
+}
+export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { page: number, pageSize: number, draft: boolean, id?: string }) => Promise<BlogBrief[]>) {
+    if (elm.loading === false && !elm.nomore) {
+        elm.loading = true;
+        getArticles({
+            page: elm.page++,
+            pageSize: elm.pagesize,
+            draft: false,
+        }).then((val) => {
+            try {
+                AddMore(elm, val);
+            } catch (error) {
+                elm.loading = false;
+            }
+        });
+    }
+}
+export function AddMore(elm: BlogAutoLoader, val: BlogBrief[]) {
+    if (!val || val.length < elm.pagesize) {
+        elm.nomore = true;
+    }
+    for (let index = 0; index < val.length; index++) {
+        const element = val[index];
+        elm.blogs.push(element);
+    }
+    elm.loading = false;
+}
