@@ -80,7 +80,6 @@ func UpsertAccount(a *model.Account) (success bool) {
 		success = false
 	}
 	return
-	return
 }
 
 //create an anonymous account

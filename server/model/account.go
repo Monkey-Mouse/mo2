@@ -2,9 +2,8 @@ package model
 
 import (
 	"errors"
-	"os"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"os"
 	//"fmt"
 )
 
@@ -57,7 +56,22 @@ func (a AddAccountRole) Validation() error {
 		return nil
 	}
 }
+func AddRoles(a *Account, roles []Erole) {
+	var new bool
+	for _, role := range roles {
+		new = true
+		for _, existRole := range a.Roles {
+			if role == existRole {
+				new = false
+				break
+			}
+		}
+		if new {
+			a.Roles = append(a.Roles, role)
+		}
+	}
 
+}
 func (a Account) IsValid() (valid bool) {
 	valid = true
 	if a.ID.IsZero() {

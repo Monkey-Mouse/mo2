@@ -66,7 +66,7 @@ func (c *Controller) Log(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param account body model.AddAccountRole true "add new account info"
-// @Success 200 {object} model.Account
+// @Success 200 {object} dto.UserInfo
 // @Router /api/accounts/role [post]
 func (c *Controller) AddAccountRole(ctx *gin.Context) {
 	var addAccount model.AddAccountRole
@@ -83,9 +83,9 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
 		return
 	}
-	account.Roles = append(account.Roles, addAccount.Roles...)
+	model.AddRoles(&account, addAccount.Roles)
 	database.UpsertAccount(&account)
-	ctx.JSON(http.StatusOK, account)
+	ctx.JSON(http.StatusOK, dto.Account2UserInfo(account))
 }
 
 // AddAccount godoc

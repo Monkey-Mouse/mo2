@@ -442,6 +442,15 @@
                             }
                         }
                     },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlogs"
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
@@ -780,7 +789,7 @@
                         "type": "boolean",
                         "description": "bool true",
                         "name": "draft",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -834,7 +843,7 @@
                         "type": "boolean",
                         "description": "bool true",
                         "name": "draft",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {

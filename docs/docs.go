@@ -457,6 +457,15 @@ var doc = `{
                             }
                         }
                     },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlogs"
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
@@ -795,7 +804,7 @@ var doc = `{
                         "type": "boolean",
                         "description": "bool true",
                         "name": "draft",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -849,7 +858,7 @@ var doc = `{
                         "type": "boolean",
                         "description": "bool true",
                         "name": "draft",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {

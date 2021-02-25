@@ -388,7 +388,7 @@ paths:
       description: delete by path
       parameters:
       - description: bool true
-        in: path
+        in: query
         name: draft
         required: true
         type: boolean
@@ -424,7 +424,7 @@ paths:
       description: restore by path
       parameters:
       - description: bool true
-        in: path
+        in: query
         name: draft
         required: true
         type: boolean
@@ -601,6 +601,12 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.QueryBlogs'
+            type: array
+        "204":
+          description: No Content
           schema:
             items:
               $ref: '#/definitions/dto.QueryBlogs'
