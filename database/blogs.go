@@ -54,6 +54,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
 			"cover":       b.Cover,
 			"key_words":   b.KeyWords,
 			"categories":  b.CategoryIDs,
+			"author_id":   b.AuthorID,
 		}}},
 		options.Update().SetUpsert(true),
 	)

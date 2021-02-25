@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"os"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	//"fmt"
@@ -16,12 +17,12 @@ const (
 
 // Account example
 type Account struct {
-	ID         primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
-	UserName   string             `json:"userName" example:"account name"`
-	Email      string             `json:"email" example:"email@qq.com"`
-	HashedPwd  string             `json:"hashedPassword" example:"$2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i"`
-	EntityInfo Entity             `json:"entityInfo,omitempty" bson:"entity_info,omitempty"`
-	Roles      []Erole            `json:"roles" example:"ordinaryUser"  bson:"roles"`
+	ID         primitive.ObjectID `json:"id,omitempty" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
+	UserName   string             `json:"userName" example:"account name" bson:"user_name,omitempty"`
+	Email      string             `json:"email" example:"email@qq.com" bson:"email,omitempty"`
+	HashedPwd  string             `json:"hashedPassword" example:"$2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i" bson:"hashed_pwd,omitempty"`
+	EntityInfo Entity             `json:"entityInfo,omitempty" bson:"entity_info,omitempty" bson:"entity_info,omitempty"`
+	Roles      []Erole            `json:"roles" bson:"roles"`
 	Infos      map[string]string  `json:"infos" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'" bson:"infos,omitempty"`
 }
 
@@ -32,13 +33,32 @@ type AddAccount struct {
 	Password string `json:"password" example:"p@ssword"`
 }
 
+// AddAccountRole example
+type AddAccountRole struct {
+	ID       primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" `
+	Roles    []Erole            `json:"roles"`
+	SuperKey string             `json:"super_key" example:"special"`
+}
+
 // LoginAccount example
 type LoginAccount struct {
 	UserNameOrEmail string `json:"userNameOrEmail" example:"account name/email@qq.com"`
 	Password        string `json:"password" example:"p@ssword"`
 }
 
-func (a *Account) IsValid() (valid bool) {
+// Validation example
+func (a AddAccountRole) Validation() error {
+	switch {
+	case os.Getenv("MO2_SUPER_KEY") != a.SuperKey:
+		return ErrPasswordInvalid
+	case a.ID.IsZero():
+		return ErrNameInvalid
+	default:
+		return nil
+	}
+}
+
+func (a Account) IsValid() (valid bool) {
 	valid = true
 	if a.ID.IsZero() {
 		valid = false
@@ -79,5 +99,5 @@ func (a LoginAccount) Validation() error {
 var (
 	ErrNameInvalid     = errors.New("name is empty")
 	ErrEmailInvalid    = errors.New("email is empty")
-	ErrPasswordInvalid = errors.New("password is empty")
+	ErrPasswordInvalid = errors.New("password is invalid")
 )

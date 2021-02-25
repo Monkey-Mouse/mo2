@@ -188,6 +188,40 @@ var doc = `{
                 }
             }
         },
+        "/api/accounts/role": {
+            "post": {
+                "description": "add by json account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Add role for an account",
+                "parameters": [
+                    {
+                        "description": "add new account info",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.AddAccountRole"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Account"
+                        }
+                    }
+                }
+            }
+        },
         "/api/blogs/addBlogs2Categories": {
             "post": {
                 "description": "blogs 与 categories皆为id列表，方便批量操作",
@@ -359,6 +393,24 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/model.Blog"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
                     }
                 }
             }
@@ -403,6 +455,24 @@ var doc = `{
                             "items": {
                                 "$ref": "#/definitions/dto.QueryBlogs"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
                         }
                     }
                 }
@@ -454,6 +524,33 @@ var doc = `{
                             "items": {
                                 "$ref": "#/definitions/dto.QueryBlogs"
                             }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlogs"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
                         }
                     }
                 }
@@ -649,6 +746,33 @@ var doc = `{
                                 "$ref": "#/definitions/dto.QueryBlog"
                             }
                         }
+                    },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
                     }
                 }
             }
@@ -686,6 +810,24 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.Blog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
                         }
                     }
                 }
@@ -1029,10 +1171,7 @@ var doc = `{
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "example": [
-                        "ordinaryUser"
-                    ]
+                    }
                 },
                 "userName": {
                     "type": "string",
@@ -1054,6 +1193,25 @@ var doc = `{
                 "userName": {
                     "type": "string",
                     "example": "account name"
+                }
+            }
+        },
+        "model.AddAccountRole": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "super_key": {
+                    "type": "string",
+                    "example": "special"
                 }
             }
         },

@@ -57,6 +57,32 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 	return
 }
 
+// UpsertAccount
+func UpsertAccount(a *model.Account) (success bool) {
+	a.EntityInfo.Update()
+	result, err := accCol.UpdateOne(context.TODO(), bson.M{"_id": a.ID}, bson.M{
+		"$set": bson.M{
+			"user_name":   a.UserName,
+			"email":       a.Email,
+			"hashed_pwd":  a.HashedPwd,
+			"entity_info": a.EntityInfo,
+			"roles":       a.Roles,
+			"infos":       a.Infos,
+		},
+	}, options.Update().SetUpsert(true))
+	success = true
+	if err != nil {
+		log.Println(err)
+		success = false
+	}
+	if result.MatchedCount == 0 {
+		log.Println("blog id do not match in database")
+		success = false
+	}
+	return
+	return
+}
+
 //create an anonymous account
 func CreateAnonymousAccount() (a model.Account) {
 	a = model.Account{

@@ -42,6 +42,7 @@ func setupHandlers(c *controller.Controller) {
 		accounts := api.Group("/accounts")
 		{
 			accounts.Post("", c.AddAccount)
+			accounts.Post("role", c.AddAccountRole)
 			accounts.Post("login", c.LoginAccount)
 			accounts.Get("logout", c.LogoutAccount)
 			accounts.Get("detail/:id", c.ShowAccount)
