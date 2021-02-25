@@ -34,9 +34,9 @@ func main() {
 
 }
 
-func Init() {
+func init() {
 	if mo2utils.IsEnvRelease() {
-		docs.SwaggerInfo.Host = "http://47.93.189.12:5001/"
+		docs.SwaggerInfo.Host = "47.93.189.12:5001"
 	}
 	mo2utils.UploadCDN()
 }

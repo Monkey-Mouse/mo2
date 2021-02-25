@@ -21,7 +21,7 @@ import (
 // @Param draft query bool false "bool true" true
 // @Param account body model.Blog true "Add blog"
 // @Success 201 {object} model.Blog
-// @Failure 204 {object} model.Blog
+// @Success 204 {object} model.Blog
 // @Failure 400 {object} ResponseError
 // @Failure 401 {object} ResponseError
 // @Router /api/blogs/publish [post]
@@ -36,20 +36,7 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("内容含非法字符，请检查"))
 		return
 	}
-	userInfo, exist := mo2utils.GetUserInfo(ctx)
-	if b.AuthorID == primitive.NilObjectID {
-		if exist {
-			b.AuthorID = userInfo.ID
-		} else {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
-			return
-		}
-	} else {
-		if b.AuthorID != userInfo.ID {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("没有权限修改文章"))
-			return
-		}
-	}
+	JudgeAuthorize(ctx, &b)
 	if success := database.UpsertBlog(&b, isDraft); success {
 		ctx.Header("location", ctx.FullPath())
 		ctx.JSON(http.StatusCreated, b)
@@ -65,12 +52,16 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 // @Tags blogs
 // @Accept  json
 // @Produce  json
-// @Param draft path bool true "bool true" true
+// @Param draft query bool true "bool true" true
 // @Param id path string false "string xxxxxxxx" "xxxxxxx"
-// @Success 200 {object} model.Blog
+// @Success 202
+// @Success 204
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
 // @Router /api/blogs/{id} [delete]
 func (c *Controller) DeleteBlog(ctx *gin.Context) {
-	isDraftStr := ctx.Param("draft")
+	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := true
 	if isDraftStr == "false" {
 		isDraft = false
@@ -86,18 +77,32 @@ func (c *Controller) DeleteBlog(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("页面找不到了"))
 		return
 	}
+	JudgeAuthorize(ctx, &blog)
+	blog.EntityInfo.IsDeleted = true
+	if success := database.UpsertBlog(&blog, isDraft); success {
+		ctx.Status(http.StatusAccepted)
+	} else {
+		ctx.Status(http.StatusNoContent)
+	}
+}
+
+// JudgeAuthorize only for user of same ID
+// 只有本人id与blog的authorID一致可以继续
+func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) {
+	userInfo, exist := mo2utils.GetUserInfo(ctx)
 	if blog.AuthorID == primitive.NilObjectID {
-		userInfo, exist := mo2utils.GetUserInfo(ctx)
 		if exist {
 			blog.AuthorID = userInfo.ID
 		} else {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足"))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请先登录"))
+			return
+		}
+	} else {
+		if blog.AuthorID != userInfo.ID {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("没有权限修改文章"))
 			return
 		}
 	}
-	blog.EntityInfo.IsDeleted = true
-	database.UpsertBlog(&blog, isDraft)
-	ctx.JSON(http.StatusOK, blog)
 }
 
 // RestoreBlog godoc
@@ -106,12 +111,15 @@ func (c *Controller) DeleteBlog(ctx *gin.Context) {
 // @Tags blogs
 // @Accept  json
 // @Produce  json
-// @Param draft path bool true "bool true" true
+// @Param draft query bool true "bool true" true
 // @Param id path string false "string xxxxxxxx" "xxxxxxx"
 // @Success 200 {object} model.Blog
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
 // @Router /api/blogs/{id} [put]
 func (c *Controller) RestoreBlog(ctx *gin.Context) {
-	isDraftStr := ctx.Param("draft")
+	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := true
 	if isDraftStr == "false" {
 		isDraft = false
@@ -127,15 +135,7 @@ func (c *Controller) RestoreBlog(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("页面找不到了"))
 		return
 	}
-	if blog.AuthorID == primitive.NilObjectID {
-		userInfo, exist := mo2utils.GetUserInfo(ctx)
-		if exist {
-			blog.AuthorID = userInfo.ID
-		} else {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足"))
-			return
-		}
-	}
+	JudgeAuthorize(ctx, &blog)
 	blog.EntityInfo.IsDeleted = false
 	database.UpsertBlog(&blog, isDraft)
 	ctx.JSON(http.StatusOK, blog)
@@ -151,6 +151,10 @@ func (c *Controller) RestoreBlog(ctx *gin.Context) {
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlogs
+// @Success 204 {object} []dto.QueryBlogs
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
 // @Router /api/blogs/find/own [get]
 func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 	pageStr := ctx.DefaultQuery("page", "0")
@@ -175,8 +179,11 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 	blogs := database.FindBlogsByUser(info, isDraft)
 	qBlogs := dto.QueryBlogs{}
 	qBlogs.Init(blogs)
-	results, _ := qBlogs.Query(page, pageSize)
-	ctx.JSON(http.StatusOK, results.GetBlogs())
+	if results, exist := qBlogs.Query(page, pageSize); exist {
+		ctx.JSON(http.StatusOK, results.GetBlogs())
+	} else {
+		ctx.JSON(http.StatusNoContent, results.GetBlogs())
+	}
 }
 
 // FindBlogsByUserId godoc
@@ -190,6 +197,10 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlogs
+// @Success 204 {object} []dto.QueryBlogs
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
 // @Router /api/blogs/find/userId [get]
 func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 	pageStr := ctx.DefaultQuery("page", "0")
@@ -210,13 +221,17 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
 		return
 	}
-	// todo check if the user has right
-	// get user info due to cookie information
+	if isDraft {
+		JudgeAuthorize(ctx, &model.Blog{AuthorID: id})
+	}
 	blogs := database.FindBlogsByUserId(id, isDraft)
 	qBlogs := dto.QueryBlogs{}
 	qBlogs.Init(blogs)
-	results, _ := qBlogs.Query(page, pageSize)
-	ctx.JSON(http.StatusOK, results.GetBlogs())
+	if results, exist := qBlogs.Query(page, pageSize); exist {
+		ctx.JSON(http.StatusOK, results.GetBlogs())
+	} else {
+		ctx.JSON(http.StatusNoContent, results.GetBlogs())
+	}
 }
 
 // FindBlogById godoc
@@ -228,6 +243,9 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 // @Param draft query bool false "bool true" true
 // @Param id query string false "string xxxxxxxx" "xxxxxxx"
 // @Success 200 {object} model.Blog
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
 // @Router /api/blogs/find/id [get]
 func (c *Controller) FindBlogById(ctx *gin.Context) {
 	isDraftStr := ctx.DefaultQuery("draft", "true")
@@ -238,12 +256,13 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
 		return
 	}
-	// todo check if the user has right
-	// get user info due to cookie information
 	blog := database.FindBlogById(id, isDraft)
 	if blog.ID.IsZero() {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("页面找不到了"))
 		return
+	}
+	if isDraft {
+		JudgeAuthorize(ctx, &blog)
 	}
 	ctx.JSON(http.StatusOK, blog)
 }
@@ -257,6 +276,10 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlog
+// @Success 204 {object} []dto.QueryBlog
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
 // @Router /api/blogs/query [get]
 func (c *Controller) QueryBlogs(ctx *gin.Context) {
 	pageStr := ctx.DefaultQuery("page", "0")
@@ -272,20 +295,23 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 
 	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := parseString2Bool(isDraftStr)
-
+	if isDraft && !mo2utils.IsInRole(ctx, model.GeneralAdmin) {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请联系管理员"))
+	}
 	blogs := database.FindAllBlogs(isDraft)
 	qBlogs := dto.QueryBlogs{}
 	qBlogs.Init(blogs)
-	results, _ := qBlogs.Query(page, pageSize)
-	ctx.JSON(http.StatusOK, results.GetBlogs())
+	if results, exist := qBlogs.Query(page, pageSize); exist {
+		ctx.JSON(http.StatusOK, results.GetBlogs())
+	} else {
+		ctx.JSON(http.StatusNoContent, results.GetBlogs())
+	}
 }
 
 func parseString2Bool(s string) (b bool) {
-
+	b = true
 	if s == "false" {
 		b = false
-	} else {
-		b = true
 	}
 	return
 }
