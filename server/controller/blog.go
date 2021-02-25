@@ -295,7 +295,9 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 
 	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := parseString2Bool(isDraftStr)
-	// TODO add authorize for is draft situation
+	if isDraft && !mo2utils.IsInRole(ctx, model.GeneralAdmin) {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请联系管理员"))
+	}
 	blogs := database.FindAllBlogs(isDraft)
 	qBlogs := dto.QueryBlogs{}
 	qBlogs.Init(blogs)
