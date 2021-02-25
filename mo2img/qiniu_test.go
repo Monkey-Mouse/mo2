@@ -1,11 +1,15 @@
 package mo2img
 
 import (
+	"os"
 	"regexp"
 	"testing"
 )
 
 func TestGenerateUploadToken(t *testing.T) {
+	if os.Getenv("CI") != "" {
+		t.Skip("Skipping testing in CI environment")
+	}
 	tests := []struct {
 		name      string
 		wantToken string
