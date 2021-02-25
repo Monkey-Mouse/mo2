@@ -61,7 +61,7 @@ func CreateAnonymousAccount() (a model.Account) {
 	a = model.Account{
 		ID:         primitive.NewObjectID(),
 		UserName:   "visitor",
-		Email:      string(rand.Int()) + "@mo2.com",
+		Email:      fmt.Sprint(rand.Int()) + "@mo2.com",
 		HashedPwd:  "#2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i",
 		EntityInfo: model.InitEntity(),
 		Roles:      nil,
