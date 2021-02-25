@@ -52,7 +52,7 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 // @Tags blogs
 // @Accept  json
 // @Produce  json
-// @Param draft path bool true "bool true" true
+// @Param draft query bool true "bool true" true
 // @Param id path string false "string xxxxxxxx" "xxxxxxx"
 // @Success 202
 // @Success 204
@@ -61,7 +61,7 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 // @Failure 404 {object} ResponseError
 // @Router /api/blogs/{id} [delete]
 func (c *Controller) DeleteBlog(ctx *gin.Context) {
-	isDraftStr := ctx.Param("draft")
+	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := true
 	if isDraftStr == "false" {
 		isDraft = false
@@ -111,7 +111,7 @@ func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) {
 // @Tags blogs
 // @Accept  json
 // @Produce  json
-// @Param draft path bool true "bool true" true
+// @Param draft query bool true "bool true" true
 // @Param id path string false "string xxxxxxxx" "xxxxxxx"
 // @Success 200 {object} model.Blog
 // @Failure 400 {object} ResponseError
@@ -119,7 +119,7 @@ func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) {
 // @Failure 404 {object} ResponseError
 // @Router /api/blogs/{id} [put]
 func (c *Controller) RestoreBlog(ctx *gin.Context) {
-	isDraftStr := ctx.Param("draft")
+	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := true
 	if isDraftStr == "false" {
 		isDraft = false
@@ -151,7 +151,7 @@ func (c *Controller) RestoreBlog(ctx *gin.Context) {
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlogs
-//@Success 200 {object} []dto.QueryBlogs
+// @Success 204 {object} []dto.QueryBlogs
 // @Failure 400 {object} ResponseError
 // @Failure 401 {object} ResponseError
 // @Failure 404 {object} ResponseError
