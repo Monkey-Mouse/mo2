@@ -46,7 +46,8 @@ const routes: Array<RouteConfig> = [
 
 const router = new VueRouter({
   mode: 'history',
-  base: process.env.BASE_URL,
+  // hard code base, sothat router won't change to cdn url
+  base: '/',
   routes
 })
 
