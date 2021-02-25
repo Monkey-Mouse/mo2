@@ -1,4 +1,4 @@
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 
@@ -16,7 +16,12 @@ export function Copy<T>(mainObject: T) {
     return objectCopy as T;
 }
 export async function GetUserData(uid: string): Promise<User> {
-    throw new Error("Not implement yet");
+    let re = await axios.get<User>('/api/accounts/detail/' + uid);
+    return re.data[0]
+}
+export async function GetUserDatas(uids: string[]): Promise<UserListData[]> {
+    let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.join('&id='));
+    return re.data
 }
 
 export function GetInitials(name: string) {
@@ -61,7 +66,7 @@ export const UploadImgToQiniu = async (
                 ob.subscribe(null, (err) => {
                     reject(err)
                 }, res => {
-                    callback({ src: '//qotwmtnjo.hn-bkt.clouddn.com/' + res.key })
+                    callback({ src: '//cdn.mo2.leezeeyee.com/' + res.key })
                     resolve();
                 })
             })

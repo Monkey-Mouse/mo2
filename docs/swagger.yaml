@@ -226,7 +226,7 @@ definitions:
         example: account name/email@qq.com
         type: string
     type: object
-host: localhost:5000
+host: localhost:5001
 info:
   contact:
     email: support@swagger.io

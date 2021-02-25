@@ -15,7 +15,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:5000",
+    "host": "localhost:5001",
     "basePath": "/",
     "paths": {
         "/api/accounts": {
