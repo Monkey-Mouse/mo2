@@ -16,7 +16,8 @@ export function Copy<T>(mainObject: T) {
     return objectCopy as T;
 }
 export async function GetUserData(uid: string): Promise<User> {
-    throw new Error("Not implement yet");
+    let re = await axios.get<User>('/api/accounts/detail/' + uid);
+    return re.data[0]
 }
 
 export function GetInitials(name: string) {

@@ -5,7 +5,7 @@ export interface BlogBrief {
     rate: number;
     description: string;
     entityInfo: EntityInfo;
-    author: string;
+    authorId: string;
 }
 export interface Blog extends BlogBrief {
     content: string;
