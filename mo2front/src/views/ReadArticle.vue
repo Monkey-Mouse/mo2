@@ -22,10 +22,15 @@
               blog.entityInfo.createTime.substr(0, 10)
             }}</span>
             <v-spacer />
-            <v-btn v-if="user.id === blog.authorId" plain small>
-              <v-icon @click="edit">mdi-file-document-edit</v-icon>
+            <v-btn @click="edit" v-if="user.id === blog.authorId" plain small>
+              <v-icon>mdi-file-document-edit</v-icon>
             </v-btn>
-            <v-btn v-if="user.id === blog.authorId" plain small>
+            <v-btn
+              @click="deleteArticle"
+              v-if="user.id === blog.authorId"
+              plain
+              small
+            >
               <v-icon>mdi-delete</v-icon>
             </v-btn>
           </v-row>
@@ -41,6 +46,12 @@
         />
         <v-row justify="center" class="mb-5">• • •</v-row> -->
           <div v-html="html" class="mo2content mt-10" spellcheck="false"></div>
+          <delete-confirm
+            :title="'确认删除'"
+            :content="deleteContent"
+            :show.sync="showDelete"
+            @confirm="confirmDelete"
+          />
         </div>
       </v-col>
     </v-row>
@@ -52,7 +63,9 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import Editor from "../components/MO2Editor.vue";
 import {
+  DeleteArticle,
   GetArticle,
+  GetErrorMsg,
   GetUserData,
   globaldic,
   UploadImgToQiniu,
@@ -62,10 +75,12 @@ import hljs from "highlight.js";
 import { Blog, User } from "@/models";
 import Avatar from "@/components/UserAvatar.vue";
 import { Prop } from "vue-property-decorator";
+import DeleteConfirm from "@/components/DeleteConfirm.vue";
 @Component({
   components: {
     Editor,
     Avatar,
+    DeleteConfirm,
   },
 })
 export default class ReadArticle extends Vue {
@@ -82,6 +97,10 @@ export default class ReadArticle extends Vue {
   blog: Blog;
   author: User;
   authorLoad = false;
+  showDelete = false;
+  get deleteContent() {
+    return '你确定要删除"' + this.title + '"吗？';
+  }
   created() {
     var draft = false;
     if (this.$route.query["draft"]) {
@@ -109,6 +128,18 @@ export default class ReadArticle extends Vue {
     globaldic.article = `<h1>${this.title}</h1>${this.html}`;
     // UpsertBlog({ draft: true }, this.blog);
     this.$router.push("/edit/" + this.blog.id);
+  }
+  deleteArticle() {
+    this.showDelete = true;
+  }
+  confirmDelete() {
+    DeleteArticle(this.blog.id, { draft: false })
+      .then(() => {
+        this.$router.push("/");
+      })
+      .catch((err) => {
+        alert(GetErrorMsg(err));
+      });
   }
 }
 </script>

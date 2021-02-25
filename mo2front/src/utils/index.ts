@@ -147,3 +147,7 @@ export function AddMore(elm: BlogAutoLoader, val: BlogBrief[]) {
     }
     elm.loading = false;
 }
+export async function DeleteArticle(id: string, query: { draft: boolean }) {
+    (await axios.delete('/api/blogs/' + id + ParseQuery(query)))
+
+}
