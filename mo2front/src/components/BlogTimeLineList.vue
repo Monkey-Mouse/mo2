@@ -121,7 +121,6 @@ export default class BlogTimeLineList extends Vue {
   prevlen = -1;
   displayColors: string[] = [];
   created() {
-    this.prevlen = this.blogs.length;
     this.displayColors = Object.getOwnPropertyNames(colors);
     // let count = Object.getOwnPropertyNames(colors).length;
     // while (this.displayColors.length < count) {
@@ -132,6 +131,7 @@ export default class BlogTimeLineList extends Vue {
     // }
   }
   mounted() {
+    this.prevlen = this.blogs.length;
     const ids = this.blogs.map((v, i, a) => v.authorId);
     GetUserDatas(ids).then((data) => {
       const dic: any = {};
@@ -148,6 +148,7 @@ export default class BlogTimeLineList extends Vue {
   }
   @Watch("blogs")
   changeBlogs() {
+    //TO DO: re fetch on loading new blogs
     // const ids = this.blogs.map((v, i, a) => v.authorId);
     // GetUserDatas(ids).then((data) => {
     //   const dic: any = {};
