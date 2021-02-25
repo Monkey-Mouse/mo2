@@ -5,14 +5,16 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - "mongodata:/data/db"
+      - "mongodata:/var/lib/mongodb"
   mo2:
-    image: mo2
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2:latest
+    env_file:
+      - var.env
+    environment:
+      - qiniuak=${qiniuak}
+      - qiniusk=${qiniusk}
     ports:
-      - 5000:5000
+      - 5001:5001
     depends_on:
       - "mongodb"
 
