@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "mo2/docs"
+	"mo2/docs"
 	"mo2/mo2utils"
 	"mo2/server"
 	//"time"
@@ -25,7 +25,6 @@ import (
 func main() {
 
 	//demo.SendEmail()
-	mo2utils.UploadCDN()
 	//demo.PrintPath()
 	server.RunServer()
 
@@ -33,4 +32,11 @@ func main() {
 
 	//demo.Welcome()
 
+}
+
+func Init() {
+	if mo2utils.IsEnvRelease() {
+		docs.SwaggerInfo.Host = "http://47.93.189.12:5001/"
+	}
+	mo2utils.UploadCDN()
 }
