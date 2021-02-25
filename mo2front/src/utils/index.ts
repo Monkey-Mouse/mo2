@@ -61,7 +61,7 @@ export const UploadImgToQiniu = async (
                 ob.subscribe(null, (err) => {
                     reject(err)
                 }, res => {
-                    callback({ src: '//qotwmtnjo.hn-bkt.clouddn.com/' + res.key })
+                    callback({ src: '//cdn.mo2.leezeeyee.com/' + res.key })
                     resolve();
                 })
             })
