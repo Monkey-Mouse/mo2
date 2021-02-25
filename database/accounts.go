@@ -9,8 +9,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"log"
 	"math/rand"
+	"mo2/dto"
 	"mo2/server/model"
 )
+
+var accCol = GetCollection("accounts")
 
 //already check the validation in controller
 //if add a newAccount success, return account info
@@ -101,4 +104,71 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 	}
 	return
 
+}
+
+// FindAccount find
+func FindAccount(id primitive.ObjectID) (a model.Account, exist bool) {
+	exist = false
+	if err := accCol.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
+		if err != mongo.ErrNoDocuments {
+			log.Fatal(err)
+		}
+	}
+	if a.IsValid() {
+		exist = true
+	}
+	return
+}
+
+// FindAllAccountsInfo find
+func FindAllAccountsInfo() (us []dto.UserInfo) {
+	as := FindAllAccounts()
+	for _, account := range as {
+		us = append(us, dto.Account2UserInfo(account))
+	}
+	return
+}
+
+// FindAllAccounts find
+func FindAllAccounts() (as []model.Account) {
+	results, err := accCol.Find(context.TODO(), bson.D{{}})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = results.All(context.TODO(), &as); err != nil {
+		log.Fatal(err)
+	}
+	return
+}
+
+// FindAccountInfo find
+func FindAccountInfo(id primitive.ObjectID) (u dto.UserInfo, exist bool) {
+	a, exist := FindAccount(id)
+	if exist {
+		u = dto.Account2UserInfo(a)
+	}
+	return
+}
+
+// ListAccountsBrief find from a list of id
+func ListAccountsBrief(idStrs []string) (bs []dto.UserInfoBrief) {
+	for _, idStr := range idStrs {
+		id, err := primitive.ObjectIDFromHex(idStr)
+		if err == nil {
+			a, exist := FindAccount(id)
+			if exist {
+				bs = append(bs, dto.MapAccount2InfoBrief(a))
+			}
+		}
+	}
+	return
+}
+
+// ListAllAccountsBrief find from a list of id
+func ListAllAccountsBrief() (bs []dto.UserInfoBrief) {
+	as := FindAllAccounts()
+	for _, account := range as {
+		bs = append(bs, dto.MapAccount2InfoBrief(account))
+	}
+	return
 }

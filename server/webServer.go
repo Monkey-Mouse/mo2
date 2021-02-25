@@ -31,6 +31,22 @@ func setupHandlers(c *controller.Controller) {
 			blogs.Get("findCategoriesByUserId", c.FindCategoriesByUserId)
 			blogs.Post("addCategory2Category", c.AddCategory2Category)
 		}
+		accounts := api.Group("/accounts")
+		{
+			//accounts.GET(":id", c.ShowAccount)
+			//accounts.POST("addUser",c.AddMo2User)
+			accounts.Post("", c.AddAccount)
+			accounts.Post("login", c.LoginAccount)
+			accounts.Get("logout", c.LogoutAccount)
+			accounts.Get("detail/:id", c.ShowAccount)
+			accounts.Get("listBrief", c.ListAccountsInfo)
+
+			/*accounts.GET("", c.ListAccounts)
+			accounts.POST("", c.AddAccount)
+			accounts.DELETE(":id", c.DeleteAccount)
+			accounts.PATCH(":id", c.UpdateAccount)
+			accounts.POST(":id/images", c.UploadAccountImage)*/
+		}
 	}
 }
 
@@ -45,25 +61,6 @@ func RunServer() {
 	middleware.H.RegisterMapedHandlers(r)
 	v1 := r.Group("/api")
 	{
-		// v1.GET("/img/:filename", c.GenUploadToken)
-		// logs := v1.Group("/logs")
-		// {
-		// 	logs.GET("", c.Log)
-		// }
-		accounts := v1.Group("/accounts")
-		{
-			//accounts.GET(":id", c.ShowAccount)
-			//accounts.POST("addUser",c.AddMo2User)
-			accounts.POST("", c.AddAccount)
-			accounts.POST("login", c.LoginAccount)
-			accounts.GET("logout", c.LogoutAccount)
-
-			/*accounts.GET("", c.ListAccounts)
-			accounts.POST("", c.AddAccount)
-			accounts.DELETE(":id", c.DeleteAccount)
-			accounts.PATCH(":id", c.UpdateAccount)
-			accounts.POST(":id/images", c.UploadAccountImage)*/
-		}
 		blogs := v1.Group("/blogs")
 		{
 			blogs.POST("publish", c.UpsertBlog)
