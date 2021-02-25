@@ -7,23 +7,29 @@
           v-bind="attrs"
           type="heading, list-item-avatar, paragraph@9"
         ></v-skeleton-loader>
-        <div v-show="!loading">
-          <div class="mo2title">
+        <div v-if="!loading">
+          <div class="mo2title text-break">
             <h1>{{ title }}</h1>
           </div>
-          <v-row class="mb-6">
-            <v-col>
-              <v-avatar color="primary" size="40">me</v-avatar>
-              <span class="text--lighten-2 ml-2">李子怡</span>
-              <span class="ml-2 grey--text">2020-1-1</span>
-            </v-col>
+          <v-row v-if="authorLoad" class="mb-6">
+            <avatar :size="40" :user="author"></avatar>
+            <span class="text--lighten-2 ml-2">{{ author.name }}</span>
+            <span class="ml-2 grey--text">{{
+              blog.entityInfo.createTime.substr(0, 10)
+            }}</span>
             <v-spacer />
-            <v-btn plain small>
+            <v-btn v-if="user.id === blog.authorId" plain small>
               <v-icon @click="edit">mdi-file-document-edit</v-icon>
             </v-btn>
-            <v-btn plain small>
+            <v-btn v-if="user.id === blog.authorId" plain small>
               <v-icon>mdi-delete</v-icon>
             </v-btn>
+          </v-row>
+          <v-row v-else class="mb-6">
+            <v-skeleton-loader
+              class="col"
+              type="list-item-avatar"
+            ></v-skeleton-loader>
           </v-row>
           <!-- <img
           class="ma-5"
@@ -41,15 +47,26 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import Editor from "../components/MO2Editor.vue";
-import { GetArticle, globaldic, UploadImgToQiniu, UpsertBlog } from "@/utils";
+import {
+  GetArticle,
+  GetUserData,
+  globaldic,
+  UploadImgToQiniu,
+  UpsertBlog,
+} from "@/utils";
 import hljs from "highlight.js";
-import { Blog } from "@/models";
+import { Blog, User } from "@/models";
+import Avatar from "@/components/UserAvatar.vue";
+import { Prop } from "vue-property-decorator";
 @Component({
   components: {
     Editor,
+    Avatar,
   },
 })
 export default class ReadArticle extends Vue {
+  @Prop()
+  user;
   title = "";
   html = "";
   attrs = {
@@ -59,6 +76,8 @@ export default class ReadArticle extends Vue {
   };
   loading = true;
   blog: Blog;
+  author: User;
+  authorLoad = false;
   created() {
     var draft = false;
     if (this.$route.query["draft"]) {
@@ -69,6 +88,10 @@ export default class ReadArticle extends Vue {
       this.blog = val;
       this.title = val.title;
       this.html = val.content;
+      GetUserData(this.blog.authorId).then((u) => {
+        this.author = u;
+        this.authorLoad = true;
+      });
       setTimeout(() => {
         // first, find all the code blocks
         document.querySelectorAll("code").forEach((block) => {
