@@ -2,13 +2,14 @@ package database
 
 import (
 	"context"
+	"log"
+	"mo2/dto"
+	"mo2/server/model"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"mo2/dto"
-	"mo2/server/model"
 )
 
 var blogCol *mongo.Collection = GetCollection("blog")
@@ -54,6 +55,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
 			"cover":       b.Cover,
 			"key_words":   b.KeyWords,
 			"categories":  b.CategoryIDs,
+			"author_id":   b.AuthorID,
 		}}},
 		options.Update().SetUpsert(true),
 	)
