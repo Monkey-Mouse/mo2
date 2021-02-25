@@ -125,6 +125,15 @@
       >
       <v-btn @click="sideNavVisible = !sideNavVisible">show side bar</v-btn> -->
     </v-main>
+    <v-footer padless>
+      <v-card flat tile class="indigo lighten-1 white--text text-center">
+        <v-divider></v-divider>
+
+        <v-card-text class="white--text">
+          {{ new Date().getFullYear() }} — <strong>MO2</strong>
+        </v-card-text>
+      </v-card>
+    </v-footer>
   </v-app>
 </template>
 
@@ -134,7 +143,7 @@ import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
 import { User } from "./models";
-import { GetInitials, GetUserInfoAsync } from "./utils";
+import { GetInitials, GetUserInfoAsync, ReachedBottom } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
 import { Watch } from "vue-property-decorator";
 // import "bulma/bulma.sass";
@@ -214,6 +223,14 @@ export default class App extends Vue {
       // setTimeout(() => {
       //   this.onResize();
       // }, 500);
+    });
+    window.addEventListener("scroll", () => {
+      if (ReachedBottom()) {
+        console.log("reached");
+        try {
+          (this.$refs["view"] as any).ReachedButtom();
+        } catch (error) {}
+      }
     });
   }
 

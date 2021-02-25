@@ -20,52 +20,77 @@
       </v-row>
     </v-parallax>
     <v-container>
-      <blog-time-line-list :blogs="blogs" />
+      <blog-time-line-list v-if="!firstloading" :blogs="blogs" />
+      <blog-skeleton v-if="loading" :num="pagesize" />
     </v-container>
   </div>
 </template>
 
 <script lang="ts">
 import { BlogBrief, User } from "@/models";
-import { Copy, GetOwnArticles, GetUserArticles, GetUserData } from "@/utils";
+import {
+  AddMore,
+  BlogAutoLoader,
+  Copy,
+  ElmReachedButtom,
+  GetOwnArticles,
+  GetUserArticles,
+  GetUserData,
+} from "@/utils";
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop } from "vue-property-decorator";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
 import Avatar from "../components/UserAvatar.vue";
+import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 @Component({
   components: {
     BlogTimeLineList,
     Avatar,
+    BlogSkeleton,
   },
 })
-export default class Account extends Vue {
+export default class Account extends Vue implements BlogAutoLoader {
   @Prop()
   user!: User;
   displayUser: User;
   uid!: string;
   blogs: BlogBrief[] = [];
+  loading = true;
+  firstloading = true;
+  page = 0;
+  pagesize = 5;
+  nomore = false;
   created() {
     this.uid = this.$route.params["id"];
     if (this.uid === undefined || this.uid === this.user.id) {
       this.uid = this.user.id;
       this.displayUser = Copy(this.user);
-      GetOwnArticles({ page: 0, pageSize: 10, draft: false }).then((data) => {
-        this.blogs = data;
+      GetOwnArticles({
+        page: this.page++,
+        pageSize: this.pagesize,
+        draft: false,
+      }).then((data) => {
+        AddMore(this, data);
+        this.firstloading = false;
       });
     } else {
       GetUserData(this.uid).then((u) => {
         this.displayUser = u;
         GetUserArticles({
-          page: 0,
-          pageSize: 10,
+          page: this.page++,
+          pageSize: this.pagesize,
           draft: false,
           id: this.uid,
         }).then((data) => {
-          this.blogs = data;
+          AddMore(this, data);
+          this.firstloading = false;
         });
       });
     }
+  }
+  public ReachedButtom() {
+    ElmReachedButtom(this, GetOwnArticles);
   }
 }
 </script>

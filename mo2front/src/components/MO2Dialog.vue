@@ -18,9 +18,14 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn :disabled="anyError" outlined text @click="confirm">{{
-            confirmText
-          }}</v-btn>
+          <v-btn
+            :disabled="anyError"
+            color="green"
+            outlined
+            text
+            @click="confirm"
+            >{{ confirmText }}</v-btn
+          >
           <v-btn @click="close" color="red">取消</v-btn>
         </v-card-actions>
       </v-container>
