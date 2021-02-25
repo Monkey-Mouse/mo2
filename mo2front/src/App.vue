@@ -12,7 +12,7 @@
           alt="Vuetify Logo"
           class="shrink mr-2"
           contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
+          src="https://tse4-mm.cn.bing.net/th/id/OIP.m0-fVm5FkxFJULj3h60oTwHaHa?w=177&h=180&c=7&o=5&dpr=2&pid=1.7"
           transition="scale-transition"
           width="40"
         />
@@ -28,14 +28,16 @@
       </div>
       <v-spacer />
       <div v-if="$route.path.indexOf('/edit') === 0">
-        <div v-if="autoSaving" class="grey--text">Saving...</div>
-        <div v-else-if="autoSaving === null" class="red--text">
-          Auto Save Failed!
-        </div>
-        <div v-else class="green--text">Saved!</div>
-        <v-btn class="ml-10" outlined color="green" @click="publishClick"
-          >publish</v-btn
-        >
+        <v-row>
+          <div v-if="autoSaving" class="grey--text ma-2">Saving...</div>
+          <div v-else-if="autoSaving === null" class="red--text ma-2">
+            Auto Save Failed!
+          </div>
+          <div v-else class="green--text ma-2">Saved!</div>
+          <v-btn class="ml-10" outlined color="green" @click="publishClick"
+            >publish</v-btn
+          >
+        </v-row>
       </div>
       <v-app-bar-nav-icon
         v-if="!this.$vuetify.breakpoint.mdAndUp"
@@ -69,8 +71,8 @@
 
       <v-list dense>
         <v-list-item
-          v-for="item in items"
-          :key="item.title"
+          v-for="(item, n) in items"
+          :key="n"
           :to="item.href"
           v-show="item.show"
         >
@@ -134,6 +136,7 @@ import Component from "vue-class-component";
 import { User } from "./models";
 import { GetInitials, GetUserInfoAsync } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
+import { Watch } from "vue-property-decorator";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 
@@ -174,10 +177,21 @@ export default class App extends Vue {
       href: "/account",
       show: this.isUser,
     },
+    {
+      title: "New Article",
+      icon: "mdi-file-document-edit",
+      href: "/edit",
+      show: this.isUser,
+    },
     { title: "About", icon: "mdi-alpha-a-circle", href: "/about", show: true },
   ];
   get isUser() {
     return this.user.roles && this.user.roles.length > 0;
+  }
+  @Watch("user")
+  userCHange() {
+    this.items[2].show = this.isUser;
+    this.items[1].show = this.isUser;
   }
   get initials(): string {
     return GetInitials(this.user.name);
