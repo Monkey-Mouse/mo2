@@ -83,9 +83,11 @@ func uploadAllFiles(curPath string, rootPath string, uploadRootPath string) {
 }
 
 func UploadCDN() {
-	rootPath := "./dist"
-	uploadRootPath := "dist"
-	UploadAllFiles(rootPath, uploadRootPath)
+	if ginMode := os.Getenv("GIN_MODE"); ginMode == "release" {
+		rootPath := "./dist"
+		uploadRootPath := "dist"
+		UploadAllFiles(rootPath, uploadRootPath)
+	}
 }
 
 func qiniuFile(srcPath string, dstPath string) {
