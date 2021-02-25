@@ -9,6 +9,7 @@ import (
 func TestGenerateUploadToken(t *testing.T) {
 	if os.Getenv("CI") != "" {
 		t.Skip("Skipping testing in CI environment")
+		return
 	}
 	tests := []struct {
 		name      string
