@@ -3,13 +3,14 @@ package mo2utils
 import (
 	"context"
 	"fmt"
-	"github.com/qiniu/go-sdk/v7/storage"
 	"io/ioutil"
 	"log"
 	"mo2/mo2img"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/qiniu/go-sdk/v7/storage"
 )
 
 func CopyAllFiles(srcPath string, tgtPath string) {
@@ -81,9 +82,12 @@ func uploadAllFiles(curPath string, rootPath string, uploadRootPath string) {
 		}
 	}
 }
+func IsEnvRelease() (release bool) {
+	return os.Getenv("GIN_MODE") == "release"
+}
 
 func UploadCDN() {
-	if ginMode := os.Getenv("GIN_MODE"); ginMode == "release" {
+	if IsEnvRelease() {
 		rootPath := "./dist"
 		uploadRootPath := "dist"
 		UploadAllFiles(rootPath, uploadRootPath)
