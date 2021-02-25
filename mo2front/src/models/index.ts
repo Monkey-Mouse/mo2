@@ -7,6 +7,15 @@ export interface BlogBrief {
     entityInfo: EntityInfo;
     authorId: string;
 }
+export interface UserListData {
+    id: string;
+    name: string;
+}
+export interface DisplayBlogBrief extends BlogBrief {
+    userLoad: boolean;
+    userName: string;
+}
+
 export interface Blog extends BlogBrief {
     content: string;
 }

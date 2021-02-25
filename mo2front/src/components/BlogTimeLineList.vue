@@ -29,7 +29,10 @@
                   >
                     {{ blog.title }}
                   </div>
-                  <div class="subtitle-1">{{ blog.author }}</div>
+                  <div v-if="blog.userLoad" class="subtitle-1">
+                    {{ blog.userName }}
+                  </div>
+                  <v-skeleton-loader v-else type="card-heading" />
                   <div class="subtitle-2">
                     {{ blog.entityInfo.createTime.substr(0, 10) }}
                   </div>
@@ -106,17 +109,19 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 import { Colors } from "vuetify/es5/util/colors";
 import { colors } from "vuetify/lib";
-import { BlogBrief } from "../models/index";
-import { randomProperty, Copy } from "../utils/index";
+import { BlogBrief, DisplayBlogBrief } from "../models/index";
+import { randomProperty, Copy, GetUserDatas } from "../utils/index";
 @Component
 export default class BlogTimeLineList extends Vue {
   @Prop()
-  blogs!: BlogBrief[];
+  blogs!: DisplayBlogBrief[];
+  prevlen = -1;
   displayColors: string[] = [];
   created() {
+    this.prevlen = this.blogs.length;
     this.displayColors = Object.getOwnPropertyNames(colors);
     // let count = Object.getOwnPropertyNames(colors).length;
     // while (this.displayColors.length < count) {
@@ -125,6 +130,36 @@ export default class BlogTimeLineList extends Vue {
     //   delete copiedColors[displayColor];
     //   this.displayColors.push(displayColor);
     // }
+  }
+  mounted() {
+    const ids = this.blogs.map((v, i, a) => v.authorId);
+    GetUserDatas(ids).then((data) => {
+      const dic: any = {};
+      for (let index = 0; index < data.length; index++) {
+        const element = data[index];
+        dic[element.id] = element.name;
+      }
+      for (let index = 0; index < this.blogs.length; index++) {
+        this.blogs[index].userName = dic[this.blogs[index].authorId];
+        this.blogs[index].userLoad = true;
+      }
+      this.$forceUpdate();
+    });
+  }
+  @Watch("blogs")
+  changeBlogs() {
+    // const ids = this.blogs.map((v, i, a) => v.authorId);
+    // GetUserDatas(ids).then((data) => {
+    //   const dic: any = {};
+    //   for (let index = 0; index < data.length; index++) {
+    //     const element = data[index];
+    //     dic[element.id] = element.name;
+    //   }
+    //   for (let index = 0; index < this.blogs.length; index++) {
+    //     this.blogs[index].userName = dic[this.blogs[index].authorId];
+    //     this.blogs[index].userLoad = true;
+    //   }
+    // });
   }
   rateChange(blog: BlogBrief) {
     // to be implemented

@@ -1,4 +1,4 @@
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 
@@ -18,6 +18,10 @@ export function Copy<T>(mainObject: T) {
 export async function GetUserData(uid: string): Promise<User> {
     let re = await axios.get<User>('/api/accounts/detail/' + uid);
     return re.data[0]
+}
+export async function GetUserDatas(uids: string[]): Promise<UserListData[]> {
+    let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.join('&id='));
+    return re.data
 }
 
 export function GetInitials(name: string) {
