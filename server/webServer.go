@@ -20,6 +20,7 @@ func setupHandlers(c *controller.Controller) {
 	{
 		api.Get("/logs", c.Log)
 		api.Get("/img/:filename", c.GenUploadToken, model.OrdinaryUser)
+		api.Post("deploy", c.Deploy)
 		blogs := api.Group("blogs")
 		{
 			blogs.Get("query", c.QueryBlogs)
