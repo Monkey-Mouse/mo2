@@ -68,6 +68,9 @@ func (h HandlerMap) Get(relativPath string, handler gin.HandlerFunc, roles ...st
 func (h HandlerMap) Post(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodPost, relativPath, handler, roles...)
 }
+func (h HandlerMap) Delete(relativPath string, handler gin.HandlerFunc, roles ...string) {
+	h.Handle(http.MethodDelete, relativPath, handler, roles...)
+}
 func (h HandlerMap) Put(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodPut, relativPath, handler, roles...)
 }

@@ -1,23 +1,16 @@
 <template>
-  <img-selector :imgs="imgs" />
+  <blog-skeleton :num="10" />
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop } from "vue-property-decorator";
-import ImgSelector from "../components/ImgSelector.vue";
+import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 @Component({
-  components: { ImgSelector },
+  components: { BlogSkeleton },
 })
-export default class About extends Vue {
-  imgs: { src: string; active: boolean }[] = [
-    { src: "https://picsum.photos/id/11/100/60", active: false },
-    { src: "https://picsum.photos/id/11/100/60", active: false },
-    { src: "https://picsum.photos/id/11/100/60", active: false },
-    { src: "https://picsum.photos/id/11/100/60", active: false },
-  ];
-}
+export default class About extends Vue {}
 </script>
 <style>
 .bordered {

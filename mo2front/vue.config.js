@@ -9,6 +9,8 @@ module.exports = {
   ],
   lintOnSave: true,
   outputDir: path.resolve(__dirname, '../dist'),
+  publicPath: process.env.NODE_ENV === 'production' ?
+    '//cdn.mo2.leezeeyee.com/frontend/' : '/',
   //publicPath: '/static',
   // 放置生成的静态资源 (js、css、img、fonts) 的 (相对于 outputDir 的) 目录。
   //assetsDir: 'static',

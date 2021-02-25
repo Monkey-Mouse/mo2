@@ -85,33 +85,31 @@ func FindAllCategories() (cs []model.Category) {
 	return
 }
 func AddBlogs2Categories(ab2cs dto.AddBlogs2Categories) (results []dto.QueryBlog) {
-	var categories []model.Category
+	var categoryIDs []primitive.ObjectID
 	for _, categoryID := range ab2cs.CategoryIDs {
-		var category model.Category
-		category = FindCategoryById(categoryID)
-		if category.IsValid() {
-			categories = append(categories, category)
+		if !categoryID.IsZero() {
+			categoryIDs = append(categoryIDs, categoryID)
 		}
 	}
 	var blog, draft model.Blog
-	if len(categories) > 0 {
+	if len(categoryIDs) > 0 {
 		for _, blogID := range ab2cs.BlogIDs {
 			blog = FindBlogById(blogID, false)
 			if blog.IsValid() {
-				AddBlog2Categories(&blog, categories, false)
+				AddBlog2Categories(&blog, categoryIDs, false)
 				results = append(results, dto.MapBlog2QueryBlog(blog))
 			}
 			draft = FindBlogById(blogID, true)
 			if draft.IsValid() {
-				AddBlog2Categories(&draft, categories, true)
+				AddBlog2Categories(&draft, categoryIDs, true)
 				results = append(results, dto.MapBlog2QueryBlog(draft))
 			}
 		}
 	}
 	return results
 }
-func AddBlog2Categories(blog *model.Blog, categories []model.Category, isDraft bool) {
-	blog.Categories = append(blog.Categories, categories...)
+func AddBlog2Categories(blog *model.Blog, categoryIDs []primitive.ObjectID, isDraft bool) {
+	blog.CategoryIDs = append(blog.CategoryIDs, categoryIDs...)
 	upsertBlog(blog, isDraft)
 }
 func AddCategory2User(category model.Category, userId primitive.ObjectID) {
@@ -136,7 +134,10 @@ func AddCategoryId2User(catId primitive.ObjectID, userId primitive.ObjectID) {
 		CategoryID: catId,
 	}
 	//todo check if valid
-	catUserCol.InsertOne(context.TODO(), catUser)
+	if _, err := catUserCol.InsertOne(context.TODO(), catUser); err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 //find category by userid

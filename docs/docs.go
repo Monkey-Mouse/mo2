@@ -48,7 +48,7 @@ var doc = `{
                 "summary": "Add an account",
                 "parameters": [
                     {
-                        "description": "Add account",
+                        "description": "add new account info",
                         "name": "account",
                         "in": "body",
                         "required": true,
@@ -67,18 +67,71 @@ var doc = `{
                 }
             }
         },
-        "/api/accounts/addUser": {
-            "post": {
-                "description": "为新用户创建信息，加入数据库",
+        "/api/accounts/detail/{id}": {
+            "get": {
+                "description": "get string by ID；若id为空，返回所有用户信息",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "新增用户",
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Show account's info",
+                "operationId": "get-string-by-int",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/listBrief": {
+            "get": {
+                "description": "from a list of user ids [usage]:/api/accounts/listBrief?id=60223d4042d6febff9f276f0\u0026id=60236866d2a68483adaccc38",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "List accounts brief info",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "description": "user IDs list",
+                        "name": "userIDs",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserInfoBrief"
+                            }
                         }
                     }
                 }
@@ -131,42 +184,6 @@ var doc = `{
                 "responses": {
                     "200": {
                         "description": ""
-                    }
-                }
-            }
-        },
-        "/api/accounts/{id}": {
-            "get": {
-                "description": "get string by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Show a account",
-                "operationId": "get-string-by-int",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Account ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "headers": {
-                            "Token": {
-                                "type": "string",
-                                "description": "qwerty"
-                            }
-                        }
                     }
                 }
             }
@@ -566,10 +583,28 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/model.Blog"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
                         }
                     }
                 }
@@ -613,6 +648,80 @@ var doc = `{
                             "items": {
                                 "$ref": "#/definitions/dto.QueryBlog"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/{id}": {
+            "put": {
+                "description": "restore by path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "restore Blog",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool true",
+                        "name": "draft",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "string xxxxxxxx",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete by path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "delete Blog",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool true",
+                        "name": "draft",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "string xxxxxxxx",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
                         }
                     }
                 }
@@ -689,6 +798,17 @@ var doc = `{
         }
     },
     "definitions": {
+        "controller.ResponseError": {
+            "type": "object",
+            "properties": {
+                "reason": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.AddBlogs2Categories": {
             "type": "object",
             "properties": {
@@ -777,7 +897,7 @@ var doc = `{
                 "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Category"
+                        "type": "string"
                     }
                 },
                 "cover": {
@@ -813,6 +933,51 @@ var doc = `{
         },
         "dto.QueryBlogs": {
             "type": "object"
+        },
+        "dto.UserInfo": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "email@qq.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "infos": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string",
+                    "example": "account name"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "ordinaryUser"
+                    ]
+                }
+            }
+        },
+        "dto.UserInfoBrief": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "name": {
+                    "type": "string",
+                    "example": "account name"
+                }
+            }
         },
         "model.Account": {
             "type": "object",
@@ -884,7 +1049,7 @@ var doc = `{
                 "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Category"
+                        "type": "string"
                     }
                 },
                 "content": {
@@ -946,6 +1111,9 @@ var doc = `{
                     "type": "string",
                     "example": "2020-10-1"
                 },
+                "is_deleted": {
+                    "type": "boolean"
+                },
                 "updateTime": {
                     "type": "string",
                     "example": "2020-10-1"
@@ -980,7 +1148,7 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
-	Host:        "localhost:5000",
+	Host:        "localhost:5001",
 	BasePath:    "/",
 	Schemes:     []string{},
 	Title:       "Mo2",

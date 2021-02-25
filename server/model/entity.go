@@ -11,6 +11,7 @@ import (
 type Entity struct {
 	CreateTime time.Time `json:"createTime" example:"2020-10-1" bson:"create_time,omitempty"`
 	UpdateTime time.Time `json:"updateTime" example:"2020-10-1" bson:"update_time,omitempty"`
+	IsDeleted  bool      `json:"is_deleted,omitempty" example"true" bson:"is_deleted,omitempty"`
 }
 
 // IndexModels Index Models to index entity
@@ -22,13 +23,14 @@ var IndexModels = []mongo.IndexModel{
 // InitEntity init new entity
 func InitEntity() Entity {
 	t := time.Now()
-	return Entity{t, t}
+	return Entity{t, t, false}
 }
 
 // Create create entity
 func (e *Entity) Create() {
 	e.CreateTime = time.Now()
 	e.UpdateTime = e.CreateTime
+	e.IsDeleted = false
 }
 
 // Update update entity

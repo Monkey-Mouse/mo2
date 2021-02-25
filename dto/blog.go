@@ -6,14 +6,14 @@ import (
 )
 
 type QueryBlog struct {
-	ID          primitive.ObjectID `json:"id,omitempty" example:"xxxxxxxxxxxxx==" `
-	AuthorID    primitive.ObjectID `json:"authorId,omitempty" example:"xxxxxxxxxxxxx==" `
-	Title       string             `json:"title,omitempty" example:"mouse ❤ monkey" `
-	Description string             `json:"description,omitempty" example:"mouse ❤ monkey" `
-	EntityInfo  model.Entity       `json:"entityInfo,omitempty"`
-	Cover       string             `json:"cover,omitempty" example:"https://xxx/xxx" `
-	KeyWords    []string           `json:"keyWords,omitempty" example:"xxx,xxx"`
-	Categories  []model.Category   `json:"categories,omitempty" bson:"categories,omitempty"`
+	ID          primitive.ObjectID   `json:"id,omitempty" example:"xxxxxxxxxxxxx==" `
+	AuthorID    primitive.ObjectID   `json:"authorId,omitempty" example:"xxxxxxxxxxxxx==" `
+	Title       string               `json:"title,omitempty" example:"mouse ❤ monkey" `
+	Description string               `json:"description,omitempty" example:"mouse ❤ monkey" `
+	EntityInfo  model.Entity         `json:"entityInfo,omitempty"`
+	Cover       string               `json:"cover,omitempty" example:"https://xxx/xxx" `
+	KeyWords    []string             `json:"keyWords,omitempty" example:"xxx,xxx"`
+	CategoryIDs []primitive.ObjectID `json:"categories,omitempty" bson:"categories,omitempty"`
 }
 type QueryBlogs struct {
 	blogs []QueryBlog `json:"blogs,omitempty"`
@@ -27,7 +27,7 @@ func MapBlog2QueryBlog(b model.Blog) (q QueryBlog) {
 	q.EntityInfo = b.EntityInfo
 	q.Cover = b.Cover
 	q.KeyWords = b.KeyWords
-	q.Categories = b.Categories
+	q.CategoryIDs = b.CategoryIDs
 	return
 }
 func (qs *QueryBlogs) Init(bs []model.Blog) {

@@ -28,16 +28,19 @@ func chooseCol(isDraft bool) (col *mongo.Collection) {
 }
 
 // InsertBlog insert
-func insertBlog(b *model.Blog, isDraft bool) {
+func insertBlog(b *model.Blog, isDraft bool) (success bool) {
 	b.Init()
 	col := chooseCol(isDraft)
+	success = true
 	if _, err := col.InsertOne(context.TODO(), b); err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		success = false
 	}
+	return
 }
 
 // upsertBlog
-func upsertBlog(b *model.Blog, isDraft bool) {
+func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
 	col := chooseCol(isDraft)
 	b.EntityInfo.Update()
 	result, err := col.UpdateOne(
@@ -50,26 +53,31 @@ func upsertBlog(b *model.Blog, isDraft bool) {
 			"content":     b.Content,
 			"cover":       b.Cover,
 			"key_words":   b.KeyWords,
-			"categories":  b.Categories,
+			"categories":  b.CategoryIDs,
 		}}},
 		options.Update().SetUpsert(true),
 	)
+	success = true
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		success = false
 	}
 	if result.MatchedCount == 0 {
 		log.Println("blog id do not match in database")
+		success = false
 	}
+	return
 }
 
 // UpsertBlog upsert blog or draft
-func UpsertBlog(b *model.Blog, isDraft bool) {
+func UpsertBlog(b *model.Blog, isDraft bool) (success bool) {
 
 	if b.ID == primitive.NilObjectID {
-		insertBlog(b, isDraft)
+		success = insertBlog(b, isDraft)
 	} else {
-		upsertBlog(b, isDraft)
+		success = upsertBlog(b, isDraft)
 	}
+	return
 }
 
 //find blog by user
