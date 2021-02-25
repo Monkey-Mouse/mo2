@@ -13,8 +13,12 @@
           </div>
           <v-row v-if="authorLoad" class="mb-6">
             <avatar :size="40" :user="author"></avatar>
-            <span class="text--lighten-2 ml-2">{{ author.name }}</span>
-            <span class="ml-2 grey--text">{{
+            <a
+              @click="$router.push('/account/' + author.id)"
+              class="text--lighten-2 ml-2 mt-2"
+              >{{ author.name }}</a
+            >
+            <span class="ml-2 grey--text mt-2">{{
               blog.entityInfo.createTime.substr(0, 10)
             }}</span>
             <v-spacer />
