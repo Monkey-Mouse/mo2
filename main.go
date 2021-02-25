@@ -34,7 +34,7 @@ func main() {
 
 }
 
-func Init() {
+func init() {
 	if mo2utils.IsEnvRelease() {
 		docs.SwaggerInfo.Host = "http://47.93.189.12:5001/"
 	}
