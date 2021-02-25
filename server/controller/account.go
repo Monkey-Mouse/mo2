@@ -59,6 +59,35 @@ func (c *Controller) Log(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, s)
 }
 
+// AddAccountRole godoc
+// @Summary Add role for an account
+// @Description add by json account
+// @Tags admin
+// @Accept  json
+// @Produce  json
+// @Param account body model.AddAccountRole true "add new account info"
+// @Success 200 {object} dto.UserInfo
+// @Router /api/accounts/role [post]
+func (c *Controller) AddAccountRole(ctx *gin.Context) {
+	var addAccount model.AddAccountRole
+	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
+		ctx.JSON(http.StatusUnauthorized, SetResponseError(err))
+		return
+	}
+	if err := addAccount.Validation(); err != nil {
+		ctx.JSON(http.StatusUnauthorized, SetResponseError(err))
+		return
+	}
+	account, exist := database.FindAccount(addAccount.ID)
+	if !exist {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
+		return
+	}
+	model.AddRoles(&account, addAccount.Roles)
+	database.UpsertAccount(&account)
+	ctx.JSON(http.StatusOK, dto.Account2UserInfo(account))
+}
+
 // AddAccount godoc
 // @Summary Add an account
 // @Description add by json account
