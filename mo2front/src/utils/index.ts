@@ -109,3 +109,6 @@ export const GetOwnArticles = async (query: { page: number, pageSize: number, dr
 export const GetUserArticles = async (query: { page: number, pageSize: number, draft: boolean, id: string }) => {
     return (await axios.get<BlogBrief[]>('/api/blogs/find/userId' + ParseQuery(query))).data
 }
+export function ReachedBottom(): boolean {
+    return (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight;
+}

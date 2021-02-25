@@ -12,7 +12,7 @@
       </v-row>
     </v-parallax>
     <v-container>
-      <blog-time-line-list v-if="!loading" :blogs="blogs" />
+      <blog-time-line-list v-if="!firstloading" :blogs="blogs" />
       <blog-skeleton v-else :num="3" />
     </v-container>
   </div>
@@ -35,11 +35,41 @@ import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 export default class Home extends Vue {
   blogs: BlogBrief[] = [];
   loading = true;
+  firstloading = true;
+  page = 0;
+  pagesize = 5;
+  nomore = false;
   created() {
-    GetArticles({ page: 0, pageSize: 10, draft: false }).then((val) => {
-      this.blogs = val;
-      this.loading = false;
+    GetArticles({
+      page: this.page++,
+      pageSize: this.pagesize,
+      draft: false,
+    }).then((val) => {
+      this.addMore(val);
+      this.firstloading = false;
     });
+  }
+  addMore(val: BlogBrief[]) {
+    if (val.length < this.pagesize) {
+      this.nomore = true;
+    }
+    for (let index = 0; index < val.length; index++) {
+      const element = val[index];
+      this.blogs.push(element);
+    }
+    this.loading = false;
+  }
+  public ReachedButtom() {
+    if (this.loading === false && !this.nomore) {
+      this.loading = true;
+      GetArticles({
+        page: this.page++,
+        pageSize: this.pagesize,
+        draft: false,
+      }).then((val) => {
+        this.addMore(val);
+      });
+    }
   }
 }
 </script>
