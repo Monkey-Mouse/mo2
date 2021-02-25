@@ -12,7 +12,7 @@
           alt="Vuetify Logo"
           class="shrink mr-2"
           contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
+          src="https://tse4-mm.cn.bing.net/th/id/OIP.m0-fVm5FkxFJULj3h60oTwHaHa?w=177&h=180&c=7&o=5&dpr=2&pid=1.7"
           transition="scale-transition"
           width="40"
         />
