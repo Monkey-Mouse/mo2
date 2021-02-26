@@ -58,7 +58,13 @@ export default class Home extends Vue implements BlogAutoLoader {
     AddMore(this, val);
   }
   public ReachedButtom() {
-    ElmReachedButtom(this, GetArticles);
+    ElmReachedButtom(this, ({ page, pageSize }) =>
+      GetArticles({
+        page: page,
+        pageSize: pageSize,
+        draft: false,
+      })
+    );
   }
 }
 </script>

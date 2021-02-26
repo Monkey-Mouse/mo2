@@ -29,9 +29,15 @@
                   >
                     {{ blog.title }}
                   </div>
-                  <div v-if="blog.userLoad" class="subtitle-1">
+                  <a
+                    v-on:click.prevent
+                    v-on:click.stop
+                    v-if="blog.userLoad"
+                    @click="$router.push('/account/' + blog.authorId)"
+                    class="subtitle-1"
+                  >
                     {{ blog.userName }}
-                  </div>
+                  </a>
                   <v-skeleton-loader v-else type="card-heading" />
                   <div class="subtitle-2">
                     {{ blog.entityInfo.createTime.substr(0, 10) }}
@@ -44,8 +50,14 @@
                 class="shrink ma-3"
                 contain
                 height="125px"
-                :src="blog.cover"
-                lazy-src="https://picsum.photos/id/11/100/60"
+                :src="
+                  blog.cover ? blog.cover : '//cdn.mo2.leezeeyee.com/404.jpg'
+                "
+                :lazy-src="
+                  blog.cover
+                    ? blog.cover
+                    : '//cdn.mo2.leezeeyee.com/404.jpg' + '~thumb'
+                "
                 style="flex-basis: 125px"
               >
                 <template v-slot:placeholder>
@@ -118,6 +130,8 @@ import { randomProperty, Copy, GetUserDatas } from "../utils/index";
 export default class BlogTimeLineList extends Vue {
   @Prop()
   blogs!: DisplayBlogBrief[];
+  @Prop({ default: false })
+  draft: boolean;
   prevlen = -1;
   displayColors: string[] = [];
   created() {
@@ -143,6 +157,7 @@ export default class BlogTimeLineList extends Vue {
         for (let index = 0; index < this.blogs.length; index++) {
           this.blogs[index].userName = dic[this.blogs[index].authorId];
           this.blogs[index].userLoad = true;
+          this.blogs[index].rate = 5;
         }
         this.$forceUpdate();
       });
@@ -165,6 +180,7 @@ export default class BlogTimeLineList extends Vue {
       for (let index = this.prevlen; index < this.blogs.length; index++) {
         this.blogs[index].userName = dic[this.blogs[index].authorId];
         this.blogs[index].userLoad = true;
+        this.blogs[index].rate = 5;
       }
       this.$forceUpdate();
     });
@@ -173,7 +189,9 @@ export default class BlogTimeLineList extends Vue {
     // to be implemented
   }
   gotoArticle(id: string) {
-    this.$router.push("/article/" + id);
+    this.$router.push(
+      "/article/" + id + (this.draft ? `?draft=${this.draft}` : "")
+    );
   }
 }
 </script>

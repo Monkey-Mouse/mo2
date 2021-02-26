@@ -121,13 +121,12 @@ export interface BlogAutoLoader {
     nomore: boolean,
     ReachedButtom: () => void,
 }
-export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { page: number, pageSize: number, draft: boolean, id?: string }) => Promise<BlogBrief[]>) {
+export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { page: number, pageSize: number }) => Promise<BlogBrief[]>) {
     if (elm.loading === false && !elm.nomore) {
         elm.loading = true;
         getArticles({
             page: elm.page++,
             pageSize: elm.pagesize,
-            draft: false,
         }).then((val) => {
             try {
                 AddMore(elm, val);
@@ -149,5 +148,4 @@ export function AddMore(elm: BlogAutoLoader, val: BlogBrief[]) {
 }
 export async function DeleteArticle(id: string, query: { draft: boolean }) {
     (await axios.delete('/api/blogs/' + id + ParseQuery(query)))
-
 }
