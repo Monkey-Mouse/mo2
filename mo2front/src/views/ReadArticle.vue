@@ -45,7 +45,11 @@
           src="https://th.bing.com/th/id/OIP.dnWfZl6P-0Pl47j7PhZodQHaHJ?w=187&h=180&c=7&o=5&dpr=2&pid=1.7"
         />
         <v-row justify="center" class="mb-5">• • •</v-row> -->
-          <div v-html="html" class="mo2content mt-10" spellcheck="false"></div>
+          <div
+            v-html="$sanitize(html)"
+            class="mo2content mt-10"
+            spellcheck="false"
+          ></div>
           <delete-confirm
             :title="'确认删除'"
             :content="deleteContent"

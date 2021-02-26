@@ -6,6 +6,8 @@ import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify';
 import VueCookies from 'vue-cookies'
+import sanitizeHtml from 'sanitize-html'
+Vue.prototype.$sanitize = sanitizeHtml
 Vue.use(VueCookies)
 
 // set default config
