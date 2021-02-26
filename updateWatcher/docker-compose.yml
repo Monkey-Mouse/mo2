@@ -13,6 +13,8 @@ services:
     environment:
       - qiniuak=${qiniuak}
       - qiniusk=${qiniusk}
+      - emailAddr=${emailAddr}
+      - emailPass=${emailPass}
     ports:
       - 5001:5001
     depends_on:

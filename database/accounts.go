@@ -4,16 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"math/rand"
+	"mo2/dto"
+	"mo2/server/model"
+
+	"mo2/mo2utils"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"math/rand"
-	"mo2/dto"
-	"mo2/mo2utils"
-	"mo2/server/model"
 )
 
 var accCol = GetCollection("accounts")
@@ -220,15 +222,23 @@ func FindAccountInfo(id primitive.ObjectID) (u dto.UserInfo, exist bool) {
 
 // ListAccountsBrief find from a list of id
 func ListAccountsBrief(idStrs []string) (bs []dto.UserInfoBrief) {
+	ids := make([]primitive.ObjectID, len(idStrs))
+	i := 0
 	for _, idStr := range idStrs {
 		id, err := primitive.ObjectIDFromHex(idStr)
-		if err == nil {
-			a, exist := FindAccount(id)
-			if exist {
-				bs = append(bs, dto.MapAccount2InfoBrief(a))
-			}
+		if err != nil {
+			return
 		}
+		ids[i] = id
+		i++
 	}
+	cursor, _ := accCol.Find(context.TODO(),
+		bson.D{
+			{Key: "_id",
+				Value: bson.D{
+					{Key: "$in", Value: ids},
+				}}})
+	cursor.All(context.TODO(), &bs)
 	return
 }
 
