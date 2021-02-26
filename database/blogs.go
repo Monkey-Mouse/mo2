@@ -99,15 +99,15 @@ func UpsertBlog(b *model.Blog, isDraft bool) (success bool) {
 }
 
 //find blog by user
-func FindBlogsByUser(u dto.LoginUserInfo, isDraft bool) (b []model.Blog) {
-	return FindBlogsByUserId(u.ID, isDraft)
+func FindBlogsByUser(u dto.LoginUserInfo, filter model.Filter) (b []model.Blog) {
+	return FindBlogsByUserId(u.ID, filter)
 }
 
 //find blog by userId
-func FindBlogsByUserId(id primitive.ObjectID, isDraft bool) (b []model.Blog) {
-	col := chooseCol(isDraft)
+func FindBlogsByUserId(id primitive.ObjectID, filter model.Filter) (b []model.Blog) {
+	col := chooseCol(filter.IsDraft)
 	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
-	cursor, err := col.Find(context.TODO(), bson.D{{"author_id", id}}, opts)
+	cursor, err := col.Find(context.TODO(), bson.M{"author_id": id, "entity_info.isdeleted": filter.IsDeleted}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		log.Fatal(err)
@@ -129,10 +129,10 @@ func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
 }
 
 //find blog
-func FindAllBlogs(isDraft bool, isDeleted bool) (b []model.Blog) {
-	col := chooseCol(isDraft)
+func FindAllBlogs(filter model.Filter) (b []model.Blog) {
+	col := chooseCol(filter.IsDraft)
 	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
-	cursor, err := col.Find(context.TODO(), bson.D{{"entity_info.isdeleted", isDeleted}}, opts)
+	cursor, err := col.Find(context.TODO(), bson.D{{"entity_info.isdeleted", filter.IsDeleted}}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		log.Fatal(err)
