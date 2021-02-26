@@ -110,6 +110,7 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
 		return
 	}
+	addAccount.UserName = primitive.NewObjectID().String() + addAccount.UserName
 	account, err := database.AddAccount(addAccount,
 		"http://"+ctx.Request.Host+"/api/accounts/verify")
 	account.Infos["token"] = ""
