@@ -39,7 +39,7 @@ import {
 } from "@/utils";
 import Vue from "vue";
 import Component from "vue-class-component";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
 import Avatar from "../components/UserAvatar.vue";
 import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
@@ -65,7 +65,7 @@ export default class Account extends Vue implements BlogAutoLoader {
     this.uid = this.$route.params["id"];
     if (this.uid === undefined || this.uid === this.user.id) {
       this.uid = this.user.id;
-      this.displayUser = Copy(this.user);
+      this.displayUser = this.user;
       GetOwnArticles({
         page: this.page++,
         pageSize: this.pagesize,
@@ -89,6 +89,18 @@ export default class Account extends Vue implements BlogAutoLoader {
       });
     }
   }
+  @Watch("user")
+  userChange() {
+    if (
+      this.uid === undefined ||
+      this.uid === "" ||
+      this.uid === this.user.id
+    ) {
+      this.uid = this.user.id;
+      this.displayUser = this.user;
+    }
+  }
+
   public ReachedButtom() {
     ElmReachedButtom(this, GetOwnArticles);
   }

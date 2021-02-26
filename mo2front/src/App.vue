@@ -158,12 +158,12 @@ Vue.use(Vuelidate);
 export default class App extends Vue {
   drawer = false;
   user: User = {
-    name: "leezeeyee",
-    email: "easilylazy@mo2.com",
-    description: "all work no play made me a dull girl",
-    site: "www.mo2.pro",
-    createTime: "2020-1-1",
-    id: "xxxxxxxxxxxxxxx",
+    name: "",
+    email: "",
+    description: "",
+    site: "",
+    createTime: "",
+    id: "",
     avatar: "",
     roles: [],
   };
