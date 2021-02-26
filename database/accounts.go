@@ -164,6 +164,7 @@ func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
 	if account.Infos["token"] == info.Token {
 		account.Infos["isActive"] = "true"
 		delete(account.Infos, "token")
+		account.UserName = account.UserName[24:]
 		UpsertAccount(&account)
 	} else {
 		err = errors.New("token不符")
