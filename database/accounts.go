@@ -20,9 +20,15 @@ import (
 
 var accCol = GetCollection("accounts")
 
+// FindAccountByEmail getaccount by email
+func FindAccountByEmail(email string) (account model.Account, err error) {
+	err = accCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account)
+	return
+}
+
 //already check the validation in controller
 //if add a newAccount success, return account info
-func AddAccount(newAccount model.AddAccount) (account model.Account, err error) {
+func AddAccount(newAccount model.AddAccount, baseUrl string) (account model.Account, err error) {
 	collection := GetCollection("accounts")
 	//ensure index
 	indexModel := []mongo.IndexModel{
@@ -39,6 +45,22 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	user, err := FindAccountByEmail(newAccount.Email)
+	if err == nil {
+		if user.Infos["isActive"] != "false" {
+			err = errors.New("Email已经被使用")
+			return
+		}
+		token := mo2utils.GenerateJwtToken(user.Email)
+		user.Infos["token"] = token
+		UpsertAccount(&user)
+		url := baseUrl + "?email=" + user.Email + "&token=" + token
+		mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url))
+		account = user
+		err = nil
+		return
+	}
 	//var account model.Account
 	account.Email = newAccount.Email
 	account.UserName = newAccount.UserName
@@ -48,6 +70,8 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 	account.Infos = make(map[string]string)
 	account.Infos["avatar"] = ""        // default pic
 	account.Infos["isActive"] = "false" // default pic
+	token := mo2utils.GenerateJwtToken(user.Email)
+	user.Infos["token"] = token
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -58,6 +82,16 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 		return
 	}
 	insertResult, err := collection.InsertOne(context.TODO(), account)
+
+	if err != nil {
+		merr := err.(mongo.WriteException).WriteErrors[0]
+		if merr.Code == 11000 {
+			err = errors.New("Name已被注册！")
+		}
+		return
+	}
+	url := baseUrl + "?email=" + account.Email + "&token=" + token
+	mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url))
 	account.ID = insertResult.InsertedID.(primitive.ObjectID)
 	return
 }

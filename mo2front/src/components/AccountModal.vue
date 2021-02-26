@@ -1,142 +1,161 @@
 <template>
-  <v-dialog
-    :value="enable"
-    @click:outside="close"
-    max-width="600px"
-    autocomplete="off"
-  >
-    <v-card :loading="processing" :disabled="processing">
-      <v-container>
-        <v-row>
-          <v-col cols="12">
-            <v-card-title>
-              <v-tabs align-with-title v-model="tabkey">
-                <v-tab :key="1">登录</v-tab>
-                <v-tab :key="2">注册</v-tab>
-              </v-tabs>
-            </v-card-title>
-          </v-col>
-        </v-row>
-        <v-tabs-items v-model="tabkey">
-          <v-tab-item @focus="regerror = ''" :key="1">
-            <v-card-text>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    label="Email"
-                    v-model="email"
-                    :rules="validateEmail()"
-                  >
-                    <v-icon slot="append" color="gray"> mdi-email </v-icon>
-                  </v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    label="Password"
-                    v-model="password"
-                    :type="showPasswd ? 'text' : 'password'"
-                    :append-icon="showPasswd ? 'mdi-eye-off' : 'mdi-eye'"
-                    @click:append="showPasswd = !showPasswd"
-                    hint="长度最小为8"
-                    :rules="validatePasswd()"
-                  >
-                  </v-text-field>
-                </v-col>
-              </v-row>
-              <v-row v-if="loginerr !== ''">
-                <v-alert dense outlined type="error" class="col-12">{{
-                  loginerr
-                }}</v-alert></v-row
-              >
-            </v-card-text>
-            <v-card-actions>
-              <v-switch label="记住我"></v-switch>
-              <v-spacer></v-spacer>
-              <v-btn
-                outlined
-                text
-                :disabled="
-                  this.$v.password.$anyError || this.$v.email.$anyError
-                "
-                @click="login"
-                >登录</v-btn
-              >
-              <v-btn @click="close" color="red">取消</v-btn>
-            </v-card-actions>
-          </v-tab-item>
-          <v-tab-item :key="2">
-            <v-card-text>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    label="Name"
-                    v-model="name"
-                    :rules="validateName()"
-                  >
-                    <v-icon slot="append" color="gray"> mdi-account </v-icon>
-                  </v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    label="Email"
-                    v-model="email"
-                    :rules="validateEmail()"
-                  >
-                    <v-icon slot="append" color="gray"> mdi-email </v-icon>
-                  </v-text-field>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    label="Password"
-                    v-model="password"
-                    :type="showPasswd ? 'text' : 'password'"
-                    :append-icon="showPasswd ? 'mdi-eye-off' : 'mdi-eye'"
-                    @click:append="showPasswd = !showPasswd"
-                    hint="长度最小为8"
-                    :rules="validatePasswd()"
-                  >
-                  </v-text-field>
-                </v-col>
-              </v-row>
-              <v-row v-if="regerror !== ''">
-                <v-alert dense outlined type="error" class="col-12">{{
-                  regerror
-                }}</v-alert></v-row
-              >
-            </v-card-text>
-            <v-card-actions>
-              <!-- <v-switch label="记住我"></v-switch> -->
-              <v-spacer></v-spacer>
-              <v-btn
-                :disabled="this.$v.$anyError"
-                outlined
-                text
-                @click="register"
-                >注册&登录</v-btn
-              >
-              <v-btn @click="close" color="red">取消</v-btn>
-            </v-card-actions>
-          </v-tab-item>
-        </v-tabs-items>
-      </v-container>
-    </v-card>
-  </v-dialog>
+  <div>
+    <v-snackbar v-model="snackbar" :timeout="5000">
+      确认Email即将发送到你的邮箱，请点击邮箱中的确认按钮后再继续！
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+    <v-dialog
+      :value="enable"
+      @click:outside="close"
+      max-width="600px"
+      autocomplete="off"
+    >
+      <v-card :loading="processing" :disabled="processing">
+        <v-container>
+          <v-row>
+            <v-col cols="12">
+              <v-card-title>
+                <v-tabs align-with-title v-model="tabkey">
+                  <v-tab :key="1">登录</v-tab>
+                  <v-tab :key="2">注册</v-tab>
+                </v-tabs>
+              </v-card-title>
+            </v-col>
+          </v-row>
+          <v-tabs-items v-model="tabkey">
+            <v-tab-item @focus="regerror = ''" :key="1">
+              <v-card-text>
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field
+                      label="Email"
+                      v-model="email"
+                      :rules="validateEmail()"
+                    >
+                      <v-icon slot="append" color="gray"> mdi-email </v-icon>
+                    </v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field
+                      label="Password"
+                      v-model="password"
+                      :type="showPasswd ? 'text' : 'password'"
+                      :append-icon="showPasswd ? 'mdi-eye-off' : 'mdi-eye'"
+                      @click:append="showPasswd = !showPasswd"
+                      hint="长度最小为8"
+                      :rules="validatePasswd()"
+                    >
+                    </v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row v-if="loginerr !== ''">
+                  <v-alert dense outlined type="error" class="col-12">{{
+                    loginerr
+                  }}</v-alert></v-row
+                >
+              </v-card-text>
+              <v-card-actions>
+                <!-- <v-switch label="记住我"></v-switch> -->
+                <v-spacer></v-spacer>
+                <v-btn
+                  outlined
+                  text
+                  :disabled="
+                    this.$v.password.$anyError || this.$v.email.$anyError
+                  "
+                  @click="login"
+                  >登录</v-btn
+                >
+                <v-btn @click="close" color="red">取消</v-btn>
+              </v-card-actions>
+            </v-tab-item>
+            <v-tab-item :key="2">
+              <v-card-text>
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field
+                      label="Name"
+                      v-model="name"
+                      :rules="validateName()"
+                    >
+                      <v-icon slot="append" color="gray"> mdi-account </v-icon>
+                    </v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field
+                      label="Email"
+                      v-model="email"
+                      :rules="validateEmail()"
+                    >
+                      <v-icon slot="append" color="gray"> mdi-email </v-icon>
+                    </v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12">
+                    <v-text-field
+                      label="Password"
+                      v-model="password"
+                      :type="showPasswd ? 'text' : 'password'"
+                      :append-icon="showPasswd ? 'mdi-eye-off' : 'mdi-eye'"
+                      @click:append="showPasswd = !showPasswd"
+                      hint="长度最小为8"
+                      :rules="validatePasswd()"
+                    >
+                    </v-text-field>
+                  </v-col>
+                </v-row>
+                <v-row v-if="regerror !== ''">
+                  <v-alert dense outlined type="error" class="col-12">{{
+                    regerror
+                  }}</v-alert></v-row
+                >
+              </v-card-text>
+              <v-card-actions>
+                <!-- <v-switch label="记住我"></v-switch> -->
+                <v-spacer></v-spacer>
+                <v-btn
+                  v-if="emailSent"
+                  :disabled="this.$v.$anyError"
+                  outlined
+                  text
+                  @click="login"
+                  >Email已确认</v-btn
+                >
+                <v-btn
+                  :disabled="this.$v.$anyError || seconds > 0"
+                  outlined
+                  text
+                  @click="register"
+                  >{{
+                    emailSent
+                      ? "重新发送" + (seconds > 0 ? `${seconds}` : "")
+                      : "注册"
+                  }}</v-btn
+                >
+
+                <v-btn @click="close" color="red">取消</v-btn>
+              </v-card-actions>
+            </v-tab-item>
+          </v-tabs-items>
+        </v-container>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 <script lang="ts">
 import { User } from "@/models";
-import {
-  GetErrorMsg,
-  LoginAsync,
-  RegisterAsync,
-  SendVerifyEmail,
-} from "@/utils";
+import { GetErrorMsg, LoginAsync, RegisterAsync } from "@/utils";
 import { AxiosError } from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
@@ -161,7 +180,10 @@ export default class AccountModal extends Vue {
   email: string = "";
   name: string = "";
   password: string = "";
+  emailSent = false;
+  snackbar = true;
   tabkey = 0;
+  seconds = -1;
   validator = {
     password: {
       required: required,
@@ -179,6 +201,10 @@ export default class AccountModal extends Vue {
   created() {
     this.email = "";
     this.password = "";
+    this.seconds = 30;
+    setInterval(() => {
+      this.seconds--;
+    }, 1000);
   }
   close() {
     this.$emit("update:enable", false);
@@ -198,6 +224,10 @@ export default class AccountModal extends Vue {
       })
       .catch((err) => {
         this.processing = false;
+        if (this.emailSent) {
+          this.regerror = GetErrorMsg(err);
+          return;
+        }
         this.loginerr = GetErrorMsg(err);
       });
   }
@@ -216,10 +246,13 @@ export default class AccountModal extends Vue {
       password: this.password,
     })
       .then((u) => {
-        SendVerifyEmail(u.email).then(() => {
-          alert("发送成功");
-          this.processing = false;
-        });
+        this.seconds = 30;
+        this.processing = false;
+        this.emailSent = true;
+        // SendVerifyEmail(u.email).then(() => {
+        //   alert("发送成功");
+        //   this.processing = false;
+        // });
       })
       .catch((err) => {
         this.processing = false;
