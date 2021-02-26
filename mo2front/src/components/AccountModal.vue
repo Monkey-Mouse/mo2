@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-snackbar v-model="snackbar" :timeout="5000">
-      确认Email即将发送到你的邮箱，请点击邮箱中的确认按钮后再继续！
+      {{ snacktext }}
 
       <template v-slot:action="{ attrs }">
         <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
@@ -129,7 +129,15 @@
                   outlined
                   text
                   @click="login"
-                  >Email已确认</v-btn
+                  >确认并登录</v-btn
+                >
+                <v-btn
+                  v-if="emailSent"
+                  :disabled="this.$v.$anyError"
+                  outlined
+                  text
+                  @click="backToMain"
+                  >先继续浏览</v-btn
                 >
                 <v-btn
                   :disabled="this.$v.$anyError || seconds > 0"
@@ -143,7 +151,7 @@
                   }}</v-btn
                 >
 
-                <v-btn @click="close" color="red">取消</v-btn>
+                <v-btn v-if="emailSent" @click="close" color="red">取消</v-btn>
               </v-card-actions>
             </v-tab-item>
           </v-tabs-items>
@@ -175,13 +183,14 @@ export default class AccountModal extends Vue {
   @Prop()
   user!: User;
   regerror: string = "";
+  snacktext = "确认Email即将发送到你的邮箱，请点击邮箱中的确认按钮后再继续！";
   loginerr = "";
   processing = false;
   email: string = "";
   name: string = "";
   password: string = "";
   emailSent = false;
-  snackbar = true;
+  snackbar = false;
   tabkey = 0;
   seconds = -1;
   validator = {
@@ -205,6 +214,11 @@ export default class AccountModal extends Vue {
     setInterval(() => {
       this.seconds--;
     }, 1000);
+  }
+  backToMain() {
+    this.snacktext = "你可以在确认邮箱之后再次点击右上角的登录继续";
+    this.snackbar = true;
+    this.close();
   }
   close() {
     this.$emit("update:enable", false);
@@ -247,6 +261,9 @@ export default class AccountModal extends Vue {
     })
       .then((u) => {
         this.seconds = 30;
+        this.snacktext =
+          "确认Email即将发送到你的邮箱，请点击邮箱中的确认按钮后再继续！";
+        this.snackbar = true;
         this.processing = false;
         this.emailSent = true;
         // SendVerifyEmail(u.email).then(() => {
