@@ -232,12 +232,15 @@ func ListAccountsBrief(idStrs []string) (bs []dto.UserInfoBrief) {
 		ids[i] = id
 		i++
 	}
-	cursor, _ := accCol.Find(context.TODO(),
+	cursor, err := accCol.Find(context.TODO(),
 		bson.D{
-			{Key: "_id",
-				Value: bson.D{
-					{Key: "$in", Value: ids},
+			{"_id",
+				bson.D{
+					{"$in", ids},
 				}}})
+	if err != nil {
+		fmt.Println(err)
+	}
 	cursor.All(context.TODO(), &bs)
 	return
 }
