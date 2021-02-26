@@ -7,6 +7,16 @@ export interface BlogBrief {
     entityInfo: EntityInfo;
     authorId: string;
 }
+export const BlankUser = {
+    name: "",
+    email: "",
+    description: "",
+    site: "",
+    createTime: "",
+    id: "",
+    avatar: "",
+    roles: [],
+}
 export interface UserListData {
     id: string;
     name: string;

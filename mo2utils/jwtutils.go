@@ -1,7 +1,7 @@
 package mo2utils
 
 import (
-	"fmt"
+	"errors"
 	"log"
 	"mo2/dto"
 	"net/http"
@@ -13,6 +13,10 @@ import (
 
 type JwtLoginClaims struct {
 	UserInfo dto.LoginUserInfo `json:"user_info"`
+	jwt.StandardClaims
+}
+type JwtInfoClaims struct {
+	Info string `json:"info"`
 	jwt.StandardClaims
 }
 
@@ -63,7 +67,24 @@ func VerifyJwt(tokenString string) (userInfo dto.LoginUserInfo, err error) {
 
 }
 
-//add jwt to generate token for user
+// VerifyInfoJwt for JwtInfoClaims
+//if token is valid, return nil
+func VerifyInfoJwt(tokenString string) (info string, err error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JwtInfoClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("mo2"), nil
+	})
+
+	if claims, ok := token.Claims.(*JwtInfoClaims); ok && token.Valid {
+		info = claims.Info
+		err = nil
+	} else {
+		err = errors.New("can not parse for jwtInfoClaims")
+	}
+	return
+
+}
+
+//ParseJwt for JwtLoginClaims
 //if token is valid, return nil
 func ParseJwt(tokenString string) (userInfo dto.LoginUserInfo, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JwtLoginClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -76,14 +97,14 @@ func ParseJwt(tokenString string) (userInfo dto.LoginUserInfo, err error) {
 	if claims, ok := token.Claims.(*JwtLoginClaims); ok && token.Valid {
 		userInfo = claims.UserInfo
 	} else {
-		log.Println("can not parse with JwtClaims")
+		err = errors.New("can not parse for jwtLoginClaims")
 	}
 	return
 
 }
 
-// generate jwt token with claim in type JwtClaims
-// for info
+// GenerateJwtCode generate jwt token with claim in type JwtClaims
+// for info dto.LoginUserInfo
 // jwtToken string
 func GenerateJwtCode(info dto.LoginUserInfo) string {
 	//TODO change the key
@@ -102,6 +123,28 @@ func GenerateJwtCode(info dto.LoginUserInfo) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(tokenString)
+	return tokenString
+}
+
+// GenerateJwtToken generate jwt token with claim in type JwtClaims
+// for info string
+// jwtToken string
+func GenerateJwtToken(info string) string {
+	//TODO change the key
+	hmacSampleSecret := []byte("mo2")
+
+	claims := JwtInfoClaims{
+		Info: info,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Minute * 10).Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Sign and get the complete encoded token as a string using the secret
+	tokenString, err := token.SignedString(hmacSampleSecret)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return tokenString
 }

@@ -148,6 +148,7 @@ func (c *Controller) RestoreBlog(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param draft query bool false "bool true" true
+// @Param deleted query bool false "bool default false" false
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlogs
@@ -169,6 +170,8 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 	}
 	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := parseString2Bool(isDraftStr)
+	isDeletedStr := ctx.DefaultQuery("deleted", "false")
+	isDeleted := parseString2Bool(isDeletedStr)
 	// get user info due to cookie information
 	info, ext := mo2utils.GetUserInfo(ctx)
 	if !ext {
@@ -176,7 +179,10 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 		return
 	}
 
-	blogs := database.FindBlogsByUser(info, isDraft)
+	blogs := database.FindBlogsByUser(info, model.Filter{
+		IsDraft:   isDraft,
+		IsDeleted: isDeleted,
+	})
 	qBlogs := dto.QueryBlogs{}
 	qBlogs.Init(blogs)
 	if results, exist := qBlogs.Query(page, pageSize); exist {
@@ -193,6 +199,7 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param draft query bool false "bool true" true
+// @Param deleted query bool false "bool default false" false
 // @Param id query string false "string xxxxxxxx" "xxxxxxx"
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
@@ -215,6 +222,8 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 	}
 	isDraftStr := ctx.DefaultQuery("draft", "true")
 	isDraft := parseString2Bool(isDraftStr)
+	isDeletedStr := ctx.DefaultQuery("deleted", "false")
+	isDeleted := parseString2Bool(isDeletedStr)
 	idStr := ctx.Query("id")
 	id, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
@@ -224,7 +233,10 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 	if isDraft {
 		JudgeAuthorize(ctx, &model.Blog{AuthorID: id})
 	}
-	blogs := database.FindBlogsByUserId(id, isDraft)
+	blogs := database.FindBlogsByUserId(id, model.Filter{
+		IsDraft:   isDraft,
+		IsDeleted: isDeleted,
+	})
 	qBlogs := dto.QueryBlogs{}
 	qBlogs.Init(blogs)
 	if results, exist := qBlogs.Query(page, pageSize); exist {
@@ -272,7 +284,8 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 // @Description find
 // @Tags blogs
 // @Produce  json
-// @Param draft query bool false "bool true" true
+// @Param draft query bool false "bool default false" false
+// @Param deleted query bool false "bool default false" false
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlog
@@ -293,12 +306,17 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("query with pageSize"))
 	}
 
-	isDraftStr := ctx.DefaultQuery("draft", "true")
+	isDraftStr := ctx.DefaultQuery("draft", "false")
 	isDraft := parseString2Bool(isDraftStr)
-	if isDraft && !mo2utils.IsInRole(ctx, model.GeneralAdmin) {
+	isDeletedStr := ctx.DefaultQuery("deleted", "false")
+	isDeleted := parseString2Bool(isDeletedStr)
+	if (isDraft || isDeleted) && !mo2utils.IsInRole(ctx, model.GeneralAdmin) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("权限不足，请联系管理员"))
 	}
-	blogs := database.FindAllBlogs(isDraft)
+	blogs := database.FindAllBlogs(model.Filter{
+		IsDraft:   isDraft,
+		IsDeleted: isDeleted,
+	})
 	qBlogs := dto.QueryBlogs{}
 	qBlogs.Init(blogs)
 	if results, exist := qBlogs.Query(page, pageSize); exist {

@@ -2,16 +2,20 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
+	"math/rand"
+	"mo2/dto"
+	"mo2/server/model"
+
+	"mo2/mo2utils"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"math/rand"
-	"mo2/dto"
-	"mo2/server/model"
 )
 
 var accCol = GetCollection("accounts")
@@ -42,7 +46,8 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 	account.EntityInfo = model.InitEntity()
 	account.Roles = append(account.Roles, model.OrdinaryUser) // default role: OrdinaryUser
 	account.Infos = make(map[string]string)
-	account.Infos["avatar"] = "" // default pic
+	account.Infos["avatar"] = ""        // default pic
+	account.Infos["isActive"] = "false" // default pic
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -96,6 +101,42 @@ func CreateAnonymousAccount() (a model.Account) {
 	return
 }
 
+// GenerateEmailToken generate token for email of an account
+func GenerateEmailToken(addAccount model.AddAccount) (account *model.Account, err error) {
+	//use email to verify
+	collection := GetCollection("accounts")
+	// verify email
+	if err = collection.FindOne(context.TODO(), bson.D{{"email", addAccount.Email}}).Decode(&account); err != nil {
+		return
+	}
+	if account.Infos == nil {
+		account.Infos = make(map[string]string)
+	}
+	account.Infos["token"] = mo2utils.GenerateJwtToken(account.Email)
+	account.Infos["isActive"] = "false"
+	return
+}
+
+//verify email of an account
+func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
+	//use email to verify
+	collection := GetCollection("accounts")
+	email := info.Email
+
+	// verify email
+	if err = collection.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
+		return
+	}
+	if account.Infos["token"] == info.Token {
+		account.Infos["isActive"] = "true"
+		delete(account.Infos, "token")
+		UpsertAccount(&account)
+	} else {
+		err = errors.New("token不符")
+	}
+	return
+}
+
 //verify an account
 func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 
@@ -104,7 +145,10 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 	collection := GetCollection("accounts")
 	userNameOrEmail := info.UserNameOrEmail
 	err = collection.FindOne(context.TODO(), bson.D{{"username", userNameOrEmail}}).Decode(&account)
-
+	if account.Infos["isActive"] == "false" {
+		err = errors.New("邮箱暂未激活")
+		return
+	}
 	if err != nil {
 		//then verify email
 		if err == mongo.ErrNoDocuments {
@@ -120,6 +164,7 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 		}
 
 	}
+
 	password := info.Password
 	hashedPassword := account.HashedPwd
 	//judge hash with hashed password
@@ -129,7 +174,6 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 		return
 	}
 	return
-
 }
 
 // FindAccount find
@@ -178,15 +222,23 @@ func FindAccountInfo(id primitive.ObjectID) (u dto.UserInfo, exist bool) {
 
 // ListAccountsBrief find from a list of id
 func ListAccountsBrief(idStrs []string) (bs []dto.UserInfoBrief) {
+	ids := make([]primitive.ObjectID, len(idStrs))
+	i := 0
 	for _, idStr := range idStrs {
 		id, err := primitive.ObjectIDFromHex(idStr)
-		if err == nil {
-			a, exist := FindAccount(id)
-			if exist {
-				bs = append(bs, dto.MapAccount2InfoBrief(a))
-			}
+		if err != nil {
+			return
 		}
+		ids[i] = id
+		i++
 	}
+	cursor, _ := accCol.Find(context.TODO(),
+		bson.D{
+			{Key: "_id",
+				Value: bson.D{
+					{Key: "$in", Value: ids},
+				}}})
+	cursor.All(context.TODO(), &bs)
 	return
 }
 

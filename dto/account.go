@@ -33,7 +33,6 @@ func Account2SuccessLogin(a model.Account) (s LoginUserInfo) {
 	s.Name = a.UserName
 	s.Roles = a.Roles
 	s.Email = a.Email
-
 	return s
 }
 

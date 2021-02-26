@@ -45,6 +45,12 @@ type LoginAccount struct {
 	Password        string `json:"password" example:"p@ssword"`
 }
 
+// VerifyEmail
+type VerifyEmail struct {
+	Email string `json:"Email" example:"email@qq.com"`
+	Token string `json:"token" example:"p@ssword"`
+}
+
 // Validation example
 func (a AddAccountRole) Validation() error {
 	switch {
