@@ -62,9 +62,9 @@ func UpsertAccount(a *model.Account) (success bool) {
 	a.EntityInfo.Update()
 	result, err := accCol.UpdateOne(context.TODO(), bson.M{"_id": a.ID}, bson.M{
 		"$set": bson.M{
-			"user_name":   a.UserName,
+			"username":    a.UserName,
 			"email":       a.Email,
-			"hashed_pwd":  a.HashedPwd,
+			"hashedpwd":   a.HashedPwd,
 			"entity_info": a.EntityInfo,
 			"roles":       a.Roles,
 			"infos":       a.Infos,
