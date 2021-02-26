@@ -1,10 +1,19 @@
 <template>
   <div>
     <v-snackbar v-model="snackbar" :timeout="5000">
-      {{ snacktext }}
+      {{ "确认Email即将发送到你的邮箱，请点击邮箱中的确认按钮后再继续！" }}
 
       <template v-slot:action="{ attrs }">
         <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+    <v-snackbar v-model="tipbar" :timeout="5000">
+      {{ "你可以在确认邮箱之后再次点击右上角的登录继续" }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn color="blue" text v-bind="attrs" @click="tipbar = false">
           Close
         </v-btn>
       </template>
@@ -183,7 +192,6 @@ export default class AccountModal extends Vue {
   @Prop()
   user!: User;
   regerror: string = "";
-  snacktext = "确认Email即将发送到你的邮箱，请点击邮箱中的确认按钮后再继续！";
   loginerr = "";
   processing = false;
   email: string = "";
@@ -191,6 +199,7 @@ export default class AccountModal extends Vue {
   password: string = "";
   emailSent = false;
   snackbar = false;
+  tipbar = false;
   tabkey = 0;
   seconds = -1;
   validator = {
@@ -216,8 +225,8 @@ export default class AccountModal extends Vue {
     }, 1000);
   }
   backToMain() {
-    this.snacktext = "你可以在确认邮箱之后再次点击右上角的登录继续";
-    this.snackbar = true;
+    this.snackbar = false;
+    this.tipbar = true;
     this.close();
   }
   close() {
@@ -261,8 +270,7 @@ export default class AccountModal extends Vue {
     })
       .then((u) => {
         this.seconds = 30;
-        this.snacktext =
-          "确认Email即将发送到你的邮箱，请点击邮箱中的确认按钮后再继续！";
+        this.tipbar = false;
         this.snackbar = true;
         this.processing = false;
         this.emailSent = true;
