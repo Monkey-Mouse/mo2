@@ -173,9 +173,16 @@ export default class EditArticle extends Vue {
     (this.$refs["dialog"] as MO2Dialog).setModel(this.blog);
     let imgEs = document.querySelectorAll(".mo2content img");
     const array = [...imgEs];
-    const list = array.map((e) => {
+    const list = [];
+    if (this.blog.cover && this.blog.cover !== "") {
+      list.push({
+        src: this.blog.cover,
+        active: false,
+      });
+    }
+    array.map((e) => {
       const i = e as HTMLImageElement;
-      return { src: i.src, active: false };
+      list.push({ src: i.src, active: false });
     });
     list.push({
       src:
