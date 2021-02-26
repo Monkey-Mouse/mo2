@@ -59,7 +59,7 @@
 </template>
 
 <script lang="ts">
-import { BlogBrief, User } from "@/models";
+import { BlankUser, BlogBrief, User } from "@/models";
 import {
   AddMore,
   BlogAutoLoader,
@@ -85,7 +85,7 @@ import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 export default class Account extends Vue implements BlogAutoLoader {
   @Prop()
   user!: User;
-  displayUser: User;
+  displayUser: User = BlankUser;
   uid!: string;
   blogs: BlogBrief[] = [];
   loading = true;

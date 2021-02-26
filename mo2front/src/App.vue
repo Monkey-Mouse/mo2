@@ -142,7 +142,7 @@ import Vue from "vue";
 import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
-import { User } from "./models";
+import { BlankUser, User } from "./models";
 import { GetInitials, GetUserInfoAsync, ReachedBottom } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
 import { Watch } from "vue-property-decorator";
@@ -157,16 +157,7 @@ Vue.use(Vuelidate);
 })
 export default class App extends Vue {
   drawer = false;
-  user: User = {
-    name: "",
-    email: "",
-    description: "",
-    site: "",
-    createTime: "",
-    id: "",
-    avatar: "",
-    roles: [],
-  };
+  user: User = BlankUser;
   autoSaving = false;
   get userdata() {
     return this.user;
