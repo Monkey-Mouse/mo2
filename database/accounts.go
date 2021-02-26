@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,6 +12,7 @@ import (
 	"log"
 	"math/rand"
 	"mo2/dto"
+	"mo2/mo2utils"
 	"mo2/server/model"
 )
 
@@ -96,6 +98,42 @@ func CreateAnonymousAccount() (a model.Account) {
 	return
 }
 
+// GenerateEmailToken generate token for email of an account
+func GenerateEmailToken(addAccount model.AddAccount) (account *model.Account, err error) {
+	//use email to verify
+	collection := GetCollection("accounts")
+	// verify email
+	if err = collection.FindOne(context.TODO(), bson.D{{"email", addAccount.Email}}).Decode(&account); err != nil {
+		return
+	}
+	if account.Infos == nil {
+		account.Infos = make(map[string]string)
+	}
+	account.Infos["token"] = mo2utils.GenerateJwtToken(account.Email)
+	account.Infos["isActive"] = "false"
+	return
+}
+
+//verify email of an account
+func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
+	//use email to verify
+	collection := GetCollection("accounts")
+	email := info.Email
+
+	// verify email
+	if err = collection.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
+		return
+	}
+	if account.Infos["token"] == info.Token {
+		account.Infos["isActive"] = "true"
+		delete(account.Infos, "token")
+		UpsertAccount(&account)
+	} else {
+		err = errors.New("token不符")
+	}
+	return
+}
+
 //verify an account
 func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 
@@ -129,7 +167,6 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 		return
 	}
 	return
-
 }
 
 // FindAccount find

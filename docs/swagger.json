@@ -46,7 +46,19 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Account"
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
                         }
                     }
                 }
@@ -82,6 +94,18 @@
                             "items": {
                                 "$ref": "#/definitions/dto.UserInfo"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
                         }
                     }
                 }
@@ -152,6 +176,18 @@
                         "schema": {
                             "$ref": "#/definitions/dto.LoginUserInfo"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
                     }
                 }
             }
@@ -201,7 +237,111 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Account"
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/verify": {
+            "get": {
+                "description": "add by json account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "verify an account's email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "email@mo2.com",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "xxxx==sf",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "308": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "generate by json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "generate verify an account's email",
+                "parameters": [
+                    {
+                        "description": "change account info",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.AddAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
                         }
                     }
                 }
@@ -1128,46 +1268,6 @@
                     "example": "xxxxxxxxxxxxx=="
                 },
                 "name": {
-                    "type": "string",
-                    "example": "account name"
-                }
-            }
-        },
-        "model.Account": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "email@qq.com"
-                },
-                "entityInfo": {
-                    "$ref": "#/definitions/model.Entity"
-                },
-                "hashedPassword": {
-                    "type": "string",
-                    "example": "$2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "xxxxxxxxxxxxx=="
-                },
-                "infos": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    },
-                    "example": {
-                        "'avatar'": " 'www.avatar.com/account_name'",
-                        "'site'": "'www.limfx.com'"
-                    }
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "userName": {
                     "type": "string",
                     "example": "account name"
                 }

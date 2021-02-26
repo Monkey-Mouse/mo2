@@ -123,34 +123,6 @@ definitions:
         example: account name
         type: string
     type: object
-  model.Account:
-    properties:
-      email:
-        example: email@qq.com
-        type: string
-      entityInfo:
-        $ref: '#/definitions/model.Entity'
-      hashedPassword:
-        example: $2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i
-        type: string
-      id:
-        example: xxxxxxxxxxxxx==
-        type: string
-      infos:
-        additionalProperties:
-          type: string
-        example:
-          '''avatar''': ' ''www.avatar.com/account_name'''
-          '''site''': '''www.limfx.com'''
-        type: object
-      roles:
-        items:
-          type: string
-        type: array
-      userName:
-        example: account name
-        type: string
-    type: object
   model.AddAccount:
     properties:
       email:
@@ -276,7 +248,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Account'
+            $ref: '#/definitions/dto.UserInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
       summary: Add an account
       tags:
       - accounts
@@ -300,6 +280,14 @@ paths:
             items:
               $ref: '#/definitions/dto.UserInfo'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
       summary: Show account's info
       tags:
       - accounts
@@ -345,6 +333,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.LoginUserInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
       summary: login an account
       tags:
       - accounts
@@ -377,10 +373,79 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Account'
+            $ref: '#/definitions/dto.UserInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
       summary: Add role for an account
       tags:
       - admin
+  /api/accounts/verify:
+    get:
+      consumes:
+      - application/json
+      description: add by json account
+      parameters:
+      - description: email@mo2.com
+        in: query
+        name: email
+        required: true
+        type: string
+      - description: xxxx==sf
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "308":
+          description: ""
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: verify an account's email
+      tags:
+      - accounts
+    post:
+      consumes:
+      - application/json
+      description: generate by json
+      parameters:
+      - description: change account info
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/model.AddAccount'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: generate verify an account's email
+      tags:
+      - accounts
   /api/blogs/{id}:
     delete:
       consumes:
