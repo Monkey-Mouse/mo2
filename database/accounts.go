@@ -71,7 +71,7 @@ func AddAccount(newAccount model.AddAccount, baseUrl string) (account model.Acco
 	account.Infos["avatar"] = ""        // default pic
 	account.Infos["isActive"] = "false" // default pic
 	token := mo2utils.GenerateJwtToken(user.Email)
-	user.Infos["token"] = token
+	account.Infos["token"] = token
 	if err != nil {
 		log.Fatal(err)
 		return
