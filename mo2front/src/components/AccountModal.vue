@@ -129,7 +129,7 @@
                   outlined
                   text
                   @click="login"
-                  >Email已确认</v-btn
+                  >确认并登录</v-btn
                 >
                 <v-btn
                   :disabled="this.$v.$anyError || seconds > 0"
@@ -181,7 +181,7 @@ export default class AccountModal extends Vue {
   name: string = "";
   password: string = "";
   emailSent = false;
-  snackbar = true;
+  snackbar = false;
   tabkey = 0;
   seconds = -1;
   validator = {
@@ -247,6 +247,7 @@ export default class AccountModal extends Vue {
     })
       .then((u) => {
         this.seconds = 30;
+        this.snackbar = true;
         this.processing = false;
         this.emailSent = true;
         // SendVerifyEmail(u.email).then(() => {
