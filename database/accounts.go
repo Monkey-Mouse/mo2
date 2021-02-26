@@ -44,7 +44,8 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 	account.EntityInfo = model.InitEntity()
 	account.Roles = append(account.Roles, model.OrdinaryUser) // default role: OrdinaryUser
 	account.Infos = make(map[string]string)
-	account.Infos["avatar"] = "" // default pic
+	account.Infos["avatar"] = ""        // default pic
+	account.Infos["isActive"] = "false" // default pic
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -142,7 +143,10 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 	collection := GetCollection("accounts")
 	userNameOrEmail := info.UserNameOrEmail
 	err = collection.FindOne(context.TODO(), bson.D{{"username", userNameOrEmail}}).Decode(&account)
-
+	if account.Infos["isActive"] == "false" {
+		err = errors.New("邮箱暂未激活")
+		return
+	}
 	if err != nil {
 		//then verify email
 		if err == mongo.ErrNoDocuments {
@@ -158,6 +162,7 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 		}
 
 	}
+
 	password := info.Password
 	hashedPassword := account.HashedPwd
 	//judge hash with hashed password
