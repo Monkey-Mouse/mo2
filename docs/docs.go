@@ -869,8 +869,14 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "boolean",
-                        "description": "bool true",
+                        "description": "bool default false",
                         "name": "draft",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "bool default false",
+                        "name": "deleted",
                         "in": "query"
                     },
                     {

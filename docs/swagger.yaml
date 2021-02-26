@@ -844,9 +844,13 @@ paths:
     get:
       description: find
       parameters:
-      - description: bool true
+      - description: bool default false
         in: query
         name: draft
+        type: boolean
+      - description: bool default false
+        in: query
+        name: deleted
         type: boolean
       - description: int 0
         in: query

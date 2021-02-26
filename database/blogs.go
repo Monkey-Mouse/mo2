@@ -64,8 +64,24 @@ func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
 		log.Println(err)
 		success = false
 	}
-	if result.UpsertedCount == 0 && result.MatchedCount == 0 {
-		log.Println("blog id do not match in database")
+	if !isDraft {
+		log.Println("发布时删除草稿" + b.ID.String())
+		deleteBlog(*b, true)
+	}
+	if result.UpsertedCount != 0 {
+		log.Println("新建文章" + b.ID.String())
+	}
+	return
+}
+
+// deleteBlog set flag of blog or draft to isDeleted
+func deleteBlog(b model.Blog, isDraft bool) (success bool) {
+	success = true
+	res, err := chooseCol(isDraft).DeleteMany(context.TODO(), bson.M{"_id": b.ID})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if res.DeletedCount == 0 {
 		success = false
 	}
 	return
