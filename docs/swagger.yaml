@@ -144,8 +144,6 @@ definitions:
           '''site''': '''www.limfx.com'''
         type: object
       roles:
-        example:
-        - ordinaryUser
         items:
           type: string
         type: array
@@ -163,6 +161,19 @@ definitions:
         type: string
       userName:
         example: account name
+        type: string
+    type: object
+  model.AddAccountRole:
+    properties:
+      id:
+        example: xxxxxxxxxxxxx==
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+      super_key:
+        example: special
         type: string
     type: object
   model.Blog:
@@ -348,6 +359,28 @@ paths:
       summary: logout
       tags:
       - accounts
+  /api/accounts/role:
+    post:
+      consumes:
+      - application/json
+      description: add by json account
+      parameters:
+      - description: add new account info
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/model.AddAccountRole'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Account'
+      summary: Add role for an account
+      tags:
+      - admin
   /api/blogs/{id}:
     delete:
       consumes:
@@ -355,7 +388,7 @@ paths:
       description: delete by path
       parameters:
       - description: bool true
-        in: path
+        in: query
         name: draft
         required: true
         type: boolean
@@ -366,10 +399,22 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "202":
+          description: ""
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
           schema:
-            $ref: '#/definitions/model.Blog'
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
       summary: delete Blog
       tags:
       - blogs
@@ -379,7 +424,7 @@ paths:
       description: restore by path
       parameters:
       - description: bool true
-        in: path
+        in: query
         name: draft
         required: true
         type: boolean
@@ -394,6 +439,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
       summary: restore Blog
       tags:
       - blogs
@@ -507,6 +564,18 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/model.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
       summary: find Blog by id
       tags:
       - blogs
@@ -536,6 +605,24 @@ paths:
             items:
               $ref: '#/definitions/dto.QueryBlogs'
             type: array
+        "204":
+          description: No Content
+          schema:
+            items:
+              $ref: '#/definitions/dto.QueryBlogs'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
       summary: find Blog
       tags:
       - blogs
@@ -569,6 +656,24 @@ paths:
             items:
               $ref: '#/definitions/dto.QueryBlogs'
             type: array
+        "204":
+          description: No Content
+          schema:
+            items:
+              $ref: '#/definitions/dto.QueryBlogs'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
       summary: find Blog by userid
       tags:
       - blogs
@@ -695,6 +800,24 @@ paths:
             items:
               $ref: '#/definitions/dto.QueryBlog'
             type: array
+        "204":
+          description: No Content
+          schema:
+            items:
+              $ref: '#/definitions/dto.QueryBlog'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
       summary: find all Blogs
       tags:
       - blogs
