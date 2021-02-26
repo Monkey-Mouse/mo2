@@ -12,11 +12,11 @@
           alt="Vuetify Logo"
           class="shrink mr-2"
           contain
-          src="https://tse4-mm.cn.bing.net/th/id/OIP.m0-fVm5FkxFJULj3h60oTwHaHa?w=177&h=180&c=7&o=5&dpr=2&pid=1.7"
+          src="./assets/logo.png"
           transition="scale-transition"
-          width="40"
+          width="100"
         />
-        <div class="text-h4">MO2</div>
+        <!-- <div class="text-h4">MO2</div> -->
         <!-- <v-img
           alt="Vuetify Name"
           class="shrink mt-1 hidden-sm-and-down"
