@@ -64,7 +64,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
 		log.Println(err)
 		success = false
 	}
-	if result.MatchedCount == 0 {
+	if result.UpsertedCount == 0 && result.MatchedCount == 0 {
 		log.Println("blog id do not match in database")
 		success = false
 	}
@@ -113,10 +113,10 @@ func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
 }
 
 //find blog
-func FindAllBlogs(isDraft bool) (b []model.Blog) {
+func FindAllBlogs(isDraft bool, isDeleted bool) (b []model.Blog) {
 	col := chooseCol(isDraft)
 	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
-	cursor, err := col.Find(context.TODO(), bson.D{{}}, opts)
+	cursor, err := col.Find(context.TODO(), bson.D{{"entity_info.isdeleted", isDeleted}}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		log.Fatal(err)
