@@ -19,6 +19,11 @@ type Blog struct {
 	CategoryIDs []primitive.ObjectID `json:"categories,omitempty" bson:"categories,omitempty"`
 }
 
+type Filter struct {
+	IsDraft   bool `json:"is_draft" example:"false"`
+	IsDeleted bool `json:"is_deleted" example:"false"`
+}
+
 func (b *Blog) Init() {
 	b.ID = primitive.NewObjectID()
 	b.EntityInfo.Create()

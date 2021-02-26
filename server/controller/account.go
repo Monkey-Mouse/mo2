@@ -68,15 +68,18 @@ func (c *Controller) Log(ctx *gin.Context) {
 // @Produce  json
 // @Param account body model.AddAccountRole true "add new account info"
 // @Success 200 {object} dto.UserInfo
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
 // @Router /api/accounts/role [post]
 func (c *Controller) AddAccountRole(ctx *gin.Context) {
 	var addAccount model.AddAccountRole
 	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		ctx.JSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
-		ctx.JSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
 		return
 	}
 	account, exist := database.FindAccount(addAccount.ID)
@@ -96,32 +99,88 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param account body model.AddAccount true "add new account info"
-// @Success 200 {object} model.Account
+// @Success 200 {object} dto.UserInfo
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
 // @Router /api/accounts [post]
 func (c *Controller) AddAccount(ctx *gin.Context) {
 	var addAccount model.AddAccount
 	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		ctx.JSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
-		ctx.JSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
 		return
 	}
 	nano := time.Now().Nanosecond()
 	account, err := database.AddAccount(addAccount)
-
 	if err != nil {
 		if strings.Contains(err.Error(), "username") {
 			fmt.Println(time.Now().Nanosecond() - nano)
-			ctx.JSON(http.StatusUnauthorized, SetResponseReason("用户名已被使用"))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("用户名已被使用"))
 		} else {
-			ctx.JSON(http.StatusUnauthorized, SetResponseReason("email已被使用"))
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("email已被使用"))
 		}
-
 		return
 	}
-	ctx.JSON(http.StatusOK, account)
+	ctx.JSON(http.StatusOK, dto.Account2UserInfo(account))
+}
+
+// GenerateVerifyEmail godoc
+// @Summary generate verify an account's email
+// @Description generate by json
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param account body model.AddAccount true "change account info"
+// @Success 200 {object} dto.UserInfo
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Router /api/accounts/verify [post]
+func (c *Controller) GenerateVerifyEmail(ctx *gin.Context) {
+	var addAccount model.AddAccount
+	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+		return
+	}
+	account, err := database.GenerateEmailToken(addAccount)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		return
+	}
+	database.UpsertAccount(account)
+	url := "http://www." + ctx.Request.Host + ctx.Request.RequestURI + "?email=" + account.Email + "&token=" + account.Infos["token"]
+	mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url))
+	ctx.JSON(http.StatusOK, dto.Account2UserInfo(*account))
+}
+
+// VerifyEmail godoc
+// @Summary verify an account's email
+// @Description add by json account
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param email query string true "email@mo2.com"
+// @Param token query string true "xxxx==sf"
+// @Success 308
+// @Failure 401 {object} ResponseError
+// @Router /api/accounts/verify [get]
+func (c *Controller) VerifyEmail(ctx *gin.Context) {
+	var verifyInfo model.VerifyEmail
+	verifyInfo.Email = ctx.Query("email")
+	verifyInfo.Token = ctx.Query("token")
+
+	account, err := database.VerifyEmail(verifyInfo)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		return
+	}
+	var s = dto.Account2SuccessLogin(account)
+	jwtToken := mo2utils.GenerateJwtCode(s)
+	//login success: to record the state
+	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
+	ctx.Redirect(http.StatusPermanentRedirect, "http://"+ctx.Request.Host)
 }
 
 // LoginAccount godoc
@@ -132,20 +191,22 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 // @Produce  json
 // @Param account body model.LoginAccount true "login account"
 // @Success 200 {object} dto.LoginUserInfo
+// @Failure 400 {object} ResponseError
+// @Failure 404 {object} ResponseError
 // @Router /api/accounts/login [post]
 func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var loginAccount model.LoginAccount
 	if err := ctx.ShouldBindJSON(&loginAccount); err != nil {
-		ctx.JSON(http.StatusBadRequest, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
 		return
 	}
 	if err := loginAccount.Validation(); err != nil {
-		ctx.JSON(http.StatusBadRequest, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
 		return
 	}
 	account, err := database.VerifyAccount(loginAccount)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, SetResponseReason("用户名或密码错误"))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("用户名或密码错误"))
 		return
 	}
 	var s = dto.Account2SuccessLogin(account)
@@ -177,6 +238,8 @@ func (c *Controller) LogoutAccount(ctx *gin.Context) {
 // @Produce  json
 // @Param id path string false "Account ID"
 // @Success 200 {object} []dto.UserInfo
+// @Failure 400 {object} ResponseError
+// @Failure 404 {object} ResponseError
 // @Router /api/accounts/detail/{id} [get]
 func (c *Controller) ShowAccount(ctx *gin.Context) {
 	idStr := ctx.Param("id")

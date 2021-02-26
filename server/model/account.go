@@ -17,9 +17,9 @@ const (
 // Account example
 type Account struct {
 	ID         primitive.ObjectID `json:"id,omitempty" example:"xxxxxxxxxxxxx==" bson:"_id,omitempty"`
-	UserName   string             `json:"userName" example:"account name" bson:"user_name,omitempty"`
+	UserName   string             `json:"userName" example:"account name" bson:"username,omitempty"`
 	Email      string             `json:"email" example:"email@qq.com" bson:"email,omitempty"`
-	HashedPwd  string             `json:"hashedPassword" example:"$2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i" bson:"hashed_pwd,omitempty"`
+	HashedPwd  string             `json:"hashedPassword" example:"$2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i" bson:"hashedpwd,omitempty"`
 	EntityInfo Entity             `json:"entityInfo,omitempty" bson:"entity_info,omitempty" bson:"entity_info,omitempty"`
 	Roles      []Erole            `json:"roles" bson:"roles"`
 	Infos      map[string]string  `json:"infos" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'" bson:"infos,omitempty"`
@@ -43,6 +43,12 @@ type AddAccountRole struct {
 type LoginAccount struct {
 	UserNameOrEmail string `json:"userNameOrEmail" example:"account name/email@qq.com"`
 	Password        string `json:"password" example:"p@ssword"`
+}
+
+// VerifyEmail
+type VerifyEmail struct {
+	Email string `json:"Email" example:"email@qq.com"`
+	Token string `json:"token" example:"p@ssword"`
 }
 
 // Validation example

@@ -2,11 +2,14 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
 	"mo2/dto"
 	"mo2/server/model"
+
+	"mo2/mo2utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -43,7 +46,8 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 	account.EntityInfo = model.InitEntity()
 	account.Roles = append(account.Roles, model.OrdinaryUser) // default role: OrdinaryUser
 	account.Infos = make(map[string]string)
-	account.Infos["avatar"] = "" // default pic
+	account.Infos["avatar"] = ""        // default pic
+	account.Infos["isActive"] = "false" // default pic
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -63,9 +67,9 @@ func UpsertAccount(a *model.Account) (success bool) {
 	a.EntityInfo.Update()
 	result, err := accCol.UpdateOne(context.TODO(), bson.M{"_id": a.ID}, bson.M{
 		"$set": bson.M{
-			"user_name":   a.UserName,
+			"username":    a.UserName,
 			"email":       a.Email,
-			"hashed_pwd":  a.HashedPwd,
+			"hashedpwd":   a.HashedPwd,
 			"entity_info": a.EntityInfo,
 			"roles":       a.Roles,
 			"infos":       a.Infos,
@@ -97,6 +101,42 @@ func CreateAnonymousAccount() (a model.Account) {
 	return
 }
 
+// GenerateEmailToken generate token for email of an account
+func GenerateEmailToken(addAccount model.AddAccount) (account *model.Account, err error) {
+	//use email to verify
+	collection := GetCollection("accounts")
+	// verify email
+	if err = collection.FindOne(context.TODO(), bson.D{{"email", addAccount.Email}}).Decode(&account); err != nil {
+		return
+	}
+	if account.Infos == nil {
+		account.Infos = make(map[string]string)
+	}
+	account.Infos["token"] = mo2utils.GenerateJwtToken(account.Email)
+	account.Infos["isActive"] = "false"
+	return
+}
+
+//verify email of an account
+func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
+	//use email to verify
+	collection := GetCollection("accounts")
+	email := info.Email
+
+	// verify email
+	if err = collection.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
+		return
+	}
+	if account.Infos["token"] == info.Token {
+		account.Infos["isActive"] = "true"
+		delete(account.Infos, "token")
+		UpsertAccount(&account)
+	} else {
+		err = errors.New("token不符")
+	}
+	return
+}
+
 //verify an account
 func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 
@@ -105,7 +145,10 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 	collection := GetCollection("accounts")
 	userNameOrEmail := info.UserNameOrEmail
 	err = collection.FindOne(context.TODO(), bson.D{{"username", userNameOrEmail}}).Decode(&account)
-
+	if account.Infos["isActive"] == "false" {
+		err = errors.New("邮箱暂未激活")
+		return
+	}
 	if err != nil {
 		//then verify email
 		if err == mongo.ErrNoDocuments {
@@ -121,6 +164,7 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 		}
 
 	}
+
 	password := info.Password
 	hashedPassword := account.HashedPwd
 	//judge hash with hashed password
@@ -130,7 +174,6 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 		return
 	}
 	return
-
 }
 
 // FindAccount find
