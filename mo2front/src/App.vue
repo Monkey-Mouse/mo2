@@ -75,6 +75,7 @@
           :key="n"
           :to="item.href"
           v-show="item.show"
+          :exact="true"
         >
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
