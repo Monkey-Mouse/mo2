@@ -149,6 +149,3 @@ export function AddMore(elm: BlogAutoLoader, val: BlogBrief[]) {
 export async function DeleteArticle(id: string, query: { draft: boolean }) {
     (await axios.delete('/api/blogs/' + id + ParseQuery(query)))
 }
-export async function SendVerifyEmail(email: string) {
-    (await axios.post(`/api/accounts/verify`, { email: email }))
-}
