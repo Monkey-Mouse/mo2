@@ -151,7 +151,7 @@
                   }}</v-btn
                 >
 
-                <v-btn v-if="emailSent" @click="close" color="red">取消</v-btn>
+                <v-btn v-if="!emailSent" @click="close" color="red">取消</v-btn>
               </v-card-actions>
             </v-tab-item>
           </v-tabs-items>
