@@ -37,6 +37,14 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	err = collection.FindOne(context.TODO(), bson.M{"email": newAccount.Email}).Decode(&account)
+	if err != mongo.ErrNoDocuments {
+		if account.Infos["isActive"] == "true" {
+			errors.New("邮箱已被注册")
+			return
+		}
+	}
 	//var account model.Account
 	account.Email = newAccount.Email
 	account.UserName = newAccount.UserName
@@ -220,6 +228,7 @@ func FindAccountInfo(id primitive.ObjectID) (u dto.UserInfo, exist bool) {
 
 // ListAccountsBrief find from a list of id
 func ListAccountsBrief(idStrs []string) (bs []dto.UserInfoBrief) {
+
 	for _, idStr := range idStrs {
 		id, err := primitive.ObjectIDFromHex(idStr)
 		if err == nil {
