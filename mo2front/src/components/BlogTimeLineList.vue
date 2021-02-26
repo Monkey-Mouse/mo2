@@ -130,6 +130,8 @@ import { randomProperty, Copy, GetUserDatas } from "../utils/index";
 export default class BlogTimeLineList extends Vue {
   @Prop()
   blogs!: DisplayBlogBrief[];
+  @Prop({ default: false })
+  draft: boolean;
   prevlen = -1;
   displayColors: string[] = [];
   created() {
@@ -187,7 +189,9 @@ export default class BlogTimeLineList extends Vue {
     // to be implemented
   }
   gotoArticle(id: string) {
-    this.$router.push("/article/" + id);
+    this.$router.push(
+      "/article/" + id + (this.draft ? `?draft=${this.draft}` : "")
+    );
   }
 }
 </script>

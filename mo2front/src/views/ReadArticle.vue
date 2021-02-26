@@ -22,6 +22,14 @@
               blog.entityInfo.createTime.substr(0, 10)
             }}</span>
             <v-spacer />
+            <v-tooltip v-if="draft" bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn plain small v-bind="attrs" v-on="on">
+                  <v-icon>mdi-eye-check</v-icon>
+                </v-btn>
+              </template>
+              <span>This is a draft</span>
+            </v-tooltip>
             <v-btn @click="edit" v-if="user.id === blog.authorId" plain small>
               <v-icon>mdi-file-document-edit</v-icon>
             </v-btn>
@@ -102,31 +110,33 @@ export default class ReadArticle extends Vue {
   author: User;
   authorLoad = false;
   showDelete = false;
+  draft = false;
   get deleteContent() {
     return '你确定要删除"' + this.title + '"吗？';
   }
   created() {
-    var draft = false;
     if (this.$route.query["draft"]) {
-      draft = (this.$route.query["draft"] as string) === "true";
+      this.draft = (this.$route.query["draft"] as string) === "true";
     }
-    GetArticle({ id: this.$route.params["id"], draft: draft }).then((val) => {
-      this.loading = false;
-      this.blog = val;
-      this.title = val.title;
-      this.html = val.content;
-      GetUserData(this.blog.authorId).then((u) => {
-        this.author = u;
-        this.authorLoad = true;
-      });
-      setTimeout(() => {
-        // first, find all the code blocks
-        document.querySelectorAll("code").forEach((block) => {
-          // then highlight each
-          hljs.highlightBlock(block);
+    GetArticle({ id: this.$route.params["id"], draft: this.draft }).then(
+      (val) => {
+        this.loading = false;
+        this.blog = val;
+        this.title = val.title;
+        this.html = val.content;
+        GetUserData(this.blog.authorId).then((u) => {
+          this.author = u;
+          this.authorLoad = true;
         });
-      }, 50);
-    });
+        setTimeout(() => {
+          // first, find all the code blocks
+          document.querySelectorAll("code").forEach((block) => {
+            // then highlight each
+            hljs.highlightBlock(block);
+          });
+        }, 50);
+      }
+    );
   }
   edit() {
     globaldic.article = `<h1>${this.title}</h1>${this.html}`;

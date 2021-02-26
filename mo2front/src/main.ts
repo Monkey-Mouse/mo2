@@ -10,7 +10,6 @@ import sanitizeHtml from 'sanitize-html'
 const list = sanitizeHtml.defaults.allowedTags.concat(sanitizeHtml.defaults.selfClosing);
 const attrs = sanitizeHtml.defaults.allowedAttributes;
 attrs['*'] = ['href', 'align', 'alt', 'center', 'bgcolor', 'data-*', 'class']
-console.log(list);
 const sanitize = (dirty) => {
   return sanitizeHtml(dirty, {
     allowedTags: list,

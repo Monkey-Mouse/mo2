@@ -48,6 +48,7 @@
             <blog-time-line-list
               v-if="!draftProps.firstloading"
               :blogs="draftProps.blogs"
+              :draft="true"
             />
             <blog-skeleton v-if="draftProps.loading" :num="pagesize" />
           </v-card>
