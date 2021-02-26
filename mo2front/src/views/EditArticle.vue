@@ -177,6 +177,11 @@ export default class EditArticle extends Vue {
       const i = e as HTMLImageElement;
       return { src: i.src, active: false };
     });
+    list.push({
+      src:
+        "//cdn.mo2.leezeeyee.com/60365aae06fd3124561400c3/1614260703850314778image.png",
+      active: false,
+    });
     list[0].active = true;
     (this.$refs["dialog"] as MO2Dialog).setModel({ cover: list });
   }

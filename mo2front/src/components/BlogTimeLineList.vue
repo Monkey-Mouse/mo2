@@ -133,34 +133,41 @@ export default class BlogTimeLineList extends Vue {
   mounted() {
     this.prevlen = this.blogs.length;
     const ids = this.blogs.map((v, i, a) => v.authorId);
+    if (ids.length !== 0) {
+      GetUserDatas(ids).then((data) => {
+        const dic: any = {};
+        for (let index = 0; index < data.length; index++) {
+          const element = data[index];
+          dic[element.id] = element.name;
+        }
+        for (let index = 0; index < this.blogs.length; index++) {
+          this.blogs[index].userName = dic[this.blogs[index].authorId];
+          this.blogs[index].userLoad = true;
+        }
+        this.$forceUpdate();
+      });
+    }
+  }
+  @Watch("blogs")
+  changeBlogs() {
+    if (this.blogs.length === this.prevlen) {
+      // didn't add new blog, return
+      return;
+    }
+
+    const ids = this.blogs.slice(this.prevlen).map((v, i, a) => v.authorId);
     GetUserDatas(ids).then((data) => {
       const dic: any = {};
       for (let index = 0; index < data.length; index++) {
         const element = data[index];
         dic[element.id] = element.name;
       }
-      for (let index = 0; index < this.blogs.length; index++) {
+      for (let index = this.prevlen; index < this.blogs.length; index++) {
         this.blogs[index].userName = dic[this.blogs[index].authorId];
         this.blogs[index].userLoad = true;
       }
       this.$forceUpdate();
     });
-  }
-  @Watch("blogs")
-  changeBlogs() {
-    //TO DO: re fetch on loading new blogs
-    // const ids = this.blogs.map((v, i, a) => v.authorId);
-    // GetUserDatas(ids).then((data) => {
-    //   const dic: any = {};
-    //   for (let index = 0; index < data.length; index++) {
-    //     const element = data[index];
-    //     dic[element.id] = element.name;
-    //   }
-    //   for (let index = 0; index < this.blogs.length; index++) {
-    //     this.blogs[index].userName = dic[this.blogs[index].authorId];
-    //     this.blogs[index].userLoad = true;
-    //   }
-    // });
   }
   rateChange(blog: BlogBrief) {
     // to be implemented
