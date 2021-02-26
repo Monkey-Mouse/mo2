@@ -111,7 +111,7 @@
               >
             </v-card-text>
             <v-card-actions>
-              <v-switch label="记住我"></v-switch>
+              <!-- <v-switch label="记住我"></v-switch> -->
               <v-spacer></v-spacer>
               <v-btn
                 :disabled="this.$v.$anyError"
@@ -131,7 +131,12 @@
 
 <script lang="ts">
 import { User } from "@/models";
-import { GetErrorMsg, LoginAsync, RegisterAsync } from "@/utils";
+import {
+  GetErrorMsg,
+  LoginAsync,
+  RegisterAsync,
+  SendVerifyEmail,
+} from "@/utils";
 import { AxiosError } from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
@@ -211,7 +216,10 @@ export default class AccountModal extends Vue {
       password: this.password,
     })
       .then((u) => {
-        this.login();
+        SendVerifyEmail(u.email).then(() => {
+          alert("发送成功");
+          this.processing = false;
+        });
       })
       .catch((err) => {
         this.processing = false;
