@@ -19,6 +19,10 @@ services:
       - 5001:5001
     depends_on:
       - "mongodb"
+  nginx:
+    build: .
+    ports:
+      - 80:80
 
 volumes:
   mongodata:
