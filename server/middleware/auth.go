@@ -39,18 +39,20 @@ func AuthMiddlware(c *gin.Context) {
 type HandlerProp struct {
 	Handler   gin.HandlerFunc
 	NeedRoles []string
+	rate      int
+	limit     int
 }
 type HandlerKey struct {
 	Url    string
 	Method string
 }
 type HandlerMap struct {
-	Map        *map[HandlerKey]HandlerProp
+	Map        map[HandlerKey]HandlerProp
 	PrefixPath string
 }
 
 var handlers = make(map[HandlerKey]HandlerProp, 0)
-var H = HandlerMap{&handlers, ""}
+var H = HandlerMap{handlers, ""}
 
 func (h HandlerMap) Group(relativPath string) HandlerMap {
 
@@ -59,8 +61,8 @@ func (h HandlerMap) Group(relativPath string) HandlerMap {
 }
 
 func (h HandlerMap) Handle(method string, relativPath string, handler gin.HandlerFunc, roles ...string) {
-	(*h.Map)[HandlerKey{Url: path.Join(h.PrefixPath, relativPath), Method: method}] = HandlerProp{
-		Handler: handler, NeedRoles: roles}
+	(h.Map)[HandlerKey{Url: path.Join(h.PrefixPath, relativPath), Method: method}] = HandlerProp{
+		Handler: handler, NeedRoles: roles, limit: -1}
 }
 func (h HandlerMap) Get(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodGet, relativPath, handler, roles...)
@@ -75,7 +77,7 @@ func (h HandlerMap) Put(relativPath string, handler gin.HandlerFunc, roles ...st
 	h.Handle(http.MethodPut, relativPath, handler, roles...)
 }
 func (h HandlerMap) RegisterMapedHandlers(r *gin.Engine) {
-	for k, v := range *h.Map {
+	for k, v := range h.Map {
 		r.Handle(k.Method, k.Url, v.Handler)
 	}
 }
