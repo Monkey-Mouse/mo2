@@ -3,7 +3,15 @@ module.exports = {
   chainWebpack: config => {
     config.module.rules.delete('eslint');
   },
-
+  pwa: {
+    iconPaths: {
+      favicon32: 'img/icons/favicon-32x32.png',
+      favicon16: 'img/icons/favicon-16x16.png',
+      appleTouchIcon: 'img/icons/tile150x150.png',
+      maskIcon: 'img/icons/tile150x150.png',
+      msTileImage: 'img/icons/tile150x150.png',
+    }
+  },
   transpileDependencies: [
     'vuetify'
   ],

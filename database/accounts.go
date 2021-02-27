@@ -4,19 +4,27 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"math/rand"
+	"mo2/dto"
+	"mo2/server/model"
+
+	"mo2/mo2utils"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"math/rand"
-	"mo2/dto"
-	"mo2/mo2utils"
-	"mo2/server/model"
 )
 
 var accCol = GetCollection("accounts")
+
+// FindAccountByEmail getaccount by email
+func FindAccountByEmail(email string) (account model.Account, err error) {
+	err = accCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account)
+	return
+}
 
 //already check the validation in controller
 //if add a newAccount success, return account info
@@ -37,12 +45,20 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 		log.Fatal(err)
 	}
 
-	err = accCol.FindOne(context.TODO(), bson.M{"email": newAccount.Email}).Decode(&account)
-	if err != mongo.ErrNoDocuments {
-		if account.Infos[model.IsActive] == model.True {
-			errors.New("邮箱已被注册")
+	user, err := FindAccountByEmail(newAccount.Email)
+	if err == nil {
+		if user.Infos["isActive"] != "false" {
+			err = errors.New("Email已经被使用")
 			return
 		}
+		token := mo2utils.GenerateJwtToken(user.Email)
+		user.Infos["token"] = token
+		UpsertAccount(&user)
+		url := baseUrl + "?email=" + user.Email + "&token=" + token
+		mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url))
+		account = user
+		err = nil
+		return
 	}
 	//var account model.Account
 	account.Email = newAccount.Email
@@ -54,6 +70,10 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 	account.Settings = make(map[string]string)
 	account.Settings[model.Avatar] = ""         // default pic
 	account.Infos[model.IsActive] = model.False // email not verified
+	account.Infos["avatar"] = ""        // default pic
+	account.Infos["isActive"] = "false" // default pic
+	token := mo2utils.GenerateJwtToken(user.Email)
+	account.Infos["token"] = token
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -64,6 +84,17 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 		return
 	}
 	insertResult, err := accCol.InsertOne(context.TODO(), account)
+	insertResult, err := collection.InsertOne(context.TODO(), account)
+
+	if err != nil {
+		merr := err.(mongo.WriteException).WriteErrors[0]
+		if merr.Code == 11000 {
+			err = errors.New("Name已被注册！")
+		}
+		return
+	}
+	url := baseUrl + "?email=" + account.Email + "&token=" + token
+	mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url))
 	account.ID = insertResult.InsertedID.(primitive.ObjectID)
 	return
 }
@@ -133,6 +164,7 @@ func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
 	if account.Infos["token"] == info.Token {
 		account.Infos["isActive"] = "true"
 		delete(account.Infos, "token")
+		account.UserName = account.UserName[24:]
 		UpsertAccount(&account)
 	} else {
 		err = errors.New("token不符")
@@ -148,32 +180,33 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 	collection := GetCollection("accounts")
 	userNameOrEmail := info.UserNameOrEmail
 	err = collection.FindOne(context.TODO(), bson.D{{"username", userNameOrEmail}}).Decode(&account)
-	if account.Infos["isActive"] == "false" {
-		err = errors.New("邮箱暂未激活")
-		return
-	}
 	if err != nil {
 		//then verify email
 		if err == mongo.ErrNoDocuments {
 			log.Println(err)
 			err = collection.FindOne(context.TODO(), bson.D{{"email", userNameOrEmail}}).Decode(&account)
 			if err != nil {
+				err = errors.New("用户名或email不存在")
 				// no chance
 				return
 			}
 		} else {
-			log.Fatal(err)
+			err = errors.New("未知错误：数据异常")
+			// log.Fatal(err)
 			return
 		}
 
 	}
-
+	if account.Infos["isActive"] == "false" {
+		err = errors.New("邮箱暂未激活！")
+		return
+	}
 	password := info.Password
 	hashedPassword := account.HashedPwd
 	//judge hash with hashed password
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
-		log.Println(err)
+		err = errors.New("密码错误！")
 		return
 	}
 	return
@@ -225,15 +258,24 @@ func FindAccountInfo(id primitive.ObjectID) (u dto.UserInfo, exist bool) {
 
 // ListAccountsBrief find from a list of id
 func ListAccountsBrief(idStrs []string) (bs []dto.UserInfoBrief) {
-
+	ids := make([]primitive.ObjectID, len(idStrs))
+	i := 0
 	for _, idStr := range idStrs {
 		id, err := primitive.ObjectIDFromHex(idStr)
-		if err == nil {
-			a, exist := FindAccount(id)
-			if exist {
-				bs = append(bs, dto.MapAccount2InfoBrief(a))
-			}
+		if err != nil {
+			return
 		}
+		ids[i] = id
+		i++
+	}
+	cursor, err := accCol.Find(context.TODO(),
+		bson.D{
+			{"_id",
+				bson.D{
+					{"$in", ids},
+				}}})
+	if err != nil {
+		fmt.Println(err)
 	}
 	return
 }

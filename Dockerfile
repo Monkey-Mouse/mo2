@@ -19,6 +19,8 @@ RUN go install -v ./...
 
 #final stage
 FROM ubuntu:latest
+RUN apt-get update
+RUN apt-get install ca-certificates -y
 COPY --from=front /home/dist /app/dist
 WORKDIR /app
 RUN chmod -R 777 .

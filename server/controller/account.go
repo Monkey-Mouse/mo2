@@ -1,12 +1,10 @@
 package controller
 
 import (
-	"fmt"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	dto "mo2/dto"
 	"mo2/mo2utils"
-	"strings"
-	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/gin-gonic/gin"
 
@@ -112,46 +110,15 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
 		return
 	}
-	nano := time.Now().Nanosecond()
-	account, err := database.AddAccount(addAccount)
-	if err != nil {
-		if strings.Contains(err.Error(), "username") {
-			fmt.Println(time.Now().Nanosecond() - nano)
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("用户名已被使用"))
-		} else {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("email已被使用"))
-		}
-		return
-	}
-	ctx.JSON(http.StatusOK, dto.Account2UserInfo(account))
-}
-
-// GenerateVerifyEmail godoc
-// @Summary generate verify an account's email
-// @Description generate by json
-// @Tags accounts
-// @Accept  json
-// @Produce  json
-// @Param account body model.AddAccount true "change account info"
-// @Success 200 {object} dto.UserInfo
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
-// @Router /api/accounts/verify [post]
-func (c *Controller) GenerateVerifyEmail(ctx *gin.Context) {
-	var addAccount model.AddAccount
-	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
-		return
-	}
-	account, err := database.GenerateEmailToken(addAccount)
+	addAccount.UserName = primitive.NewObjectID().String() + addAccount.UserName
+	account, err := database.AddAccount(addAccount,
+		"http://"+ctx.Request.Host+"/api/accounts/verify")
+	account.Infos["token"] = ""
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
 		return
 	}
-	database.UpsertAccount(account)
-	url := "http://www." + ctx.Request.Host + ctx.Request.RequestURI + "?email=" + account.Email + "&token=" + account.Infos["token"]
-	mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url))
-	ctx.JSON(http.StatusOK, dto.Account2UserInfo(*account))
+	ctx.JSON(http.StatusOK, dto.Account2UserInfo(account))
 }
 
 // VerifyEmail godoc
@@ -205,7 +172,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 	}
 	account, err := database.VerifyAccount(loginAccount)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("用户名或密码错误"))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
 		return
 	}
 	var s = dto.Account2SuccessLogin(account)
@@ -221,7 +188,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 // @Tags accounts
 // @Produce  json
 // @Success 200
-// @Router /api/accounts/logout [get]
+// @Router /api/accounts/logout [post]
 func (c *Controller) LogoutAccount(ctx *gin.Context) {
 
 	ctx.SetCookie("jwtToken", "true", -1, "/", ctx.Request.Host, false, true)

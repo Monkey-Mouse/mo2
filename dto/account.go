@@ -54,8 +54,8 @@ func Account2UserInfo(a model.Account) (u UserInfo) {
 }
 
 type UserInfoBrief struct {
-	ID   primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx=="`
-	Name string             `json:"name" example:"account name"`
+	ID   primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" bson:"_id"`
+	Name string             `json:"name" example:"account name" bson:"username"`
 }
 
 func MapAccount2InfoBrief(a model.Account) (b UserInfoBrief) {
