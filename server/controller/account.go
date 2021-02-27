@@ -1,10 +1,9 @@
 package controller
 
 import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	dto "mo2/dto"
 	"mo2/mo2utils"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/gin-gonic/gin"
 
@@ -86,7 +85,7 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 	}
 	model.AddRoles(&account, addAccount.Roles)
 	database.UpsertAccount(&account)
-	ctx.JSON(http.StatusOK, dto.Account2UserInfo(account))
+	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
 }
 
 // AddAccount godoc
@@ -95,7 +94,7 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 // @Tags accounts
 // @Accept  json
 // @Produce  json
-// @Param account body model.AddAccount true "add new account info"
+// @Param account body model.InitAccount true "add new account info"
 // @Success 200 {object} dto.UserInfo
 // @Failure 400 {object} ResponseError
 // @Failure 401 {object} ResponseError
@@ -110,15 +109,25 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
 		return
 	}
-	addAccount.UserName = primitive.NewObjectID().String() + addAccount.UserName
-	account, err := database.AddAccount(addAccount,
-		"http://"+ctx.Request.Host+"/api/accounts/verify")
-	account.Infos["token"] = ""
+	unique, merr := database.EnsureEmailUnique(addAccount.Email)
+	if !unique {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("Email已经被使用"))
+		return
+	}
+	if merr.IsError() {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(merr))
+		return
+	}
+	baseUrl := "http://" + ctx.Request.Host + "/api/accounts/verify"
+	token := mo2utils.GenerateJwtToken(addAccount.Email)
+	url := baseUrl + "?email=" + addAccount.Email + "&token=" + token
+	mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url, addAccount.UserName))
+	account, err := database.InitAccount(addAccount, token)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
 		return
 	}
-	ctx.JSON(http.StatusOK, dto.Account2UserInfo(account))
+	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
 }
 
 // VerifyEmail godoc

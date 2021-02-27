@@ -7,10 +7,9 @@ import (
 	"log"
 	"math/rand"
 	"mo2/dto"
-	"mo2/server/model"
-
 	"mo2/mo2utils"
 	"mo2/mo2utils/mo2errors"
+	"mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -37,52 +36,69 @@ func CreateAccountIndex() (err error) {
 	return
 }
 
-// FindAccountByEmail getaccount by email
-func FindAccountByEmail(email string) (account model.Account, err error) {
-	err = accCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account)
+// FindAccountByEmail get account by email
+func FindAccountByEmail(email string) (account model.Account, e mo2errors.Mo2Errors) {
+	if err := accCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
+		if err == mongo.ErrNoDocuments {
+			e.Init(mo2errors.Mo2NotFound, err.Error())
+		} else {
+			e.Init(mo2errors.Mo2Error, err.Error())
+		}
+	}
+	e.InitCode(mo2errors.Mo2NoError)
+	return
+}
+
+// EnsureEmailUnique return true if unique, else return false
+// 	if not unique, check whether the user exists
+// 								if active, already exists, return false
+//								if not active, delete document, return ture
+// 	if unique, return true
+func EnsureEmailUnique(email string) (unique bool, e mo2errors.Mo2Errors) {
+	user, e := FindAccountByEmail(email)
+	if e.ErrorCode != mo2errors.Mo2NotFound {
+		unique = false
+		if user.Infos[model.IsActive] == model.True {
+			return
+		} else {
+			if _, e = DeleteAccountByEmail(user.Email); e.IsError() {
+				if e.ErrorCode != mo2errors.Mo2NotFound {
+					return
+				}
+			}
+		}
+	}
+	unique = true
+	e.InitCode(mo2errors.Mo2NoError)
 	return
 }
 
 //already check the validation in controller
 //if add a newAccount success, return account info
-func AddAccount(newAccount model.AddAccount, baseUrl string) (account model.Account, err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	user, err := FindAccountByEmail(newAccount.Email)
-	if err == nil {
-		if user.Infos[model.IsActive] == model.True {
-			err = mo2errors.New(mo2errors.Mo2Conflict, "Email已经被使用")
-			return
-		}
-	}
+func InitAccount(newAccount model.AddAccount, token string) (account model.Account, err error) {
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(newAccount.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	token := mo2utils.GenerateJwtToken(newAccount.Email)
 	//var account model.Account
 	account = model.Account{
 		UserName:   primitive.NewObjectID().String() + newAccount.UserName,
 		Email:      newAccount.Email,
 		HashedPwd:  string(hashedPwd),
 		EntityInfo: model.InitEntity(),
-		Roles:      append(account.Roles, model.OrdinaryUser), // default role: OrdinaryUser
 		Infos:      map[string]string{model.Token: token, model.IsActive: model.False},
 		Settings:   map[string]string{model.Avatar: ""},
 	}
+	model.AddRoles(&account, []model.Erole{model.OrdinaryUser})
 	insertResult, err := accCol.InsertOne(context.TODO(), account)
 	if err != nil {
 		merr := err.(mongo.WriteException).WriteErrors[0]
 		if merr.Code == 11000 {
-			err = errors.New("Name已被注册！")
+			err = mo2errors.New(mo2errors.Mo2Conflict, "Name已被注册！")
 		}
 		return
 	}
-	url := baseUrl + "?email=" + account.Email + "&token=" + token
-	mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url))
 	account.ID = insertResult.InsertedID.(primitive.ObjectID)
 	return
 }
@@ -110,6 +126,29 @@ func UpsertAccount(a *model.Account) (success bool) {
 		log.Println("blog id do not match in database")
 		success = false
 	}
+	return
+}
+
+func DeleteAccount(id primitive.ObjectID) (a model.Account, e mo2errors.Mo2Errors) {
+	if err := accCol.FindOneAndDelete(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
+		if err == mongo.ErrNoDocuments {
+			e.Init(mo2errors.Mo2NotFound, err.Error())
+		} else {
+			e.Init(mo2errors.Mo2Error, err.Error())
+		}
+	}
+	return
+}
+
+func DeleteAccountByEmail(email string) (a model.Account, e mo2errors.Mo2Errors) {
+	if err := accCol.FindOneAndDelete(context.TODO(), bson.D{{"email", email}}).Decode(&a); err != nil {
+		if err == mongo.ErrNoDocuments {
+			e.Init(mo2errors.Mo2NotFound, err.Error())
+		} else {
+			e.Init(mo2errors.Mo2Error, err.Error())
+		}
+	}
+	e.InitCode(mo2errors.Mo2NoError)
 	return
 }
 
