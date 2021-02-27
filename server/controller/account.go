@@ -111,7 +111,7 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
 		return
 	}
-	addAccount.UserName = primitive.NewObjectID().String() + addAccount.UserName
+	addAccount.UserName = primitive.NewObjectID().Hex() + addAccount.UserName
 	ip := ctx.ClientIP()
 	fmt.Println(ip)
 	account, err := database.AddAccount(addAccount,
