@@ -8,18 +8,10 @@ type Mo2Errors struct {
 }
 
 func (e Mo2Errors) Error() string {
-	return fmt.Sprintf("#{e.ErrorCode}: #{e.ErrorTip}")
+	return fmt.Sprintf("%v: %v", e.ErrorCode, e.ErrorTip)
 }
 func (e *Mo2Errors) SetErrorTip(s string) {
 	e.ErrorTip = s
-}
-func (e *Mo2Errors) Init(c int, s string) {
-	e.ErrorCode = c
-	e.ErrorTip = s
-}
-func (e *Mo2Errors) InitCode(c int) {
-	e.ErrorCode = c
-	e.ErrorTip = CodeText(c)
 }
 
 // New returns an error that formats as the given text.
