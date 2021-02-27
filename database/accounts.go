@@ -56,9 +56,9 @@ func AddAccount(newAccount model.AddAccount, baseURL string, senderAddr string) 
 		user.Infos["token"] = token
 		UpsertAccount(&user)
 		url := baseURL + "?email=" + user.Email + "&token=" + token
-		mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url), senderAddr)
-		account = user
 		err = nil
+		err = mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url), senderAddr)
+		account = user
 		return
 	}
 	//var account model.Account
@@ -91,7 +91,7 @@ func AddAccount(newAccount model.AddAccount, baseURL string, senderAddr string) 
 		return
 	}
 	url := baseURL + "?email=" + account.Email + "&token=" + token
-	mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url), senderAddr)
+	err = mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url), senderAddr)
 	account.ID = insertResult.InsertedID.(primitive.ObjectID)
 	return
 }
