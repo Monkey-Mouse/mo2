@@ -91,7 +91,7 @@ func AddAccount(newAccount model.AddAccount, baseURL string, senderAddr string) 
 		return
 	}
 	url := baseURL + "?email=" + account.Email + "&token=" + token
-	err = mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url), senderAddr)
+	err = mo2utils.SendEmail([]string{account.Email}, mo2utils.VerifyEmailMessage(url), senderAddr)
 	account.ID = insertResult.InsertedID.(primitive.ObjectID)
 	return
 }

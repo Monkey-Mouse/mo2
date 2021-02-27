@@ -5,7 +5,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - "mongodata:/var/lib/mongodb"
+      - "./mongo-volume:/data/db"
   mo2:
     image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2:latest
     env_file:
