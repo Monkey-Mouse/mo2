@@ -180,32 +180,33 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 	collection := GetCollection("accounts")
 	userNameOrEmail := info.UserNameOrEmail
 	err = collection.FindOne(context.TODO(), bson.D{{"username", userNameOrEmail}}).Decode(&account)
-	if account.Infos["isActive"] == "false" {
-		err = errors.New("邮箱暂未激活")
-		return
-	}
 	if err != nil {
 		//then verify email
 		if err == mongo.ErrNoDocuments {
 			log.Println(err)
 			err = collection.FindOne(context.TODO(), bson.D{{"email", userNameOrEmail}}).Decode(&account)
 			if err != nil {
+				err = errors.New("用户名或email不存在")
 				// no chance
 				return
 			}
 		} else {
-			log.Fatal(err)
+			err = errors.New("未知错误：数据异常")
+			// log.Fatal(err)
 			return
 		}
 
 	}
-
+	if account.Infos["isActive"] == "false" {
+		err = errors.New("邮箱暂未激活！")
+		return
+	}
 	password := info.Password
 	hashedPassword := account.HashedPwd
 	//judge hash with hashed password
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
-		log.Println(err)
+		err = errors.New("密码错误！")
 		return
 	}
 	return
