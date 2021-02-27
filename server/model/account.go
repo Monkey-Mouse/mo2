@@ -13,6 +13,13 @@ const (
 	GeneralAdmin Erole = "GeneralAdmin"
 	OrdinaryUser Erole = "OrdinaryUser"
 )
+const (
+	Token    = "token"
+	Avatar   = "avatar"
+	IsActive = "isActive"
+	True     = "true"
+	False    = "false"
+)
 
 // Account example
 type Account struct {
@@ -22,13 +29,20 @@ type Account struct {
 	HashedPwd  string             `json:"hashedPassword" example:"$2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i" bson:"hashedpwd,omitempty"`
 	EntityInfo Entity             `json:"entityInfo,omitempty" bson:"entity_info,omitempty" bson:"entity_info,omitempty"`
 	Roles      []Erole            `json:"roles" bson:"roles"`
-	Infos      map[string]string  `json:"infos" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'" bson:"infos,omitempty"`
+	Infos      map[string]string  `json:"infos" example:"'token': 'xxxxxxxx'(private data)" bson:"infos,omitempty"`
+	Settings   map[string]string  `json:"settings" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'(public data)" bson:"settings,omitempty"`
 }
 
 // AddAccount example
 type AddAccount struct {
 	UserName string `json:"userName" example:"account name"`
-	Email    string `json:"email" example:"email@qq.com"`
+	Email    string `json:"email" example:"email@mo2.com"`
+	Password string `json:"password" example:"p@ssword"`
+}
+
+// DeleteAccount example
+type DeleteAccount struct {
+	Email    string `json:"email" example:"email@mo2.com"`
 	Password string `json:"password" example:"p@ssword"`
 }
 
@@ -41,13 +55,13 @@ type AddAccountRole struct {
 
 // LoginAccount example
 type LoginAccount struct {
-	UserNameOrEmail string `json:"userNameOrEmail" example:"account name/email@qq.com"`
+	UserNameOrEmail string `json:"userNameOrEmail" example:"account name/email@mo2.com"`
 	Password        string `json:"password" example:"p@ssword"`
 }
 
 // VerifyEmail
 type VerifyEmail struct {
-	Email string `json:"Email" example:"email@qq.com"`
+	Email string `json:"Email" example:"email@mo2.com"`
 	Token string `json:"token" example:"p@ssword"`
 }
 

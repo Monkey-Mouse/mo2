@@ -77,6 +77,56 @@ var doc = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "delete by path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "delete Blog",
+                "parameters": [
+                    {
+                        "description": "delete account info",
+                        "name": "info",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.DeleteAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": ""
+                    },
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
             }
         },
         "/api/accounts/detail/{id}": {
@@ -208,7 +258,7 @@ var doc = `{
             }
         },
         "/api/accounts/logout": {
-            "get": {
+            "post": {
                 "description": "logout and delete cookies",
                 "produces": [
                     "application/json"
@@ -308,50 +358,6 @@ var doc = `{
                 "responses": {
                     "308": {
                         "description": ""
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "generate by json",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "accounts"
-                ],
-                "summary": "generate verify an account's email",
-                "parameters": [
-                    {
-                        "description": "change account info",
-                        "name": "account",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.AddAccount"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.UserInfo"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
-                        }
                     },
                     "401": {
                         "description": "Unauthorized",
@@ -575,6 +581,12 @@ var doc = `{
                         "in": "query"
                     },
                     {
+                        "type": "boolean",
+                        "description": "bool default false",
+                        "name": "deleted",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "description": "int 0",
                         "name": "page",
@@ -644,6 +656,12 @@ var doc = `{
                         "type": "boolean",
                         "description": "bool true",
                         "name": "draft",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "bool default false",
+                        "name": "deleted",
                         "in": "query"
                     },
                     {
@@ -1260,12 +1278,6 @@ var doc = `{
                     "type": "string",
                     "example": "xxxxxxxxxxxxx=="
                 },
-                "infos": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
                 "name": {
                     "type": "string",
                     "example": "account name"
@@ -1278,6 +1290,16 @@ var doc = `{
                     "example": [
                         "ordinaryUser"
                     ]
+                },
+                "settings": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "'avatar'": " 'www.avatar.com/account_name'",
+                        "'site'": "'www.limfx.com'(public data)"
+                    }
                 }
             }
         },
@@ -1299,7 +1321,7 @@ var doc = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "email@qq.com"
+                    "example": "email@mo2.com"
                 },
                 "password": {
                     "type": "string",
@@ -1395,6 +1417,19 @@ var doc = `{
                 }
             }
         },
+        "model.DeleteAccount": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "email@mo2.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "p@ssword"
+                }
+            }
+        },
         "model.Entity": {
             "type": "object",
             "properties": {
@@ -1420,7 +1455,7 @@ var doc = `{
                 },
                 "userNameOrEmail": {
                     "type": "string",
-                    "example": "account name/email@qq.com"
+                    "example": "account name/email@mo2.com"
                 }
             }
         }

@@ -7,9 +7,9 @@ import (
 	"log"
 	"math/rand"
 	"mo2/dto"
-	"mo2/server/model"
-
 	"mo2/mo2utils"
+	"mo2/mo2utils/mo2errors"
+	"mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,16 +20,7 @@ import (
 
 var accCol = GetCollection("accounts")
 
-// FindAccountByEmail getaccount by email
-func FindAccountByEmail(email string) (account model.Account, err error) {
-	err = accCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account)
-	return
-}
-
-//already check the validation in controller
-//if add a newAccount success, return account info
-func AddAccount(newAccount model.AddAccount, baseURL string, senderAddr string) (account model.Account, err error) {
-	collection := GetCollection("accounts")
+func CreateAccountIndex() (err error) {
 	//ensure index
 	indexModel := []mongo.IndexModel{
 		{
@@ -41,57 +32,73 @@ func AddAccount(newAccount model.AddAccount, baseURL string, senderAddr string) 
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	_, err = collection.Indexes().CreateMany(context.TODO(), indexModel)
+	_, err = GetCollection("accounts").Indexes().CreateMany(context.TODO(), indexModel)
+	return
+}
+
+// FindAccountByEmail get account by email
+func FindAccountByEmail(email string) (account model.Account, e mo2errors.Mo2Errors) {
+	if err := accCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
+		if err == mongo.ErrNoDocuments {
+			e.Init(mo2errors.Mo2NotFound, err.Error())
+		} else {
+			e.Init(mo2errors.Mo2Error, err.Error())
+		}
+	}
+	e.InitCode(mo2errors.Mo2NoError)
+	return
+}
+
+// EnsureEmailUnique return true if unique, else return false
+// 	if not unique, check whether the user exists
+// 								if active, already exists, return false
+//								if not active, delete document, return ture
+// 	if unique, return true
+func EnsureEmailUnique(email string) (unique bool, e mo2errors.Mo2Errors) {
+	user, e := FindAccountByEmail(email)
+	if e.ErrorCode != mo2errors.Mo2NotFound {
+		unique = false
+		if user.Infos[model.IsActive] == model.True {
+			return
+		} else {
+			if _, e = DeleteAccountByEmail(user.Email); e.IsError() {
+				if e.ErrorCode != mo2errors.Mo2NotFound {
+					return
+				}
+			}
+		}
+	}
+	unique = true
+	e.InitCode(mo2errors.Mo2NoError)
+	return
+}
+
+//already check the validation in controller
+//if add a newAccount success, return account info
+func InitAccount(newAccount model.AddAccount, token string) (account model.Account, err error) {
+	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(newAccount.Password), bcrypt.DefaultCost)
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	user, err := FindAccountByEmail(newAccount.Email)
-	if err == nil {
-		if user.Infos["isActive"] != "false" {
-			err = errors.New("Email已经被使用")
-			return
-		}
-		token := mo2utils.GenerateJwtToken(user.Email)
-		user.Infos["token"] = token
-		UpsertAccount(&user)
-		url := baseURL + "?email=" + user.Email + "&token=" + token
-		err = nil
-		err = mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url), senderAddr)
-		account = user
 		return
 	}
 	//var account model.Account
-	account.Email = newAccount.Email
-	account.UserName = newAccount.UserName
-	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(newAccount.Password), bcrypt.DefaultCost)
-	account.EntityInfo = model.InitEntity()
-	account.Roles = append(account.Roles, model.OrdinaryUser) // default role: OrdinaryUser
-	account.Infos = make(map[string]string)
-	account.Infos["avatar"] = ""        // default pic
-	account.Infos["isActive"] = "false" // default pic
-	token := mo2utils.GenerateJwtToken(user.Email)
-	account.Infos["token"] = token
-	if err != nil {
-		log.Fatal(err)
-		return
+	account = model.Account{
+		UserName:   primitive.NewObjectID().String() + newAccount.UserName,
+		Email:      newAccount.Email,
+		HashedPwd:  string(hashedPwd),
+		EntityInfo: model.InitEntity(),
+		Infos:      map[string]string{model.Token: token, model.IsActive: model.False},
+		Settings:   map[string]string{model.Avatar: ""},
 	}
-	account.HashedPwd = string(hashedPwd)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	insertResult, err := collection.InsertOne(context.TODO(), account)
-
+	model.AddRoles(&account, []model.Erole{model.OrdinaryUser})
+	insertResult, err := accCol.InsertOne(context.TODO(), account)
 	if err != nil {
 		merr := err.(mongo.WriteException).WriteErrors[0]
 		if merr.Code == 11000 {
-			err = errors.New("Name已被注册！")
+			err = mo2errors.New(mo2errors.Mo2Conflict, "Name已被注册！")
 		}
 		return
 	}
-	url := baseURL + "?email=" + account.Email + "&token=" + token
-	err = mo2utils.SendEmail([]string{account.Email}, mo2utils.VerifyEmailMessage(url), senderAddr)
 	account.ID = insertResult.InsertedID.(primitive.ObjectID)
 	return
 }
@@ -107,6 +114,7 @@ func UpsertAccount(a *model.Account) (success bool) {
 			"entity_info": a.EntityInfo,
 			"roles":       a.Roles,
 			"infos":       a.Infos,
+			"settings":    a.Settings,
 		},
 	}, options.Update().SetUpsert(true))
 	success = true
@@ -118,6 +126,29 @@ func UpsertAccount(a *model.Account) (success bool) {
 		log.Println("blog id do not match in database")
 		success = false
 	}
+	return
+}
+
+func DeleteAccount(id primitive.ObjectID) (a model.Account, e mo2errors.Mo2Errors) {
+	if err := accCol.FindOneAndDelete(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
+		if err == mongo.ErrNoDocuments {
+			e.Init(mo2errors.Mo2NotFound, err.Error())
+		} else {
+			e.Init(mo2errors.Mo2Error, err.Error())
+		}
+	}
+	return
+}
+
+func DeleteAccountByEmail(email string) (a model.Account, e mo2errors.Mo2Errors) {
+	if err := accCol.FindOneAndDelete(context.TODO(), bson.D{{"email", email}}).Decode(&a); err != nil {
+		if err == mongo.ErrNoDocuments {
+			e.Init(mo2errors.Mo2NotFound, err.Error())
+		} else {
+			e.Init(mo2errors.Mo2Error, err.Error())
+		}
+	}
+	e.InitCode(mo2errors.Mo2NoError)
 	return
 }
 
@@ -138,32 +169,28 @@ func CreateAnonymousAccount() (a model.Account) {
 // GenerateEmailToken generate token for email of an account
 func GenerateEmailToken(addAccount model.AddAccount) (account *model.Account, err error) {
 	//use email to verify
-	collection := GetCollection("accounts")
-	// verify email
-	if err = collection.FindOne(context.TODO(), bson.D{{"email", addAccount.Email}}).Decode(&account); err != nil {
+	if err = accCol.FindOne(context.TODO(), bson.D{{"email", addAccount.Email}}).Decode(&account); err != nil {
 		return
 	}
 	if account.Infos == nil {
 		account.Infos = make(map[string]string)
 	}
-	account.Infos["token"] = mo2utils.GenerateJwtToken(account.Email)
-	account.Infos["isActive"] = "false"
+	account.Infos[model.Token] = mo2utils.GenerateJwtToken(account.Email)
+	account.Infos[model.IsActive] = model.False
 	return
 }
 
 //verify email of an account
 func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
 	//use email to verify
-	collection := GetCollection("accounts")
 	email := info.Email
-
 	// verify email
-	if err = collection.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
+	if err = accCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
 		return
 	}
-	if account.Infos["token"] == info.Token {
-		account.Infos["isActive"] = "true"
-		delete(account.Infos, "token")
+	if account.Infos[model.Token] == info.Token {
+		account.Infos[model.IsActive] = model.True
+		delete(account.Infos, model.Token)
 		account.UserName = account.UserName[24:]
 		UpsertAccount(&account)
 	} else {
@@ -176,7 +203,6 @@ func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
 func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 
 	//first use username, then use email to verify
-	//var
 	collection := GetCollection("accounts")
 	userNameOrEmail := info.UserNameOrEmail
 	err = collection.FindOne(context.TODO(), bson.D{{"username", userNameOrEmail}}).Decode(&account)
@@ -197,7 +223,7 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 		}
 
 	}
-	if account.Infos["isActive"] == "false" {
+	if account.Infos[model.IsActive] == model.False {
 		err = errors.New("邮箱暂未激活！")
 		return
 	}
@@ -230,7 +256,7 @@ func FindAccount(id primitive.ObjectID) (a model.Account, exist bool) {
 func FindAllAccountsInfo() (us []dto.UserInfo) {
 	as := FindAllAccounts()
 	for _, account := range as {
-		us = append(us, dto.Account2UserInfo(account))
+		us = append(us, dto.Account2UserPublicInfo(account))
 	}
 	return
 }
@@ -251,7 +277,7 @@ func FindAllAccounts() (as []model.Account) {
 func FindAccountInfo(id primitive.ObjectID) (u dto.UserInfo, exist bool) {
 	a, exist := FindAccount(id)
 	if exist {
-		u = dto.Account2UserInfo(a)
+		u = dto.Account2UserPublicInfo(a)
 	}
 	return
 }

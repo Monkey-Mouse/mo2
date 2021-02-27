@@ -7,6 +7,7 @@ var globalClient *mongo.Client
 func GetClient() *mongo.Client {
 	if globalClient == nil {
 		connectMongoDB()
+		CreateAccountIndex()
 	}
 
 	return globalClient
