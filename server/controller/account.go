@@ -188,7 +188,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 // @Tags accounts
 // @Produce  json
 // @Success 200
-// @Router /api/accounts/logout [get]
+// @Router /api/accounts/logout [post]
 func (c *Controller) LogoutAccount(ctx *gin.Context) {
 
 	ctx.SetCookie("jwtToken", "true", -1, "/", ctx.Request.Host, false, true)
