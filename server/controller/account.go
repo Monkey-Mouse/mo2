@@ -2,6 +2,7 @@ package controller
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"fmt"
 	dto "mo2/dto"
 	"mo2/mo2utils"
 
@@ -109,6 +110,12 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
 		return
 	}
+	addAccount.UserName = primitive.NewObjectID().Hex() + addAccount.UserName
+	ip := ctx.ClientIP()
+	fmt.Println(ip)
+	account, err := database.AddAccount(addAccount,
+		"http://"+ctx.Request.Host+"/api/accounts/verify", ip)
+	account.Infos["token"] = ""
 	unique, merr := database.EnsureEmailUnique(addAccount.Email)
 	if !unique {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("Email已经被使用"))
