@@ -28,7 +28,7 @@ func FindAccountByEmail(email string) (account model.Account, err error) {
 
 //already check the validation in controller
 //if add a newAccount success, return account info
-func AddAccount(newAccount model.AddAccount, baseUrl string) (account model.Account, err error) {
+func AddAccount(newAccount model.AddAccount, baseURL string, senderAddr string) (account model.Account, err error) {
 	collection := GetCollection("accounts")
 	//ensure index
 	indexModel := []mongo.IndexModel{
@@ -55,8 +55,8 @@ func AddAccount(newAccount model.AddAccount, baseUrl string) (account model.Acco
 		token := mo2utils.GenerateJwtToken(user.Email)
 		user.Infos["token"] = token
 		UpsertAccount(&user)
-		url := baseUrl + "?email=" + user.Email + "&token=" + token
-		mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url))
+		url := baseURL + "?email=" + user.Email + "&token=" + token
+		mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url), senderAddr)
 		account = user
 		err = nil
 		return
@@ -90,8 +90,8 @@ func AddAccount(newAccount model.AddAccount, baseUrl string) (account model.Acco
 		}
 		return
 	}
-	url := baseUrl + "?email=" + account.Email + "&token=" + token
-	mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url))
+	url := baseURL + "?email=" + account.Email + "&token=" + token
+	mo2utils.SendEmail([]string{user.Email}, mo2utils.VerifyEmailMessage(url), senderAddr)
 	account.ID = insertResult.InsertedID.(primitive.ObjectID)
 	return
 }
