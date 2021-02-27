@@ -42,6 +42,7 @@ func setupHandlers(c *controller.Controller) {
 		accounts := api.Group("/accounts")
 		{
 			accounts.Post("", c.AddAccount)
+			accounts.Delete("", c.DeleteAccount)
 			accounts.Get("verify", c.VerifyEmail)
 			accounts.Post("role", c.AddAccountRole)
 			accounts.Post("login", c.LoginAccount)

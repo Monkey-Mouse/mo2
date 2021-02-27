@@ -100,10 +100,6 @@ definitions:
       id:
         example: xxxxxxxxxxxxx==
         type: string
-      infos:
-        additionalProperties:
-          type: string
-        type: object
       name:
         example: account name
         type: string
@@ -113,6 +109,13 @@ definitions:
         items:
           type: string
         type: array
+      settings:
+        additionalProperties:
+          type: string
+        example:
+          '''avatar''': ' ''www.avatar.com/account_name'''
+          '''site''': '''www.limfx.com''(public data)'
+        type: object
     type: object
   dto.UserInfoBrief:
     properties:
@@ -126,7 +129,7 @@ definitions:
   model.AddAccount:
     properties:
       email:
-        example: email@qq.com
+        example: email@mo2.com
         type: string
       password:
         example: p@ssword
@@ -196,6 +199,15 @@ definitions:
         example: xxxxxxxxxxxxxx==
         type: string
     type: object
+  model.DeleteAccount:
+    properties:
+      email:
+        example: email@mo2.com
+        type: string
+      password:
+        example: p@ssword
+        type: string
+    type: object
   model.Entity:
     properties:
       createTime:
@@ -213,7 +225,7 @@ definitions:
         example: p@ssword
         type: string
       userNameOrEmail:
-        example: account name/email@qq.com
+        example: account name/email@mo2.com
         type: string
     type: object
 host: localhost:5001
@@ -231,6 +243,39 @@ info:
   version: "1.0"
 paths:
   /api/accounts:
+    delete:
+      consumes:
+      - application/json
+      description: delete by path
+      parameters:
+      - description: delete account info
+        in: body
+        name: info
+        required: true
+        schema:
+          $ref: '#/definitions/model.DeleteAccount'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: ""
+        "204":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: delete Blog
+      tags:
+      - accounts
     post:
       consumes:
       - application/json
@@ -345,7 +390,7 @@ paths:
       tags:
       - accounts
   /api/accounts/logout:
-    get:
+    post:
       description: logout and delete cookies
       produces:
       - application/json
@@ -415,35 +460,6 @@ paths:
           schema:
             $ref: '#/definitions/controller.ResponseError'
       summary: verify an account's email
-      tags:
-      - accounts
-    post:
-      consumes:
-      - application/json
-      description: generate by json
-      parameters:
-      - description: change account info
-        in: body
-        name: account
-        required: true
-        schema:
-          $ref: '#/definitions/model.AddAccount'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.UserInfo'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controller.ResponseError'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/controller.ResponseError'
-      summary: generate verify an account's email
       tags:
       - accounts
   /api/blogs/{id}:
@@ -653,6 +669,10 @@ paths:
         in: query
         name: draft
         type: boolean
+      - description: bool default false
+        in: query
+        name: deleted
+        type: boolean
       - description: int 0
         in: query
         name: page
@@ -699,6 +719,10 @@ paths:
       - description: bool true
         in: query
         name: draft
+        type: boolean
+      - description: bool default false
+        in: query
+        name: deleted
         type: boolean
       - description: string xxxxxxxx
         in: query

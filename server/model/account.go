@@ -36,7 +36,13 @@ type Account struct {
 // AddAccount example
 type AddAccount struct {
 	UserName string `json:"userName" example:"account name"`
-	Email    string `json:"email" example:"email@qq.com"`
+	Email    string `json:"email" example:"email@mo2.com"`
+	Password string `json:"password" example:"p@ssword"`
+}
+
+// DeleteAccount example
+type DeleteAccount struct {
+	Email    string `json:"email" example:"email@mo2.com"`
 	Password string `json:"password" example:"p@ssword"`
 }
 
@@ -49,13 +55,13 @@ type AddAccountRole struct {
 
 // LoginAccount example
 type LoginAccount struct {
-	UserNameOrEmail string `json:"userNameOrEmail" example:"account name/email@qq.com"`
+	UserNameOrEmail string `json:"userNameOrEmail" example:"account name/email@mo2.com"`
 	Password        string `json:"password" example:"p@ssword"`
 }
 
 // VerifyEmail
 type VerifyEmail struct {
-	Email string `json:"Email" example:"email@qq.com"`
+	Email string `json:"Email" example:"email@mo2.com"`
 	Token string `json:"token" example:"p@ssword"`
 }
 
