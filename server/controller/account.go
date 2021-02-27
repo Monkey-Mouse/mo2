@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	dto "mo2/dto"
 	"mo2/mo2utils"
 
@@ -111,8 +112,10 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		return
 	}
 	addAccount.UserName = primitive.NewObjectID().String() + addAccount.UserName
+	ip := ctx.ClientIP()
+	fmt.Println(ip)
 	account, err := database.AddAccount(addAccount,
-		"http://"+ctx.Request.Host+"/api/accounts/verify")
+		"http://"+ctx.Request.Host+"/api/accounts/verify", ip)
 	account.Infos["token"] = ""
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
