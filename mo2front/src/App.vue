@@ -65,6 +65,7 @@
         }}</v-list-item-title>
 
         <v-btn icon v-if="!isUser" @click="showLogin()"> 登录 </v-btn>
+        <v-btn icon v-else color="red" @click="logOut"> 登出 </v-btn>
       </v-list-item>
 
       <v-divider></v-divider>
@@ -119,6 +120,15 @@
     <v-main>
       <router-view ref="view" :autoSaving.sync="autoSaving" :user="user" />
       <account-modal :enable.sync="enable" :user.sync="userdata" />
+      <v-snackbar v-model="snackbar" :timeout="5000">
+        {{ "登出成功！" }}
+
+        <template v-slot:action="{ attrs }">
+          <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
       <!-- <v-btn @click="showLogin()">Login</v-btn>
       <account-modal :enable.sync="enable" />
       <v-btn @click="$vuetify.theme.dark = !$vuetify.theme.dark"
@@ -144,7 +154,7 @@ import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
 import { BlankUser, User } from "./models";
-import { GetInitials, GetUserInfoAsync, ReachedBottom } from "./utils";
+import { GetInitials, GetUserInfoAsync, Logout, ReachedBottom } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
 import { Watch } from "vue-property-decorator";
 // import "bulma/bulma.sass";
@@ -160,6 +170,7 @@ export default class App extends Vue {
   drawer = false;
   user: User = BlankUser;
   autoSaving = false;
+  snackbar = false;
   get userdata() {
     return this.user;
   }
@@ -197,6 +208,16 @@ export default class App extends Vue {
   get initials(): string {
     return GetInitials(this.user.name);
   }
+  logOut() {
+    Logout().then(() => {
+      GetUserInfoAsync().then((u) => {
+        this.user = u;
+        this.items[1].show = this.isUser;
+        this.items[2].show = this.isUser;
+        this.snackbar = true;
+      });
+    });
+  }
   publishClick() {
     (this.$refs["view"] as any).publish();
   }
@@ -204,6 +225,7 @@ export default class App extends Vue {
     GetUserInfoAsync().then((u) => {
       this.user = u;
       this.items[1].show = this.isUser;
+      this.items[2].show = this.isUser;
     });
     try {
       this.$vuetify.theme.dark = JSON.parse(
