@@ -172,7 +172,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 	}
 	account, err := database.VerifyAccount(loginAccount)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseReason("用户名或密码错误"))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
 		return
 	}
 	var s = dto.Account2SuccessLogin(account)
