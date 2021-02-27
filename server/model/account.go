@@ -13,6 +13,13 @@ const (
 	GeneralAdmin Erole = "GeneralAdmin"
 	OrdinaryUser Erole = "OrdinaryUser"
 )
+const (
+	Token    = "token"
+	Avatar   = "avatar"
+	IsActive = "isActive"
+	True     = "true"
+	False    = "false"
+)
 
 // Account example
 type Account struct {
@@ -22,7 +29,8 @@ type Account struct {
 	HashedPwd  string             `json:"hashedPassword" example:"$2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i" bson:"hashedpwd,omitempty"`
 	EntityInfo Entity             `json:"entityInfo,omitempty" bson:"entity_info,omitempty" bson:"entity_info,omitempty"`
 	Roles      []Erole            `json:"roles" bson:"roles"`
-	Infos      map[string]string  `json:"infos" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'" bson:"infos,omitempty"`
+	Infos      map[string]string  `json:"infos" example:"'token': 'xxxxxxxx'(private data)" bson:"infos,omitempty"`
+	Settings   map[string]string  `json:"settings" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'(public data)" bson:"settings,omitempty"`
 }
 
 // AddAccount example

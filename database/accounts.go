@@ -21,7 +21,6 @@ var accCol = GetCollection("accounts")
 //already check the validation in controller
 //if add a newAccount success, return account info
 func AddAccount(newAccount model.AddAccount) (account model.Account, err error) {
-	collection := GetCollection("accounts")
 	//ensure index
 	indexModel := []mongo.IndexModel{
 		{
@@ -33,14 +32,14 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 			Options: options.Index().SetUnique(true),
 		},
 	}
-	_, err = collection.Indexes().CreateMany(context.TODO(), indexModel)
+	_, err = accCol.Indexes().CreateMany(context.TODO(), indexModel)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = collection.FindOne(context.TODO(), bson.M{"email": newAccount.Email}).Decode(&account)
+	err = accCol.FindOne(context.TODO(), bson.M{"email": newAccount.Email}).Decode(&account)
 	if err != mongo.ErrNoDocuments {
-		if account.Infos["isActive"] == "true" {
+		if account.Infos[model.IsActive] == model.True {
 			errors.New("邮箱已被注册")
 			return
 		}
@@ -52,8 +51,9 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 	account.EntityInfo = model.InitEntity()
 	account.Roles = append(account.Roles, model.OrdinaryUser) // default role: OrdinaryUser
 	account.Infos = make(map[string]string)
-	account.Infos["avatar"] = ""        // default pic
-	account.Infos["isActive"] = "false" // default pic
+	account.Settings = make(map[string]string)
+	account.Settings[model.Avatar] = ""         // default pic
+	account.Infos[model.IsActive] = model.False // email not verified
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -63,7 +63,7 @@ func AddAccount(newAccount model.AddAccount) (account model.Account, err error) 
 		log.Fatal(err)
 		return
 	}
-	insertResult, err := collection.InsertOne(context.TODO(), account)
+	insertResult, err := accCol.InsertOne(context.TODO(), account)
 	account.ID = insertResult.InsertedID.(primitive.ObjectID)
 	return
 }
@@ -79,6 +79,7 @@ func UpsertAccount(a *model.Account) (success bool) {
 			"entity_info": a.EntityInfo,
 			"roles":       a.Roles,
 			"infos":       a.Infos,
+			"settings":    a.Settings,
 		},
 	}, options.Update().SetUpsert(true))
 	success = true
@@ -110,27 +111,23 @@ func CreateAnonymousAccount() (a model.Account) {
 // GenerateEmailToken generate token for email of an account
 func GenerateEmailToken(addAccount model.AddAccount) (account *model.Account, err error) {
 	//use email to verify
-	collection := GetCollection("accounts")
-	// verify email
-	if err = collection.FindOne(context.TODO(), bson.D{{"email", addAccount.Email}}).Decode(&account); err != nil {
+	if err = accCol.FindOne(context.TODO(), bson.D{{"email", addAccount.Email}}).Decode(&account); err != nil {
 		return
 	}
 	if account.Infos == nil {
 		account.Infos = make(map[string]string)
 	}
-	account.Infos["token"] = mo2utils.GenerateJwtToken(account.Email)
-	account.Infos["isActive"] = "false"
+	account.Infos[model.Token] = mo2utils.GenerateJwtToken(account.Email)
+	account.Infos[model.IsActive] = model.False
 	return
 }
 
 //verify email of an account
 func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
 	//use email to verify
-	collection := GetCollection("accounts")
 	email := info.Email
-
 	// verify email
-	if err = collection.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
+	if err = accCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
 		return
 	}
 	if account.Infos["token"] == info.Token {
