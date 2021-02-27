@@ -97,7 +97,7 @@ func UploadCDN() {
 func qiniuFile(srcPath string, dstPath string) {
 	localFile := srcPath
 	key := dstPath
-	upToken := mo2img.GenerateUploadToken(localFile)
+	upToken := mo2img.GenerateOverwriteToken(localFile, dstPath)
 	cfg := storage.Config{}
 	// 空间对应的机房
 	cfg.Zone = &storage.ZoneHuanan
