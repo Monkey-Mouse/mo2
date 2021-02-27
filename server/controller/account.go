@@ -2,7 +2,6 @@ package controller
 
 import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"fmt"
 	dto "mo2/dto"
 	"mo2/mo2utils"
 
@@ -95,7 +94,7 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 // @Tags accounts
 // @Accept  json
 // @Produce  json
-// @Param account body model.InitAccount true "add new account info"
+// @Param account body model.AddAccount true "add new account info"
 // @Success 200 {object} dto.UserInfo
 // @Failure 400 {object} ResponseError
 // @Failure 401 {object} ResponseError
@@ -111,11 +110,6 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		return
 	}
 	addAccount.UserName = primitive.NewObjectID().Hex() + addAccount.UserName
-	ip := ctx.ClientIP()
-	fmt.Println(ip)
-	account, err := database.AddAccount(addAccount,
-		"http://"+ctx.Request.Host+"/api/accounts/verify", ip)
-	account.Infos["token"] = ""
 	unique, merr := database.EnsureEmailUnique(addAccount.Email)
 	if !unique {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("Email已经被使用"))
@@ -128,13 +122,44 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 	baseUrl := "http://" + ctx.Request.Host + "/api/accounts/verify"
 	token := mo2utils.GenerateJwtToken(addAccount.Email)
 	url := baseUrl + "?email=" + addAccount.Email + "&token=" + token
-	mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url, addAccount.UserName))
+	mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url, addAccount.UserName), ctx.ClientIP())
 	account, err := database.InitAccount(addAccount, token)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
+}
+
+// DeleteAccount godoc
+// @Summary delete Blog
+// @Description delete by path
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param info body model.DeleteAccount true "delete account info"
+// @Success 202
+// @Success 204
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
+// @Router /api/accounts [delete]
+func (c *Controller) DeleteAccount(ctx *gin.Context) {
+	var info model.DeleteAccount
+	if err := ctx.ShouldBindJSON(&info); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+		return
+	}
+	if _, err := database.VerifyAccount(model.LoginAccount{Password: info.Password, UserNameOrEmail: info.Email}); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		return
+	}
+	if _, merr := database.DeleteAccountByEmail(info.Email); merr.IsError() {
+		ctx.Status(http.StatusNoContent)
+	} else {
+		ctx.Status(http.StatusAccepted)
+
+	}
 }
 
 // VerifyEmail godoc
