@@ -2,8 +2,7 @@ package mo2utils
 
 import (
 	"fmt"
-	"net/smtp"
-	"os"
+	emailservice "mo2/services/emailService"
 )
 
 func VerifyEmailMessage(url string) []byte {
@@ -17,23 +16,9 @@ func VerifyEmailMessage(url string) []byte {
 
 	return []byte(msg)
 }
-func SendEmail(receiverEmails []string, message []byte) (err error) {
+func SendEmail(receiverEmails []string, message []byte, senderAddr string) (err error) {
 
-	//test
-	//to:=[]string{"liziyi@hust.edu.cn"}
-
-	// Sender data.
-	from := os.Getenv("emailAddr")
-	password := os.Getenv("emailPass")
-
-	// smtp server configuration.
-	smtpHost := "smtp.qq.com"
-	smtpPort := "587"
-
-	// Authentication.
-	auth := smtp.PlainAuth("", from, password, smtpHost)
-	// Sending email.
-	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, receiverEmails, message)
+	err = emailservice.QueueEmail(message, receiverEmails, senderAddr)
 	if err != nil {
 		fmt.Println(err)
 	}
