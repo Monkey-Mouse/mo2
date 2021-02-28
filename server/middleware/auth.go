@@ -115,16 +115,23 @@ type handlerMap struct {
 	Map        map[handlerKey]handlerProp
 	PrefixPath string
 	Roles      []string
+	Limit      int
 }
 
 var handlers = make(map[handlerKey]handlerProp, 0)
 
 // H handlermap, like gin router
-var H = handlerMap{handlers, "", []string{}}
+var H = handlerMap{handlers, "", []string{}, -1}
 
 func (h handlerMap) Group(relativPath string, roles ...string) handlerMap {
 	h.PrefixPath = path.Join(h.PrefixPath, relativPath)
 	h.Roles = roles
+	return h
+}
+func (h handlerMap) GroupWithLimit(relativPath string, ratelimit int, roles ...string) handlerMap {
+	h.PrefixPath = path.Join(h.PrefixPath, relativPath)
+	h.Roles = roles
+	h.Limit = ratelimit
 	return h
 }
 
@@ -147,7 +154,7 @@ func (h handlerMap) PutWithRateLimit(relativPath string, handler gin.HandlerFunc
 }
 
 func (h handlerMap) Handle(method string, relativPath string, handler gin.HandlerFunc, roles ...string) {
-	h.HandlerWithRateLimit(http.MethodGet, relativPath, handler, -1, roles...)
+	h.HandlerWithRateLimit(http.MethodGet, relativPath, handler, h.Limit, roles...)
 }
 func (h handlerMap) Get(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodGet, relativPath, handler, roles...)
