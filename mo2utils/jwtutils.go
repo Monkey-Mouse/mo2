@@ -25,20 +25,19 @@ type JwtInfoClaims struct {
 var key []byte = make([]byte, 16)
 
 func init() {
+	initKey()
+}
+func initKey() (err error) {
 	bytes, err := ioutil.ReadFile("mo2.secret")
 	if err != nil {
+
 		rand.Seed(time.Now().UnixNano())
-		rand.Read(key)
-		ioutil.WriteFile("mo2.secret", key, 0)
+		_, err = rand.Read(key)
+		err = ioutil.WriteFile("mo2.secret", key, 0)
 		return
 	}
 	key = bytes
-}
-
-func (j JwtLoginClaims) Valid() error {
-
-	return nil
-
+	return
 }
 
 func BasicAuth() gin.HandlerFunc {

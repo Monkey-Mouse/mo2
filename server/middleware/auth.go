@@ -64,9 +64,6 @@ func AuthMiddleware(c *gin.Context) {
 		return
 	}
 
-	cookieStr, err := c.Cookie("jwtToken")
-	uinfo, jwterr := mo2utils.ParseJwt(cookieStr)
-	c.Set(mo2utils.UserInfoKey, uinfo)
 	key := handlerKey{c.FullPath(), c.Request.Method}
 	prop, ok := handlers[key]
 	// not registered for this middleware
@@ -84,10 +81,13 @@ func AuthMiddleware(c *gin.Context) {
 		c.Next()
 		return
 	}
+	cookieStr, err := c.Cookie("jwtToken")
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
 		return
 	}
+	uinfo, jwterr := mo2utils.ParseJwt(cookieStr)
+	c.Set(mo2utils.UserInfoKey, uinfo)
 	if jwterr != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
 		return
