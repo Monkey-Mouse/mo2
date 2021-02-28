@@ -7,6 +7,10 @@ import (
 )
 
 func Test_initKey(t *testing.T) {
+	if os.Getenv("CI") != "" {
+		t.Skipf("Skip for ci")
+		return
+	}
 	_ = os.Remove("mo2.secret")
 	tests := []struct {
 		name    string
