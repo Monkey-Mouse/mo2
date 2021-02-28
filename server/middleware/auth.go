@@ -154,7 +154,7 @@ func (h handlerMap) PutWithRateLimit(relativPath string, handler gin.HandlerFunc
 }
 
 func (h handlerMap) Handle(method string, relativPath string, handler gin.HandlerFunc, roles ...string) {
-	h.HandlerWithRateLimit(http.MethodGet, relativPath, handler, h.Limit, roles...)
+	h.HandlerWithRateLimit(method, relativPath, handler, h.Limit, roles...)
 }
 func (h handlerMap) Get(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodGet, relativPath, handler, roles...)
