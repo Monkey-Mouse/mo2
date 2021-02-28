@@ -38,12 +38,15 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("内容含非法字符，请检查"))
 		return
 	}
-	JudgeAuthorize(ctx, &b)
-	if success := database.UpsertBlog(&b, isDraft); success {
-		ctx.Header("location", ctx.FullPath())
-		ctx.JSON(http.StatusCreated, b)
+	if pass := JudgeAuthorize(ctx, &b); pass {
+		if success := database.UpsertBlog(&b, isDraft); success {
+			ctx.Header("location", ctx.FullPath())
+			ctx.JSON(http.StatusCreated, b)
+		} else {
+			ctx.JSON(http.StatusNoContent, b)
+		}
 	} else {
-		ctx.JSON(http.StatusNoContent, b)
+		return
 	}
 
 }
@@ -79,19 +82,24 @@ func (c *Controller) DeleteBlog(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
 		return
 	}
-	JudgeAuthorize(ctx, &blog)
-	blog.EntityInfo.IsDeleted = true
-	if success := database.UpsertBlog(&blog, isDraft); success {
-		ctx.Status(http.StatusAccepted)
+	if pass := JudgeAuthorize(ctx, &blog); pass {
+		blog.EntityInfo.IsDeleted = true
+		if success := database.UpsertBlog(&blog, isDraft); success {
+			ctx.Status(http.StatusAccepted)
+		} else {
+			ctx.Status(http.StatusNoContent)
+		}
 	} else {
-		ctx.Status(http.StatusNoContent)
+		return
 	}
+
 }
 
 // JudgeAuthorize only for user of same ID
 // 只有本人id与blog的authorID一致可以继续
-func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) {
+func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) (pass bool) {
 	userInfo, exist := mo2utils.GetUserInfo(ctx)
+	pass = false
 	if blog.AuthorID == primitive.NilObjectID {
 		if exist {
 			blog.AuthorID = userInfo.ID
@@ -105,6 +113,8 @@ func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) {
 			return
 		}
 	}
+	pass = true
+	return
 }
 
 // RestoreBlog godoc
@@ -137,10 +147,14 @@ func (c *Controller) RestoreBlog(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
 		return
 	}
-	JudgeAuthorize(ctx, &blog)
-	blog.EntityInfo.IsDeleted = false
-	database.UpsertBlog(&blog, isDraft)
-	ctx.JSON(http.StatusOK, blog)
+	if pass := JudgeAuthorize(ctx, &blog); pass {
+		blog.EntityInfo.IsDeleted = false
+		database.UpsertBlog(&blog, isDraft)
+		ctx.JSON(http.StatusOK, blog)
+	} else {
+		return
+	}
+
 }
 
 // FindBlogsByUser godoc
@@ -232,20 +246,25 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
+
 	if isDraft {
-		JudgeAuthorize(ctx, &model.Blog{AuthorID: id})
+		if pass := JudgeAuthorize(ctx, &model.Blog{AuthorID: id}); pass {
+			blogs := database.FindBlogsByUserId(id, model.Filter{
+				IsDraft:   isDraft,
+				IsDeleted: isDeleted,
+			})
+			qBlogs := dto.QueryBlogs{}
+			qBlogs.Init(blogs)
+			if results, exist := qBlogs.Query(page, pageSize); exist {
+				ctx.JSON(http.StatusOK, results.GetBlogs())
+			} else {
+				ctx.JSON(http.StatusNoContent, results.GetBlogs())
+			}
+		} else {
+			return
+		}
 	}
-	blogs := database.FindBlogsByUserId(id, model.Filter{
-		IsDraft:   isDraft,
-		IsDeleted: isDeleted,
-	})
-	qBlogs := dto.QueryBlogs{}
-	qBlogs.Init(blogs)
-	if results, exist := qBlogs.Query(page, pageSize); exist {
-		ctx.JSON(http.StatusOK, results.GetBlogs())
-	} else {
-		ctx.JSON(http.StatusNoContent, results.GetBlogs())
-	}
+
 }
 
 // FindBlogById godoc
@@ -276,9 +295,12 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 		return
 	}
 	if isDraft {
-		JudgeAuthorize(ctx, &blog)
+		if pass := JudgeAuthorize(ctx, &blog); pass {
+			ctx.JSON(http.StatusOK, blog)
+		} else {
+			return
+		}
 	}
-	ctx.JSON(http.StatusOK, blog)
 }
 
 // QueryBlogs godoc
