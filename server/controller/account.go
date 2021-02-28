@@ -105,18 +105,18 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 func (c *Controller) UpdateAccount(ctx *gin.Context) {
 	var accountInfo dto.UserInfoBrief
 	if err := ctx.ShouldBindJSON(&accountInfo); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	account, exist := database.FindAccount(accountInfo.ID)
 	if !exist {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
+		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("无此用户"))
 		return
 	}
 	account.UserName = accountInfo.Name
 	account.Settings = accountInfo.Settings
 	if merr := database.UpsertAccount(&account); merr.IsError() {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(merr))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(merr))
 		return
 	} else {
 		ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
