@@ -36,7 +36,7 @@ func resetBlocker() {
 	}
 }
 
-var blockFilter = bloom.NewWithEstimates(100000, 0.01)
+var blockFilter = bloom.NewWithEstimates(10000, 0.01)
 
 func checkRateLimit(prop handlerProp, ip string) bool {
 	// rate limit logic

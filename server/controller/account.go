@@ -1,9 +1,10 @@
 package controller
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	dto "mo2/dto"
 	"mo2/mo2utils"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/gin-gonic/gin"
 
@@ -122,7 +123,10 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 	baseUrl := "http://" + ctx.Request.Host + "/api/accounts/verify"
 	token := mo2utils.GenerateJwtToken(addAccount.Email)
 	url := baseUrl + "?email=" + addAccount.Email + "&token=" + token
-	mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url, addAccount.UserName), ctx.ClientIP())
+	senderr := mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url, addAccount.UserName), ctx.ClientIP())
+	if senderr != nil {
+		ctx.AbortWithStatusJSON(senderr.ErrorCode, SetResponseError(senderr))
+	}
 	account, err := database.InitAccount(addAccount, token)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
