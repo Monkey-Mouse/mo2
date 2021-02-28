@@ -1,15 +1,17 @@
 package controller
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	dto "mo2/dto"
 	"mo2/mo2utils"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/gin-gonic/gin"
 
 	//"github.com/swaggo/swag/example/celler/model"
 	"log"
 	"mo2/database"
+	"mo2/server/controller/badresponse"
 	"mo2/server/model"
 	"net/http"
 )
@@ -71,16 +73,16 @@ func (c *Controller) Log(ctx *gin.Context) {
 func (c *Controller) AddAccountRole(ctx *gin.Context) {
 	var addAccount model.AddAccountRole
 	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	account, exist := database.FindAccount(addAccount.ID)
 	if !exist {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
+		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("无此用户"))
 		return
 	}
 	model.AddRoles(&account, addAccount.Roles...)
@@ -135,30 +137,33 @@ func (c *Controller) UpdateAccount(ctx *gin.Context) {
 func (c *Controller) AddAccount(ctx *gin.Context) {
 	var addAccount model.AddAccount
 	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
 		return
 	}
 	addAccount.UserName = primitive.NewObjectID().Hex() + addAccount.UserName
 	unique, merr := database.EnsureEmailUnique(addAccount.Email)
 	if !unique {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("Email已经被使用"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("Email已经被使用"))
 		return
 	}
 	if merr.IsError() {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(merr))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(merr))
 		return
 	}
 	baseUrl := "http://" + ctx.Request.Host + "/api/accounts/verify"
 	token := mo2utils.GenerateJwtToken(addAccount.Email)
 	url := baseUrl + "?email=" + addAccount.Email + "&token=" + token
-	mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url, addAccount.UserName), ctx.ClientIP())
+	senderr := mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url, addAccount.UserName), ctx.ClientIP())
+	if senderr != nil {
+		ctx.AbortWithStatusJSON(senderr.ErrorCode, badresponse.SetResponseError(senderr))
+	}
 	account, err := database.InitAccount(addAccount, token)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
@@ -180,11 +185,11 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 func (c *Controller) DeleteAccount(ctx *gin.Context) {
 	var info model.DeleteAccount
 	if err := ctx.ShouldBindJSON(&info); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
 	if _, err := database.VerifyAccount(model.LoginAccount{Password: info.Password, UserNameOrEmail: info.Email}); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	if _, merr := database.DeleteAccountByEmail(info.Email); merr.IsError() {
@@ -213,7 +218,7 @@ func (c *Controller) VerifyEmail(ctx *gin.Context) {
 
 	account, err := database.VerifyEmail(verifyInfo)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	var s = dto.Account2SuccessLogin(account)
@@ -237,16 +242,16 @@ func (c *Controller) VerifyEmail(ctx *gin.Context) {
 func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var loginAccount model.LoginAccount
 	if err := ctx.ShouldBindJSON(&loginAccount); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
 		return
 	}
 	if err := loginAccount.Validation(); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
 		return
 	}
 	account, err := database.VerifyAccount(loginAccount)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	var s = dto.Account2SuccessLogin(account)
@@ -289,12 +294,12 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 	} else {
 		id, err := primitive.ObjectIDFromHex(idStr)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 			return
 		}
 		result, exist := database.FindAccountInfo(id)
 		if !exist {
-			ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
+			ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("无此用户"))
 			return
 		}
 		us = append(us, result)

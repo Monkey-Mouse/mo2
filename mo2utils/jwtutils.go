@@ -2,7 +2,9 @@ package mo2utils
 
 import (
 	"errors"
+	"io/ioutil"
 	"log"
+	"math/rand"
 	"mo2/dto"
 	"net/http"
 	"time"
@@ -20,10 +22,22 @@ type JwtInfoClaims struct {
 	jwt.StandardClaims
 }
 
-func (j JwtLoginClaims) Valid() error {
+var key []byte = make([]byte, 16)
 
-	return nil
+func init() {
+	initKey()
+}
+func initKey() (err error) {
+	bytes, err := ioutil.ReadFile("mo2.secret")
+	if err != nil {
 
+		rand.Seed(time.Now().UnixNano())
+		_, err = rand.Read(key)
+		err = ioutil.WriteFile("mo2.secret", key, 0)
+		return
+	}
+	key = bytes
+	return
 }
 
 func BasicAuth() gin.HandlerFunc {
@@ -131,7 +145,6 @@ func GenerateJwtCode(info dto.LoginUserInfo) string {
 // jwtToken string
 func GenerateJwtToken(info string) string {
 	//TODO change the key
-	hmacSampleSecret := []byte("mo2")
 
 	claims := JwtInfoClaims{
 		Info: info,
@@ -142,7 +155,7 @@ func GenerateJwtToken(info string) string {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString(hmacSampleSecret)
+	tokenString, err := token.SignedString(key)
 	if err != nil {
 		log.Fatal(err)
 	}

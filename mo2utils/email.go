@@ -2,6 +2,7 @@ package mo2utils
 
 import (
 	"fmt"
+	"mo2/mo2utils/mo2errors"
 	emailservice "mo2/services/emailService"
 )
 
@@ -18,7 +19,7 @@ func VerifyEmailMessage(url string, name string) []byte {
 
 	return []byte(msg)
 }
-func SendEmail(receiverEmails []string, message []byte, senderAddr string) (err error) {
+func SendEmail(receiverEmails []string, message []byte, senderAddr string) (err *mo2errors.Mo2Errors) {
 
 	err = emailservice.QueueEmail(message, receiverEmails, senderAddr)
 	if err != nil {

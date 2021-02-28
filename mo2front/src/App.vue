@@ -154,7 +154,13 @@ import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
 import { BlankUser, User } from "./models";
-import { GetInitials, GetUserInfoAsync, Logout, ReachedBottom } from "./utils";
+import {
+  GetInitials,
+  GetUserInfoAsync,
+  Logout,
+  ReachedBottom,
+  UserRole,
+} from "./utils";
 import Avatar from "./components/UserAvatar.vue";
 import { Watch } from "vue-property-decorator";
 // import "bulma/bulma.sass";
@@ -198,7 +204,7 @@ export default class App extends Vue {
     { title: "About", icon: "mdi-alpha-a-circle", href: "/about", show: true },
   ];
   get isUser() {
-    return this.user.roles && this.user.roles.length > 0;
+    return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
   @Watch("user")
   userCHange() {

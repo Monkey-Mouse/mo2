@@ -2,82 +2,174 @@ package middleware
 
 import (
 	"mo2/mo2utils"
-	"mo2/server/controller"
+	"mo2/server/controller/badresponse"
 	"net/http"
 	"path"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/modern-go/concurrent"
+	"github.com/willf/bloom"
 )
 
-func AuthMiddlware(c *gin.Context) {
-	cookieStr, err := c.Cookie("jwtToken")
-	uinfo, jwterr := mo2utils.ParseJwt(cookieStr)
-	c.Set(mo2utils.UserInfoKey, uinfo)
-	key := HandlerKey{c.FullPath(), c.Request.Method}
+var duration int = 10
+var unblockEvery int = 3600
+
+// SetupRateLimiter setup ddos banner
+func SetupRateLimiter(limitEvery int, unblockevery int) {
+	duration = limitEvery
+	unblockEvery = unblockevery
+}
+func cleaner() {
+	for {
+		for _, v := range handlers {
+
+			v.rates = concurrent.NewMap()
+		}
+		time.Sleep(time.Second * time.Duration(duration))
+	}
+}
+func resetBlocker() {
+	for {
+		blockFilter.ClearAll()
+		time.Sleep(time.Second * time.Duration(unblockEvery))
+	}
+}
+
+var blockFilter = bloom.NewWithEstimates(10000, 0.01)
+
+func checkRateLimit(prop handlerProp, ip string) bool {
+	// rate limit logic
+	if prop.limit < 0 {
+		return true
+	}
+	v, ext := prop.rates.Load(ip)
+	if !ext {
+		prop.rates.Store(ip, 1)
+	} else {
+		prop.rates.Store(ip, (v.(int))+1)
+		if v.(int)+1 > prop.limit {
+			blockFilter.AddString(ip)
+			return false
+		}
+	}
+	return true
+}
+
+// AuthMiddleware also have rate limit function
+func AuthMiddleware(c *gin.Context) {
+	// Block illegal ips
+	if blockFilter.TestString(c.ClientIP()) {
+		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("IP Blocked!检测到该ip地址存在潜在的ddos行为"))
+		return
+	}
+
+	key := handlerKey{c.FullPath(), c.Request.Method}
 	prop, ok := handlers[key]
-	if !ok || prop.NeedRoles == nil || len(prop.NeedRoles) == 0 {
+	// not registered for this middleware
+	if !ok {
 		c.Next()
 		return
 	}
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("Unauthorized!"))
+	// rate limit logic
+	if !checkRateLimit(prop, c.ClientIP()) {
+		c.AbortWithStatusJSON(http.StatusTooManyRequests, badresponse.SetResponseReason("Too frequent!"))
 		return
 	}
+	// role auth logic
+	if prop.NeedRoles == nil || len(prop.NeedRoles) == 0 {
+		c.Next()
+		return
+	}
+	cookieStr, err := c.Cookie("jwtToken")
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
+		return
+	}
+	uinfo, jwterr := mo2utils.ParseJwt(cookieStr)
+	c.Set(mo2utils.UserInfoKey, uinfo)
 	if jwterr != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("Unauthorized!"))
+		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
 		return
 	}
 	for _, v := range prop.NeedRoles {
 		if !mo2utils.Contains(uinfo.Roles, v) {
-			c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("Need role: "+v))
+			c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Need role: "+v))
 			return
 		}
 	}
 	c.Next()
 }
 
-type HandlerProp struct {
+type handlerProp struct {
 	Handler   gin.HandlerFunc
 	NeedRoles []string
-	rate      int
+	rates     *concurrent.Map
 	limit     int
 }
-type HandlerKey struct {
-	Url    string
+type handlerKey struct {
+	URL    string
 	Method string
 }
-type HandlerMap struct {
-	Map        map[HandlerKey]HandlerProp
+type handlerMap struct {
+	Map        map[handlerKey]handlerProp
 	PrefixPath string
+	Roles      []string
+	Limit      int
 }
 
-var handlers = make(map[HandlerKey]HandlerProp, 0)
-var H = HandlerMap{handlers, ""}
+var handlers = make(map[handlerKey]handlerProp, 0)
 
-func (h HandlerMap) Group(relativPath string) HandlerMap {
+// H handlermap, like gin router
+var H = handlerMap{handlers, "", []string{}, -1}
 
+func (h handlerMap) Group(relativPath string, roles ...string) handlerMap {
 	h.PrefixPath = path.Join(h.PrefixPath, relativPath)
+	h.Roles = roles
+	return h
+}
+func (h handlerMap) GroupWithLimit(relativPath string, ratelimit int, roles ...string) handlerMap {
+	h.PrefixPath = path.Join(h.PrefixPath, relativPath)
+	h.Roles = roles
+	h.Limit = ratelimit
 	return h
 }
 
-func (h HandlerMap) Handle(method string, relativPath string, handler gin.HandlerFunc, roles ...string) {
-	(h.Map)[HandlerKey{Url: path.Join(h.PrefixPath, relativPath), Method: method}] = HandlerProp{
-		Handler: handler, NeedRoles: roles, limit: -1}
+func (h handlerMap) HandlerWithRateLimit(method string, relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
+	(h.Map)[handlerKey{URL: path.Join(h.PrefixPath, relativPath), Method: method}] = handlerProp{
+		Handler: handler, NeedRoles: append(roles, h.Roles...), limit: ratelimit, rates: concurrent.NewMap()}
 }
-func (h HandlerMap) Get(relativPath string, handler gin.HandlerFunc, roles ...string) {
+
+func (h handlerMap) GetWithRateLimit(relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
+	h.HandlerWithRateLimit(http.MethodGet, relativPath, handler, ratelimit, roles...)
+}
+func (h handlerMap) PostWithRateLimit(relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
+	h.HandlerWithRateLimit(http.MethodPost, relativPath, handler, ratelimit, roles...)
+}
+func (h handlerMap) DeleteWithRateLimit(relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
+	h.HandlerWithRateLimit(http.MethodDelete, relativPath, handler, ratelimit, roles...)
+}
+func (h handlerMap) PutWithRateLimit(relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
+	h.HandlerWithRateLimit(http.MethodPut, relativPath, handler, ratelimit, roles...)
+}
+
+func (h handlerMap) Handle(method string, relativPath string, handler gin.HandlerFunc, roles ...string) {
+	h.HandlerWithRateLimit(method, relativPath, handler, h.Limit, roles...)
+}
+func (h handlerMap) Get(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodGet, relativPath, handler, roles...)
 }
-func (h HandlerMap) Post(relativPath string, handler gin.HandlerFunc, roles ...string) {
+func (h handlerMap) Post(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodPost, relativPath, handler, roles...)
 }
-func (h HandlerMap) Delete(relativPath string, handler gin.HandlerFunc, roles ...string) {
+func (h handlerMap) Delete(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodDelete, relativPath, handler, roles...)
 }
-func (h HandlerMap) Put(relativPath string, handler gin.HandlerFunc, roles ...string) {
+func (h handlerMap) Put(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodPut, relativPath, handler, roles...)
 }
-func (h HandlerMap) RegisterMapedHandlers(r *gin.Engine) {
+func (h handlerMap) RegisterMapedHandlers(r *gin.Engine) {
 	for k, v := range h.Map {
-		r.Handle(k.Method, k.Url, v.Handler)
+		r.Handle(k.Method, k.URL, v.Handler)
 	}
 }

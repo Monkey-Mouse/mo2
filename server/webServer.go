@@ -70,7 +70,7 @@ func RunServer() {
 
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
-	r.Use(middleware.AuthMiddlware)
+	r.Use(middleware.AuthMiddleware)
 	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
 	setupHandlers(c)
