@@ -90,7 +90,7 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 		Infos:      map[string]string{model.Token: token, model.IsActive: model.False},
 		Settings:   map[string]string{model.Avatar: ""},
 	}
-	model.AddRoles(&account, []model.Erole{model.OrdinaryUser})
+	model.AddRoles(&account, model.OrdinaryUser)
 	insertResult, err := accCol.InsertOne(context.TODO(), account)
 	if err != nil {
 		merr := err.(mongo.WriteException).WriteErrors[0]
@@ -104,7 +104,7 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 }
 
 // UpsertAccount
-func UpsertAccount(a *model.Account) (success bool) {
+func UpsertAccount(a *model.Account) (merr mo2errors.Mo2Errors) {
 	a.EntityInfo.Update()
 	result, err := accCol.UpdateOne(context.TODO(), bson.M{"_id": a.ID}, bson.M{
 		"$set": bson.M{
@@ -117,14 +117,14 @@ func UpsertAccount(a *model.Account) (success bool) {
 			"settings":    a.Settings,
 		},
 	}, options.Update().SetUpsert(true))
-	success = true
 	if err != nil {
-		log.Println(err)
-		success = false
+		merr.Init(mo2errors.Mo2Error, err.Error())
+		return
 	}
-	if result.MatchedCount == 0 {
-		log.Println("blog id do not match in database")
-		success = false
+	if result.ModifiedCount != 0 {
+		merr.Init(mo2errors.Mo2NoError, "更新完成")
+	} else {
+		merr.Init(mo2errors.Mo2NoError, "没有任何更改")
 	}
 	return
 }

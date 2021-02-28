@@ -76,7 +76,7 @@ func (a AddAccountRole) Validation() error {
 		return nil
 	}
 }
-func AddRoles(a *Account, roles []Erole) {
+func AddRoles(a *Account, roles ...Erole) {
 	var new bool
 	for _, role := range roles {
 		new = true

@@ -43,6 +43,7 @@ func setupHandlers(c *controller.Controller) {
 		{
 			accounts.Post("", c.AddAccount)
 			accounts.Delete("", c.DeleteAccount)
+			accounts.Put("", c.UpdateAccount)
 			accounts.Get("verify", c.VerifyEmail)
 			accounts.Post("role", c.AddAccountRole)
 			accounts.Post("login", c.LoginAccount)
