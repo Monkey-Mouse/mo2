@@ -125,6 +125,13 @@ definitions:
       name:
         example: account name
         type: string
+      settings:
+        additionalProperties:
+          type: string
+        example:
+          '''avatar''': ' ''www.avatar.com/account_name'''
+          '''site''': '''www.limfx.com''(public data)'
+        type: object
     type: object
   model.AddAccount:
     properties:
@@ -303,6 +310,39 @@ paths:
           schema:
             $ref: '#/definitions/controller.ResponseError'
       summary: Add an account
+      tags:
+      - accounts
+    put:
+      consumes:
+      - application/json
+      description: 通过id获取已有用户，验证身份。并将name的修改与setting的修改应用
+      parameters:
+      - description: id必须，可修改name/settings
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserInfoBrief'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.ResponseError'
+      summary: 修改名称（唯一用于登录）/偏好设置
       tags:
       - accounts
   /api/accounts/detail/{id}:
