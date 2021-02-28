@@ -149,7 +149,12 @@
                   >先继续浏览</v-btn
                 >
                 <v-btn
-                  :disabled="this.$v.$anyError || seconds > 0"
+                  :disabled="
+                    this.$v.password.$anyError ||
+                    this.$v.email.$anyError ||
+                    this.$v.name.$anyError ||
+                    seconds > 0
+                  "
                   outlined
                   text
                   @click="register"
