@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	dto "mo2/dto"
 	"mo2/mo2utils"
 
@@ -12,6 +11,7 @@ import (
 	//"github.com/swaggo/swag/example/celler/model"
 	"log"
 	"mo2/database"
+	"mo2/server/controller/badresponse"
 	"mo2/server/model"
 	"net/http"
 )
@@ -73,21 +73,21 @@ func (c *Controller) Log(ctx *gin.Context) {
 func (c *Controller) AddAccountRole(ctx *gin.Context) {
 	var addAccount model.AddAccountRole
 	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	account, exist := database.FindAccount(addAccount.ID)
 	if !exist {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
+		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("无此用户"))
 		return
 	}
 	model.AddRoles(&account, addAccount.Roles)
 	database.UpsertAccount(&account)
-	ctx.JSON(http.StatusOK, dto.Account2UserInfo(account))
+	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
 }
 
 // AddAccount godoc
@@ -104,24 +104,67 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 func (c *Controller) AddAccount(ctx *gin.Context) {
 	var addAccount model.AddAccount
 	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
 		return
 	}
 	addAccount.UserName = primitive.NewObjectID().Hex() + addAccount.UserName
-	ip := ctx.ClientIP()
-	fmt.Println(ip)
-	account, err := database.AddAccount(addAccount,
-		"http://"+ctx.Request.Host+"/api/accounts/verify", ip)
-	account.Infos["token"] = ""
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+	unique, merr := database.EnsureEmailUnique(addAccount.Email)
+	if !unique {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("Email已经被使用"))
 		return
 	}
-	ctx.JSON(http.StatusOK, dto.Account2UserInfo(account))
+	if merr.IsError() {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(merr))
+		return
+	}
+	baseUrl := "http://" + ctx.Request.Host + "/api/accounts/verify"
+	token := mo2utils.GenerateJwtToken(addAccount.Email)
+	url := baseUrl + "?email=" + addAccount.Email + "&token=" + token
+	senderr := mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url, addAccount.UserName), ctx.ClientIP())
+	if senderr != nil {
+		ctx.AbortWithStatusJSON(senderr.ErrorCode, badresponse.SetResponseError(senderr))
+	}
+	account, err := database.InitAccount(addAccount, token)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
+}
+
+// DeleteAccount godoc
+// @Summary delete Blog
+// @Description delete by path
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param info body model.DeleteAccount true "delete account info"
+// @Success 202
+// @Success 204
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
+// @Router /api/accounts [delete]
+func (c *Controller) DeleteAccount(ctx *gin.Context) {
+	var info model.DeleteAccount
+	if err := ctx.ShouldBindJSON(&info); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
+		return
+	}
+	if _, err := database.VerifyAccount(model.LoginAccount{Password: info.Password, UserNameOrEmail: info.Email}); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		return
+	}
+	if _, merr := database.DeleteAccountByEmail(info.Email); merr.IsError() {
+		ctx.Status(http.StatusNoContent)
+	} else {
+		ctx.Status(http.StatusAccepted)
+
+	}
 }
 
 // VerifyEmail godoc
@@ -142,7 +185,7 @@ func (c *Controller) VerifyEmail(ctx *gin.Context) {
 
 	account, err := database.VerifyEmail(verifyInfo)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	var s = dto.Account2SuccessLogin(account)
@@ -166,16 +209,16 @@ func (c *Controller) VerifyEmail(ctx *gin.Context) {
 func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var loginAccount model.LoginAccount
 	if err := ctx.ShouldBindJSON(&loginAccount); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
 		return
 	}
 	if err := loginAccount.Validation(); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
 		return
 	}
 	account, err := database.VerifyAccount(loginAccount)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
 	var s = dto.Account2SuccessLogin(account)
@@ -218,12 +261,12 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 	} else {
 		id, err := primitive.ObjectIDFromHex(idStr)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, SetResponseReason("非法输入"))
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 			return
 		}
 		result, exist := database.FindAccountInfo(id)
 		if !exist {
-			ctx.AbortWithStatusJSON(http.StatusNotFound, SetResponseReason("无此用户"))
+			ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("无此用户"))
 			return
 		}
 		us = append(us, result)

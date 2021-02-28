@@ -42,6 +42,7 @@ func setupHandlers(c *controller.Controller) {
 		accounts := api.Group("/accounts")
 		{
 			accounts.Post("", c.AddAccount)
+			accounts.Delete("", c.DeleteAccount)
 			accounts.Get("verify", c.VerifyEmail)
 			accounts.Post("role", c.AddAccountRole)
 			accounts.Post("login", c.LoginAccount)
@@ -68,7 +69,7 @@ func RunServer() {
 
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
-	r.Use(middleware.AuthMiddlware)
+	r.Use(middleware.AuthMiddleware)
 	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
 	setupHandlers(c)

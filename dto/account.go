@@ -37,19 +37,19 @@ func Account2SuccessLogin(a model.Account) (s LoginUserInfo) {
 }
 
 type UserInfo struct {
-	ID    primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx=="`
-	Name  string             `json:"name" example:"account name"`
-	Email string             `json:"email" example:"email@qq.com"`
-	Roles []model.Erole      `json:"roles" example:"ordinaryUser"  `
-	Infos map[string]string  `json:"infos" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'`
+	ID       primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx=="`
+	Name     string             `json:"name" example:"account name"`
+	Email    string             `json:"email" example:"email@qq.com"`
+	Roles    []model.Erole      `json:"roles" example:"ordinaryUser"  `
+	Settings map[string]string  `json:"settings" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'(public data)" bson:"settings,omitempty"`
 }
 
-func Account2UserInfo(a model.Account) (u UserInfo) {
+func Account2UserPublicInfo(a model.Account) (u UserInfo) {
 	u.ID = a.ID
 	u.Name = a.UserName
 	u.Roles = a.Roles
 	u.Email = a.Email
-	u.Infos = a.Infos
+	u.Settings = a.Settings
 	return u
 }
 

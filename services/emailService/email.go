@@ -1,11 +1,15 @@
 package emailservice
 
 import (
-	"errors"
 	"fmt"
+	"mo2/mo2utils/mo2errors"
+	"net/http"
 	"net/smtp"
 	"os"
 	"time"
+
+	"github.com/modern-go/concurrent"
+	"github.com/willf/bloom"
 )
 
 // emailProp struct for send email
@@ -16,35 +20,44 @@ type emailProp struct {
 
 var emailChan chan<- emailProp
 var initialed = false
-var blockMap map[string]int64 = make(map[string]int64, 100)
-var sec int64 = 30
+var blockMap *concurrent.Map = concurrent.NewMap()
+var sec int64 = 5
+var max int64 = 10
+var blockTime int = 3600
+var blockFilter = bloom.NewWithEstimates(10000, 0.01)
 
 // SetFrequencyLimit set shortest resend time
-func SetFrequencyLimit(seconds int64) {
+func SetFrequencyLimit(seconds int64, limit int64, blocksec int) {
 	sec = seconds
+	max = limit
+	blockTime = blocksec
 }
 
 // QueueEmail add email to send queue
-func QueueEmail(msg []byte, receivers []string, remoteAddr string) (err error) {
+func QueueEmail(msg []byte, receivers []string, remoteAddr string) (err *mo2errors.Mo2Errors) {
 	if !initialed {
 		startEmailService()
 	}
-	val, ok := blockMap[remoteAddr]
+	if blockFilter.TestString(remoteAddr) {
+		err = mo2errors.New(http.StatusForbidden, "IP blocked! 检测到此IP潜在的ddos行为")
+		return
+	}
+	val, ok := blockMap.Load(remoteAddr)
 	prop := emailProp{msg: msg, receivers: receivers}
 	if !ok {
-		blockMap[remoteAddr] = time.Now().UnixNano()
+		blockMap.Store(remoteAddr, int64(1))
 		emailChan <- prop
 		return
 	}
-	secs := (time.Now().Local().UnixNano() - val) / int64(time.Second)
-	blockMap[remoteAddr] = time.Now().UnixNano()
-	if secs >= sec {
-		emailChan <- prop
+	num := val.(int64)
+	if num >= max {
+		err = mo2errors.New(http.StatusTooManyRequests, "请求次数过多")
+		blockFilter.AddString(remoteAddr)
 		return
 	}
-	err = errors.New("Email请求过于频繁")
+	blockMap.Store(remoteAddr, num+1)
+	emailChan <- prop
 	return
-
 }
 
 // startEmailService start go routine for send email
@@ -55,20 +68,22 @@ func startEmailService() {
 	emailc := make(chan emailProp, 100)
 	go startWorker(emailc)
 	go cleaner()
+	go blockReseter()
 	emailChan = emailc
 	initialed = true
 	return
 }
 func cleaner() {
 	seconds := time.Second * time.Duration(sec)
-	secondsint := int64(time.Second) * sec
 	for {
-		nano := time.Now().UnixNano()
-		for k, v := range blockMap {
-			if v < nano-secondsint {
-				delete(blockMap, k)
-			}
-		}
+		blockMap = concurrent.NewMap()
+		time.Sleep(seconds)
+	}
+}
+func blockReseter() {
+	seconds := time.Second * time.Duration(blockTime)
+	for {
+		blockFilter.ClearAll()
 		time.Sleep(seconds)
 	}
 }

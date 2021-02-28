@@ -152,3 +152,6 @@ export async function DeleteArticle(id: string, query: { draft: boolean }) {
 export async function Logout() {
     (await axios.post('/api/accounts/logout'));
 }
+export const AdminRole = "GeneralAdmin"
+export const UserRole = "OrdinaryUser"
+export const AnonymousRole = "Anonymous"

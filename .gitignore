@@ -18,3 +18,4 @@ limfx*.json
 dist/*
 dist
 *.env
+*.secret
