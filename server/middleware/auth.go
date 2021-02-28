@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"mo2/mo2utils"
-	"mo2/server/controller"
+	"mo2/server/controller/badresponse"
 	"net/http"
 	"path"
 	"time"
@@ -60,7 +60,7 @@ func checkRateLimit(prop handlerProp, ip string) bool {
 func AuthMiddleware(c *gin.Context) {
 	// Block illegal ips
 	if blockFilter.TestString(c.ClientIP()) {
-		c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("IP Blocked!检测到该ip地址存在潜在的ddos行为"))
+		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("IP Blocked!检测到该ip地址存在潜在的ddos行为"))
 		return
 	}
 
@@ -76,7 +76,7 @@ func AuthMiddleware(c *gin.Context) {
 	}
 	// rate limit logic
 	if !checkRateLimit(prop, c.ClientIP()) {
-		c.AbortWithStatusJSON(http.StatusTooManyRequests, controller.SetResponseReason("Too frequent!"))
+		c.AbortWithStatusJSON(http.StatusTooManyRequests, badresponse.SetResponseReason("Too frequent!"))
 		return
 	}
 	// role auth logic
@@ -85,16 +85,16 @@ func AuthMiddleware(c *gin.Context) {
 		return
 	}
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("Unauthorized!"))
+		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
 		return
 	}
 	if jwterr != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("Unauthorized!"))
+		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
 		return
 	}
 	for _, v := range prop.NeedRoles {
 		if !mo2utils.Contains(uinfo.Roles, v) {
-			c.AbortWithStatusJSON(http.StatusForbidden, controller.SetResponseReason("Need role: "+v))
+			c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Need role: "+v))
 			return
 		}
 	}
