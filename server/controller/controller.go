@@ -1,7 +1,5 @@
 package controller
 
-import "time"
-
 // Controller example
 type Controller struct {
 }
@@ -14,20 +12,4 @@ func NewController() *Controller {
 // Message example
 type Message struct {
 	Message string `json:"message" example:"message"`
-}
-
-type ResponseError struct {
-	Time   time.Time `json:"time"`
-	Reason string    `json:"reason"`
-}
-
-func SetResponseError(err error) (r ResponseError) {
-	r.Reason = err.Error()
-	r.Time = time.Now()
-	return
-}
-func SetResponseReason(err string) (r ResponseError) {
-	r.Reason = err
-	r.Time = time.Now()
-	return
 }

@@ -2,8 +2,9 @@ package model
 
 import (
 	"errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"os"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	//"fmt"
 )
 
@@ -12,6 +13,7 @@ type Erole = string
 const (
 	GeneralAdmin Erole = "GeneralAdmin"
 	OrdinaryUser Erole = "OrdinaryUser"
+	Anonymous    Erole = "Anonymous"
 )
 const (
 	Token    = "token"
