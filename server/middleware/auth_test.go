@@ -28,7 +28,7 @@ func Test_checkRateLimit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := checkRateLimit(tt.args.prop, tt.args.ip); got != tt.want {
+			if got := checkRL(tt.args.prop, tt.args.ip); got != tt.want {
 				t.Errorf("checkRateLimit() = %v, want %v", got, tt.want)
 			}
 		})
