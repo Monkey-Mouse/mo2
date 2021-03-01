@@ -76,15 +76,15 @@ func startEmailService() {
 func cleaner() {
 	seconds := time.Second * time.Duration(sec)
 	for {
-		blockMap = concurrent.NewMap()
 		time.Sleep(seconds)
+		blockMap = concurrent.NewMap()
 	}
 }
 func blockReseter() {
 	seconds := time.Second * time.Duration(blockTime)
 	for {
-		blockFilter.ClearAll()
 		time.Sleep(seconds)
+		blockFilter.ClearAll()
 	}
 }
 func startWorker(emailChan <-chan emailProp) {

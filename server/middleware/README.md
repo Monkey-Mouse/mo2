@@ -7,9 +7,6 @@ middleware包含mo2中用到的大部分中间件
 
 ### auth middleware
 auth是目前唯一的一个中间件，它能实现基于role的身份认证，以及基本的rate limit功能，能在一定程度上抵御ddos攻击  
-role auth的设计中，不同role逻辑只能用与逻辑连接，不能用或逻辑。  
-也就是说，我们能够要求api的访问者同时具有admin和user身份，而不能要求访问者是admin或user身份之一  
-**所以设计api的时候，应该将api资源和role对应。如果要保护一组api，那么请给他一个专门对应的role**
 
 
 #### QuickStart
@@ -19,12 +16,14 @@ func setupHandlers(c *controller.Controller) {
     // api组里的api在被访问时都会检查用户是否有User身份
 	api := middleware.H.Group("/api", "User")
 	{
+        // 任何Group下的子路由和Group中的role规则是与关系
+        // 下面这个路由的访问者必须要有User身份，因为在api定义的Group方法里传入了"User"
+		api.Get("/logs1", c.Log)
         // 强迫这个路由的访问者在User身份的基础上同时具有Admin身份
 		api.Get("/logs", c.Log, "Admin")
-        // 这个路由的访问者要有User身份，因为在api定义的Group方法里传入了"User"
-		api.Get("/logs1", c.Log)
 	}
-    // 可以传多个需要检验的Role
+    // 可以传多个需要检验的Role，任何平行输入的role在检查时是或逻辑
+    // 下方这个api会检查用户是否具有Admin和User其中之一的Role
     middleware.H.Get("/logs2", c.Log, "Admin", "User")
     // Group也是
     api1 := middleware.H.Group("/api1", "User", "Admin")

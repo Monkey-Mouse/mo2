@@ -1,9 +1,11 @@
 package middleware
 
 import (
+	"errors"
 	"mo2/server/controller/badresponse"
 	"net/http"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -88,18 +90,32 @@ func AuthMiddleware(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
 		return
 	}
-	for _, v := range prop.NeedRoles {
-		if !uinfo.IsInRole(v) {
-			c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Need role: "+v))
-			return
-		}
+	if err := checkRoles(uinfo, prop.NeedRoles); err != nil {
+		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseError(err))
+		return
 	}
 	c.Next()
 }
 
+func checkRoles(uinfo RoleHolder, rolePolicies [][]string) error {
+	for _, v := range rolePolicies {
+		failedCheck := true
+		for _, u := range v {
+			if uinfo.IsInRole(u) {
+				failedCheck = false
+				break
+			}
+		}
+		if failedCheck {
+			return errors.New("Need role: " + strings.Join(v, " or "))
+		}
+	}
+	return nil
+}
+
 type handlerProp struct {
 	Handler   gin.HandlerFunc
-	NeedRoles []string
+	NeedRoles [][]string
 	rates     *concurrent.Map
 	limit     int
 }
@@ -110,30 +126,30 @@ type handlerKey struct {
 type handlerMap struct {
 	Map        map[handlerKey]handlerProp
 	PrefixPath string
-	Roles      []string
+	Roles      [][]string
 	Limit      int
 }
 
 var handlers = make(map[handlerKey]handlerProp, 0)
 
 // H handlermap, like gin router
-var H = handlerMap{handlers, "", []string{}, -1}
+var H = handlerMap{handlers, "", make([][]string, 0), -1}
 
-func (h handlerMap) Group(relativPath string, roles ...string) handlerMap {
-	h.PrefixPath = path.Join(h.PrefixPath, relativPath)
-	h.Roles = roles
+func (h handlerMap) Group(relativePath string, roles ...string) handlerMap {
+	h.PrefixPath = path.Join(h.PrefixPath, relativePath)
+	h.Roles = append(h.Roles, roles)
 	return h
 }
-func (h handlerMap) GroupWithLimit(relativPath string, ratelimit int, roles ...string) handlerMap {
-	h.PrefixPath = path.Join(h.PrefixPath, relativPath)
-	h.Roles = roles
+func (h handlerMap) GroupWithLimit(relativePath string, ratelimit int, roles ...string) handlerMap {
+	h = h.Group(relativePath, roles...)
 	h.Limit = ratelimit
 	return h
 }
 
 func (h handlerMap) HandlerWithRateLimit(method string, relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
+	h.Roles = append(h.Roles, roles)
 	(h.Map)[handlerKey{URL: path.Join(h.PrefixPath, relativPath), Method: method}] = handlerProp{
-		Handler: handler, NeedRoles: append(roles, h.Roles...), limit: ratelimit, rates: concurrent.NewMap()}
+		Handler: handler, NeedRoles: h.Roles, limit: ratelimit, rates: concurrent.NewMap()}
 }
 
 func (h handlerMap) GetWithRateLimit(relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
