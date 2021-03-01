@@ -2,6 +2,7 @@ package server
 
 import (
 	_ "mo2/docs"
+	"mo2/mo2utils"
 	"mo2/server/controller"
 	"mo2/server/middleware"
 	"mo2/server/model"
@@ -74,7 +75,7 @@ func RunServer() {
 	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
 	setupHandlers(c)
-	middleware.H.RegisterMapedHandlers(r)
+	middleware.H.RegisterMapedHandlers(r, mo2utils.UserRoleInfoFromJwt, mo2utils.UserInfoKey)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.NoRoute(func(c *gin.Context) {

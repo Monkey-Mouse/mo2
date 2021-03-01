@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"mo2/mo2utils"
 	"mo2/server/controller/badresponse"
 	"net/http"
 	"path"
@@ -14,6 +13,9 @@ import (
 
 var duration int = 10
 var unblockEvery int = 3600
+var fromJWT FromJWT
+var blockFilter = bloom.NewWithEstimates(10000, 0.01)
+var userInfoKey string
 
 // SetupRateLimiter setup ddos banner
 func SetupRateLimiter(limitEvery int, unblockevery int) {
@@ -35,8 +37,6 @@ func resetBlocker() {
 		time.Sleep(time.Second * time.Duration(unblockEvery))
 	}
 }
-
-var blockFilter = bloom.NewWithEstimates(10000, 0.01)
 
 func checkRateLimit(prop handlerProp, ip string) bool {
 	// rate limit logic
@@ -86,14 +86,14 @@ func AuthMiddleware(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
 		return
 	}
-	uinfo, jwterr := mo2utils.ParseJwt(cookieStr)
-	c.Set(mo2utils.UserInfoKey, uinfo)
+	uinfo, jwterr := fromJWT(cookieStr)
+	c.Set(userInfoKey, uinfo)
 	if jwterr != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
 		return
 	}
 	for _, v := range prop.NeedRoles {
-		if !mo2utils.Contains(uinfo.Roles, v) {
+		if !uinfo.IsInRole(v) {
 			c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Need role: "+v))
 			return
 		}
@@ -168,7 +168,10 @@ func (h handlerMap) Delete(relativPath string, handler gin.HandlerFunc, roles ..
 func (h handlerMap) Put(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodPut, relativPath, handler, roles...)
 }
-func (h handlerMap) RegisterMapedHandlers(r *gin.Engine) {
+func (h handlerMap) RegisterMapedHandlers(r *gin.Engine, getUserFromJWT FromJWT, userKey string) {
+	fromJWT = getUserFromJWT
+	userInfoKey = userKey
+	r.Use(AuthMiddleware)
 	for k, v := range h.Map {
 		r.Handle(k.Method, k.URL, v.Handler)
 	}
