@@ -1,8 +1,10 @@
 package middleware
 
 import (
+	"fmt"
 	"mo2/mo2utils"
 	"mo2/server/controller/badresponse"
+	"mo2/server/model"
 	"net/http"
 	"path"
 	"time"
@@ -77,7 +79,7 @@ func AuthMiddleware(c *gin.Context) {
 		return
 	}
 	// role auth logic
-	if prop.NeedRoles == nil || len(prop.NeedRoles) == 0 {
+	if prop.NeedRoles == nil || len(prop.NeedRoles) == 0 || mo2utils.Contains(prop.NeedRoles, model.Anonymous) {
 		c.Next()
 		return
 	}
@@ -92,13 +94,19 @@ func AuthMiddleware(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
 		return
 	}
+	passAuth := false
 	for _, v := range prop.NeedRoles {
-		if !mo2utils.Contains(uinfo.Roles, v) {
-			c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Need role: "+v))
-			return
+		if mo2utils.Contains(uinfo.Roles, v) {
+			passAuth = true
+			break
 		}
 	}
-	c.Next()
+	if passAuth {
+		c.Next()
+	} else {
+		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason(fmt.Sprintf("Need role(s): %v", prop.NeedRoles)))
+		return
+	}
 }
 
 type handlerProp struct {
