@@ -27,7 +27,7 @@ func TestQueueEmail(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.name == "testReleaseBlock" {
-				time.Sleep(time.Second * 2)
+				time.Sleep(time.Second * 3)
 			}
 			if err := QueueEmail(tt.args.msg, tt.args.receivers, tt.args.remoteAddr); (err != nil) != tt.wantErr {
 				t.Errorf("QueueEmail() error = %v, wantErr %v", err, tt.wantErr)
