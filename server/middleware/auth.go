@@ -80,7 +80,7 @@ func AuthMiddleware(c *gin.Context) {
 		return
 	}
 	// role auth logic
-	if prop.NeedRoles == nil || len(prop.NeedRoles) == 0 {
+	if prop.needRoles == nil || len(prop.needRoles) == 0 {
 		c.Next()
 		return
 	}
@@ -90,7 +90,7 @@ func AuthMiddleware(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
 		return
 	}
-	if err := checkRoles(uinfo, prop.NeedRoles); err != nil {
+	if err := checkRoles(uinfo, prop.needRoles); err != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseError(err))
 		return
 	}
@@ -114,20 +114,20 @@ func checkRoles(uinfo RoleHolder, rolePolicies [][]string) error {
 }
 
 type handlerProp struct {
-	Handler   gin.HandlerFunc
-	NeedRoles [][]string
+	handler   gin.HandlerFunc
+	needRoles [][]string
 	rates     *concurrent.Map
 	limit     int
 }
 type handlerKey struct {
-	URL    string
-	Method string
+	url    string
+	method string
 }
 type handlerMap struct {
-	Map        map[handlerKey]handlerProp
-	PrefixPath string
-	Roles      [][]string
-	Limit      int
+	innerMap   map[handlerKey]handlerProp
+	prefixPath string
+	roles      [][]string
+	limit      int
 }
 
 var handlers = make(map[handlerKey]handlerProp, 0)
@@ -135,48 +135,69 @@ var handlers = make(map[handlerKey]handlerProp, 0)
 // H handlermap, like gin router
 var H = handlerMap{handlers, "", make([][]string, 0), -1}
 
+// Group 类似gin router的Group方法，注意group里设置的多个role是以or逻辑连接的
+// 而group下属的其它api设置的role条件会与group里的role条件进行与运算
 func (h handlerMap) Group(relativePath string, roles ...string) handlerMap {
-	h.PrefixPath = path.Join(h.PrefixPath, relativePath)
-	h.Roles = append(h.Roles, roles)
+	h.prefixPath = path.Join(h.prefixPath, relativePath)
+	h.roles = append(h.roles, roles)
 	return h
 }
+
+// GroupWithLimit 字面意思，增加了ratelimit功能
 func (h handlerMap) GroupWithLimit(relativePath string, ratelimit int, roles ...string) handlerMap {
 	h = h.Group(relativePath, roles...)
-	h.Limit = ratelimit
+	h.limit = ratelimit
 	return h
 }
 
+// HandlerWithRateLimit 用于非常规http方法的处理
 func (h handlerMap) HandlerWithRateLimit(method string, relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
-	h.Roles = append(h.Roles, roles)
-	(h.Map)[handlerKey{URL: path.Join(h.PrefixPath, relativPath), Method: method}] = handlerProp{
-		Handler: handler, NeedRoles: h.Roles, limit: ratelimit, rates: concurrent.NewMap()}
+	h.roles = append(h.roles, roles)
+	(h.innerMap)[handlerKey{url: path.Join(h.prefixPath, relativPath), method: method}] = handlerProp{
+		handler: handler, needRoles: h.roles, limit: ratelimit, rates: concurrent.NewMap()}
 }
 
+// GetWithRateLimit 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
 func (h handlerMap) GetWithRateLimit(relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
 	h.HandlerWithRateLimit(http.MethodGet, relativPath, handler, ratelimit, roles...)
 }
+
+// PostWithRateLimit 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
 func (h handlerMap) PostWithRateLimit(relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
 	h.HandlerWithRateLimit(http.MethodPost, relativPath, handler, ratelimit, roles...)
 }
+
+// DeleteWithRateLimit 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
 func (h handlerMap) DeleteWithRateLimit(relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
 	h.HandlerWithRateLimit(http.MethodDelete, relativPath, handler, ratelimit, roles...)
 }
+
+// PutWithRateLimit 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
 func (h handlerMap) PutWithRateLimit(relativPath string, handler gin.HandlerFunc, ratelimit int, roles ...string) {
 	h.HandlerWithRateLimit(http.MethodPut, relativPath, handler, ratelimit, roles...)
 }
 
+// Handler 用于非常规http方法的处理
 func (h handlerMap) Handle(method string, relativPath string, handler gin.HandlerFunc, roles ...string) {
-	h.HandlerWithRateLimit(method, relativPath, handler, h.Limit, roles...)
+	h.HandlerWithRateLimit(method, relativPath, handler, h.limit, roles...)
 }
+
+// Get 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
 func (h handlerMap) Get(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodGet, relativPath, handler, roles...)
 }
+
+// Post 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
 func (h handlerMap) Post(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodPost, relativPath, handler, roles...)
 }
+
+// Delete 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
 func (h handlerMap) Delete(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodDelete, relativPath, handler, roles...)
 }
+
+// Put 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
 func (h handlerMap) Put(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodPut, relativPath, handler, roles...)
 }
@@ -187,7 +208,7 @@ func (h handlerMap) RegisterMapedHandlers(r *gin.Engine, getUserFromCTX FromCTX,
 	fromCTX = getUserFromCTX
 	userInfoKey = userKey
 	r.Use(AuthMiddleware)
-	for k, v := range h.Map {
-		r.Handle(k.Method, k.URL, v.Handler)
+	for k, v := range h.innerMap {
+		r.Handle(k.method, k.url, v.handler)
 	}
 }

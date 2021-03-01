@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"fmt"
+	"math/rand"
 	"reflect"
 	"testing"
 
@@ -44,8 +46,8 @@ func Test_handlerMap_Group1(t *testing.T) {
 		args args
 		want handlerMap
 	}{
-		{name: "test handler not change origin prefix", h: handlerMap{PrefixPath: ""}, args: args{"/xxx", nil}, want: handlerMap{PrefixPath: ""}},
-		{name: "test handler not change origin role", h: handlerMap{PrefixPath: "", Roles: nil}, args: args{"/xxx", []string{"xxxx"}}, want: handlerMap{PrefixPath: "", Roles: nil}},
+		{name: "test handler not change origin prefix", h: handlerMap{prefixPath: ""}, args: args{"/xxx", nil}, want: handlerMap{prefixPath: ""}},
+		{name: "test handler not change origin role", h: handlerMap{prefixPath: "", roles: nil}, args: args{"/xxx", []string{"xxxx"}}, want: handlerMap{prefixPath: "", roles: nil}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -105,7 +107,7 @@ func Test_handlerMap_Group(t *testing.T) {
 		args args
 		want handlerMap
 	}{
-		{name: "test role policy and role", h: handlerMap{PrefixPath: "/x", Roles: [][]string{{"xx", "xxx"}}}, args: args{"xxx", []string{"xxxx"}}, want: handlerMap{PrefixPath: "/x/xxx", Roles: [][]string{{"xx", "xxx"}, {"xxxx"}}}},
+		{name: "test role policy and role", h: handlerMap{prefixPath: "/x", roles: [][]string{{"xx", "xxx"}}}, args: args{"xxx", []string{"xxxx"}}, want: handlerMap{prefixPath: "/x/xxx", roles: [][]string{{"xx", "xxx"}, {"xxxx"}}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -114,4 +116,26 @@ func Test_handlerMap_Group(t *testing.T) {
 			}
 		})
 	}
+}
+func Benchmark_checkRoles(b *testing.B) {
+	testU := testUser{roles: []string{"xxxxxxx", "xxxxxxxxxxxx"}}
+	type args struct {
+		uinfo        RoleHolder
+		rolePolicies [][]string
+	}
+	rolePolicy := make([][]string, 100)
+	ran := rand.Int63()
+	for i := range rolePolicy {
+		rolePolicy[i] = make([]string, 100)
+		for u := range rolePolicy[i] {
+			rolePolicy[i][u] = fmt.Sprintf("%v", ran)
+			ran = (ran * 887) % 10000000
+		}
+	}
+	arguments := args{
+		uinfo:        testU,
+		rolePolicies: rolePolicy,
+	}
+	b.ResetTimer()
+	checkRoles(arguments.uinfo, arguments.rolePolicies)
 }
