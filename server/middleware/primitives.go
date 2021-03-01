@@ -1,7 +1,9 @@
 package middleware
 
+import "github.com/gin-gonic/gin"
+
 //RoleHolder user interface with role
 type RoleHolder interface {
 	IsInRole(role string) bool
 }
-type FromJWT func(jwt string) (uinfo RoleHolder, err error)
+type FromCTX func(ctx *gin.Context) (uinfo RoleHolder, err error)

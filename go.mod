@@ -26,7 +26,9 @@ require (
 	github.com/willf/bloom v2.0.3+incompatible
 	go.mongodb.org/mongo-driver v1.4.6
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
+	golang.org/x/mod v0.4.1 // indirect
+	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
+	golang.org/x/sys v0.0.0-20210228012217-479acdf4ea46 // indirect
 	golang.org/x/tools v0.1.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )

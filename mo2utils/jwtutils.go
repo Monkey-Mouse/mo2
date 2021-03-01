@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/rand"
 	"mo2/dto"
-	"mo2/server/middleware"
 	"net/http"
 	"time"
 
@@ -97,13 +96,6 @@ func VerifyInfoJwt(tokenString string) (info string, err error) {
 	}
 	return
 
-}
-
-//UserRoleInfoFromJwt for JwtLoginClaims
-//if token is valid, return nil
-func UserRoleInfoFromJwt(tokenString string) (userInfo middleware.RoleHolder, err error) {
-	userInfo, err = ParseJwt(tokenString)
-	return
 }
 
 //ParseJwt for JwtLoginClaims

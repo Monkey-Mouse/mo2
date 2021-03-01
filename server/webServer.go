@@ -71,11 +71,17 @@ func RunServer() {
 
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
-	r.Use(middleware.AuthMiddleware)
 	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
 	setupHandlers(c)
-	middleware.H.RegisterMapedHandlers(r, mo2utils.UserRoleInfoFromJwt, mo2utils.UserInfoKey)
+	middleware.H.RegisterMapedHandlers(r, func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {
+		str, err := ctx.Cookie("jwtToken")
+		if err != nil {
+			return
+		}
+		userInfo, err = mo2utils.ParseJwt(str)
+		return
+	}, mo2utils.UserInfoKey)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.NoRoute(func(c *gin.Context) {

@@ -13,7 +13,7 @@ import (
 
 var duration int = 10
 var unblockEvery int = 3600
-var fromJWT FromJWT
+var fromCTX FromCTX
 var blockFilter = bloom.NewWithEstimates(10000, 0.01)
 var userInfoKey string
 
@@ -57,6 +57,7 @@ func checkRateLimit(prop handlerProp, ip string) bool {
 }
 
 // AuthMiddleware also have rate limit function
+// 请不要手动注册这个中间件，你应该用这个package中的RegisterMapedHandlers方法
 func AuthMiddleware(c *gin.Context) {
 	// Block illegal ips
 	if blockFilter.TestString(c.ClientIP()) {
@@ -81,12 +82,7 @@ func AuthMiddleware(c *gin.Context) {
 		c.Next()
 		return
 	}
-	cookieStr, err := c.Cookie("jwtToken")
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
-		return
-	}
-	uinfo, jwterr := fromJWT(cookieStr)
+	uinfo, jwterr := fromCTX(c)
 	c.Set(userInfoKey, uinfo)
 	if jwterr != nil {
 		c.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("Unauthorized!"))
@@ -168,8 +164,11 @@ func (h handlerMap) Delete(relativPath string, handler gin.HandlerFunc, roles ..
 func (h handlerMap) Put(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(http.MethodPut, relativPath, handler, roles...)
 }
-func (h handlerMap) RegisterMapedHandlers(r *gin.Engine, getUserFromJWT FromJWT, userKey string) {
-	fromJWT = getUserFromJWT
+
+// RegisterMapedHandlers 必须要使用的方法，只有用了它，路由和中间件才会真正被注册
+// 使用这个方法请不要手动注册中间件
+func (h handlerMap) RegisterMapedHandlers(r *gin.Engine, getUserFromCTX FromCTX, userKey string) {
+	fromCTX = getUserFromCTX
 	userInfoKey = userKey
 	r.Use(AuthMiddleware)
 	for k, v := range h.Map {
