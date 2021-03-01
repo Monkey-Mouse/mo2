@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"mo2/server/controller/badresponse"
 	"net/http"
 	"path"
@@ -171,6 +172,7 @@ func (h handlerMap) HandlerWithRL(
 		url:    path.Join(h.prefixPath, relativPath),
 		method: method,
 	}
+	fmt.Println(ratelimit)
 	(h.innerMap)[key] = handlerProp{
 		handler:   handler,
 		needRoles: h.roles,
@@ -303,4 +305,6 @@ func (h handlerMap) RegisterMapedHandlers(r *gin.Engine, getUserFromCTX FromCTX,
 	for k, v := range h.innerMap {
 		r.Handle(k.method, k.url, v.handler)
 	}
+	go cleaner()
+	go resetBlocker()
 }

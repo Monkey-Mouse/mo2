@@ -3,9 +3,12 @@ package middleware
 import (
 	"fmt"
 	"math/rand"
+	"net/http"
+	"path"
 	"reflect"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/modern-go/concurrent"
 )
 
@@ -138,4 +141,113 @@ func Benchmark_checkRoles(b *testing.B) {
 	}
 	b.ResetTimer()
 	checkRoles(arguments.uinfo, arguments.rolePolicies)
+}
+
+func Test_handlerMap_Get(t *testing.T) {
+	type args struct {
+		relativPath string
+		handler     gin.HandlerFunc
+		roles       []string
+	}
+	tests := []struct {
+		name string
+		h    handlerMap
+		args args
+	}{
+		{name: "get test", h: H, args: args{"/xxx", nil, []string{}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.h.Get(tt.args.relativPath, tt.args.handler, tt.args.roles...)
+			_, ok := H.innerMap[handlerKey{tt.args.relativPath, http.MethodGet}]
+			if !ok {
+				t.Errorf("get test failed! failed to find handler after registered!")
+			}
+		})
+	}
+}
+
+func Test_handlerMap_Handle(t *testing.T) {
+	type args struct {
+		method      string
+		relativPath string
+		handler     gin.HandlerFunc
+		roles       []string
+	}
+	H = H.Group("/aaa")
+	tests := []struct {
+		name string
+		h    handlerMap
+		args args
+	}{
+		{name: "handler test", h: H, args: args{"xxx", "/xxx", nil, []string{}}},
+		{name: "handler test", h: H, args: args{"xxaaa", "/ddxxx", nil, []string{}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.h.Handle(tt.args.method, tt.args.relativPath, tt.args.handler, tt.args.roles...)
+			_, ok := H.innerMap[handlerKey{path.Join("/aaa", tt.args.relativPath), tt.args.method}]
+			if !ok {
+				t.Errorf("handler test failed! failed to find handler after registered!")
+			}
+		})
+	}
+}
+
+func Test_handlerMap_GetWithRL(t *testing.T) {
+	h := handlerMap{handlers, "", make([][]string, 0), -1}
+	type args struct {
+		relativPath string
+		handler     gin.HandlerFunc
+		ratelimit   int
+		roles       []string
+	}
+	tests := []struct {
+		name string
+		h    handlerMap
+		args args
+	}{
+		{name: "get test", h: h, args: args{"/xxx", nil, 10, []string{}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.h.GetWithRL(tt.args.relativPath, tt.args.handler, tt.args.ratelimit, tt.args.roles...)
+			v, ok := h.innerMap[handlerKey{tt.args.relativPath, http.MethodGet}]
+			if !ok {
+				t.Errorf("get test failed! failed to find handler after registered!")
+			}
+			if v.limit != tt.args.ratelimit {
+				t.Errorf("get test failed! rate limit value is wrong! expect: %v, real: %v", tt.args.ratelimit, v.limit)
+			}
+		})
+	}
+}
+
+func Test_handlerMap_PostWithRL(t *testing.T) {
+	h := handlerMap{handlers, "", make([][]string, 0), -1}
+	type args struct {
+		relativPath string
+		handler     gin.HandlerFunc
+		ratelimit   int
+		roles       []string
+	}
+	tests := []struct {
+		name string
+		h    handlerMap
+		args args
+	}{
+		{name: "post test", h: h, args: args{"/xxx", nil, 10, []string{}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.h.PostWithRL(tt.args.relativPath, tt.args.handler, tt.args.ratelimit, tt.args.roles...)
+			v, ok := h.innerMap[handlerKey{tt.args.relativPath, http.MethodGet}]
+			if !ok {
+				t.Errorf("post test failed! failed to find handler after registered!")
+			}
+			if v.limit != tt.args.ratelimit {
+				t.Errorf("get test failed! rate limit value is wrong! expect: %v, real: %v", tt.args.ratelimit, v.limit)
+			}
+		})
+	}
 }
