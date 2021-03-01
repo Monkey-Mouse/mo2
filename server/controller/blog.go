@@ -336,6 +336,7 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 	isDeleted := parseString2Bool(isDeletedStr)
 	if (isDraft || isDeleted) && !mo2utils.IsInRole(ctx, model.GeneralAdmin) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason("权限不足，请联系管理员"))
+		return
 	}
 	blogs := database.FindAllBlogs(model.Filter{
 		IsDraft:   isDraft,

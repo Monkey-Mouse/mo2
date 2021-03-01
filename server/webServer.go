@@ -17,39 +17,39 @@ import (
 func setupHandlers(c *controller.Controller) {
 	api := middleware.H.Group("/api")
 	{
-		api.Get("/logs", c.Log)
+		api.Get("/logs", c.Log, model.Anonymous, model.OrdinaryUser)
 		api.Get("/img/:filename", c.GenUploadToken, model.OrdinaryUser)
-		blogs := api.Group("blogs")
+		blogs := api.Group("blogs", model.OrdinaryUser)
 		{
-			blogs.Get("query", c.QueryBlogs)
-			blogs.Post("addCategory", c.UpsertCategory, model.OrdinaryUser)
-			blogs.Get("findAllCategories", c.FindAllCategories, model.OrdinaryUser)
-			blogs.Post("addBlogs2Categories", c.AddBlogs2Categories, model.OrdinaryUser)
-			blogs.Get("findCategoryByUserId", c.FindCategoryByUserId, model.OrdinaryUser)
-			blogs.Post("addCategory2User", c.AddCategory2User, model.OrdinaryUser)
-			blogs.Get("findCategoriesByUserId", c.FindCategoriesByUserId, model.OrdinaryUser)
-			blogs.Post("addCategory2Category", c.AddCategory2Category, model.OrdinaryUser)
-			blogs.Post("publish", c.UpsertBlog, model.OrdinaryUser)
-			blogs.Delete(":id", c.DeleteBlog, model.OrdinaryUser)
-			blogs.Put(":id", c.RestoreBlog, model.OrdinaryUser)
-			find := blogs.Group("/find")
+			blogs.Get("query", c.QueryBlogs, model.Anonymous)
+			blogs.Post("addCategory", c.UpsertCategory)
+			blogs.Get("findAllCategories", c.FindAllCategories)
+			blogs.Post("addBlogs2Categories", c.AddBlogs2Categories)
+			blogs.Get("findCategoryByUserId", c.FindCategoryByUserId)
+			blogs.Post("addCategory2User", c.AddCategory2User)
+			blogs.Get("findCategoriesByUserId", c.FindCategoriesByUserId)
+			blogs.Post("addCategory2Category", c.AddCategory2Category)
+			blogs.Post("publish", c.UpsertBlog)
+			blogs.Delete(":id", c.DeleteBlog)
+			blogs.Put(":id", c.RestoreBlog)
+			find := blogs.Group("/find", model.OrdinaryUser)
 			{
-				find.Get("own", c.FindBlogsByUser, model.OrdinaryUser)
-				find.Get("userId", c.FindBlogsByUserId)
-				find.Get("id", c.FindBlogById)
+				find.Get("own", c.FindBlogsByUser)
+				find.Get("userId", c.FindBlogsByUserId, model.Anonymous)
+				find.Get("id", c.FindBlogById, model.Anonymous)
 			}
 		}
 		accounts := api.Group("/accounts")
 		{
-			accounts.Post("", c.AddAccount)
-			accounts.Delete("", c.DeleteAccount)
-			accounts.Put("", c.UpdateAccount)
-			accounts.Get("verify", c.VerifyEmail)
-			accounts.Post("role", c.AddAccountRole)
-			accounts.Post("login", c.LoginAccount)
-			accounts.Post("logout", c.LogoutAccount)
-			accounts.Get("detail/:id", c.ShowAccount)
-			accounts.Get("listBrief", c.ListAccountsInfo)
+			accounts.Post("", c.AddAccount, model.Anonymous) //todo: whether add ordinaryUser
+			accounts.Delete("", c.DeleteAccount, model.OrdinaryUser)
+			accounts.Put("", c.UpdateAccount, model.OrdinaryUser)
+			accounts.Get("verify", c.VerifyEmail, model.Anonymous, model.OrdinaryUser)
+			accounts.Post("role", c.AddAccountRole, model.GeneralAdmin, model.OrdinaryUser) //todo update after have generalAdmin
+			accounts.Post("login", c.LoginAccount, model.Anonymous)                         //todo: whether add ordinaryUser
+			accounts.Post("logout", c.LogoutAccount, model.OrdinaryUser)
+			accounts.Get("detail/:id", c.ShowAccount, model.Anonymous, model.OrdinaryUser)
+			accounts.Get("listBrief", c.ListAccountsInfo, model.Anonymous, model.OrdinaryUser)
 		}
 		auth := api.Group("/auth")
 		{

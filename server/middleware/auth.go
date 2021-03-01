@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"mo2/mo2utils"
 	"mo2/server/controller/badresponse"
-	"mo2/server/model"
 	"net/http"
 	"path"
 	"time"
@@ -79,7 +78,7 @@ func AuthMiddleware(c *gin.Context) {
 		return
 	}
 	// role auth logic
-	if prop.NeedRoles == nil || len(prop.NeedRoles) == 0 || mo2utils.Contains(prop.NeedRoles, model.Anonymous) {
+	if prop.NeedRoles == nil || len(prop.NeedRoles) == 0 {
 		c.Next()
 		return
 	}
