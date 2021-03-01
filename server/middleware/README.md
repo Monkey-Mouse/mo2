@@ -6,7 +6,10 @@ middleware包含mo2中用到的大部分中间件
 ## 内容
 
 ### auth middleware
-auth是目前唯一的一个中间件，它能实现基于role的身份认证，以及基本的rate limit功能，能在一定程度上抵御ddos攻击
+auth是目前唯一的一个中间件，它能实现基于role的身份认证，以及基本的rate limit功能，能在一定程度上抵御ddos攻击  
+role auth的设计中，不同role逻辑只能用与逻辑连接，不能用或逻辑。  
+也就是说，我们能够要求api的访问者同时具有admin和user身份，而不能要求访问者是admin或user身份之一  
+**所以设计api的时候，应该将api资源和role对应。如果要保护一组api，那么请给他一个专门对应的role**
 
 
 #### QuickStart
@@ -27,7 +30,13 @@ func setupHandlers(c *controller.Controller) {
     api1 := middleware.H.Group("/api1", "User", "Admin")
     
     /* 
-    所有需要使用Ratelimit功能保护的api只需要在常规的注册方法后加入WithRateLimit就是了加ratelimit功能的方法多接受一参数，就是第三个参数。它是一个数字，代表在一个周期内一个ip对该方法请求次数的上限如果超过这个上限，这个ip会被ban。周期长度默认10秒，ban时间默认3600秒（1小时）也就是说下边这种写法意义是：/logs2这个api最多被一个相同ip在10秒内请求30次，如果10秒不到的时间内请求次数达到30，这个ip会被ban 1个小时。周期长度和ban的时间可以使用SetupRateLimiter(limitEvery int, unblockevery int)方法设置
+    所有需要使用Ratelimit功能保护的api只需要在常规的注册方法后加入WithRateLimit就是了加
+    ratelimit功能的方法多接受一参数，就是第三个参数。它是一个数字，
+    代表在一个周期内一个ip对该方法请求次数的上限如果超过这个上限，这个ip会被ban。
+    周期长度默认10秒，ban时间默认3600秒（1小时）
+    也就是说下边这种写法意义是：/logs2这个api最多被一个相同ip在10秒内请求30次，
+    如果10秒不到的时间内请求次数达到30，这个ip会被ban 1个小时。
+    周期长度和ban的时间可以使用SetupRateLimiter(limitEvery int, unblockevery int)方法设置
     */
     middleware.H.GetWithRateLimit("/logs2", c.Log, 30, "Admin", "User")
     // 同理，group也有ratelimit版本
@@ -37,14 +46,15 @@ func setupHandlers(c *controller.Controller) {
 ```
 注意，在将handler通过类似上方的方法注册**后**，需要手动调用
 ```go
-middleware.H.RegisterMapedHandlers(r, func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {
-    str, err := ctx.Cookie("jwtToken")
-    if err != nil {
+middleware.H.RegisterMapedHandlers(r, 
+    func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {
+        str, err := ctx.Cookie("jwtToken")
+        if err != nil {
+            return
+        }
+        userInfo, err = mo2utils.ParseJwt(str)
         return
-    }
-    userInfo, err = mo2utils.ParseJwt(str)
-    return
-}, mo2utils.UserInfoKey)
+    }, mo2utils.UserInfoKey)
 ```
 **只有这样中间件和路由才会真正被注册入gin的router中**  
 重要方法`func (h handlerMap) RegisterMapedHandlers(r *gin.Engine, getUserFromCTX FromCTX, userKey string)`  
