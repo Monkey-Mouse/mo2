@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"fmt"
 	"mo2/server/controller/badresponse"
 	"net/http"
 	"path"
@@ -172,7 +171,6 @@ func (h handlerMap) HandlerWithRL(
 		url:    path.Join(h.prefixPath, relativPath),
 		method: method,
 	}
-	fmt.Println(ratelimit)
 	(h.innerMap)[key] = handlerProp{
 		handler:   handler,
 		needRoles: h.roles,

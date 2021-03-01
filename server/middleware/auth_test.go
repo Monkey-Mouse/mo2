@@ -12,7 +12,7 @@ import (
 	"github.com/modern-go/concurrent"
 )
 
-func Test_checkRateLimit(t *testing.T) {
+func Test_checkRL(t *testing.T) {
 	type args struct {
 		prop handlerProp
 		ip   string
