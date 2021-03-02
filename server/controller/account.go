@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	//"github.com/swaggo/swag/example/celler/model"
-	"log"
+
 	"mo2/database"
 	"mo2/server/controller/badresponse"
 	"mo2/server/model"
@@ -52,7 +52,7 @@ func (c *Controller) Log(ctx *gin.Context) {
 		//parse jwtToken and get user info
 		s, err = mo2utils.ParseJwt(jwtToken)
 		if err != nil {
-			log.Println(err)
+			ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
 		}
 	}
 	ctx.JSON(http.StatusOK, s)
