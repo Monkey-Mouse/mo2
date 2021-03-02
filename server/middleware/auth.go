@@ -105,14 +105,13 @@ func AuthMiddleware(c *gin.Context) {
 	}
 	// rate limit logic
 	checkBlockAndRL(prop, c.ClientIP())
-
+	uinfo, jwterr := fromCTX(c)
+	c.Set(userInfoKey, uinfo)
 	// role auth logic
 	if prop.needRoles == nil || len(prop.needRoles) == 0 {
 		c.Next()
 		return
 	}
-	uinfo, jwterr := fromCTX(c)
-	c.Set(userInfoKey, uinfo)
 	if jwterr != nil {
 		badresponse.SetErrResponse(c, http.StatusForbidden,
 			"Unauthorized!")
