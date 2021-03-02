@@ -31,9 +31,7 @@
 
         <v-tab href="#tab-1"> Articles </v-tab>
 
-        <v-tab v-if="ownPage" @click="loadDraft" href="#tab-2">
-          DraftBox
-        </v-tab>
+        <v-tab v-if="ownPage" href="#tab-2"> DraftBox </v-tab>
       </v-tabs>
 
       <v-tabs-items v-model="tab">
@@ -95,6 +93,7 @@ export default class Account extends Vue implements BlogAutoLoader {
   nomore = false;
   tab = 1;
   ownPage = false;
+  create = false;
 
   draftProps: BlogAutoLoader = {
     loading: true,
@@ -106,11 +105,18 @@ export default class Account extends Vue implements BlogAutoLoader {
     ReachedButtom: () => {},
   };
   created() {
+    this.initPage();
+    this.create = true;
+  }
+  initPage() {
     this.uid = this.$route.params["id"];
     if (this.uid === undefined || this.uid === this.user.id) {
       this.uid = this.user.id;
       this.displayUser = this.user;
       this.ownPage = true;
+      if (this.$route.fullPath !== "/account") {
+        this.$router.replace("/account");
+      }
       GetOwnArticles({
         page: this.page++,
         pageSize: this.pagesize,
@@ -134,6 +140,14 @@ export default class Account extends Vue implements BlogAutoLoader {
       });
     }
   }
+
+  @Watch("$route", { immediate: true, deep: true })
+  pageChange() {
+    if (this.create) {
+      this.initPage();
+    }
+  }
+
   @Watch("user")
   userChange() {
     if (
@@ -145,6 +159,7 @@ export default class Account extends Vue implements BlogAutoLoader {
       this.displayUser = this.user;
     }
   }
+  @Watch("tab")
   loadDraft() {
     if (this.draftProps.firstloading) {
       if (this.ownPage) {

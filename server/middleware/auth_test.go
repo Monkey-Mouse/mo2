@@ -3,10 +3,12 @@ package middleware
 import (
 	"fmt"
 	"math/rand"
+	"mo2/mo2utils/mo2errors"
 	"net/http"
 	"path"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/modern-go/concurrent"
@@ -111,6 +113,8 @@ func Test_handlerMap_Group(t *testing.T) {
 		want handlerMap
 	}{
 		{name: "test role policy and role", h: handlerMap{prefixPath: "/x", roles: [][]string{{"xx", "xxx"}}}, args: args{"xxx", []string{"xxxx"}}, want: handlerMap{prefixPath: "/x/xxx", roles: [][]string{{"xx", "xxx"}, {"xxxx"}}}},
+		{name: "test not append empty role", h: handlerMap{prefixPath: "/x", roles: [][]string{{"xx", "xxx"}}}, args: args{"xxx", []string{}}, want: handlerMap{prefixPath: "/x/xxx", roles: [][]string{{"xx", "xxx"}}}},
+		{name: "test not append nil role", h: handlerMap{prefixPath: "/x", roles: [][]string{{"xx", "xxx"}}}, args: args{"xxx", nil}, want: handlerMap{prefixPath: "/x/xxx", roles: [][]string{{"xx", "xxx"}}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -247,6 +251,70 @@ func Test_handlerMap_PostWithRL(t *testing.T) {
 			}
 			if v.limit != tt.args.ratelimit {
 				t.Errorf("get test failed! rate limit value is wrong! expect: %v, real: %v", tt.args.ratelimit, v.limit)
+			}
+		})
+	}
+}
+
+func Test_checkBlockAndRL(t *testing.T) {
+	h := handlerMap{handlers, "", make([][]string, 0), -1}
+	unblockEvery = 1
+	duration = 1
+	h.GetWithRL("/xx", nil, 3)
+	handlers = h.innerMap
+	type args struct {
+		prop handlerProp
+		ip   string
+	}
+	tests := []struct {
+		name string
+		args args
+		want *mo2errors.Mo2Errors
+	}{
+		{name: "Test ip enter1", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
+		{name: "Test ip enter2", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
+		{name: "Test ip enter3", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
+		{name: "Test ip ban", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: mo2errors.New(429, "Too frequent!")},
+		{name: "Test ip block", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: mo2errors.New(403, "IP Blocked!检测到该ip地址存在潜在的ddos行为")},
+		{name: "Test ip unblock", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
+	}
+	go cleaner()
+	go resetBlocker()
+	for _, tt := range tests {
+		if tt.name == "Test ip unblock" {
+			time.Sleep(2 * time.Second)
+		}
+		hm := getHandlers()
+		t.Run(tt.name, func(t *testing.T) {
+			if got := checkBlockAndRL(hm[handlerKey{"/xx", http.MethodGet}], tt.args.ip); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("checkBlockAndRL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_handlerMap_HandlerWithRL(t *testing.T) {
+	h := handlerMap{handlers, "", make([][]string, 0), -1}
+	type args struct {
+		method      string
+		relativPath string
+		handler     gin.HandlerFunc
+		ratelimit   int
+		roles       []string
+	}
+	tests := []struct {
+		name string
+		h    handlerMap
+		args args
+	}{
+		{"Test not append nil role", h, args{"a", "a", nil, -1, nil}},
+		{"Test not append empty role", h, args{"a", "a", nil, -1, []string{}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.h.HandlerWithRL(tt.args.method, tt.args.relativPath, tt.args.handler, tt.args.ratelimit, tt.args.roles...)
+			if len(h.innerMap[handlerKey{"a", "a"}].needRoles) > 0 {
+				t.Errorf("nil or empty role appended!")
 			}
 		})
 	}

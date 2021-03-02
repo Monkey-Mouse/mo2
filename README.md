@@ -1,5 +1,10 @@
 # Mo2
-[![codecov](https://codecov.io/gh/Monkey-Mouse/mo2/branch/main/graph/badge.svg?token=8X3HF5VFWT)](https://codecov.io/gh/Monkey-Mouse/mo2)![gobadge](https://github.com/Monkey-Mouse/mo2/actions/workflows/.github/workflows/go.yml/badge.svg)![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/Monkey-Mouse/mo2.svg)](https://github.com/Monkey-Mouse/mo2)![GoReportCard example](https://goreportcard.com/badge/github.com/Monkey-Mouse/mo2)  
+[![codecov](https://codecov.io/gh/Monkey-Mouse/mo2/branch/main/graph/badge.svg?token=8X3HF5VFWT)](https://codecov.io/gh/Monkey-Mouse/mo2)
+![gobadge](https://github.com/Monkey-Mouse/mo2/actions/workflows/.github/workflows/go.yml/badge.svg)
+![made-with-Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/Monkey-Mouse/mo2.svg)](https://github.com/Monkey-Mouse/mo2)
+![GoReportCard](https://goreportcard.com/badge/github.com/Monkey-Mouse/mo2)
+[![BCH compliance](https://bettercodehub.com/edge/badge/Monkey-Mouse/mo2?branch=main)](https://bettercodehub.com/)  
 一个属于所有人的博客网站
 ![logo](mo2front/public/img/icons/android-chrome-512x512.png)
 

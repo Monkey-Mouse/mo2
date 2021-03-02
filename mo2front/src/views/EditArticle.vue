@@ -49,7 +49,7 @@ import {
 import { BlogUpsert, InputProp } from "@/models";
 import { required, minLength, email } from "vuelidate/lib/validators";
 import { AxiosError } from "axios";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 @Component({
   components: {
     Editor,
@@ -108,13 +108,16 @@ export default class EditArticle extends Vue {
     };
   }
   created() {
-    // this.content = globaldic.article ?? "";
-    // globaldic.article = "";
-    // console.log(this.content, this.$route.params["id"]);
-    if (this.content !== "") {
-      this.loading = false;
-      this.blog.id = this.$route.params["id"];
-    } else if (this.$route.params["id"]) {
+    this.init();
+  }
+  @Watch("$route", { immediate: true, deep: true })
+  pageChange() {
+    if (!this.blog.id || this.blog.id === "") {
+      this.init();
+    }
+  }
+  init() {
+    if (this.$route.params["id"]) {
       this.blog.id = this.$route.params["id"];
       GetArticle({ id: this.blog.id, draft: true })
         .then((val) => {
@@ -155,9 +158,8 @@ export default class EditArticle extends Vue {
     let elm = document.querySelector(".mo2content p") as any;
     if (this.blog.description === "" || this.blog.description === undefined) {
       this.blog.description = "";
-      const descriptions = [];
       while (this.blog.description.length < 50 && elm) {
-        descriptions.push(elm.innerText);
+        this.blog.description += (elm.innerText as string).trim();
         while (
           elm.nextElementSibling &&
           elm.nextElementSibling.tagName !== "P"
@@ -166,8 +168,6 @@ export default class EditArticle extends Vue {
         }
         elm = elm.nextElementSibling;
       }
-
-      this.blog.description = descriptions.join("").trim();
     }
     this.showPublish = true;
     (this.$refs["dialog"] as MO2Dialog).setModel(this.blog);
@@ -198,6 +198,9 @@ export default class EditArticle extends Vue {
       this.blog[key] = element;
     }
     var data = await UpsertBlog({ draft: draft }, this.blog);
+    if (this.blog.id !== data.id) {
+      this.$router.replace(`/edit/${data.id}`);
+    }
     this.blog.id = data.id;
   }
   async confirm(model: BlogUpsert, draft = false) {

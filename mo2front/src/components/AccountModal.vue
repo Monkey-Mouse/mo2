@@ -148,22 +148,11 @@
                   @click="backToMain"
                   >先继续浏览</v-btn
                 >
-                <v-btn
-                  :disabled="
-                    this.$v.password.$anyError ||
-                    this.$v.email.$anyError ||
-                    this.$v.name.$anyError ||
-                    seconds > 0
-                  "
-                  outlined
-                  text
-                  @click="register"
-                  >{{
-                    emailSent
-                      ? "重新发送" + (seconds > 0 ? `${seconds}` : "")
-                      : "注册"
-                  }}</v-btn
-                >
+                <v-btn :disabled="regDisable" outlined text @click="register">{{
+                  emailSent
+                    ? "重新发送" + (seconds > 0 ? `${seconds}` : "")
+                    : "注册"
+                }}</v-btn>
 
                 <v-btn v-if="!emailSent" @click="close" color="red">取消</v-btn>
               </v-card-actions>
@@ -221,10 +210,19 @@ export default class AccountModal extends Vue {
     },
   };
   showPasswd: boolean = false;
+
+  public get regDisable(): boolean {
+    return (
+      this.$v.password.$anyError ||
+      this.$v.email.$anyError ||
+      this.$v.name.$anyError ||
+      this.seconds > 0
+    );
+  }
+
   created() {
     this.email = "";
     this.password = "";
-    this.seconds = 30;
     setInterval(() => {
       this.seconds--;
     }, 1000);

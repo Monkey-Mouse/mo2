@@ -3,7 +3,6 @@ WORKDIR /home/mo2front
 COPY ./mo2front .
 RUN npm install
 RUN npm run build
-RUN cd ..
 
 
 #build stage

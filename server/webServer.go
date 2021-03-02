@@ -52,21 +52,10 @@ func setupHandlers(c *controller.Controller) {
 			accounts.Get("detail/:id", c.ShowAccount, model.Anonymous, model.OrdinaryUser)
 			accounts.Get("listBrief", c.ListAccountsInfo, model.Anonymous, model.OrdinaryUser)
 		}
-		auth := api.Group("/auth")
-		{
-			auth.Get("home", func(ctx *gin.Context) {
-				//TODO change the info generate way
-				user, err := ctx.Cookie("jwtToken")
-				if err != nil {
-					ctx.JSON(http.StatusForbidden, "login first!")
-				} else {
-					ctx.JSON(http.StatusOK, gin.H{"home": user + " Welcome to your home"})
-				}
-			})
-		}
 	}
 }
 
+// RunServer start web server
 func RunServer() {
 
 	r := gin.Default()
@@ -87,9 +76,5 @@ func RunServer() {
 	r.NoRoute(func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "dist/index.html")
 	})
-	// r.GET("/", func(c *gin.Context) {
-	// 	http.ServeFile(c.Writer, c.Request, "dist/index.html")
-	// })
-	// r.Static("/static", "dist/static")
 	r.Run(":5001")
 }
