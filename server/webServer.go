@@ -7,6 +7,8 @@ import (
 	"mo2/server/middleware"
 	"mo2/server/model"
 
+	"github.com/gin-contrib/pprof"
+
 	"net/http"
 
 	"github.com/gin-contrib/static"
@@ -71,7 +73,7 @@ func RunServer() {
 		userInfo, err = mo2utils.ParseJwt(str)
 		return
 	}, mo2utils.UserInfoKey)
-
+	pprof.Register(r)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.NoRoute(func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "dist/index.html")
