@@ -34,6 +34,56 @@ var doc = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/accounts": {
+            "put": {
+                "description": "通过id获取已有用户，验证身份。并将name的修改与setting的修改应用",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "修改名称（唯一用于登录）/偏好设置",
+                "parameters": [
+                    {
+                        "description": "id必须，可修改name/settings",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserInfoBrief"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "add by json account",
                 "consumes": [
@@ -1313,6 +1363,16 @@ var doc = `{
                 "name": {
                     "type": "string",
                     "example": "account name"
+                },
+                "settings": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "'avatar'": " 'www.avatar.com/account_name'",
+                        "'site'": "'www.limfx.com'(public data)"
+                    }
                 }
             }
         },

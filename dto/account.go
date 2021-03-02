@@ -28,6 +28,10 @@ type LoginUserInfo struct {
 	Roles []model.Erole      `json:"roles" example:"ordinaryUser" `
 }
 
+func (t LoginUserInfo) IsInRole(role string) bool {
+	return Contains(t.Roles, role)
+}
+
 func Account2SuccessLogin(a model.Account) (s LoginUserInfo) {
 	s.ID = a.ID
 	s.Name = a.UserName
@@ -54,12 +58,14 @@ func Account2UserPublicInfo(a model.Account) (u UserInfo) {
 }
 
 type UserInfoBrief struct {
-	ID   primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" bson:"_id"`
-	Name string             `json:"name" example:"account name" bson:"username"`
+	ID       primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" bson:"_id"`
+	Name     string             `json:"name" example:"account name" bson:"username"`
+	Settings map[string]string  `json:"settings" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'(public data)" bson:"settings,omitempty"`
 }
 
 func MapAccount2InfoBrief(a model.Account) (b UserInfoBrief) {
 	b.ID = a.ID
 	b.Name = a.UserName
+	b.Settings = a.Settings
 	return b
 }

@@ -85,9 +85,42 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("无此用户"))
 		return
 	}
-	model.AddRoles(&account, addAccount.Roles)
+	model.AddRoles(&account, addAccount.Roles...)
 	database.UpsertAccount(&account)
 	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
+}
+
+// UpdateAccount godoc
+// @Summary 修改名称（唯一用于登录）/偏好设置
+// @Description 通过id获取已有用户，验证身份。并将name的修改与setting的修改应用
+// @Tags accounts
+// @Accept  json
+// @Produce  json
+// @Param account body dto.UserInfoBrief true "id必须，可修改name/settings"
+// @Success 200 {object} dto.UserInfo
+// @Failure 400 {object} ResponseError
+// @Failure 401 {object} ResponseError
+// @Failure 404 {object} ResponseError
+// @Router /api/accounts [put]
+func (c *Controller) UpdateAccount(ctx *gin.Context) {
+	var accountInfo dto.UserInfoBrief
+	if err := ctx.ShouldBindJSON(&accountInfo); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		return
+	}
+	account, exist := database.FindAccount(accountInfo.ID)
+	if !exist {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("无此用户"))
+		return
+	}
+	account.UserName = accountInfo.Name
+	account.Settings = accountInfo.Settings
+	if merr := database.UpsertAccount(&account); merr.IsError() {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(merr))
+		return
+	} else {
+		ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
+	}
 }
 
 // AddAccount godoc

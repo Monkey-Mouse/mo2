@@ -30,5 +30,7 @@ jobs:
       - name: Test
         env:
           CI: true
-        run: go test -v ./...
-        
+        run: go test ./... -coverprofile=coverage.txt -covermode=atomic
+
+      - name: CodeCov
+        run: bash <(curl -s https://codecov.io/bash)

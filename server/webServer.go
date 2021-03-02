@@ -2,6 +2,7 @@ package server
 
 import (
 	_ "mo2/docs"
+	"mo2/mo2utils"
 	"mo2/server/controller"
 	"mo2/server/middleware"
 	"mo2/server/model"
@@ -43,6 +44,7 @@ func setupHandlers(c *controller.Controller) {
 		{
 			accounts.Post("", c.AddAccount)
 			accounts.Delete("", c.DeleteAccount)
+			accounts.Put("", c.UpdateAccount)
 			accounts.Get("verify", c.VerifyEmail)
 			accounts.Post("role", c.AddAccountRole)
 			accounts.Post("login", c.LoginAccount)
@@ -50,38 +52,29 @@ func setupHandlers(c *controller.Controller) {
 			accounts.Get("detail/:id", c.ShowAccount)
 			accounts.Get("listBrief", c.ListAccountsInfo)
 		}
-		auth := api.Group("/auth")
-		{
-			auth.Get("home", func(ctx *gin.Context) {
-				//TODO change the info generate way
-				user, err := ctx.Cookie("jwtToken")
-				if err != nil {
-					ctx.JSON(http.StatusForbidden, "login first!")
-				} else {
-					ctx.JSON(http.StatusOK, gin.H{"home": user + " Welcome to your home"})
-				}
-			})
-		}
 	}
 }
 
+// RunServer start web server
 func RunServer() {
 
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
-	r.Use(middleware.AuthMiddleware)
 	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
 	setupHandlers(c)
-	middleware.H.RegisterMapedHandlers(r)
+	middleware.H.RegisterMapedHandlers(r, func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {
+		str, err := ctx.Cookie("jwtToken")
+		if err != nil {
+			return
+		}
+		userInfo, err = mo2utils.ParseJwt(str)
+		return
+	}, mo2utils.UserInfoKey)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.NoRoute(func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "dist/index.html")
 	})
-	// r.GET("/", func(c *gin.Context) {
-	// 	http.ServeFile(c.Writer, c.Request, "dist/index.html")
-	// })
-	// r.Static("/static", "dist/static")
 	r.Run(":5001")
 }

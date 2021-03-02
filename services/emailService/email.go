@@ -20,7 +20,8 @@ type emailProp struct {
 
 var emailChan chan<- emailProp
 var initialed = false
-var blockMap *concurrent.Map = concurrent.NewMap()
+var blockMap = concurrent.NewMap()
+var bmChan = make(chan *concurrent.Map, 0)
 var sec int64 = 5
 var max int64 = 10
 var blockTime int = 3600
@@ -33,8 +34,18 @@ func SetFrequencyLimit(seconds int64, limit int64, blocksec int) {
 	blockTime = blocksec
 }
 
+func getBM() (bm *concurrent.Map) {
+	select {
+	case bm = <-bmChan:
+	default:
+		bm = blockMap
+	}
+	return
+}
+
 // QueueEmail add email to send queue
 func QueueEmail(msg []byte, receivers []string, remoteAddr string) (err *mo2errors.Mo2Errors) {
+	bm := getBM()
 	if !initialed {
 		startEmailService()
 	}
@@ -42,10 +53,10 @@ func QueueEmail(msg []byte, receivers []string, remoteAddr string) (err *mo2erro
 		err = mo2errors.New(http.StatusForbidden, "IP blocked! 检测到此IP潜在的ddos行为")
 		return
 	}
-	val, ok := blockMap.Load(remoteAddr)
+	val, ok := bm.Load(remoteAddr)
 	prop := emailProp{msg: msg, receivers: receivers}
 	if !ok {
-		blockMap.Store(remoteAddr, int64(1))
+		bm.Store(remoteAddr, int64(1))
 		emailChan <- prop
 		return
 	}
@@ -55,7 +66,7 @@ func QueueEmail(msg []byte, receivers []string, remoteAddr string) (err *mo2erro
 		blockFilter.AddString(remoteAddr)
 		return
 	}
-	blockMap.Store(remoteAddr, num+1)
+	bm.Store(remoteAddr, num+1)
 	emailChan <- prop
 	return
 }
@@ -76,18 +87,23 @@ func startEmailService() {
 func cleaner() {
 	seconds := time.Second * time.Duration(sec)
 	for {
-		blockMap = concurrent.NewMap()
 		time.Sleep(seconds)
+		nm := concurrent.NewMap()
+		blockMap = nm
+		bmChan <- nm
 	}
 }
 func blockReseter() {
 	seconds := time.Second * time.Duration(blockTime)
 	for {
-		blockFilter.ClearAll()
 		time.Sleep(seconds)
+		blockFilter.ClearAll()
 	}
 }
 func startWorker(emailChan <-chan emailProp) {
+	if os.Getenv("TEST") == "TRUE" {
+		return
+	}
 	from := os.Getenv("emailAddr")
 	password := os.Getenv("emailPass")
 	// Sender data.
