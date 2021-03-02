@@ -33,6 +33,13 @@ func (e *Entity) Create() {
 	e.IsDeleted = false
 }
 
+// Set set entity with exist create time
+func (e *Entity) Set(createTime time.Time) {
+	e.CreateTime = createTime
+	e.UpdateTime = e.CreateTime
+	e.IsDeleted = false
+}
+
 // Update update entity
 func (e *Entity) Update() {
 	if IsTimeValid(e.CreateTime) {
