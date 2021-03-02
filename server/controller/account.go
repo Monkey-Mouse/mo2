@@ -40,20 +40,24 @@ func SayHello(c *gin.Context) {
 func (c *Controller) Log(ctx *gin.Context) {
 
 	jwtToken, err := ctx.Cookie("jwtToken")
+	needReset := false
 	var s dto.LoginUserInfo
 	if err != nil {
+		needReset = true
+	} else {
+		//parse jwtToken and get user info
+		s, err = mo2utils.ParseJwt(jwtToken)
+		if err != nil {
+			needReset = true
+		}
+	}
+	if needReset {
 		//allocate an anonymous account
 		account := database.CreateAnonymousAccount()
 		s = dto.Account2SuccessLogin(account)
 		jwtToken = mo2utils.GenerateJwtCode(s)
 		//login success: to record the state
 		ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
-	} else {
-		//parse jwtToken and get user info
-		s, err = mo2utils.ParseJwt(jwtToken)
-		if err != nil {
-			ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
-		}
 	}
 	ctx.JSON(http.StatusOK, s)
 }
