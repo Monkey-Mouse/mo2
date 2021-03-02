@@ -19,7 +19,12 @@ func setupHandlers(c *controller.Controller) {
 	api := middleware.H.Group("/api")
 	{
 		api.Get("/logs", c.Log)
-		api.Get("/img/:filename", c.GenUploadToken, model.OrdinaryUser)
+		uploads := api.Group("", model.OrdinaryUser)
+		{
+			uploads.Get("/img/:filename", c.GenUploadToken)
+			uploads.Post("/file", c.Upload)
+
+		}
 		blogs := api.Group("blogs")
 		{
 			open := blogs.Group("", model.Anonymous, model.OrdinaryUser)
