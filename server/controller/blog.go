@@ -298,9 +298,11 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 		if pass := JudgeAuthorize(ctx, &blog); pass {
 			ctx.JSON(http.StatusOK, blog)
 		} else {
-			return
+			ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
 		}
+		return
 	}
+	ctx.JSON(http.StatusOK, blog)
 }
 
 // QueryBlogs godoc

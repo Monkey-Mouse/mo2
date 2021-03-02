@@ -45,7 +45,7 @@ func initKey() (err error) {
 //if token is valid, return nil
 func ParseJwt(tokenString string) (userInfo dto.LoginUserInfo, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JwtLoginClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("mo2"), nil
+		return key, nil
 	})
 	if err != nil {
 		return

@@ -170,7 +170,9 @@ func (h handlerMap) Group(
 	relativePath string,
 	roles ...string) handlerMap {
 	h.prefixPath = path.Join(h.prefixPath, relativePath)
-	h.roles = append(h.roles, roles)
+	if roles != nil && len(roles) != 0 {
+		h.roles = append(h.roles, roles)
+	}
 	return h
 }
 
@@ -191,7 +193,9 @@ func (h handlerMap) HandlerWithRL(
 	handler gin.HandlerFunc,
 	ratelimit int,
 	roles ...string) {
-	h.roles = append(h.roles, roles)
+	if roles != nil && len(roles) != 0 {
+		h.roles = append(h.roles, roles)
+	}
 	key := handlerKey{
 		url:    path.Join(h.prefixPath, relativPath),
 		method: method,
