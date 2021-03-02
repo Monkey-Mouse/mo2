@@ -28,6 +28,10 @@ type LoginUserInfo struct {
 	Roles []model.Erole      `json:"roles" example:"ordinaryUser" `
 }
 
+func (t LoginUserInfo) IsInRole(role string) bool {
+	return Contains(t.Roles, role)
+}
+
 func Account2SuccessLogin(a model.Account) (s LoginUserInfo) {
 	s.ID = a.ID
 	s.Name = a.UserName

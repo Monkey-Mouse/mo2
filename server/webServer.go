@@ -2,6 +2,7 @@ package server
 
 import (
 	_ "mo2/docs"
+	"mo2/mo2utils"
 	"mo2/server/controller"
 	"mo2/server/middleware"
 	"mo2/server/model"
@@ -70,11 +71,17 @@ func RunServer() {
 
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
-	r.Use(middleware.AuthMiddleware)
 	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
 	setupHandlers(c)
-	middleware.H.RegisterMapedHandlers(r)
+	middleware.H.RegisterMapedHandlers(r, func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {
+		str, err := ctx.Cookie("jwtToken")
+		if err != nil {
+			return
+		}
+		userInfo, err = mo2utils.ParseJwt(str)
+		return
+	}, mo2utils.UserInfoKey)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.NoRoute(func(c *gin.Context) {
