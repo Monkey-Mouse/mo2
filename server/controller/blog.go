@@ -27,7 +27,7 @@ const reasonKey = "reason"
 // @Param draft query bool false "bool true" true
 // @Param account body model.Blog true "Add blog"
 // @Success 201 {object} model.Blog
-// @Success 204 {object}
+// @Success 204
 // @Failure 400 {object} ResponseError
 // @Failure 401 {object} ResponseError
 // @Router /api/blogs/publish [post]
@@ -260,7 +260,7 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlogs
-// @Success 204 {object}
+// @Success 204
 // @Failure 400 {object} ResponseError
 // @Failure 401 {object} ResponseError
 // @Failure 404 {object} ResponseError
