@@ -300,6 +300,8 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 		} else {
 			return
 		}
+	} else {
+		ctx.JSON(http.StatusOK, blog)
 	}
 }
 
