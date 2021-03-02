@@ -43,16 +43,19 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 		return
 	}
 	JudgeAuthorize(ctx, &b)
-	if passAuth, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
-		if passAuth.(bool) {
+	if passAuthValue, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
+		if passAuthValue.(bool) {
 			if success := database.UpsertBlog(&b, isDraft); success {
 				ctx.Header("location", ctx.FullPath())
 				ctx.JSON(http.StatusCreated, b)
-				return
+			} else {
+				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
 			}
+			return
 		} else {
 			if err, ok := ctx.Get(reasonKey); ok {
-				if merr := err.(mo2errors.Mo2Errors); merr.ErrorCode == mo2errors.Mo2NoLogin {
+				merr, ok := err.(mo2errors.Mo2Errors)
+				if ok && merr.ErrorCode == mo2errors.Mo2NoLogin {
 					ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason(merr.ErrorTip))
 					return
 				}
@@ -127,14 +130,14 @@ func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) {
 			blog.AuthorID = userInfo.ID
 		} else {
 			ctx.Set(passAuthKey, false)
-			ctx.Set(reasonKey, mo2errors.New(mo2errors.Mo2NoLogin, "权限不足，请先登录"))
-
+			ctx.Set(reasonKey, *mo2errors.New(mo2errors.Mo2NoLogin, "权限不足，请先登录"))
 			return
 		}
 	} else {
 		if blog.AuthorID != userInfo.ID {
 			ctx.Set(passAuthKey, false)
-			ctx.Set(reasonKey, mo2errors.New(mo2errors.Mo2Unauthorized, "没有权限修改文章"))
+			ctx.Set(reasonKey, *mo2errors.New(mo2errors.Mo2Unauthorized, "没有权限修改文章"))
+			return
 		}
 	}
 	ctx.Set(passAuthKey, true)
