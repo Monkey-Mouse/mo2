@@ -34,6 +34,7 @@ func cleaner() {
 			v.rates = concurrent.NewMap()
 			m[k] = v
 		}
+		handlers = m
 		handlerChan <- m
 	}
 }

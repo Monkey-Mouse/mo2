@@ -1,11 +1,13 @@
 package emailservice
 
 import (
+	"os"
 	"testing"
 	"time"
 )
 
 func TestQueueEmail(t *testing.T) {
+	os.Setenv("TEST", "TRUE")
 	SetFrequencyLimit(1, 3, 2)
 	type args struct {
 		msg        []byte
@@ -29,6 +31,7 @@ func TestQueueEmail(t *testing.T) {
 			if tt.name == "testReleaseBlock" {
 				time.Sleep(time.Second * 3)
 			}
+
 			if err := QueueEmail(tt.args.msg, tt.args.receivers, tt.args.remoteAddr); (err != nil) != tt.wantErr {
 				t.Errorf("QueueEmail() error = %v, wantErr %v", err, tt.wantErr)
 			}
