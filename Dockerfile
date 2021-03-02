@@ -20,7 +20,7 @@ RUN go install -v ./...
 FROM ubuntu:latest
 RUN apt-get update
 RUN apt-get install ca-certificates -y
-RUN apt-get install graphviz
+RUN apt-get install graphviz -y
 COPY --from=front /home/dist /app/dist
 WORKDIR /app
 RUN chmod -R 777 .
