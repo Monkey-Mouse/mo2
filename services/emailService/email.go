@@ -20,8 +20,8 @@ type emailProp struct {
 
 var emailChan chan<- emailProp
 var initialed = false
-var blockMap *concurrent.Map = concurrent.NewMap()
-var bmChan chan *concurrent.Map
+var blockMap = concurrent.NewMap()
+var bmChan = make(chan *concurrent.Map, 0)
 var sec int64 = 5
 var max int64 = 10
 var blockTime int = 3600

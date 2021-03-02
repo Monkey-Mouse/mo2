@@ -19,7 +19,7 @@ var unblockEvery int = 3600
 var fromCTX FromCTX
 var blockFilter = bloom.NewWithEstimates(10000, 0.01)
 var userInfoKey string
-var handlerChan chan map[handlerKey]handlerProp = make(chan map[handlerKey]handlerProp)
+var handlerChan = make(chan map[handlerKey]handlerProp)
 
 // SetupRateLimiter setup ddos banner
 func SetupRateLimiter(limitEvery int, unblockevery int) {
