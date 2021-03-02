@@ -6,6 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"mo2/dto"
+	"os"
+	"path"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -29,12 +31,14 @@ func init() {
 	initKey()
 }
 func initKey() (err error) {
-	bytes, err := ioutil.ReadFile("mo2.secret")
+	os.Mkdir("./secret", 0755)
+	path := path.Join("./secret", "mo2.secret")
+	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 
 		rand.Seed(time.Now().UnixNano())
 		_, err = rand.Read(key)
-		err = ioutil.WriteFile("mo2.secret", key, 0)
+		err = ioutil.WriteFile(path, key, 0)
 		return
 	}
 	key = bytes

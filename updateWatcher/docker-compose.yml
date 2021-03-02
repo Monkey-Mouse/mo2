@@ -19,10 +19,9 @@ services:
       - 5001:5001
     depends_on:
       - "mongodb"
+    volumes:
+      - "./secrets:/app/secrets"
   nginx:
     build: .
     ports:
       - 80:80
-
-volumes:
-  mongodata:

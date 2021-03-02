@@ -1,6 +1,12 @@
 package dto
 
-import "testing"
+import (
+	"mo2/server/model"
+	"reflect"
+	"testing"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 func TestContains(t *testing.T) {
 	type args struct {
@@ -19,6 +25,27 @@ func TestContains(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Contains(tt.args.slice, tt.args.item); got != tt.want {
 				t.Errorf("Contains() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMapAccount2InfoBrief(t *testing.T) {
+	type args struct {
+		a model.Account
+	}
+	id := primitive.NewObjectID()
+	tests := []struct {
+		name  string
+		args  args
+		wantB UserInfoBrief
+	}{
+		{name: "test parse", args: args{model.Account{ID: id, UserName: "user", Settings: map[string]string{"a": "b"}}}, wantB: UserInfoBrief{ID: id, Name: "user", Settings: map[string]string{"a": "b"}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotB := MapAccount2InfoBrief(tt.args.a); !reflect.DeepEqual(gotB, tt.wantB) {
+				t.Errorf("MapAccount2InfoBrief() = %v, want %v", gotB, tt.wantB)
 			}
 		})
 	}
