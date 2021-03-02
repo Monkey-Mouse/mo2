@@ -1,8 +1,9 @@
 package dto
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"mo2/server/model"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type QueryBlog struct {
