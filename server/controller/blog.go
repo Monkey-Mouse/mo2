@@ -346,7 +346,7 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 	}
 	var passAuth bool
 	if isDraft {
-		JudgeAuthorize(ctx, &model.Blog{AuthorID: id})
+		JudgeAuthorize(ctx, &blog)
 		if passAuthValue, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
 			passAuth, _ = passAuthValue.(bool)
 			if !passAuth {
