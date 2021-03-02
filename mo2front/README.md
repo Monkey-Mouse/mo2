@@ -1,4 +1,6 @@
-# mo2front
+# Mo2 front
+
+Mo2的前端项目
 
 ## Project setup
 ```
