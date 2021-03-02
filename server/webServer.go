@@ -52,18 +52,6 @@ func setupHandlers(c *controller.Controller) {
 			accounts.Get("detail/:id", c.ShowAccount)
 			accounts.Get("listBrief", c.ListAccountsInfo)
 		}
-		auth := api.Group("/auth")
-		{
-			auth.Get("home", func(ctx *gin.Context) {
-				//TODO change the info generate way
-				user, err := ctx.Cookie("jwtToken")
-				if err != nil {
-					ctx.JSON(http.StatusForbidden, "login first!")
-				} else {
-					ctx.JSON(http.StatusOK, gin.H{"home": user + " Welcome to your home"})
-				}
-			})
-		}
 	}
 }
 

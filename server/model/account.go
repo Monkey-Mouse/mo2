@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"os"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	//"fmt"
@@ -68,6 +69,18 @@ type LoginAccount struct {
 type VerifyEmail struct {
 	Email string `json:"Email" example:"email@mo2.com"`
 	Token string `json:"token" example:"p@ssword"`
+}
+
+// Validation example
+func (a AddAccountRole) Validation() error {
+	switch {
+	case os.Getenv("MO2_SUPER_KEY") != a.SuperKey:
+		return ErrPasswordInvalid
+	case a.ID.IsZero():
+		return ErrNameInvalid
+	default:
+		return nil
+	}
 }
 
 // AddRoles add roles to an account,
