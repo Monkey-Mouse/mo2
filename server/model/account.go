@@ -2,19 +2,22 @@ package model
 
 import (
 	"errors"
-	"os"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	//"fmt"
 )
 
+// Erole is mo2 role type
 type Erole = string
 
+// Roles
 const (
 	GeneralAdmin Erole = "GeneralAdmin"
 	OrdinaryUser Erole = "OrdinaryUser"
 	Anonymous    Erole = "Anonymous"
 )
+
+// User info consts
 const (
 	Token    = "token"
 	Avatar   = "avatar"
@@ -61,23 +64,14 @@ type LoginAccount struct {
 	Password        string `json:"password" example:"p@ssword"`
 }
 
-// VerifyEmail
+// VerifyEmail struct for email verify
 type VerifyEmail struct {
 	Email string `json:"Email" example:"email@mo2.com"`
 	Token string `json:"token" example:"p@ssword"`
 }
 
-// Validation example
-func (a AddAccountRole) Validation() error {
-	switch {
-	case os.Getenv("MO2_SUPER_KEY") != a.SuperKey:
-		return ErrPasswordInvalid
-	case a.ID.IsZero():
-		return ErrNameInvalid
-	default:
-		return nil
-	}
-}
+// AddRoles add roles to an account,
+// should never add dup role
 func AddRoles(a *Account, roles ...Erole) {
 	var new bool
 	for _, role := range roles {
@@ -94,6 +88,8 @@ func AddRoles(a *Account, roles ...Erole) {
 	}
 
 }
+
+// IsValid check if user is valid (by id)
 func (a Account) IsValid() (valid bool) {
 	valid = true
 	if a.ID.IsZero() {
@@ -117,8 +113,7 @@ func (a AddAccount) Validation() error {
 	}
 }
 
-//
-//LoginAccount Validation
+// Validation is for LoginAccount Validation
 func (a LoginAccount) Validation() error {
 	switch {
 	case len(a.UserNameOrEmail) == 0:

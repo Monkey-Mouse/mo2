@@ -67,6 +67,7 @@ func setupHandlers(c *controller.Controller) {
 	}
 }
 
+// RunServer start web server
 func RunServer() {
 
 	r := gin.Default()
@@ -87,9 +88,5 @@ func RunServer() {
 	r.NoRoute(func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "dist/index.html")
 	})
-	// r.GET("/", func(c *gin.Context) {
-	// 	http.ServeFile(c.Writer, c.Request, "dist/index.html")
-	// })
-	// r.Static("/static", "dist/static")
 	r.Run(":5001")
 }

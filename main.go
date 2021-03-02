@@ -23,20 +23,12 @@ import (
 // @BasePath /
 // @query.collection.format multi
 func main() {
-
-	//demo.SendEmail()
-	//demo.PrintPath()
 	server.RunServer()
-
-	//demo.GetClient()
-
-	//demo.Welcome()
-
 }
 
 func init() {
 	if mo2utils.IsEnvRelease() {
-		docs.SwaggerInfo.Host = "47.93.189.12:5001"
+		docs.SwaggerInfo.Host = "8.135.117.116"
 	}
 	mo2utils.UploadCDN()
 }
