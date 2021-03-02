@@ -31,8 +31,8 @@ func init() {
 	initKey()
 }
 func initKey() (err error) {
-	os.Mkdir("./secret", 0755)
-	path := path.Join("./secret", "mo2.secret")
+	os.Mkdir("./secrets", 0755)
+	path := path.Join("./secrets", "mo2.secret")
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 
