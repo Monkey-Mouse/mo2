@@ -113,6 +113,8 @@ func Test_handlerMap_Group(t *testing.T) {
 		want handlerMap
 	}{
 		{name: "test role policy and role", h: handlerMap{prefixPath: "/x", roles: [][]string{{"xx", "xxx"}}}, args: args{"xxx", []string{"xxxx"}}, want: handlerMap{prefixPath: "/x/xxx", roles: [][]string{{"xx", "xxx"}, {"xxxx"}}}},
+		{name: "test not append empty role", h: handlerMap{prefixPath: "/x", roles: [][]string{{"xx", "xxx"}}}, args: args{"xxx", []string{}}, want: handlerMap{prefixPath: "/x/xxx", roles: [][]string{{"xx", "xxx"}}}},
+		{name: "test not append nil role", h: handlerMap{prefixPath: "/x", roles: [][]string{{"xx", "xxx"}}}, args: args{"xxx", nil}, want: handlerMap{prefixPath: "/x/xxx", roles: [][]string{{"xx", "xxx"}}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -286,6 +288,33 @@ func Test_checkBlockAndRL(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := checkBlockAndRL(hm[handlerKey{"/xx", http.MethodGet}], tt.args.ip); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("checkBlockAndRL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_handlerMap_HandlerWithRL(t *testing.T) {
+	h := handlerMap{handlers, "", make([][]string, 0), -1}
+	type args struct {
+		method      string
+		relativPath string
+		handler     gin.HandlerFunc
+		ratelimit   int
+		roles       []string
+	}
+	tests := []struct {
+		name string
+		h    handlerMap
+		args args
+	}{
+		{"Test not append nil role", h, args{"a", "a", nil, -1, nil}},
+		{"Test not append empty role", h, args{"a", "a", nil, -1, []string{}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.h.HandlerWithRL(tt.args.method, tt.args.relativPath, tt.args.handler, tt.args.ratelimit, tt.args.roles...)
+			if len(h.innerMap[handlerKey{"a", "a"}].needRoles) > 0 {
+				t.Errorf("nil or empty role appended!")
 			}
 		})
 	}
