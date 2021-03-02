@@ -24,17 +24,25 @@ func setupHandlers(c *controller.Controller) {
 		api.Get("/img/:filename", c.GenUploadToken, model.OrdinaryUser)
 		blogs := api.Group("blogs")
 		{
-			blogs.Get("query", c.QueryBlogs)
-			blogs.Post("addCategory", c.UpsertCategory, model.OrdinaryUser)
-			blogs.Get("findAllCategories", c.FindAllCategories, model.OrdinaryUser)
-			blogs.Post("addBlogs2Categories", c.AddBlogs2Categories, model.OrdinaryUser)
-			blogs.Get("findCategoryByUserId", c.FindCategoryByUserId, model.OrdinaryUser)
-			blogs.Post("addCategory2User", c.AddCategory2User, model.OrdinaryUser)
-			blogs.Get("findCategoriesByUserId", c.FindCategoriesByUserId, model.OrdinaryUser)
-			blogs.Post("addCategory2Category", c.AddCategory2Category, model.OrdinaryUser)
-			blogs.Post("publish", c.UpsertBlog, model.OrdinaryUser)
-			blogs.Delete(":id", c.DeleteBlog, model.OrdinaryUser)
-			blogs.Put(":id", c.RestoreBlog, model.OrdinaryUser)
+			open := blogs.Group("", model.Anonymous, model.OrdinaryUser)
+			{
+				open.Get("query", c.QueryBlogs)
+
+			}
+			user := blogs.Group("", model.OrdinaryUser)
+			{
+				user.Post("addCategory", c.UpsertCategory)
+				user.Get("findAllCategories", c.FindAllCategories)
+				user.Post("addBlogs2Categories", c.AddBlogs2Categories)
+				user.Get("findCategoryByUserId", c.FindCategoryByUserId)
+				user.Post("addCategory2User", c.AddCategory2User)
+				user.Get("findCategoriesByUserId", c.FindCategoriesByUserId)
+				user.Post("addCategory2Category", c.AddCategory2Category)
+				user.Post("publish", c.UpsertBlog)
+				user.Delete(":id", c.DeleteBlog)
+				user.Put(":id", c.RestoreBlog)
+			}
+
 			find := blogs.Group("/find")
 			{
 				find.Get("own", c.FindBlogsByUser, model.OrdinaryUser)
@@ -45,10 +53,10 @@ func setupHandlers(c *controller.Controller) {
 		accounts := api.Group("/accounts")
 		{
 			accounts.Post("", c.AddAccount)
-			accounts.Delete("", c.DeleteAccount)
-			accounts.Put("", c.UpdateAccount)
-			accounts.Get("verify", c.VerifyEmail)
-			accounts.Post("role", c.AddAccountRole)
+			accounts.Delete("", c.DeleteAccount, model.OrdinaryUser)
+			accounts.Put("", c.UpdateAccount, model.OrdinaryUser)
+			accounts.Get("verify", c.VerifyEmail, model.Anonymous, model.OrdinaryUser)
+			accounts.Post("role", c.AddAccountRole, model.GeneralAdmin, model.OrdinaryUser)
 			accounts.Post("login", c.LoginAccount)
 			accounts.Post("logout", c.LogoutAccount)
 			accounts.Get("detail/:id", c.ShowAccount)

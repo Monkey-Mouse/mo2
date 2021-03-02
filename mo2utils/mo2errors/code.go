@@ -3,15 +3,18 @@ package mo2errors
 const (
 	Mo2NoError        = 200
 	Mo2NoExist        = 400
+	Mo2Unauthorized   = 401
 	Mo2NotFound       = 404
 	Mo2Conflict       = 409
 	Mo2LengthRequired = 411
 	Mo2Error          = 418
+	Mo2NoLogin        = 420
 )
 
 var codeText = map[int]string{
 	Mo2NoExist:        "object not exist",
 	Mo2NotFound:       "object not found",
+	Mo2Unauthorized:   "don't have authorize to visit",
 	Mo2Conflict:       "have conflict with exist object",
 	Mo2LengthRequired: "length not match required",
 	Mo2Error:          "some internal error",
