@@ -6,6 +6,7 @@ import (
 	emailservice "mo2/services/emailService"
 )
 
+// VerifyEmailMessage build email body for verify email
 func VerifyEmailMessage(url string, name string) []byte {
 
 	subject := "Subject: 确认Mo2邮箱!\n"
@@ -19,6 +20,8 @@ func VerifyEmailMessage(url string, name string) []byte {
 
 	return []byte(msg)
 }
+
+// SendEmail can send raw email to receivers
 func SendEmail(receiverEmails []string, message []byte, senderAddr string) (err *mo2errors.Mo2Errors) {
 
 	err = emailservice.QueueEmail(message, receiverEmails, senderAddr)

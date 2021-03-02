@@ -6,17 +6,18 @@ import (
 	"log"
 	"math/rand"
 	"mo2/dto"
-	"net/http"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 )
 
+// JwtLoginClaims mo2 jwt claims
 type JwtLoginClaims struct {
 	UserInfo dto.LoginUserInfo `json:"user_info"`
 	jwt.StandardClaims
 }
+
+// JwtInfoClaims claim with extra string info
 type JwtInfoClaims struct {
 	Info string `json:"info"`
 	jwt.StandardClaims
@@ -38,64 +39,6 @@ func initKey() (err error) {
 	}
 	key = bytes
 	return
-}
-
-func BasicAuth() gin.HandlerFunc {
-
-	//check the cookie
-	return func(c *gin.Context) {
-
-		jwtToken, err := c.Cookie("jwtToken")
-		if err != nil {
-			log.Println(err)
-			//c.JSON(http.StatusForbidden, gin.H{"info": "need to login first"})
-
-		}
-		userInfo, err := VerifyJwt(jwtToken)
-		c.Keys[""] = ""
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{"user": userInfo.Name})
-		} else {
-			log.Println(err)
-			//TODO redirect to login
-			//display login window to get post
-			c.JSON(http.StatusForbidden, gin.H{"info": "need to login first"})
-		}
-	}
-}
-
-//add jwt to generate token for user
-//if token is valid, return nil
-func VerifyJwt(tokenString string) (userInfo dto.LoginUserInfo, err error) {
-	token, err := jwt.ParseWithClaims(tokenString, &JwtLoginClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("mo2"), nil
-	})
-
-	if claims, ok := token.Claims.(*JwtLoginClaims); ok && token.Valid {
-		userInfo = claims.UserInfo
-		err = nil
-	} else {
-		log.Println("can not parse with JwtClaims")
-	}
-	return
-
-}
-
-// VerifyInfoJwt for JwtInfoClaims
-//if token is valid, return nil
-func VerifyInfoJwt(tokenString string) (info string, err error) {
-	token, err := jwt.ParseWithClaims(tokenString, &JwtInfoClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("mo2"), nil
-	})
-
-	if claims, ok := token.Claims.(*JwtInfoClaims); ok && token.Valid {
-		info = claims.Info
-		err = nil
-	} else {
-		err = errors.New("can not parse for jwtInfoClaims")
-	}
-	return
-
 }
 
 //ParseJwt for JwtLoginClaims
@@ -121,8 +64,6 @@ func ParseJwt(tokenString string) (userInfo dto.LoginUserInfo, err error) {
 // for info dto.LoginUserInfo
 // jwtToken string
 func GenerateJwtCode(info dto.LoginUserInfo) string {
-	//TODO change the key
-	hmacSampleSecret := []byte("mo2")
 
 	claims := JwtLoginClaims{
 		UserInfo: info,
@@ -133,7 +74,7 @@ func GenerateJwtCode(info dto.LoginUserInfo) string {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString(hmacSampleSecret)
+	tokenString, err := token.SignedString(key)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -144,7 +85,6 @@ func GenerateJwtCode(info dto.LoginUserInfo) string {
 // for info string
 // jwtToken string
 func GenerateJwtToken(info string) string {
-	//TODO change the key
 
 	claims := JwtInfoClaims{
 		Info: info,
