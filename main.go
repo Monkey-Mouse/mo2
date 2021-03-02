@@ -1,7 +1,8 @@
 package main
 
 import (
-	_ "mo2/docs"
+	"mo2/docs"
+	"mo2/mo2utils"
 	"mo2/server"
 	//"time"
 )
@@ -18,16 +19,16 @@ import (
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:5000
+// @host localhost:5001
 // @BasePath /
 // @query.collection.format multi
 func main() {
-
-	//demo.SendEmail()
 	server.RunServer()
+}
 
-	//demo.GetClient()
-
-	//demo.Welcome()
-
+func init() {
+	if mo2utils.IsEnvRelease() {
+		docs.SwaggerInfo.Host = "8.135.117.116"
+	}
+	mo2utils.UploadCDN()
 }

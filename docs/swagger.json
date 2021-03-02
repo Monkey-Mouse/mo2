@@ -1,0 +1,1508 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a Mo2 server.",
+        "title": "Mo2",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:5001",
+    "basePath": "/",
+    "paths": {
+        "/api/accounts": {
+            "put": {
+                "description": "通过id获取已有用户，验证身份。并将name的修改与setting的修改应用",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "修改名称（唯一用于登录）/偏好设置",
+                "parameters": [
+                    {
+                        "description": "id必须，可修改name/settings",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserInfoBrief"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "add by json account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Add an account",
+                "parameters": [
+                    {
+                        "description": "add new account info",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.AddAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete by path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "delete Blog",
+                "parameters": [
+                    {
+                        "description": "delete account info",
+                        "name": "info",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.DeleteAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": ""
+                    },
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/detail/{id}": {
+            "get": {
+                "description": "get string by ID；若id为空，返回所有用户信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Show account's info",
+                "operationId": "get-string-by-int",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/listBrief": {
+            "get": {
+                "description": "from a list of user ids [usage]:/api/accounts/listBrief?id=60223d4042d6febff9f276f0\u0026id=60236866d2a68483adaccc38",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "List accounts brief info",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "description": "user IDs list",
+                        "name": "userIDs",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserInfoBrief"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/login": {
+            "post": {
+                "description": "login by json model.LoginAccount and set cookies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "login an account",
+                "parameters": [
+                    {
+                        "description": "login account",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.LoginAccount"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginUserInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/logout": {
+            "post": {
+                "description": "logout and delete cookies",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "logout",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/accounts/role": {
+            "post": {
+                "description": "add by json account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Add role for an account",
+                "parameters": [
+                    {
+                        "description": "add new account info",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.AddAccountRole"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/accounts/verify": {
+            "get": {
+                "description": "add by json account",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "verify an account's email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "email@mo2.com",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "xxxx==sf",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "308": {
+                        "description": ""
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/addBlogs2Categories": {
+            "post": {
+                "description": "blogs 与 categories皆为id列表，方便批量操作",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "add blogs to chosen categories",
+                "parameters": [
+                    {
+                        "description": "dto.AddBlogs2Categories",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddBlogs2Categories"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlog"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/addCategory": {
+            "post": {
+                "description": "add by json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "upsert category",
+                "parameters": [
+                    {
+                        "description": "Add category",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Category"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Category"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/addCategory2Category": {
+            "post": {
+                "description": "category为model.Category(若id存在，直接存放；否则新建) parent category 为id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "add category to parent category",
+                "parameters": [
+                    {
+                        "description": "category info and parent id",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddCategory2Category"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Category"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/addCategory2User": {
+            "post": {
+                "description": "user 与 category 皆为id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "add category to user",
+                "parameters": [
+                    {
+                        "description": "category id and user id",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddCategory2User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddCategory2User"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/find/id": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "find Blog by id",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool true",
+                        "name": "draft",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "string xxxxxxxx",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/find/own": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "find Blog",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool true",
+                        "name": "draft",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "bool default false",
+                        "name": "deleted",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 0",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 5",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlogs"
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlogs"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/find/userId": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "find Blog by userid",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool true",
+                        "name": "draft",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "bool default false",
+                        "name": "deleted",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "string xxxxxxxx",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 0",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 5",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlogs"
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlogs"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/findAllCategories": {
+            "get": {
+                "description": "若id为空，返回所有categories；若id不为空，返回该id的category",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "find categories",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "string ObjectID",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Category"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/findCategoriesByUserId": {
+            "get": {
+                "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "find categories by user id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "string ObjectID",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/model.Category"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/findCategoryByUserId": {
+            "get": {
+                "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "find category by user id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "string ObjectID",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Category"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/publish": {
+            "post": {
+                "description": "add by json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "Publish Blog",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool true",
+                        "name": "draft",
+                        "in": "query"
+                    },
+                    {
+                        "description": "Add blog",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/query": {
+            "get": {
+                "description": "find",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "find all Blogs",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool default false",
+                        "name": "draft",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "bool default false",
+                        "name": "deleted",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 0",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 5",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlog"
+                            }
+                        }
+                    },
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.QueryBlog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/{id}": {
+            "put": {
+                "description": "restore by path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "restore Blog",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool true",
+                        "name": "draft",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "string xxxxxxxx",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete by path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "delete Blog",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool true",
+                        "name": "draft",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "string xxxxxxxx",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": ""
+                    },
+                    "204": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/img/{filename}": {
+            "get": {
+                "description": "add by json",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "img"
+                ],
+                "summary": "Gen img token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "file name",
+                        "name": "filename",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ImgUploadToken"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logs": {
+            "get": {
+                "description": "get by check cookies",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "logs"
+                ],
+                "summary": "get user info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginUserInfo"
+                        }
+                    }
+                }
+            }
+        },
+        "/sayHello": {
+            "get": {
+                "description": "say something",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "simple test",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controller.ResponseError": {
+            "type": "object",
+            "properties": {
+                "reason": {
+                    "type": "string"
+                },
+                "time": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AddBlogs2Categories": {
+            "type": "object",
+            "properties": {
+                "blog_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "category_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.AddCategory2Category": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "$ref": "#/definitions/model.Category"
+                },
+                "parent_id": {
+                    "type": "string",
+                    "example": "xxxxxxx"
+                }
+            }
+        },
+        "dto.AddCategory2User": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "string",
+                    "example": "xxxxxxx"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ImgUploadToken": {
+            "type": "object",
+            "properties": {
+                "file_key": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.LoginUserInfo": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "email@qq.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "name": {
+                    "type": "string",
+                    "example": "account name"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "ordinaryUser"
+                    ]
+                }
+            }
+        },
+        "dto.QueryBlog": {
+            "type": "object",
+            "properties": {
+                "authorId": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "cover": {
+                    "type": "string",
+                    "example": "https://xxx/xxx"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "mouse ❤ monkey"
+                },
+                "entityInfo": {
+                    "$ref": "#/definitions/model.Entity"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "keyWords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "xxx",
+                        "xxx"
+                    ]
+                },
+                "title": {
+                    "type": "string",
+                    "example": "mouse ❤ monkey"
+                }
+            }
+        },
+        "dto.QueryBlogs": {
+            "type": "object"
+        },
+        "dto.UserInfo": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "email@qq.com"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "name": {
+                    "type": "string",
+                    "example": "account name"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "ordinaryUser"
+                    ]
+                },
+                "settings": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "'avatar'": " 'www.avatar.com/account_name'",
+                        "'site'": "'www.limfx.com'(public data)"
+                    }
+                }
+            }
+        },
+        "dto.UserInfoBrief": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "name": {
+                    "type": "string",
+                    "example": "account name"
+                },
+                "settings": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "'avatar'": " 'www.avatar.com/account_name'",
+                        "'site'": "'www.limfx.com'(public data)"
+                    }
+                }
+            }
+        },
+        "model.AddAccount": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "email@mo2.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "p@ssword"
+                },
+                "userName": {
+                    "type": "string",
+                    "example": "account name"
+                }
+            }
+        },
+        "model.AddAccountRole": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "super_key": {
+                    "type": "string",
+                    "example": "special"
+                }
+            }
+        },
+        "model.Blog": {
+            "type": "object",
+            "properties": {
+                "authorId": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "content": {
+                    "type": "string",
+                    "example": "xxxx\nxxxx"
+                },
+                "cover": {
+                    "type": "string",
+                    "example": "https://xxx/xxx"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "mouse ❤ monkey"
+                },
+                "entityInfo": {
+                    "$ref": "#/definitions/model.Entity"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx=="
+                },
+                "keyWords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "xxx",
+                        "xxx"
+                    ]
+                },
+                "title": {
+                    "type": "string",
+                    "example": "mouse ❤ monkey"
+                }
+            }
+        },
+        "model.Category": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxxx=="
+                },
+                "name": {
+                    "type": "string",
+                    "example": "records"
+                },
+                "parent_id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxxx=="
+                }
+            }
+        },
+        "model.DeleteAccount": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "email@mo2.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "p@ssword"
+                }
+            }
+        },
+        "model.Entity": {
+            "type": "object",
+            "properties": {
+                "createTime": {
+                    "type": "string",
+                    "example": "2020-10-1"
+                },
+                "is_deleted": {
+                    "type": "boolean"
+                },
+                "updateTime": {
+                    "type": "string",
+                    "example": "2020-10-1"
+                }
+            }
+        },
+        "model.LoginAccount": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "p@ssword"
+                },
+                "userNameOrEmail": {
+                    "type": "string",
+                    "example": "account name/email@mo2.com"
+                }
+            }
+        }
+    }
+}

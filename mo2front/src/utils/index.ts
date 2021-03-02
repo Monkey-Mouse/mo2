@@ -1,4 +1,4 @@
-import { User, ApiError, ImgToken } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 
@@ -16,7 +16,12 @@ export function Copy<T>(mainObject: T) {
     return objectCopy as T;
 }
 export async function GetUserData(uid: string): Promise<User> {
-    throw new Error("Not implement yet");
+    let re = await axios.get<User>('/api/accounts/detail/' + uid);
+    return re.data[0]
+}
+export async function GetUserDatas(uids: string[]): Promise<UserListData[]> {
+    let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.join('&id='));
+    return re.data
 }
 
 export function GetInitials(name: string) {
@@ -61,7 +66,7 @@ export const UploadImgToQiniu = async (
                 ob.subscribe(null, (err) => {
                     reject(err)
                 }, res => {
-                    callback({ src: '//qotwmtnjo.hn-bkt.clouddn.com/' + res.key })
+                    callback({ src: '//cdn.mo2.leezeeyee.com/' + res.key })
                     resolve();
                 })
             })
@@ -71,3 +76,82 @@ export const UploadImgToQiniu = async (
     await Promise.all(promises)
 
 }
+export var globaldic: any = {};
+export function ParseQuery(query: { [key: string]: any }) {
+    let queryStr = '?';
+    const queryList: string[] = [];
+    for (const key in query) {
+        const element = query[key];
+        queryList.push(`${key}=${element}`)
+    }
+    queryStr = queryStr + queryList.join('&');
+    return queryStr
+}
+export const GetArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
+    return (await axios.get<BlogBrief[]>('/api/blogs/query' + ParseQuery(query))).data
+}
+export async function UpsertBlog(query: { draft: boolean }, blog: BlogUpsert) {
+    return (await axios.post<Blog>('/api/blogs/publish' + ParseQuery(query), blog)).data
+}
+export function UpSertBlogSync(query: { draft: boolean }, blog: BlogUpsert) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/blogs/publish" + ParseQuery(query), false);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify(blog));
+}
+export async function GetArticle(query: { id: string, draft: boolean }) {
+    return (await axios.get<Blog>('/api/blogs/find/id' + ParseQuery(query))).data
+}
+export const GetOwnArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
+    return (await axios.get<BlogBrief[]>('/api/blogs/find/own' + ParseQuery(query))).data
+}
+
+export const GetUserArticles = async (query: { page: number, pageSize: number, draft: boolean, id: string }) => {
+    return (await axios.get<BlogBrief[]>('/api/blogs/find/userId' + ParseQuery(query))).data
+}
+export function ReachedBottom(): boolean {
+    return (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight;
+}
+export interface BlogAutoLoader {
+    blogs: BlogBrief[],
+    loading: boolean,
+    firstloading: boolean;
+    page: number,
+    pagesize: number,
+    nomore: boolean,
+    ReachedButtom: () => void,
+}
+export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { page: number, pageSize: number }) => Promise<BlogBrief[]>) {
+    if (elm.loading === false && !elm.nomore) {
+        elm.loading = true;
+        getArticles({
+            page: elm.page++,
+            pageSize: elm.pagesize,
+        }).then((val) => {
+            try {
+                AddMore(elm, val);
+            } catch (error) {
+                elm.loading = false;
+            }
+        });
+    }
+}
+export function AddMore(elm: BlogAutoLoader, val: BlogBrief[]) {
+    if (!val || val.length < elm.pagesize) {
+        elm.nomore = true;
+    }
+    for (let index = 0; index < val.length; index++) {
+        const element = val[index];
+        elm.blogs.push(element);
+    }
+    elm.loading = false;
+}
+export async function DeleteArticle(id: string, query: { draft: boolean }) {
+    (await axios.delete('/api/blogs/' + id + ParseQuery(query)))
+}
+export async function Logout() {
+    (await axios.post('/api/accounts/logout'));
+}
+export const AdminRole = "GeneralAdmin"
+export const UserRole = "OrdinaryUser"
+export const AnonymousRole = "Anonymous"

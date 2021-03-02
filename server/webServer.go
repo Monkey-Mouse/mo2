@@ -5,6 +5,7 @@ import (
 	"mo2/mo2utils"
 	"mo2/server/controller"
 	"mo2/server/middleware"
+	"mo2/server/model"
 
 	"net/http"
 
@@ -14,63 +15,66 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+func setupHandlers(c *controller.Controller) {
+	api := middleware.H.Group("/api")
+	{
+		api.Get("/logs", c.Log)
+		api.Get("/img/:filename", c.GenUploadToken, model.OrdinaryUser)
+		blogs := api.Group("blogs")
+		{
+			blogs.Get("query", c.QueryBlogs)
+			blogs.Post("addCategory", c.UpsertCategory, model.OrdinaryUser)
+			blogs.Get("findAllCategories", c.FindAllCategories, model.OrdinaryUser)
+			blogs.Post("addBlogs2Categories", c.AddBlogs2Categories, model.OrdinaryUser)
+			blogs.Get("findCategoryByUserId", c.FindCategoryByUserId, model.OrdinaryUser)
+			blogs.Post("addCategory2User", c.AddCategory2User, model.OrdinaryUser)
+			blogs.Get("findCategoriesByUserId", c.FindCategoriesByUserId, model.OrdinaryUser)
+			blogs.Post("addCategory2Category", c.AddCategory2Category, model.OrdinaryUser)
+			blogs.Post("publish", c.UpsertBlog, model.OrdinaryUser)
+			blogs.Delete(":id", c.DeleteBlog, model.OrdinaryUser)
+			blogs.Put(":id", c.RestoreBlog, model.OrdinaryUser)
+			find := blogs.Group("/find")
+			{
+				find.Get("own", c.FindBlogsByUser, model.OrdinaryUser)
+				find.Get("userId", c.FindBlogsByUserId)
+				find.Get("id", c.FindBlogById)
+			}
+		}
+		accounts := api.Group("/accounts")
+		{
+			accounts.Post("", c.AddAccount)
+			accounts.Delete("", c.DeleteAccount)
+			accounts.Put("", c.UpdateAccount)
+			accounts.Get("verify", c.VerifyEmail)
+			accounts.Post("role", c.AddAccountRole)
+			accounts.Post("login", c.LoginAccount)
+			accounts.Post("logout", c.LogoutAccount)
+			accounts.Get("detail/:id", c.ShowAccount)
+			accounts.Get("listBrief", c.ListAccountsInfo)
+		}
+	}
+}
+
+// RunServer start web server
 func RunServer() {
 
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
-
-	r.Use(middleware.AuthMiddlware)
 	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
-	v1 := r.Group("/api")
-	{
-		v1.GET("/img/:filename", c.GenUploadToken)
-		logs := v1.Group("/logs")
-		{
-			logs.GET("", c.Log)
+	setupHandlers(c)
+	middleware.H.RegisterMapedHandlers(r, func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {
+		str, err := ctx.Cookie("jwtToken")
+		if err != nil {
+			return
 		}
-		accounts := v1.Group("/accounts")
-		{
-			//accounts.GET(":id", c.ShowAccount)
-			//accounts.POST("addUser",c.AddMo2User)
-			accounts.POST("", c.AddAccount)
-			accounts.POST("login", c.LoginAccount)
-			accounts.GET("logout", c.LogoutAccount)
-
-			/*accounts.GET("", c.ListAccounts)
-			accounts.POST("", c.AddAccount)
-			accounts.DELETE(":id", c.DeleteAccount)
-			accounts.PATCH(":id", c.UpdateAccount)
-			accounts.POST(":id/images", c.UploadAccountImage)*/
-		}
-		blogs := v1.Group("/blogs")
-		{
-			blogs.POST("", c.PublishBlog)
-		}
-
-	}
-	auth := r.Group("/auth", mo2utils.BasicAuth())
-	{
-		auth.GET("home", func(ctx *gin.Context) {
-
-			//TODO change the info generate way
-			user, err := ctx.Cookie("jwtToken")
-			if err != nil {
-				ctx.JSON(http.StatusForbidden, "login first!")
-			} else {
-				ctx.JSON(http.StatusOK, gin.H{"home": user + " Welcome to your home"})
-
-			}
-		})
-	}
+		userInfo, err = mo2utils.ParseJwt(str)
+		return
+	}, mo2utils.UserInfoKey)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.NoRoute(func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "dist/index.html")
 	})
-	// r.GET("/", func(c *gin.Context) {
-	// 	http.ServeFile(c.Writer, c.Request, "dist/index.html")
-	// })
-	// r.Static("/static", "dist/static")
-	r.Run(":5000")
+	r.Run(":5001")
 }

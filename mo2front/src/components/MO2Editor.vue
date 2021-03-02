@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row justify="center">
-      <v-col cols="12" lg="8" class="mo2editor">
+      <v-col cols="12" lg="7" class="mo2editor">
         <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
           <div class="menubar">
             <div class="toolbar row">
@@ -266,7 +266,7 @@ import {
 } from "tiptap-extensions";
 import Title from "./title";
 import DOC from "./doc";
-let that: any = {};
+let that: MO2Editor | any = {};
 //#region hljs
 import onec from "highlight.js/lib/languages/1c";
 import abnf from "highlight.js/lib/languages/abnf";
@@ -459,7 +459,7 @@ import xml from "highlight.js/lib/languages/xml";
 import xquery from "highlight.js/lib/languages/xquery";
 import yaml from "highlight.js/lib/languages/yaml";
 import zephir from "highlight.js/lib/languages/zephir";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 //#endregion
 @Component({
   components: {
@@ -471,12 +471,16 @@ import { Prop } from "vue-property-decorator";
 })
 export default class MO2Editor extends Vue {
   @Prop()
+  content?: string;
+  @Prop()
   uploadImgs: (
     blobs: File[],
     callback: (imgprop: { src: string }) => void
   ) => Promise<void>;
   isuploading = false;
   linkMenuIsActive = false;
+  update = false;
+  editable = true;
   load = false;
   editor: Editor = new Editor({
     extensions: [
@@ -722,14 +726,23 @@ export default class MO2Editor extends Vue {
     ],
     content: `
     `,
-    onUpdate() {},
+    onUpdate() {
+      (that as MO2Editor).update = true;
+    },
     onPaste(editorview, event, slice) {
       var items = (event.clipboardData || event.originalEvent.clipboardData)
         .items;
-      console.log({ items }); // will give you the mime types
       var files = [];
       for (let index = 0; index < items.length; index++) {
-        var item = items[index];
+        var item = items[index] as DataTransferItem;
+        if (
+          item.type === "text/html" &&
+          items.length >= index + 1 &&
+          items[index + 1].kind === "file"
+        ) {
+          index++;
+          continue;
+        }
         if (item.kind === "file") {
           var blob = item.getAsFile();
           files = files.concat(blob);
@@ -739,12 +752,13 @@ export default class MO2Editor extends Vue {
           // reader.readAsDataURL(blob);
         }
       }
-      console.log({ files });
       if (files.length === 0) {
         return;
       }
+      console.log(files, event);
+      (event as Event).stopImmediatePropagation();
+      (event as Event).stopPropagation();
       (event as Event).preventDefault();
-      console.log(that.isuploading);
       that.isuploading = true;
       that
         .uploadImgs(files, this.commands.image)
@@ -756,7 +770,29 @@ export default class MO2Editor extends Vue {
   });
   mounted() {
     that = this;
+    if (this.content) {
+      this.editor.setContent(this.content);
+    }
+    this.$emit("loaded", this);
+    this.startAutoSave();
   }
+  startAutoSave() {
+    setTimeout(() => {
+      if ((that as MO2Editor).update) {
+        (that as MO2Editor).update = false;
+        (that as MO2Editor).$emit("autosave");
+      }
+      this.startAutoSave();
+    }, 5000);
+  }
+
+  @Watch("content")
+  contentSet() {
+    if (this.content) {
+      this.editor.setContent(this.content);
+    }
+  }
+
   beforeDestroy() {
     this.editor.destroy();
   }
@@ -776,82 +812,14 @@ export default class MO2Editor extends Vue {
     command({ href: url });
     this.hideLinkMenu();
   }
+  @Watch("editable")
+  changeEditable() {
+    this.editor.setOptions({
+      editable: this.editable,
+    });
+  }
+  public GetHTML() {
+    return this.editor.getHTML() as string;
+  }
 }
 </script>
-<style>
-.menubar {
-  position: fixed;
-}
-</style>
-<style lang="scss">
-pre {
-  &::before {
-    content: attr(data-language);
-    text-transform: uppercase;
-    display: block;
-    text-align: right;
-    font-weight: bold;
-    font-size: 0.6rem;
-  }
-  code {
-    .hljs-comment,
-    .hljs-quote {
-      color: #999999;
-    }
-    .hljs-variable,
-    .hljs-template-variable,
-    .hljs-attribute,
-    .hljs-tag,
-    .hljs-name,
-    .hljs-regexp,
-    .hljs-link,
-    .hljs-name,
-    .hljs-selector-id,
-    .hljs-selector-class {
-      color: #f2777a;
-    }
-    .hljs-number,
-    .hljs-meta,
-    .hljs-built_in,
-    .hljs-builtin-name,
-    .hljs-literal,
-    .hljs-type,
-    .hljs-params {
-      color: #f99157;
-    }
-    .hljs-string,
-    .hljs-symbol,
-    .hljs-bullet {
-      color: #99cc99;
-    }
-    .hljs-title,
-    .hljs-section {
-      color: #ffcc66;
-    }
-    .hljs-keyword,
-    .hljs-selector-tag {
-      color: #6699cc;
-    }
-    .hljs-emphasis {
-      font-style: italic;
-    }
-    .hljs-strong {
-      font-weight: 700;
-    }
-  }
-}
-</style>
-<style>
-.mo2editor img {
-  width: 100%;
-}
-*.is-empty:nth-child(1)::before,
-*.is-empty:nth-child(2)::before {
-  content: attr(data-empty-text);
-  float: left;
-  color: #aaa;
-  pointer-events: none;
-  height: 0;
-  font-style: italic;
-}
-</style>

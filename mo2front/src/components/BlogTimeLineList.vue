@@ -14,7 +14,11 @@
         min-height="200"
         transition="fade-transition"
       >
-        <v-card class="mx-auto elevation-20" style="max-width: 400px">
+        <v-card
+          @click="gotoArticle(blog.id)"
+          class="clickable mx-auto elevation-20"
+          style="max-width: 400px"
+        >
           <v-row justify="space-between">
             <v-col sm="6" cols="12">
               <v-card-title>
@@ -25,8 +29,19 @@
                   >
                     {{ blog.title }}
                   </div>
-                  <div class="subtitle-1">{{ blog.author }}</div>
-                  <div class="subtitle-2">{{ blog.createTime }}</div>
+                  <a
+                    v-on:click.prevent
+                    v-on:click.stop
+                    v-if="blog.userLoad"
+                    @click="$router.push('/account/' + blog.authorId)"
+                    class="subtitle-1"
+                  >
+                    {{ blog.userName }}
+                  </a>
+                  <v-skeleton-loader v-else type="card-heading" />
+                  <div class="subtitle-2">
+                    {{ blog.entityInfo.createTime.substr(0, 10) }}
+                  </div>
                 </div>
               </v-card-title>
             </v-col>
@@ -35,13 +50,36 @@
                 class="shrink ma-3"
                 contain
                 height="125px"
-                :src="blog.cover"
+                :src="
+                  blog.cover ? blog.cover : '//cdn.mo2.leezeeyee.com/404.jpg'
+                "
+                :lazy-src="
+                  blog.cover
+                    ? blog.cover
+                    : '//cdn.mo2.leezeeyee.com/404.jpg' + '~thumb'
+                "
                 style="flex-basis: 125px"
+              >
+                <template v-slot:placeholder>
+                  <v-row
+                    class="fill-height ma-0"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-progress-circular
+                      indeterminate
+                      color="grey lighten-5"
+                    ></v-progress-circular>
+                  </v-row> </template
               ></v-img>
             </v-col>
           </v-row>
           <v-divider dark></v-divider>
-          <v-card-actions class="pa-4">
+          <v-card-actions
+            v-on:click.prevent
+            v-on:click.stop
+            class="pa-4 unclickable"
+          >
             Rate this
             <v-spacer></v-spacer>
             <span class="text--lighten-2 caption mr-2">
@@ -69,7 +107,7 @@
           min-height="200"
           transition="fade-transition"
         >
-          <div class="py-4">
+          <div class="py-4 text-break">
             <div>
               {{ blog.description }}
             </div>
@@ -83,15 +121,18 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 import { Colors } from "vuetify/es5/util/colors";
 import { colors } from "vuetify/lib";
-import { BlogBrief } from "../models/index";
-import { randomProperty, Copy } from "../utils/index";
+import { BlogBrief, DisplayBlogBrief } from "../models/index";
+import { randomProperty, Copy, GetUserDatas } from "../utils/index";
 @Component
 export default class BlogTimeLineList extends Vue {
   @Prop()
-  blogs!: BlogBrief[];
+  blogs!: DisplayBlogBrief[];
+  @Prop({ default: false })
+  draft: boolean;
+  prevlen = -1;
   displayColors: string[] = [];
   created() {
     this.displayColors = Object.getOwnPropertyNames(colors);
@@ -103,8 +144,59 @@ export default class BlogTimeLineList extends Vue {
     //   this.displayColors.push(displayColor);
     // }
   }
+  mounted() {
+    this.prevlen = this.blogs.length;
+    const ids = this.blogs.map((v, i, a) => v.authorId);
+    if (ids.length !== 0) {
+      GetUserDatas(ids).then((data) => {
+        const dic: any = {};
+        for (let index = 0; index < data.length; index++) {
+          const element = data[index];
+          dic[element.id] = element.name;
+        }
+        for (let index = 0; index < this.blogs.length; index++) {
+          this.blogs[index].userName = dic[this.blogs[index].authorId];
+          this.blogs[index].userLoad = true;
+          this.blogs[index].rate = 5;
+        }
+        this.$forceUpdate();
+      });
+    }
+  }
+  @Watch("blogs")
+  changeBlogs() {
+    if (this.blogs.length === this.prevlen) {
+      // didn't add new blog, return
+      return;
+    }
+
+    const ids = this.blogs.slice(this.prevlen).map((v, i, a) => v.authorId);
+    GetUserDatas(ids).then((data) => {
+      const dic: any = {};
+      for (let index = 0; index < data.length; index++) {
+        const element = data[index];
+        dic[element.id] = element.name;
+      }
+      for (let index = this.prevlen; index < this.blogs.length; index++) {
+        this.blogs[index].userName = dic[this.blogs[index].authorId];
+        this.blogs[index].userLoad = true;
+        this.blogs[index].rate = 5;
+      }
+      this.$forceUpdate();
+    });
+  }
   rateChange(blog: BlogBrief) {
     // to be implemented
   }
+  gotoArticle(id: string) {
+    this.$router.push(
+      "/article/" + id + (this.draft ? `?draft=${this.draft}` : "")
+    );
+  }
 }
 </script>
+<style>
+.unclickable {
+  cursor: default;
+}
+</style>

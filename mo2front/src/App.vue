@@ -12,11 +12,11 @@
           alt="Vuetify Logo"
           class="shrink mr-2"
           contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
+          src="./assets/logo.png"
           transition="scale-transition"
-          width="40"
+          width="100"
         />
-        <div class="text-h4">MO2</div>
+        <!-- <div class="text-h4">MO2</div> -->
         <!-- <v-img
           alt="Vuetify Name"
           class="shrink mt-1 hidden-sm-and-down"
@@ -26,8 +26,19 @@
           width="100"
         /> -->
       </div>
-
-      <v-spacer></v-spacer>
+      <v-spacer />
+      <div v-if="$route.path.indexOf('/edit') === 0">
+        <v-row>
+          <div v-if="autoSaving" class="grey--text ma-2">Saving...</div>
+          <div v-else-if="autoSaving === null" class="red--text ma-2">
+            Auto Save Failed!
+          </div>
+          <div v-else class="green--text ma-2">Saved!</div>
+          <v-btn class="ml-10" outlined color="green" @click="publishClick"
+            >publish</v-btn
+          >
+        </v-row>
+      </div>
       <v-app-bar-nav-icon
         v-if="!this.$vuetify.breakpoint.mdAndUp"
         @click.stop="
@@ -38,7 +49,6 @@
       ></v-app-bar-nav-icon>
     </v-app-bar>
     <v-navigation-drawer
-      style="z-index: 99999"
       right
       fixed
       :permanent="this.$vuetify.breakpoint.mdAndUp"
@@ -55,16 +65,18 @@
         }}</v-list-item-title>
 
         <v-btn icon v-if="!isUser" @click="showLogin()"> 登录 </v-btn>
+        <v-btn icon v-else color="red" @click="logOut"> 登出 </v-btn>
       </v-list-item>
 
       <v-divider></v-divider>
 
       <v-list dense>
         <v-list-item
-          v-for="item in items"
-          :key="item.title"
+          v-for="(item, n) in items"
+          :key="n"
           :to="item.href"
           v-show="item.show"
+          :exact="true"
         >
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
@@ -106,8 +118,17 @@
       </template>
     </v-navigation-drawer>
     <v-main>
-      <router-view :user="user" />
+      <router-view ref="view" :autoSaving.sync="autoSaving" :user="user" />
       <account-modal :enable.sync="enable" :user.sync="userdata" />
+      <v-snackbar v-model="snackbar" :timeout="5000">
+        {{ "登出成功！" }}
+
+        <template v-slot:action="{ attrs }">
+          <v-btn color="blue" text v-bind="attrs" @click="snackbar = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
       <!-- <v-btn @click="showLogin()">Login</v-btn>
       <account-modal :enable.sync="enable" />
       <v-btn @click="$vuetify.theme.dark = !$vuetify.theme.dark"
@@ -115,6 +136,15 @@
       >
       <v-btn @click="sideNavVisible = !sideNavVisible">show side bar</v-btn> -->
     </v-main>
+    <v-footer padless>
+      <v-card flat tile class="indigo lighten-1 white--text text-center">
+        <v-divider></v-divider>
+
+        <v-card-text class="white--text">
+          {{ new Date().getFullYear() }} — <strong>MO2</strong>
+        </v-card-text>
+      </v-card>
+    </v-footer>
   </v-app>
 </template>
 
@@ -123,9 +153,16 @@ import Vue from "vue";
 import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
-import { User } from "./models";
-import { GetInitials, GetUserInfoAsync } from "./utils";
+import { BlankUser, User } from "./models";
+import {
+  GetInitials,
+  GetUserInfoAsync,
+  Logout,
+  ReachedBottom,
+  UserRole,
+} from "./utils";
 import Avatar from "./components/UserAvatar.vue";
+import { Watch } from "vue-property-decorator";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 
@@ -137,17 +174,9 @@ Vue.use(Vuelidate);
 })
 export default class App extends Vue {
   drawer = false;
-  user: User = {
-    name: "leezeeyee",
-    email: "easilylazy@mo2.com",
-    description: "all work no play made me a dull girl",
-    site: "www.mo2.pro",
-    createTime: "2020-1-1",
-    id: "xxxxxxxxxxxxxxx",
-    avatar: "",
-    roles: [],
-  };
-
+  user: User = BlankUser;
+  autoSaving = false;
+  snackbar = false;
   get userdata() {
     return this.user;
   }
@@ -166,19 +195,43 @@ export default class App extends Vue {
       href: "/account",
       show: this.isUser,
     },
+    {
+      title: "New Article",
+      icon: "mdi-file-document-edit",
+      href: "/edit",
+      show: this.isUser,
+    },
     { title: "About", icon: "mdi-alpha-a-circle", href: "/about", show: true },
   ];
   get isUser() {
-    return this.user.roles && this.user.roles.length > 0;
+    return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
+  }
+  @Watch("user")
+  userCHange() {
+    this.items[2].show = this.isUser;
+    this.items[1].show = this.isUser;
   }
   get initials(): string {
     return GetInitials(this.user.name);
   }
-
+  logOut() {
+    Logout().then(() => {
+      GetUserInfoAsync().then((u) => {
+        this.user = u;
+        this.items[1].show = this.isUser;
+        this.items[2].show = this.isUser;
+        this.snackbar = true;
+      });
+    });
+  }
+  publishClick() {
+    (this.$refs["view"] as any).publish();
+  }
   created() {
     GetUserInfoAsync().then((u) => {
       this.user = u;
       this.items[1].show = this.isUser;
+      this.items[2].show = this.isUser;
     });
     try {
       this.$vuetify.theme.dark = JSON.parse(
@@ -190,6 +243,13 @@ export default class App extends Vue {
       // setTimeout(() => {
       //   this.onResize();
       // }, 500);
+    });
+    window.addEventListener("scroll", () => {
+      if (ReachedBottom()) {
+        try {
+          (this.$refs["view"] as any).ReachedButtom();
+        } catch (error) {}
+      }
     });
   }
 

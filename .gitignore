@@ -13,9 +13,9 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-docs/*
 limfx*.json
 .idea
 dist/*
 dist
-docs
+*.env
+*.secret

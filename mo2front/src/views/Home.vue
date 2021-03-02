@@ -12,31 +12,59 @@
       </v-row>
     </v-parallax>
     <v-container>
-      <blog-time-line-list :blogs="blogs" />
+      <blog-time-line-list v-if="!firstloading" :blogs="blogs" />
+      <blog-skeleton v-if="loading" :num="pagesize" />
     </v-container>
   </div>
 </template>
 
 <script lang="ts">
 import { BlogBrief } from "@/models";
+import {
+  GetArticles,
+  BlogAutoLoader,
+  AddMore,
+  ElmReachedButtom,
+} from "@/utils";
+import axios from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
+import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 @Component({
   components: {
     BlogTimeLineList,
+    BlogSkeleton,
   },
 })
-export default class Home extends Vue {
-  blogs: BlogBrief[] = Array<BlogBrief>(10).fill({
-    id: "string",
-    title: "MO2",
-    cover: "https://picsum.photos/500/300?image=40",
-    rate: 4.3,
-    description:
-      "Lorem ipsum dolor sit amet, no nam oblique veritus. Commune scaevola imperdiet nec ut, sed euismod convenire principes at. Est et nobis iisque percipit, an vim zril disputando voluptatibus, vix an salutandi sententiae.",
-    createTime: "2021/2/9",
-    author: "Leezeeyee",
-  });
+export default class Home extends Vue implements BlogAutoLoader {
+  blogs: BlogBrief[] = [];
+  loading = true;
+  firstloading = true;
+  page = 0;
+  pagesize = 5;
+  nomore = false;
+  created() {
+    GetArticles({
+      page: this.page++,
+      pageSize: this.pagesize,
+      draft: false,
+    }).then((val) => {
+      this.addMore(val);
+      this.firstloading = false;
+    });
+  }
+  addMore(val: BlogBrief[]) {
+    AddMore(this, val);
+  }
+  public ReachedButtom() {
+    ElmReachedButtom(this, ({ page, pageSize }) =>
+      GetArticles({
+        page: page,
+        pageSize: pageSize,
+        draft: false,
+      })
+    );
+  }
 }
 </script>

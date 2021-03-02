@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import { User } from "@/models";
-import { GetInitials } from "@/utils";
+import { GetInitials, UserRole } from "@/utils";
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop } from "vue-property-decorator";
@@ -27,7 +27,7 @@ export default class Avatar extends Vue {
   @Prop()
   size?: number;
   get isUser() {
-    return this.user.roles && this.user.roles.length > 0;
+    return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
   get initials(): string {
     return GetInitials(this.user.name);

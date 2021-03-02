@@ -4,8 +4,42 @@ export interface BlogBrief {
     cover: string;
     rate: number;
     description: string;
+    entityInfo: EntityInfo;
+    authorId: string;
+}
+export const BlankUser = {
+    name: "",
+    email: "",
+    description: "",
+    site: "",
+    createTime: "",
+    id: "",
+    avatar: "",
+    roles: [],
+}
+export interface UserListData {
+    id: string;
+    name: string;
+}
+export interface DisplayBlogBrief extends BlogBrief {
+    userLoad: boolean;
+    userName: string;
+}
+
+export interface Blog extends BlogBrief {
+    content: string;
+}
+export interface EntityInfo {
     createTime: string;
-    author: string;
+    updateTime: string;
+}
+export interface BlogUpsert {
+    id?: string;
+    content?: string,
+    cover?: string,
+    description?: string,
+    keyWords?: string[],
+    title?: string
 }
 export interface User {
     id: string;

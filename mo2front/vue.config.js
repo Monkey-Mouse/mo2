@@ -3,12 +3,22 @@ module.exports = {
   chainWebpack: config => {
     config.module.rules.delete('eslint');
   },
-
+  pwa: {
+    iconPaths: {
+      favicon32: 'img/icons/favicon-32x32.png',
+      favicon16: 'img/icons/favicon-16x16.png',
+      appleTouchIcon: 'img/icons/tile150x150.png',
+      maskIcon: 'img/icons/tile150x150.png',
+      msTileImage: 'img/icons/tile150x150.png',
+    }
+  },
   transpileDependencies: [
     'vuetify'
   ],
   lintOnSave: true,
   outputDir: path.resolve(__dirname, '../dist'),
+  publicPath: process.env.NODE_ENV === 'production' ?
+    '//cdn.mo2.leezeeyee.com/dist/' : '/',
   //publicPath: '/static',
   // 放置生成的静态资源 (js、css、img、fonts) 的 (相对于 outputDir 的) 目录。
   //assetsDir: 'static',
@@ -35,7 +45,7 @@ module.exports = {
     proxy: {
       '/api': {
         // 要访问的跨域的域名
-        target: 'http://localhost:5000',
+        target: 'http://47.93.189.12:5001/', //'http://localhost:5001',
         // target: 'https://limfx.pro',
         ws: true, // 是否启用websockets
         pathRewrite: {

@@ -8,8 +8,8 @@ import (
 
 func SaveConfig(filename string) {
 	config := Configuration{
-		EmailAddr: "easilylazy@qq.com",
-		EmailPass: "xmxviunohwbphadc",
+		EmailAddr: "XXXXXXXXXXXXX",
+		EmailPass: "XXXXXXXXXXXXX",
 	}
 	bytes, err := yaml.Marshal(config)
 	if err != nil {
