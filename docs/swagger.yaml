@@ -1,6 +1,6 @@
 basePath: /
 definitions:
-  controller.ResponseError:
+  badresponse.ResponseError:
     properties:
       reason:
         type: string
@@ -271,15 +271,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: delete Blog
       tags:
       - accounts
@@ -304,11 +304,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: Add an account
       tags:
       - accounts
@@ -333,15 +333,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: 修改名称（唯一用于登录）/偏好设置
       tags:
       - accounts
@@ -368,11 +368,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: Show account's info
       tags:
       - accounts
@@ -421,11 +421,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: login an account
       tags:
       - accounts
@@ -462,15 +462,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: Add role for an account
       tags:
       - admin
@@ -498,7 +498,7 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: verify an account's email
       tags:
       - accounts
@@ -524,18 +524,20 @@ paths:
           description: ""
         "204":
           description: ""
+        "304":
+          description: ""
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: delete Blog
       tags:
       - blogs
@@ -563,15 +565,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: restore Blog
       tags:
       - blogs
@@ -688,15 +690,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: find Blog by id
       tags:
       - blogs
@@ -739,15 +741,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: find Blog
       tags:
       - blogs
@@ -786,23 +788,19 @@ paths:
               $ref: '#/definitions/dto.QueryBlogs'
             type: array
         "204":
-          description: No Content
-          schema:
-            items:
-              $ref: '#/definitions/dto.QueryBlogs'
-            type: array
+          description: ""
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: find Blog by userid
       tags:
       - blogs
@@ -890,17 +888,15 @@ paths:
           schema:
             $ref: '#/definitions/model.Blog'
         "204":
-          description: No Content
-          schema:
-            $ref: '#/definitions/model.Blog'
+          description: ""
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: Publish Blog
       tags:
       - blogs
@@ -942,15 +938,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: find all Blogs
       tags:
       - blogs
@@ -988,6 +984,26 @@ paths:
       summary: get user info
       tags:
       - logs
+  /file:
+    post:
+      consumes:
+      - multipart/form-data
+      description: say something
+      parameters:
+      - description: file
+        in: body
+        name: form
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: simple test
   /sayHello:
     get:
       description: say something

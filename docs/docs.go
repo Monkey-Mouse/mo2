@@ -67,19 +67,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -117,13 +117,13 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -161,19 +161,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -214,13 +214,13 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -295,13 +295,13 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -358,19 +358,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -412,7 +412,7 @@ var doc = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -593,19 +593,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -671,19 +671,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -744,30 +744,24 @@ var doc = `{
                         }
                     },
                     "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.QueryBlogs"
-                            }
-                        }
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -904,21 +898,18 @@ var doc = `{
                         }
                     },
                     "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "$ref": "#/definitions/model.Blog"
-                        }
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -982,19 +973,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -1038,19 +1029,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -1089,22 +1080,25 @@ var doc = `{
                     "204": {
                         "description": ""
                     },
+                    "304": {
+                        "description": ""
+                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -1162,6 +1156,37 @@ var doc = `{
                 }
             }
         },
+        "/file": {
+            "post": {
+                "description": "say something",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "simple test",
+                "parameters": [
+                    {
+                        "description": "file",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/sayHello": {
             "get": {
                 "description": "say something",
@@ -1181,7 +1206,7 @@ var doc = `{
         }
     },
     "definitions": {
-        "controller.ResponseError": {
+        "badresponse.ResponseError": {
             "type": "object",
             "properties": {
                 "reason": {
