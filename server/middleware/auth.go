@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"mo2/mo2utils/mo2errors"
 	"mo2/server/controller/badresponse"
 	"net/http"
 	"path"
@@ -18,6 +19,7 @@ var unblockEvery int = 3600
 var fromCTX FromCTX
 var blockFilter = bloom.NewWithEstimates(10000, 0.01)
 var userInfoKey string
+var handlerChan chan map[handlerKey]handlerProp = make(chan map[handlerKey]handlerProp)
 
 // SetupRateLimiter setup ddos banner
 func SetupRateLimiter(limitEvery int, unblockevery int) {
@@ -26,17 +28,19 @@ func SetupRateLimiter(limitEvery int, unblockevery int) {
 }
 func cleaner() {
 	for {
-		for _, v := range handlers {
-
-			v.rates = concurrent.NewMap()
-		}
 		time.Sleep(time.Second * time.Duration(duration))
+		m := make(map[handlerKey]handlerProp, len(handlers))
+		for k, v := range handlers {
+			v.rates = concurrent.NewMap()
+			m[k] = v
+		}
+		handlerChan <- m
 	}
 }
 func resetBlocker() {
 	for {
-		blockFilter.ClearAll()
 		time.Sleep(time.Second * time.Duration(unblockEvery))
+		blockFilter.ClearAll()
 	}
 }
 
@@ -58,29 +62,49 @@ func checkRL(prop handlerProp, ip string) bool {
 	return true
 }
 
+func checkBlock(ip string) *mo2errors.Mo2Errors {
+	if blockFilter.TestString(ip) {
+		return mo2errors.New(http.StatusForbidden, "IP Blocked!检测到该ip地址存在潜在的ddos行为")
+	}
+	return nil
+}
+
+func checkBlockAndRL(prop handlerProp, ip string) *mo2errors.Mo2Errors {
+	err := checkBlock(ip)
+	if err != nil {
+		return err
+	}
+	ok := checkRL(prop, ip)
+	if !ok {
+		return mo2errors.New(http.StatusTooManyRequests, "Too frequent!")
+	}
+	return nil
+}
+
+func getHandlers() map[handlerKey]handlerProp {
+	var hm map[handlerKey]handlerProp
+	select {
+	case hm = <-handlerChan:
+	default:
+		hm = handlers
+	}
+	return hm
+}
+
 // AuthMiddleware also have rate limit function
 // 请不要手动注册这个中间件，你应该用这个package中的RegisterMapedHandlers方法
 func AuthMiddleware(c *gin.Context) {
-	// Block illegal ips
-	if blockFilter.TestString(c.ClientIP()) {
-		badresponse.SetErrResponse(c, http.StatusForbidden,
-			"IP Blocked!检测到该ip地址存在潜在的ddos行为")
-		return
-	}
-
 	key := handlerKey{c.FullPath(), c.Request.Method}
-	prop, ok := handlers[key]
+	hm := getHandlers()
+	prop, ok := hm[key]
 	// not registered for this middleware
 	if !ok {
 		c.Next()
 		return
 	}
 	// rate limit logic
-	if !checkRL(prop, c.ClientIP()) {
-		badresponse.SetErrResponse(c, http.StatusTooManyRequests,
-			"Too frequent!")
-		return
-	}
+	checkBlockAndRL(prop, c.ClientIP())
+
 	// role auth logic
 	if prop.needRoles == nil || len(prop.needRoles) == 0 {
 		c.Next()
