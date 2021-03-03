@@ -1,6 +1,6 @@
 <template>
   <v-dialog :value="show" @click:outside="close" max-width="600px">
-    <v-card>
+    <v-card :loading="loading" :disabled="loading">
       <v-container>
         <v-row>
           <v-col cols="12">
@@ -20,6 +20,11 @@
               :centerBox="true"
             ></VueCropper>
           </div>
+          <v-row v-if="confirmerr !== ''">
+            <v-alert dense outlined type="error" class="col-12">{{
+              confirmerr
+            }}</v-alert></v-row
+          >
         </v-card-text>
         <v-card-actions>
           <v-btn color="green" outlined text @click="confirm">确认</v-btn>
@@ -45,6 +50,10 @@ export default class About extends Vue {
   show: boolean;
   @Prop()
   img: string | Blob;
+  @Prop({ default: false })
+  loading: boolean;
+  @Prop({ default: "" })
+  confirmerr: string;
   confirm() {
     // 获取截图的blob数据
     (this.$refs.cropper as any).getCropBlob((data) => {

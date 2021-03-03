@@ -13,6 +13,8 @@
       :img="avatar"
       title="裁剪你的头像"
       @confirm="confirmAvatar"
+      :loading="avatarProcessing"
+      :confirmerr="avErr"
     />
     <input
       @change="imgChange"
@@ -131,6 +133,8 @@ export default class Account extends Vue implements BlogAutoLoader {
   edit = false;
   avatar: string = "";
   showCropper = false;
+  avatarProcessing = false;
+  avErr = "";
 
   draftProps: BlogAutoLoader = {
     loading: true,
@@ -170,16 +174,34 @@ export default class Account extends Vue implements BlogAutoLoader {
     }
   }
   async confirmAvatar(data: any) {
+    this.avatarProcessing = true;
     data.lastModifiedDate = new Date();
     data.name = "avatar.webp";
     let f = data as File;
     if (!this.user.settings) {
       this.user.settings = {};
     }
-    await UploadImgToQiniu([f], ({ src }) => (this.user.settings.avatar = src));
-    await UpdateUserInfo(this.user);
+    try {
+      await UploadImgToQiniu(
+        [f],
+        ({ src }) => (this.user.settings.avatar = src)
+      );
+    } catch (error) {
+      this.avatarProcessing = false;
+      this.avErr = "图片上传失败！";
+      return;
+    }
+    try {
+      await UpdateUserInfo(this.user);
+    } catch (error) {
+      this.avatarProcessing = false;
+      this.avErr = GetErrorMsg(error);
+      return;
+    }
     this.showCropper = false;
     this.displayUser.settings.avatar = this.user.settings.avatar;
+    this.avatarProcessing = false;
+    this.avErr = "";
   }
   changeAvatar() {
     (this.$refs.f as HTMLInputElement).click();
