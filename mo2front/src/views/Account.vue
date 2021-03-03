@@ -8,6 +8,19 @@
       confirmText="确认"
       :confirm="confirm"
     />
+    <cropper
+      :show.sync="showCropper"
+      :img="avatar"
+      title="裁剪你的头像"
+      @confirm="confirmAvatar"
+    />
+    <input
+      @change="imgChange"
+      ref="f"
+      type="file"
+      accept="image/*"
+      style="display: none"
+    />
     <v-parallax
       dark
       src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
@@ -15,7 +28,9 @@
     >
       <v-row align="center" justify="center">
         <v-col class="text-center" cols="12">
-          <avatar :size="80" :user="displayUser" />
+          <a @click="changeAvatar" class="clickable">
+            <avatar :size="80" :user="displayUser" />
+          </a>
           <!-- <v-img class="v-avatar" :src="displayUser.avatar"></v-img> -->
           <h1 class="display-1 font-weight-thin mb-4">
             {{ displayUser.name }}
@@ -79,6 +94,7 @@ import {
   GetUserArticles,
   GetUserData,
   UpdateUserInfo,
+  UploadImgToQiniu,
 } from "@/utils";
 import { required } from "vuelidate/lib/validators";
 import Vue from "vue";
@@ -88,12 +104,14 @@ import BlogTimeLineList from "../components/BlogTimeLineList.vue";
 import Avatar from "../components/UserAvatar.vue";
 import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 import MO2Dialog from "../components/MO2Dialog.vue";
+import Cropper from "../components/ImageCropper.vue";
 @Component({
   components: {
     BlogTimeLineList,
     Avatar,
     BlogSkeleton,
     MO2Dialog,
+    Cropper,
   },
 })
 export default class Account extends Vue implements BlogAutoLoader {
@@ -111,6 +129,8 @@ export default class Account extends Vue implements BlogAutoLoader {
   ownPage = false;
   create = false;
   edit = false;
+  avatar: string = "";
+  showCropper = false;
 
   draftProps: BlogAutoLoader = {
     loading: true,
@@ -142,11 +162,33 @@ export default class Account extends Vue implements BlogAutoLoader {
     try {
       this.user.name = name;
       await UpdateUserInfo(this.user);
+      this.displayUser.name = name;
       this.initPage();
       return { err: "", pass: true };
     } catch (error) {
       return { err: GetErrorMsg(error), pass: false };
     }
+  }
+  async confirmAvatar(data: any) {
+    data.lastModifiedDate = new Date();
+    data.name = "avatar.webp";
+    let f = data as File;
+    if (!this.user.settings) {
+      this.user.settings = {};
+    }
+    await UploadImgToQiniu([f], ({ src }) => (this.user.settings.avatar = src));
+    await UpdateUserInfo(this.user);
+    this.showCropper = false;
+    this.displayUser.settings.avatar = this.user.settings.avatar;
+  }
+  changeAvatar() {
+    (this.$refs.f as HTMLInputElement).click();
+  }
+  imgChange() {
+    this.avatar = URL.createObjectURL(
+      (this.$refs.f as HTMLInputElement).files[0]
+    );
+    this.showCropper = true;
   }
   created() {
     this.initPage();

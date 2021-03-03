@@ -10,12 +10,12 @@ export interface BlogBrief {
 export const BlankUser = {
     name: "",
     email: "",
-    description: "",
-    site: "",
-    createTime: "",
     id: "",
-    avatar: "",
     roles: [],
+    settings: {
+        avatar: ""
+    },
+    entityInfo: {}
 }
 export interface UserListData {
     id: string;
@@ -30,8 +30,8 @@ export interface Blog extends BlogBrief {
     content: string;
 }
 export interface EntityInfo {
-    createTime: string;
-    updateTime: string;
+    createTime?: string;
+    updateTime?: string;
 }
 export interface BlogUpsert {
     id?: string;
