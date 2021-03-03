@@ -1,5 +1,3 @@
-// +build normal
-
 package mo2utils
 
 import (

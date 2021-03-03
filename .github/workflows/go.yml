@@ -34,12 +34,7 @@ jobs:
         env:
           CI: true
           MO2_MONGO_URL: mongodb://127.0.0.1:27017
-        run: go test ./... -tags=normal -coverprofile=coverage.txt -covermode=atomic
-      - name: Test rate_limit
-        env:
-          CI: true
-          MO2_MONGO_URL: mongodb://127.0.0.1:27017
-        run: go test ./... -tags=rate_limit
+        run: go test ./... -coverprofile=coverage.txt -covermode=atomic
 
       - name: CodeCov
         run: bash <(curl -s https://codecov.io/bash)
