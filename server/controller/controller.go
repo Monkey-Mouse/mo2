@@ -30,13 +30,10 @@ func SetupHandlers(c *Controller) {
 	{
 		api.GetWithRL(apiLogs, c.Log, 10)
 		api.Get(apiImgGenToken, c.GenUploadToken, model.OrdinaryUser)
-		blogs := api.Group("blogs")
+		blogs := api.Group("blogs", model.Anonymous, model.OrdinaryUser)
 		{
-			open := blogs.Group("", model.Anonymous, model.OrdinaryUser)
-			{
-				open.Get("query", c.QueryBlogs)
+			blogs.Get("query", c.QueryBlogs)
 
-			}
 			user := blogs.Group("", model.OrdinaryUser)
 			{
 				user.Post("addCategory", c.UpsertCategory)
@@ -58,7 +55,7 @@ func SetupHandlers(c *Controller) {
 				find.Get("id", c.FindBlogById)
 			}
 		}
-		accounts := api.Group("/accounts")
+		accounts := api.Group("/accounts", model.Anonymous, model.OrdinaryUser)
 		{
 			accounts.Post("", c.AddAccount)
 			accounts.Delete("", c.DeleteAccount, model.OrdinaryUser)

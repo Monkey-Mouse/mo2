@@ -18,17 +18,6 @@ import (
 
 const cookieExpiredTime int = 300000
 
-// @Summary simple test
-// @Description say something
-// @Produce  json
-// @Success 200 {string} json
-// @Router /sayHello [get]
-func SayHello(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Hello! Welcome to Mo2!",
-	})
-}
-
 // Log godoc
 // @Summary get user info
 // @Description get by check cookies
@@ -77,7 +66,7 @@ func (c *Controller) Log(ctx *gin.Context) {
 func (c *Controller) AddAccountRole(ctx *gin.Context) {
 	var addAccount model.AddAccountRole
 	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
@@ -109,7 +98,12 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 func (c *Controller) UpdateAccount(ctx *gin.Context) {
 	var accountInfo dto.UserInfoBrief
 	if err := ctx.ShouldBindJSON(&accountInfo); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
+		return
+	}
+	uinfo, _ := mo2utils.GetUserInfo(ctx)
+	if uinfo.ID != accountInfo.ID {
+		ctx.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("非法操作！"))
 		return
 	}
 	account, exist := database.FindAccount(accountInfo.ID)
@@ -122,9 +116,8 @@ func (c *Controller) UpdateAccount(ctx *gin.Context) {
 	if merr := database.UpsertAccount(&account); merr.IsError() {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(merr))
 		return
-	} else {
-		ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
 	}
+	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
 }
 
 // AddAccount godoc
@@ -145,29 +138,28 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseError(err))
 		return
 	}
-	addAccount.UserName = primitive.NewObjectID().Hex() + addAccount.UserName
 	unique, merr := database.EnsureEmailUnique(addAccount.Email)
 	if !unique {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("Email已经被使用"))
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseReason("Email已经被使用"))
 		return
 	}
 	if merr.IsError() {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(merr))
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseError(merr))
 		return
 	}
-	baseUrl := "http://" + ctx.Request.Host + "/api/accounts/verify"
+	baseURL := "http://" + ctx.Request.Host + "/api/accounts/verify"
 	token := mo2utils.GenerateJwtToken(addAccount.Email)
-	url := baseUrl + "?email=" + addAccount.Email + "&token=" + token
+	url := baseURL + "?email=" + addAccount.Email + "&token=" + token
 	senderr := mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url, addAccount.UserName), ctx.ClientIP())
 	if senderr != nil {
 		ctx.AbortWithStatusJSON(senderr.ErrorCode, badresponse.SetResponseError(senderr))
 	}
 	account, err := database.InitAccount(addAccount, token)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseError(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
@@ -192,15 +184,19 @@ func (c *Controller) DeleteAccount(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
+	uinfo, _ := mo2utils.GetUserInfo(ctx)
+	if uinfo.Email != info.Email {
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseReason("非法输入"))
+		return
+	}
 	if _, err := database.VerifyAccount(model.LoginAccount{Password: info.Password, UserNameOrEmail: info.Email}); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseError(err))
 		return
 	}
 	if _, merr := database.DeleteAccountByEmail(info.Email); merr.IsError() {
-		ctx.Status(http.StatusNoContent)
+		ctx.Status(http.StatusInternalServerError)
 	} else {
-		ctx.Status(http.StatusAccepted)
-
+		ctx.Status(http.StatusNoContent)
 	}
 }
 

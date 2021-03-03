@@ -83,7 +83,7 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 	}
 	//var account model.Account
 	account = model.Account{
-		UserName:   primitive.NewObjectID().String() + newAccount.UserName,
+		UserName:   newAccount.UserName,
 		Email:      newAccount.Email,
 		HashedPwd:  string(hashedPwd),
 		EntityInfo: model.InitEntity(),
@@ -95,11 +95,32 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 	if err != nil {
 		merr := err.(mongo.WriteException).WriteErrors[0]
 		if merr.Code == 11000 {
-			err = mo2errors.New(mo2errors.Mo2Conflict, "Name已被注册！")
+			acc, _ := FindAccountByName(account.UserName)
+			if acc.Infos[model.IsActive] == model.True {
+				err = mo2errors.New(mo2errors.Mo2Conflict, "Name已被注册！")
+				return
+			}
+			DeleteAccount(acc.ID)
+			insertResult, err = accCol.InsertOne(context.TODO(), account)
+		} else {
+			return
 		}
-		return
 	}
 	account.ID = insertResult.InsertedID.(primitive.ObjectID)
+	return
+}
+
+// FindAccountByName as name
+func FindAccountByName(name string) (a model.Account, exist bool) {
+	exist = false
+	if err := accCol.FindOne(context.TODO(), bson.D{{"username", name}}).Decode(&a); err != nil {
+		if err != mongo.ErrNoDocuments {
+			log.Fatal(err)
+		}
+	}
+	if a.IsValid() {
+		exist = true
+	}
 	return
 }
 
@@ -191,7 +212,6 @@ func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
 	if account.Infos[model.Token] == info.Token {
 		account.Infos[model.IsActive] = model.True
 		delete(account.Infos, model.Token)
-		account.UserName = account.UserName[24:]
 		UpsertAccount(&account)
 	} else {
 		err = errors.New("token不符")
