@@ -27,9 +27,9 @@ const reasonKey = "reason"
 // @Param draft query bool false "bool true" true
 // @Param account body model.Blog true "Add blog"
 // @Success 201 {object} model.Blog
-// @Success 204 {object}
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
+// @Success 204
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
 // @Router /api/blogs/publish [post]
 func (c *Controller) UpsertBlog(ctx *gin.Context) {
 	isDraftStr := ctx.DefaultQuery("draft", "true")
@@ -77,9 +77,9 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 // @Success 202
 // @Success 204
 // @Failure 304
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/{id} [delete]
 func (c *Controller) DeleteBlog(ctx *gin.Context) {
 	isDraftStr := ctx.DefaultQuery("draft", "true")
@@ -153,9 +153,9 @@ func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) {
 // @Param draft query bool true "bool true" true
 // @Param id path string false "string xxxxxxxx" "xxxxxxx"
 // @Success 200 {object} model.Blog
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/{id} [put]
 func (c *Controller) RestoreBlog(ctx *gin.Context) {
 	isDraftStr := ctx.DefaultQuery("draft", "true")
@@ -209,9 +209,9 @@ func (c *Controller) RestoreBlog(ctx *gin.Context) {
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlogs
 // @Success 204 {object} []dto.QueryBlogs
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/find/own [get]
 func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 	pageStr := ctx.DefaultQuery("page", "0")
@@ -260,10 +260,10 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlogs
-// @Success 204 {object}
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Success 204
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/find/userId [get]
 func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 	pageStr := ctx.DefaultQuery("page", "0")
@@ -326,9 +326,9 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 // @Param draft query bool false "bool true" true
 // @Param id query string false "string xxxxxxxx" "xxxxxxx"
 // @Success 200 {object} model.Blog
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/find/id [get]
 func (c *Controller) FindBlogById(ctx *gin.Context) {
 	isDraftStr := ctx.DefaultQuery("draft", "true")
@@ -376,9 +376,9 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 // @Param pageSize query int false "int 5" 5
 // @Success 200 {object} []dto.QueryBlog
 // @Success 204 {object} []dto.QueryBlog
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/query [get]
 func (c *Controller) QueryBlogs(ctx *gin.Context) {
 	pageStr := ctx.DefaultQuery("page", "0")
