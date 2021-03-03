@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 var r *gin.Engine
@@ -48,6 +49,9 @@ func get(t *testing.T, uri string, params map[string]string) (req *http.Request)
 func post(t *testing.T, uri string, params map[string]string, body interface{}) (req *http.Request) {
 	return send("POST", t, uri, params, body)
 }
+func put(t *testing.T, uri string, params map[string]string, body interface{}) (req *http.Request) {
+	return send("PUT", t, uri, params, body)
+}
 func send(mthd string, t *testing.T, uri string, params map[string]string, body interface{}) (req *http.Request) {
 	uri = uri + "?"
 	for k, v := range params {
@@ -64,6 +68,10 @@ func send(mthd string, t *testing.T, uri string, params map[string]string, body 
 func addCookie(req *http.Request) {
 	req.Header.Set("Cookie",
 		"jwtToken="+mo2utils.GenerateJwtCode(dto.LoginUserInfo{Roles: []string{model.OrdinaryUser}}))
+}
+func addCookieWithID(req *http.Request, id primitive.ObjectID) {
+	req.Header.Set("Cookie",
+		"jwtToken="+mo2utils.GenerateJwtCode(dto.LoginUserInfo{ID: id, Roles: []string{model.OrdinaryUser}}))
 }
 
 type tests struct {

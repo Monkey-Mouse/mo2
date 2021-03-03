@@ -101,6 +101,11 @@ func (c *Controller) UpdateAccount(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
+	uinfo, _ := mo2utils.GetUserInfo(ctx)
+	if uinfo.ID != accountInfo.ID {
+		ctx.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseReason("非法操作！"))
+		return
+	}
 	account, exist := database.FindAccount(accountInfo.ID)
 	if !exist {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("无此用户"))
@@ -111,9 +116,8 @@ func (c *Controller) UpdateAccount(ctx *gin.Context) {
 	if merr := database.UpsertAccount(&account); merr.IsError() {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(merr))
 		return
-	} else {
-		ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
 	}
+	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))
 }
 
 // AddAccount godoc
