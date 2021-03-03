@@ -2,6 +2,7 @@ package controller
 
 import (
 	"mo2/server/model"
+	"os"
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,5 +21,8 @@ func TestController_AddAccountRole(t *testing.T) {
 	addCookie(req1)
 	testHTTP(t,
 		tests{name: "Test auth", req: req, wantCode: 403},
-		tests{name: "Test add account role", req: req1, wantCode: 401})
+		tests{name: "Test add account role no right", req: req1, wantCode: 401})
+	os.Setenv("MO2_SUPER_KEY", "xx")
+	testHTTP(t,
+		tests{name: "Test add account role no user", req: req1, wantCode: 404})
 }
