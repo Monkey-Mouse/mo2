@@ -66,7 +66,7 @@ func (c *Controller) Log(ctx *gin.Context) {
 func (c *Controller) AddAccountRole(ctx *gin.Context) {
 	var addAccount model.AddAccountRole
 	if err := ctx.ShouldBindJSON(&addAccount); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
@@ -98,7 +98,7 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 func (c *Controller) UpdateAccount(ctx *gin.Context) {
 	var accountInfo dto.UserInfoBrief
 	if err := ctx.ShouldBindJSON(&accountInfo); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
 		return
 	}
 	uinfo, _ := mo2utils.GetUserInfo(ctx)
@@ -138,29 +138,28 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		return
 	}
 	if err := addAccount.Validation(); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseError(err))
 		return
 	}
-	addAccount.UserName = primitive.NewObjectID().Hex() + addAccount.UserName
 	unique, merr := database.EnsureEmailUnique(addAccount.Email)
 	if !unique {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("Email已经被使用"))
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseReason("Email已经被使用"))
 		return
 	}
 	if merr.IsError() {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(merr))
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseError(merr))
 		return
 	}
-	baseUrl := "http://" + ctx.Request.Host + "/api/accounts/verify"
+	baseURL := "http://" + ctx.Request.Host + "/api/accounts/verify"
 	token := mo2utils.GenerateJwtToken(addAccount.Email)
-	url := baseUrl + "?email=" + addAccount.Email + "&token=" + token
+	url := baseURL + "?email=" + addAccount.Email + "&token=" + token
 	senderr := mo2utils.SendEmail([]string{addAccount.Email}, mo2utils.VerifyEmailMessage(url, addAccount.UserName), ctx.ClientIP())
 	if senderr != nil {
 		ctx.AbortWithStatusJSON(senderr.ErrorCode, badresponse.SetResponseError(senderr))
 	}
 	account, err := database.InitAccount(addAccount, token)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseError(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, dto.Account2UserPublicInfo(account))

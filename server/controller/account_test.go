@@ -23,6 +23,9 @@ func addRoleReq(t *testing.T, id primitive.ObjectID) *http.Request {
 func updateAccount(t *testing.T, id primitive.ObjectID) *http.Request {
 	return put(t, "/api/accounts", nil, dto.UserInfoBrief{ID: id, Name: "xx", Settings: map[string]string{"hi": "hello"}})
 }
+func addAccount(t *testing.T, name string, email string) *http.Request {
+	return post(t, "/api/accounts", nil, model.AddAccount{UserName: name, Email: email, Password: "xxxxaaaa"})
+}
 func TestController_AddAccountRole(t *testing.T) {
 	id := primitive.NewObjectID()
 	req := addRoleReq(t, id)
@@ -35,7 +38,7 @@ func TestController_AddAccountRole(t *testing.T) {
 	testHTTP(t,
 		tests{name: "Test auth", req: req, wantCode: 403},
 		tests{name: "Test add account role no right", req: req1, wantCode: 401},
-		tests{name: "Test json no bind", req: req1, wantCode: 401})
+		tests{name: "Test json no bind", req: req1, wantCode: 400})
 	os.Setenv("MO2_SUPER_KEY", "xx")
 	testHTTP(t,
 		tests{name: "Test add account role no user", req: req2, wantCode: 404})
@@ -63,8 +66,50 @@ func TestController_UpdateAccount(t *testing.T) {
 	testHTTP(t,
 		tests{name: "Test auth", req: req1, wantCode: 403},
 		tests{name: "Test update another account", req: req2, wantCode: 403},
-		tests{name: "Test json no bind", req: req2, wantCode: 401},
+		tests{name: "Test json no bind", req: req2, wantCode: 400},
 		tests{name: "Test no user", req: req3, wantCode: 404},
-		tests{name: "Test success", req: req4, wantCode: 200, wantStr: "hi"})
+		tests{name: "Test success", req: req4, wantCode: 200, wantStr: "hi"},
+	)
 	database.DeleteAccount(id)
+}
+
+func TestController_AddAccount(t *testing.T) {
+	id := primitive.NewObjectID()
+	id1 := primitive.NewObjectID()
+	database.UpsertAccount(&model.Account{
+		ID:       id,
+		UserName: id.Hex(),
+		Email:    id.Hex(),
+		Roles:    []string{},
+		Infos:    map[string]string{model.IsActive: model.True},
+	})
+	database.UpsertAccount(&model.Account{
+		ID:       id1,
+		UserName: id1.Hex(),
+		Email:    id1.Hex(),
+		Roles:    []string{},
+		Infos:    map[string]string{model.IsActive: model.True},
+	})
+	req1 := addAccount(t, "", "lll")
+	req2 := addAccount(t, "", "lll")
+	req3 := addAccount(t, id.Hex(), "lll")
+	req4 := addAccount(t, "lll", id.Hex())
+	req5 := addAccount(t, id1.Hex(), "lll")
+	req6 := addAccount(t, "lll", id1.Hex())
+	addCookie(req2)
+	addCookie(req3)
+	addCookie(req4)
+	addCookie(req5)
+	addCookie(req6)
+	testHTTP(t,
+		tests{name: "Test auth", req: req1, wantCode: 403},
+		tests{name: "Test empty account name", req: req2, wantCode: 422},
+		tests{name: "Test json no bind", req: req2, wantCode: 400},
+		tests{name: "Test name dup", req: req3, wantCode: 422, wantStr: "Name"},
+		tests{name: "Test email dup", req: req4, wantCode: 422, wantStr: "Email"},
+		tests{name: "Test name dup inactive", req: req5, wantCode: 422, wantStr: "Name"},
+		tests{name: "Test email dup inactive", req: req6, wantCode: 422, wantStr: "Email"},
+	)
+	database.DeleteAccount(id)
+	database.DeleteAccount(id1)
 }
