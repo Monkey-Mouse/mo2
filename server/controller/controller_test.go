@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"io/ioutil"
 	"mo2/mo2utils"
 	"mo2/server/middleware"
 	"net/http"
@@ -36,8 +37,7 @@ func TestMain(m *testing.M) {
 	// Exit with exit value from tests
 	os.Exit(exitVal)
 }
-func get(t *testing.T, uri string, params map[string]string) (req *http.Request, resp *httptest.ResponseRecorder) {
-	resp = httptest.NewRecorder()
+func get(t *testing.T, uri string, params map[string]string) (req *http.Request) {
 	uri = uri + "?"
 	for k, v := range params {
 		uri = uri + k + "=" + v + "&"
@@ -48,4 +48,37 @@ func get(t *testing.T, uri string, params map[string]string) (req *http.Request,
 		t.Fatal(err)
 	}
 	return
+}
+
+type tests struct {
+	name        string
+	req         *http.Request
+	wantCode    int
+	wantStr     string
+	wantHeaders []string
+}
+
+func testHTTP(t *testing.T, testSlice ...tests) {
+	for _, test := range testSlice {
+		t.Run(test.name, func(t *testing.T) {
+			resp := httptest.NewRecorder()
+			r.ServeHTTP(resp, test.req)
+			if resp.Code == test.wantCode {
+				if p, err := ioutil.ReadAll(resp.Body); err != nil {
+					t.Errorf("response err")
+				} else if !strings.Contains(string(p), test.wantStr) {
+					t.Errorf("Want contain str: %v, actual: %v", test.wantStr, string(p))
+				} else {
+					for _, v := range test.wantHeaders {
+						_, ok := resp.HeaderMap[v]
+						if !ok {
+							t.Errorf("Want header: %v", v)
+						}
+					}
+				}
+			} else {
+				t.Errorf("Want code: %v, actual code: %v", test.wantCode, resp.Code)
+			}
+		})
+	}
 }

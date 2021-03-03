@@ -19,14 +19,17 @@ type Message struct {
 	Message string `json:"message" example:"message"`
 }
 
-const imgGenToken = "/img/:filename"
+const (
+	apiImgGenToken = "/img/:filename"
+	apiLogs        = "/logs"
+)
 
 // SetupHandlers set up
 func SetupHandlers(c *Controller) {
 	api := middleware.H.Group("/api")
 	{
-		api.Get("/logs", c.Log)
-		api.Get(imgGenToken, c.GenUploadToken)
+		api.Get(apiLogs, c.Log)
+		api.Get(apiImgGenToken, c.GenUploadToken, model.OrdinaryUser)
 		blogs := api.Group("blogs")
 		{
 			open := blogs.Group("", model.Anonymous, model.OrdinaryUser)
