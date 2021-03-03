@@ -143,7 +143,7 @@ func TestController_DeleteAccount(t *testing.T) {
 		tests{name: "Test delete others", req: req2, wantCode: 422},
 		tests{name: "Test json not bind", req: req2, wantCode: 400},
 		tests{name: "Test wrong pass", req: req3, wantCode: 403},
-		tests{name: "Test no account", req: req4, wantCode: 204},
+		tests{name: "Test delete", req: req4, wantCode: 204},
 	)
 	_, err := database.DeleteAccount(id)
 	if !err.IsError() {
