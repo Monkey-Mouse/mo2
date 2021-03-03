@@ -27,7 +27,7 @@
       :inputProps="inputProps"
       :validator="validator"
       ref="dialog"
-      @confirm="confirm"
+      :confirm="confirm"
       :uploadImgs="uploadImgs"
     />
   </div>
@@ -42,6 +42,7 @@ import {
   GetArticle,
   GetErrorMsg,
   globaldic,
+  timeout,
   UploadImgToQiniu,
   UpsertBlog,
   UpSertBlogSync,
@@ -139,14 +140,21 @@ export default class EditArticle extends Vue {
           }
         });
     } else this.loading = false;
-    window.addEventListener("beforeunload", () => {
+    window.onbeforeunload = () => {
+      if (!this.$route.params["id"] || this.$route.params["id"] === "") {
+        return;
+      }
       this.getTitleAndContent();
-      UpSertBlogSync({ draft: true }, this.blog);
-    });
-  }
-  beforeDestroy() {
-    this.getTitleAndContent();
-    UpSertBlogSync({ draft: true }, this.blog);
+      console.log(this.$route.params["id"], this.blog);
+      if (
+        this.blog.title &&
+        this.blog.content &&
+        this.blog.title !== "" &&
+        this.blog.content !== ""
+      ) {
+        UpSertBlogSync({ draft: true }, this.blog);
+      }
+    };
   }
   editorLoad(editor: Editor) {
     this.editor = editor;
@@ -209,8 +217,13 @@ export default class EditArticle extends Vue {
     this.blog.id = data.id;
   }
   async confirm(model: BlogUpsert, draft = false) {
-    await this.postBlog(model, draft);
-    this.$router.push("/article/" + this.blog.id);
+    try {
+      await this.postBlog(model, draft);
+      this.$router.push("/article/" + this.blog.id);
+      return { err: "", pass: true };
+    } catch (error) {
+      return { err: GetErrorMsg(error), pass: false };
+    }
   }
   autoSave() {
     this.$emit("update:autoSaving", true);

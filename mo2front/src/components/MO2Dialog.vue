@@ -1,6 +1,10 @@
 <template>
   <v-dialog :value="show" @click:outside="close" max-width="600px">
-    <v-card>
+    <v-card
+      @input="confirmerr = ''"
+      :disabled="processing"
+      :loading="processing"
+    >
       <v-container>
         <v-row>
           <v-col cols="12">
@@ -15,6 +19,11 @@
             :inputProps="inputProps"
             :uploadImgs="uploadImgs"
           />
+          <v-row v-if="confirmerr !== ''">
+            <v-alert dense outlined type="error" class="col-12">{{
+              confirmerr
+            }}</v-alert></v-row
+          >
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -23,7 +32,7 @@
             color="green"
             outlined
             text
-            @click="confirm"
+            @click="confirmClick"
             >{{ confirmText }}</v-btn
           >
           <v-btn @click="close" color="red">取消</v-btn>
@@ -48,6 +57,8 @@ import { Prop } from "vue-property-decorator";
 })
 export default class About extends Vue {
   @Prop()
+  confirm!: (any) => Promise<{ err: string; pass: boolean }>;
+  @Prop()
   title!: string;
   @Prop()
   validator!: any;
@@ -62,13 +73,23 @@ export default class About extends Vue {
     blobs: File[],
     callback: (imgprop: { src: string }) => void
   ) => Promise<void>;
+  confirmerr = "";
   anyError = true;
+  processing = false;
   close() {
     this.$emit("update:show", false);
   }
-  confirm() {
-    this.$emit("confirm", (this.$refs["inputs"] as InputList).Model);
-    this.close();
+  async confirmClick() {
+    this.processing = true;
+    const { err, pass } = await this.confirm(
+      (this.$refs["inputs"] as InputList).Model
+    );
+    this.processing = false;
+    if (pass) {
+      this.close();
+    } else {
+      this.confirmerr = err;
+    }
   }
   setModel(model: any) {
     setTimeout(() => {

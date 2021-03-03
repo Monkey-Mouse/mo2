@@ -149,7 +149,7 @@ export default class ReadArticle extends Vue {
   confirmDelete() {
     DeleteArticle(this.blog.id, { draft: this.draft })
       .then(() => {
-        this.$router.push("/");
+        this.$router.back();
       })
       .catch((err) => {
         alert(GetErrorMsg(err));
@@ -157,3 +157,11 @@ export default class ReadArticle extends Vue {
   }
 }
 </script>
+<style>
+.v-skeleton-loader__text {
+  border-radius: 6px;
+  flex: 1 0 auto;
+  height: 12px;
+  margin-bottom: 6px !important;
+}
+</style>

@@ -153,3 +153,9 @@ export async function Logout() {
 export const AdminRole = "GeneralAdmin"
 export const UserRole = "OrdinaryUser"
 export const AnonymousRole = "Anonymous"
+export function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+export async function UpdateUserInfo(info: User) {
+    return (await axios.put<User>('/api/accounts', info)).data;
+}
