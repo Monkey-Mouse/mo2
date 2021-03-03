@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func TestController_Log(t *testing.T) {
@@ -25,6 +26,9 @@ func updateAccount(t *testing.T, id primitive.ObjectID) *http.Request {
 }
 func addAccount(t *testing.T, name string, email string) *http.Request {
 	return post(t, "/api/accounts", nil, model.AddAccount{UserName: name, Email: email, Password: "xxxxaaaa"})
+}
+func deleteAccount(t *testing.T, pass string, email string) *http.Request {
+	return delete(t, "/api/accounts", nil, model.DeleteAccount{Email: email, Password: pass})
 }
 func TestController_AddAccountRole(t *testing.T) {
 	id := primitive.NewObjectID()
@@ -88,7 +92,7 @@ func TestController_AddAccount(t *testing.T) {
 		UserName: id1.Hex(),
 		Email:    id1.Hex(),
 		Roles:    []string{},
-		Infos:    map[string]string{model.IsActive: model.True},
+		Infos:    map[string]string{model.IsActive: model.False},
 	})
 	req1 := addAccount(t, "", "lll")
 	req2 := addAccount(t, "", "lll")
@@ -107,9 +111,42 @@ func TestController_AddAccount(t *testing.T) {
 		tests{name: "Test json no bind", req: req2, wantCode: 400},
 		tests{name: "Test name dup", req: req3, wantCode: 422, wantStr: "Name"},
 		tests{name: "Test email dup", req: req4, wantCode: 422, wantStr: "Email"},
-		tests{name: "Test name dup inactive", req: req5, wantCode: 422, wantStr: "Name"},
-		tests{name: "Test email dup inactive", req: req6, wantCode: 422, wantStr: "Email"},
+		tests{name: "Test name dup inactive", req: req5, wantCode: 200},
+		tests{name: "Test email dup inactive", req: req6, wantCode: 200},
 	)
 	database.DeleteAccount(id)
 	database.DeleteAccount(id1)
+}
+
+func TestController_DeleteAccount(t *testing.T) {
+	id := primitive.NewObjectID()
+	// id1 := primitive.NewObjectID()
+	pass := "aaaaaaaa"
+	hash, _ := bcrypt.GenerateFromPassword([]byte(pass), 10)
+	database.UpsertAccount(&model.Account{
+		ID:        id,
+		UserName:  id.Hex(),
+		Email:     id.Hex(),
+		Roles:     []string{},
+		Infos:     map[string]string{model.IsActive: model.True},
+		HashedPwd: string(hash),
+	})
+	req1 := deleteAccount(t, id.Hex(), id.Hex())
+	req2 := deleteAccount(t, id.Hex(), id.Hex())
+	req3 := deleteAccount(t, id.Hex(), id.Hex())
+	req4 := deleteAccount(t, pass, id.Hex())
+	addCookie(req2)
+	addCookieWithIDAndEmail(req3, id, id.Hex())
+	addCookieWithIDAndEmail(req4, id, id.Hex())
+	testHTTP(t,
+		tests{name: "Test auth", req: req1, wantCode: 403},
+		tests{name: "Test delete others", req: req2, wantCode: 422},
+		tests{name: "Test json not bind", req: req2, wantCode: 400},
+		tests{name: "Test wrong pass", req: req3, wantCode: 403},
+		tests{name: "Test no account", req: req4, wantCode: 204},
+	)
+	_, err := database.DeleteAccount(id)
+	if !err.IsError() {
+		t.Errorf("Account didn't really delete!")
+	}
 }

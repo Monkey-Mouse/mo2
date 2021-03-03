@@ -184,15 +184,19 @@ func (c *Controller) DeleteAccount(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
+	uinfo, _ := mo2utils.GetUserInfo(ctx)
+	if uinfo.Email != info.Email {
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseReason("非法输入"))
+		return
+	}
 	if _, err := database.VerifyAccount(model.LoginAccount{Password: info.Password, UserNameOrEmail: info.Email}); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusForbidden, badresponse.SetResponseError(err))
 		return
 	}
 	if _, merr := database.DeleteAccountByEmail(info.Email); merr.IsError() {
-		ctx.Status(http.StatusNoContent)
+		ctx.Status(http.StatusInternalServerError)
 	} else {
-		ctx.Status(http.StatusAccepted)
-
+		ctx.Status(http.StatusNoContent)
 	}
 }
 
