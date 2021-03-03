@@ -112,7 +112,9 @@ export default class EditArticle extends Vue {
   }
   @Watch("$route", { immediate: true, deep: true })
   pageChange() {
-    if (!this.blog.id || this.blog.id === "") {
+    if (!this.$route.params["id"] || this.$route.params["id"] === "") {
+      this.content = "";
+      this.blog = {};
       this.init();
     }
   }
@@ -142,16 +144,19 @@ export default class EditArticle extends Vue {
       UpSertBlogSync({ draft: true }, this.blog);
     });
   }
+  beforeDestroy() {
+    this.getTitleAndContent();
+    UpSertBlogSync({ draft: true }, this.blog);
+  }
   editorLoad(editor: Editor) {
     this.editor = editor;
     this.editorLoaded = true;
   }
   getTitleAndContent() {
-    const titleElm = document.querySelector("h1");
-    this.blog.title = titleElm.innerText.trim();
-    this.blog.content = this.editor
-      .GetHTML()
-      .substring(9 + titleElm.innerText.length);
+    const raw = this.editor.GetHTML();
+    const titlePos = raw.indexOf("</h1>");
+    this.blog.title = raw.substring(4, titlePos);
+    this.blog.content = raw.substring(titlePos + 5);
   }
   publish() {
     this.getTitleAndContent();

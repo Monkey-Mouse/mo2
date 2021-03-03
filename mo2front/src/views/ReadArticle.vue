@@ -147,7 +147,7 @@ export default class ReadArticle extends Vue {
     this.showDelete = true;
   }
   confirmDelete() {
-    DeleteArticle(this.blog.id, { draft: false })
+    DeleteArticle(this.blog.id, { draft: this.draft })
       .then(() => {
         this.$router.push("/");
       })

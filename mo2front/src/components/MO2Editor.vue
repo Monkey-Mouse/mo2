@@ -788,7 +788,8 @@ export default class MO2Editor extends Vue {
 
   @Watch("content")
   contentSet() {
-    if (this.content) {
+    if (this.content !== null && this.content !== undefined) {
+      console.log("set");
       this.editor.setContent(this.content);
     }
   }
