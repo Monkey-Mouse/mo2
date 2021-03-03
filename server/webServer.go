@@ -21,7 +21,6 @@ func RunServer() {
 
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
-	r.GET("/sayHello", controller.SayHello)
 	c := controller.NewController()
 	controller.SetupHandlers(c)
 	middleware.H.RegisterMapedHandlers(r, func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {

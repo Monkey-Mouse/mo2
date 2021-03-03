@@ -1,9 +1,13 @@
 package controller
 
 import (
+	"bytes"
+	"encoding/json"
 	"io/ioutil"
+	dto "mo2/dto"
 	"mo2/mo2utils"
 	"mo2/server/middleware"
+	"mo2/server/model"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -39,16 +43,27 @@ func TestMain(m *testing.M) {
 	os.Exit(exitVal)
 }
 func get(t *testing.T, uri string, params map[string]string) (req *http.Request) {
+	return send("GET", t, uri, params, nil)
+}
+func post(t *testing.T, uri string, params map[string]string, body interface{}) (req *http.Request) {
+	return send("POST", t, uri, params, body)
+}
+func send(mthd string, t *testing.T, uri string, params map[string]string, body interface{}) (req *http.Request) {
 	uri = uri + "?"
 	for k, v := range params {
 		uri = uri + k + "=" + v + "&"
 	}
-
-	req, err := http.NewRequest("GET", strings.Trim(uri, "&"), nil)
+	v, _ := json.Marshal(body)
+	req, err := http.NewRequest(mthd, strings.Trim(uri, "&"), bytes.NewBuffer(v))
 	if err != nil {
 		t.Fatal(err)
 	}
 	return
+}
+
+func addCookie(req *http.Request) {
+	req.Header.Set("Cookie",
+		"jwtToken="+mo2utils.GenerateJwtCode(dto.LoginUserInfo{Roles: []string{model.OrdinaryUser}}))
 }
 
 type tests struct {

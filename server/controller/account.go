@@ -18,17 +18,6 @@ import (
 
 const cookieExpiredTime int = 300000
 
-// @Summary simple test
-// @Description say something
-// @Produce  json
-// @Success 200 {string} json
-// @Router /sayHello [get]
-func SayHello(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Hello! Welcome to Mo2!",
-	})
-}
-
 // Log godoc
 // @Summary get user info
 // @Description get by check cookies
