@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	//"github.com/swaggo/swag/example/celler/model"
-	"log"
+
 	"mo2/database"
 	"mo2/server/controller/badresponse"
 	"mo2/server/model"
@@ -40,20 +40,24 @@ func SayHello(c *gin.Context) {
 func (c *Controller) Log(ctx *gin.Context) {
 
 	jwtToken, err := ctx.Cookie("jwtToken")
+	needReset := false
 	var s dto.LoginUserInfo
 	if err != nil {
+		needReset = true
+	} else {
+		//parse jwtToken and get user info
+		s, err = mo2utils.ParseJwt(jwtToken)
+		if err != nil {
+			needReset = true
+		}
+	}
+	if needReset {
 		//allocate an anonymous account
 		account := database.CreateAnonymousAccount()
 		s = dto.Account2SuccessLogin(account)
 		jwtToken = mo2utils.GenerateJwtCode(s)
 		//login success: to record the state
 		ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
-	} else {
-		//parse jwtToken and get user info
-		s, err = mo2utils.ParseJwt(jwtToken)
-		if err != nil {
-			log.Println(err)
-		}
 	}
 	ctx.JSON(http.StatusOK, s)
 }

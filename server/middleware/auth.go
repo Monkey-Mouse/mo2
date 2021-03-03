@@ -20,6 +20,10 @@ var fromCTX FromCTX
 var blockFilter = bloom.NewWithEstimates(10000, 0.01)
 var userInfoKey string
 var handlerChan = make(chan map[handlerKey]handlerProp)
+var handlers = make(map[handlerKey]handlerProp, 0)
+
+// H handlermap, like gin router
+var H = handlerMap{handlers, "", make([][]string, 0), -1}
 
 // SetupRateLimiter setup ddos banner
 func SetupRateLimiter(limitEvery int, unblockevery int) {
@@ -104,7 +108,10 @@ func AuthMiddleware(c *gin.Context) {
 		return
 	}
 	// rate limit logic
-	checkBlockAndRL(prop, c.ClientIP())
+	err := checkBlockAndRL(prop, c.ClientIP())
+	if err != nil {
+		c.AbortWithStatusJSON(err.ErrorCode, err.ErrorTip)
+	}
 	uinfo, jwterr := fromCTX(c)
 	c.Set(userInfoKey, uinfo)
 	// role auth logic
@@ -157,11 +164,6 @@ type handlerMap struct {
 	roles      [][]string
 	limit      int
 }
-
-var handlers = make(map[handlerKey]handlerProp, 0)
-
-// H handlermap, like gin router
-var H = handlerMap{handlers, "", make([][]string, 0), -1}
 
 // Group 类似gin router的Group方法，注意group里设置的多个role是以or逻辑连接的
 // 而group下属的其它api设置的role条件会与group里的role条件进行与运算

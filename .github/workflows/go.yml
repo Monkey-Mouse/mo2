@@ -26,10 +26,14 @@ jobs:
 
       - name: Build
         run: go build -v ./...
-
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.3.0
+        with:
+          mongodb-version: 4.2
       - name: Test
         env:
           CI: true
+          MO2_MONGO_URL: mongodb://127.0.0.1:27017
         run: go test ./... -coverprofile=coverage.txt -covermode=atomic
 
       - name: CodeCov

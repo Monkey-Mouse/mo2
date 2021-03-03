@@ -3,8 +3,10 @@ package middleware
 import (
 	"fmt"
 	"math/rand"
+	"mo2/mo2utils"
 	"mo2/mo2utils/mo2errors"
 	"net/http"
+	"net/http/httptest"
 	"path"
 	"reflect"
 	"testing"
@@ -13,6 +15,65 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/modern-go/concurrent"
 )
+
+func setupTestHandlers() {
+	api := H.Group("/apitest")
+	{
+		api.GetWithRL("/logs", func(c *gin.Context) {
+
+		}, 10)
+	}
+}
+
+func Test_AuthMiddleware(t *testing.T) {
+	SetupRateLimiter(5, 5)
+	authR := gin.New()
+	req, _ := http.NewRequest("GET", "/apitest/logs", nil)
+	setupTestHandlers()
+	H.RegisterMapedHandlers(authR, func(ctx *gin.Context) (userInfo RoleHolder, err error) {
+		return
+	}, mo2utils.UserInfoKey)
+	ch := make(chan bool, 0)
+	t.Run("Test rate limit block", func(t *testing.T) {
+		for i := 0; i < 100; i++ {
+			go func() {
+				resp := httptest.NewRecorder()
+				authR.ServeHTTP(resp, req)
+				ch <- resp.Code == 200
+			}()
+		}
+		sucNum := 0
+		for i := 0; i < 100; i++ {
+			success := <-ch
+			if success {
+				sucNum++
+			}
+		}
+		if sucNum < 10 || sucNum > 20 {
+			t.Errorf("auth middleware should ban 80-90 times, actual baned: %v", 100-sucNum)
+		}
+	})
+	time.Sleep(5 * time.Second)
+	t.Run("Test rate limit unblock", func(t *testing.T) {
+		for i := 0; i < 100; i++ {
+			go func() {
+				resp := httptest.NewRecorder()
+				authR.ServeHTTP(resp, req)
+				ch <- resp.Code == 200
+			}()
+		}
+		sucNum := 0
+		for i := 0; i < 100; i++ {
+			success := <-ch
+			if success {
+				sucNum++
+			}
+		}
+		if sucNum < 10 || sucNum > 20 {
+			t.Errorf("auth middleware should ban 80-90 times, actual baned: %v", 100-sucNum)
+		}
+	})
+}
 
 func Test_checkRL(t *testing.T) {
 	type args struct {
