@@ -9,8 +9,10 @@ import (
 	"time"
 )
 
+// NoTitle 未命名文章题目
 const NoTitle = "未命名"
 
+// Transform to parse md file for model.Blog
 func Transform(file []byte) (blog model.Blog) {
 	markdown := goldmark.New(
 		goldmark.WithExtensions(

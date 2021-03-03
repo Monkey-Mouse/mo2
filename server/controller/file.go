@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
-	_ "mime/multipart"
+	_ "mime/multipart" //in godoc comment
 	"net/http"
 )
 
+// Upload godoc
 // @Summary simple test
 // @Description say something
 // @Accept multipart/form-data
