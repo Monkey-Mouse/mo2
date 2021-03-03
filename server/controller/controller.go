@@ -28,8 +28,12 @@ const (
 func SetupHandlers(c *Controller) {
 	api := middleware.H.Group("/api")
 	{
-		api.GetWithRL(apiLogs, c.Log, 10)
-		api.Get(apiImgGenToken, c.GenUploadToken, model.OrdinaryUser)
+		api.GetWithRL("/logs", c.Log, 10)
+		uploads := api.Group("", model.OrdinaryUser)
+		{
+			uploads.Get("/img/:filename", c.GenUploadToken)
+			uploads.Post("/file", c.Upload)
+		}
 		blogs := api.Group("blogs", model.Anonymous, model.OrdinaryUser)
 		{
 			blogs.Get("query", c.QueryBlogs)

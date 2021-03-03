@@ -59,9 +59,9 @@ func (c *Controller) Log(ctx *gin.Context) {
 // @Produce  json
 // @Param account body model.AddAccountRole true "add new account info"
 // @Success 200 {object} dto.UserInfo
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/accounts/role [post]
 func (c *Controller) AddAccountRole(ctx *gin.Context) {
 	var addAccount model.AddAccountRole
@@ -91,9 +91,9 @@ func (c *Controller) AddAccountRole(ctx *gin.Context) {
 // @Produce  json
 // @Param account body dto.UserInfoBrief true "id必须，可修改name/settings"
 // @Success 200 {object} dto.UserInfo
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/accounts [put]
 func (c *Controller) UpdateAccount(ctx *gin.Context) {
 	var accountInfo dto.UserInfoBrief
@@ -128,8 +128,8 @@ func (c *Controller) UpdateAccount(ctx *gin.Context) {
 // @Produce  json
 // @Param account body model.AddAccount true "add new account info"
 // @Success 200 {object} dto.UserInfo
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
 // @Router /api/accounts [post]
 func (c *Controller) AddAccount(ctx *gin.Context) {
 	var addAccount model.AddAccount
@@ -174,9 +174,9 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 // @Param info body model.DeleteAccount true "delete account info"
 // @Success 202
 // @Success 204
-// @Failure 400 {object} ResponseError
-// @Failure 401 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/accounts [delete]
 func (c *Controller) DeleteAccount(ctx *gin.Context) {
 	var info model.DeleteAccount
@@ -209,7 +209,7 @@ func (c *Controller) DeleteAccount(ctx *gin.Context) {
 // @Param email query string true "email@mo2.com"
 // @Param token query string true "xxxx==sf"
 // @Success 308
-// @Failure 401 {object} ResponseError
+// @Failure 401 {object} badresponse.ResponseError
 // @Router /api/accounts/verify [get]
 func (c *Controller) VerifyEmail(ctx *gin.Context) {
 	var verifyInfo model.VerifyEmail
@@ -236,8 +236,8 @@ func (c *Controller) VerifyEmail(ctx *gin.Context) {
 // @Produce  json
 // @Param account body model.LoginAccount true "login account"
 // @Success 200 {object} dto.LoginUserInfo
-// @Failure 400 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/accounts/login [post]
 func (c *Controller) LoginAccount(ctx *gin.Context) {
 	var loginAccount model.LoginAccount
@@ -283,8 +283,8 @@ func (c *Controller) LogoutAccount(ctx *gin.Context) {
 // @Produce  json
 // @Param id path string false "Account ID"
 // @Success 200 {object} []dto.UserInfo
-// @Failure 400 {object} ResponseError
-// @Failure 404 {object} ResponseError
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
 // @Router /api/accounts/detail/{id} [get]
 func (c *Controller) ShowAccount(ctx *gin.Context) {
 	idStr := ctx.Param("id")

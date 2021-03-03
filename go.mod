@@ -25,6 +25,8 @@ require (
 	github.com/swaggo/swag/example/celler v0.0.0-20201209092904-3d90fc0a5c6e
 	github.com/willf/bitset v1.1.11 // indirect
 	github.com/willf/bloom v2.0.3+incompatible
+	github.com/yuin/goldmark v1.2.1
+	github.com/yuin/goldmark-meta v1.0.0
 	go.mongodb.org/mongo-driver v1.4.6
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/mod v0.4.1 // indirect
