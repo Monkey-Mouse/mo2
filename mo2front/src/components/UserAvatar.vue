@@ -2,7 +2,7 @@
   <v-avatar :size="size" color="brown">
     <v-img
       v-if="
-        user.avatar !== null && user.avatar !== undefined && user.avatar !== ''
+        user.settings && user.settings.avatar && user.settings.avatar !== ''
       "
       :src="user.avatar"
     ></v-img>

@@ -41,15 +41,16 @@ export interface BlogUpsert {
     keyWords?: string[],
     title?: string
 }
+export interface UserSettings {
+    avatar?: string
+}
 export interface User {
     id: string;
     name: string;
     email: string;
-    description: string;
-    createTime: string;
-    site?: string;
-    avatar: string;
     roles?: string[];
+    entityInfo?: EntityInfo;
+    settings?: UserSettings
 }
 export interface InputProp {
     errorMsg: { [name: string]: string };

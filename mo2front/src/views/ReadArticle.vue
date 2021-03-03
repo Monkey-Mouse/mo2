@@ -149,7 +149,7 @@ export default class ReadArticle extends Vue {
   confirmDelete() {
     DeleteArticle(this.blog.id, { draft: this.draft })
       .then(() => {
-        this.$router.push("/");
+        this.$router.back();
       })
       .catch((err) => {
         alert(GetErrorMsg(err));
