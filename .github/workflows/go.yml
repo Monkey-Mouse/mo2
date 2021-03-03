@@ -30,7 +30,11 @@ jobs:
       - name: Test
         env:
           CI: true
-        run: go test ./... -coverprofile=coverage.txt -covermode=atomic
+        run: go test ./... -tags=normal -coverprofile=coverage.txt -covermode=atomic
+      - name: Test rate_limit
+        env:
+          CI: true
+        run: go test ./... -tags=rate_limit
 
       - name: CodeCov
         run: bash <(curl -s https://codecov.io/bash)

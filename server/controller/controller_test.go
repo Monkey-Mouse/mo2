@@ -18,6 +18,7 @@ var c *Controller
 
 func TestMain(m *testing.M) {
 	// Write code here to run before tests
+	middleware.SetupRateLimiter(5, 5)
 	r = gin.Default()
 	c = NewController()
 	SetupHandlers(c)

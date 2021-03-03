@@ -1,3 +1,5 @@
+// +build normal
+
 package mo2errors_test
 
 import (

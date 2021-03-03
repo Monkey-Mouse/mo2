@@ -1,3 +1,5 @@
+// +build normal
+
 package controller
 
 import (

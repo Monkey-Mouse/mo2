@@ -28,7 +28,7 @@ const (
 func SetupHandlers(c *Controller) {
 	api := middleware.H.Group("/api")
 	{
-		api.Get(apiLogs, c.Log)
+		api.GetWithRL(apiLogs, c.Log, 10)
 		api.Get(apiImgGenToken, c.GenUploadToken, model.OrdinaryUser)
 		blogs := api.Group("blogs")
 		{
