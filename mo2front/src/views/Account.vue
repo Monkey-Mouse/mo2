@@ -15,6 +15,7 @@
       @confirm="confirmAvatar"
       :loading="avatarProcessing"
       :confirmerr="avErr"
+      @imgLoad="imgLoad"
     />
     <input
       @change="imgChange"
@@ -162,12 +163,19 @@ export default class Account extends Vue implements BlogAutoLoader {
       type: "text",
     },
   };
+  imgLoad(success) {
+    if (success === "error") {
+      this.avErr = "图片格式错误！";
+    }
+    this.avatarProcessing = false;
+  }
   async confirm({ name }: { name: string }) {
     try {
       this.user.name = name;
       await UpdateUserInfo(this.user);
-      this.displayUser.name = name;
-      this.initPage();
+      // this.displayUser.name = name;
+      this.updateUser();
+      // this.initPage();
       return { err: "", pass: true };
     } catch (error) {
       return { err: GetErrorMsg(error), pass: false };
@@ -199,18 +207,30 @@ export default class Account extends Vue implements BlogAutoLoader {
       return;
     }
     this.showCropper = false;
-    this.displayUser.settings.avatar = this.user.settings.avatar;
+    // this.displayUser.settings.avatar = this.user.settings.avatar;
+    this.updateUser();
     this.avatarProcessing = false;
     this.avErr = "";
+  }
+  @Watch("showCropper")
+  changeCropper() {
+    if (!this.showCropper) {
+      this.avErr = "";
+    }
+  }
+  updateUser() {
+    this.$emit("update:user", this.user);
   }
   changeAvatar() {
     (this.$refs.f as HTMLInputElement).click();
   }
   imgChange() {
+    this.showCropper = true;
+    this.avatarProcessing = true;
     this.avatar = URL.createObjectURL(
       (this.$refs.f as HTMLInputElement).files[0]
     );
-    this.showCropper = true;
+    (this.$refs.f as HTMLInputElement).value = "";
   }
   created() {
     this.initPage();
@@ -221,7 +241,7 @@ export default class Account extends Vue implements BlogAutoLoader {
     this.inputProps["name"].default = this.user.name;
     if (this.uid === undefined || this.uid === this.user.id) {
       this.uid = this.user.id;
-      this.displayUser = await GetUserData(this.uid);
+      this.displayUser = this.user;
       this.ownPage = true;
       if (this.$route.fullPath !== "/account") {
         this.$router.replace("/account");
@@ -259,14 +279,10 @@ export default class Account extends Vue implements BlogAutoLoader {
 
   @Watch("user")
   userChange() {
-    if (
-      this.uid === undefined ||
-      this.uid === "" ||
-      this.uid === this.user.id
-    ) {
-      this.uid = this.user.id;
-      this.displayUser = this.user;
-    }
+    this.uid = this.user.id;
+    this.displayUser = this.user;
+    this.inputProps.name.default = this.user.name;
+    console.log(this.displayUser);
   }
   @Watch("tab")
   loadDraft() {

@@ -18,6 +18,7 @@
               :autoCrop="true"
               :fixed="true"
               :centerBox="true"
+              @imgLoad="imgLoad"
             ></VueCropper>
           </div>
           <v-row v-if="confirmerr !== ''">
@@ -63,6 +64,9 @@ export default class About extends Vue {
   }
   close() {
     this.$emit("update:show", false);
+  }
+  imgLoad(success) {
+    this.$emit("imgLoad", success);
   }
 }
 </script>
