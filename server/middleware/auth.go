@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"log"
 	"mo2/mo2utils/mo2errors"
 	"mo2/server/controller/badresponse"
 	"net/http"
@@ -17,6 +18,8 @@ import (
 	"github.com/willf/bloom"
 )
 
+const redisHashSet = "ratelimiter"
+
 var duration int = 10
 var unblockEvery int = 3600
 var fromCTX FromCTX
@@ -30,6 +33,15 @@ var lock = sync.Mutex{}
 // H handlermap, like gin router
 var H = handlerMap{handlers, "", make([][]string, 0), -1}
 
+func resetVar() {
+	blockFilter = bloom.NewWithEstimates(10000, 0.01)
+	handlers = make(map[handlerKey]handlerProp, 0)
+	dicChan = make(chan *concurrent.Map, 0)
+	lock = sync.Mutex{}
+	H = handlerMap{handlers, "", make([][]string, 0), -1}
+	rdb = nil
+}
+
 // SetupRateLimiter setup ddos banner
 func SetupRateLimiter(limitEvery int, unblockevery int, useRedis bool) {
 	if useRedis {
@@ -38,14 +50,25 @@ func SetupRateLimiter(limitEvery int, unblockevery int, useRedis bool) {
 			Password: "", // no password set
 			DB:       0,  // use default DB
 		})
+		rdb.Del(redisHashSet).Err()
 	}
 	duration = limitEvery
 	unblockEvery = unblockevery
+	blockFilter.ClearAll()
+}
+func redisCleaner() {
+	for {
+		time.Sleep(time.Second * time.Duration(duration))
+		if rdb == nil {
+			return
+		}
+		rdb.Del(redisHashSet).Err()
+	}
+
 }
 func cleaner() {
 	cancelChan := make(chan bool, 0)
 	for {
-
 		go func() {
 			newDic := concurrent.NewMap()
 			for {
@@ -65,6 +88,23 @@ func resetBlocker() {
 		time.Sleep(time.Second * time.Duration(unblockEvery))
 		blockFilter.ClearAll()
 	}
+}
+
+func redisCheckRL(prop string, ip string, limit int) bool {
+	// rate limit logic
+	if limit < 0 {
+		return true
+	}
+	key := prop + ip
+	re, err := rdb.HIncrBy(redisHashSet, key, 1).Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if re > int64(limit) {
+		blockFilter.AddString(ip)
+		return false
+	}
+	return true
 }
 
 func checkRL(prop string, ip string, limit int) bool {
@@ -102,7 +142,12 @@ func checkBlockAndRL(prop string, ip string, limit int) *mo2errors.Mo2Errors {
 	if err != nil {
 		return err
 	}
-	ok := checkRL(prop, ip, limit)
+	var ok bool
+	if rdb != nil {
+		ok = redisCheckRL(prop, ip, limit)
+	} else {
+		ok = checkRL(prop, ip, limit)
+	}
 	if !ok {
 		return mo2errors.New(http.StatusTooManyRequests, "Too frequent!")
 	}
@@ -343,6 +388,11 @@ func (h handlerMap) RegisterMapedHandlers(r *gin.Engine, getUserFromCTX FromCTX,
 	for k, v := range h.innerMap {
 		r.Handle(k.method, k.url, v.handler)
 	}
-	go cleaner()
+	if rdb == nil {
+		go cleaner()
+	} else {
+		go redisCleaner()
+	}
+
 	go resetBlocker()
 }

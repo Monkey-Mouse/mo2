@@ -23,8 +23,12 @@ func setupTestHandlers() {
 	}
 }
 
-func Test_AuthMiddleware(t *testing.T) {
-	SetupRateLimiter(5, 5, false)
+func Test_RedisAuthMiddleware(t *testing.T) {
+	testMiddleware(t, true)
+}
+func testMiddleware(t *testing.T, useredis bool) {
+	resetVar()
+	SetupRateLimiter(5, 5, useredis)
 	authR := gin.New()
 	req, _ := http.NewRequest("GET", "/apitest/logs", nil)
 	setupTestHandlers()
@@ -47,10 +51,8 @@ func Test_AuthMiddleware(t *testing.T) {
 				sucNum++
 			}
 		}
-		if sucNum < 10 || sucNum > 20 {
-			t.Errorf("auth middleware should ban 80-90 times, actual baned: %v", 100-sucNum)
-		} else {
-			t.Log(100 - sucNum)
+		if sucNum != 10 {
+			t.Errorf("auth middleware should ban 90 times, actual baned: %v", 100-sucNum)
 		}
 	})
 	time.Sleep(5 * time.Second)
@@ -69,12 +71,13 @@ func Test_AuthMiddleware(t *testing.T) {
 				sucNum++
 			}
 		}
-		if sucNum < 10 || sucNum > 20 {
-			t.Errorf("auth middleware should ban 80-90 times, actual baned: %v", 100-sucNum)
-		} else {
-			t.Log(100 - sucNum)
+		if sucNum != 10 {
+			t.Errorf("auth middleware should ban 90 times, actual baned: %v", 100-sucNum)
 		}
 	})
+}
+func Test_AuthMiddleware(t *testing.T) {
+	testMiddleware(t, false)
 }
 
 // func Test_checkRL(t *testing.T) {
