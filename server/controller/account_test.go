@@ -30,6 +30,9 @@ func addAccount(t *testing.T, name string, email string) *http.Request {
 func deleteAccount(t *testing.T, pass string, email string) *http.Request {
 	return delete(t, "/api/accounts", nil, model.DeleteAccount{Email: email, Password: pass})
 }
+func login(t *testing.T, pass string, emailOrName string) *http.Request {
+	return post(t, "/api/accounts/login", nil, model.LoginAccount{UserNameOrEmail: emailOrName, Password: pass})
+}
 func TestController_AddAccountRole(t *testing.T) {
 	id := primitive.NewObjectID()
 	req := addRoleReq(t, id)
@@ -120,7 +123,6 @@ func TestController_AddAccount(t *testing.T) {
 
 func TestController_DeleteAccount(t *testing.T) {
 	id := primitive.NewObjectID()
-	// id1 := primitive.NewObjectID()
 	pass := "aaaaaaaa"
 	hash, _ := bcrypt.GenerateFromPassword([]byte(pass), 10)
 	database.UpsertAccount(&model.Account{
@@ -149,4 +151,46 @@ func TestController_DeleteAccount(t *testing.T) {
 	if !err.IsError() {
 		t.Errorf("Account didn't really delete!")
 	}
+}
+
+func TestController_LoginAccount(t *testing.T) {
+	id := primitive.NewObjectID()
+	id1 := primitive.NewObjectID()
+	pass := "aaaaaaaa"
+	hash, _ := bcrypt.GenerateFromPassword([]byte(pass), 10)
+	database.UpsertAccount(&model.Account{
+		ID:        id,
+		UserName:  id.Hex(),
+		Email:     id.Hex(),
+		Roles:     []string{},
+		Infos:     map[string]string{model.IsActive: model.True},
+		HashedPwd: string(hash),
+	})
+	database.UpsertAccount(&model.Account{
+		ID:        id1,
+		UserName:  id1.Hex(),
+		Email:     id1.Hex(),
+		Roles:     []string{},
+		Infos:     map[string]string{model.IsActive: model.False},
+		HashedPwd: string(hash),
+	})
+	req1 := login(t, "xxxx", id1.Hex())
+	req2 := login(t, pass, id1.Hex())
+	req3 := login(t, "xxx", id.Hex())
+	req4 := login(t, "", "")
+	req5 := login(t, pass, id.Hex())
+	addCookie(req2)
+	addCookie(req3)
+	addCookie(req4)
+	addCookie(req5)
+	testHTTP(t,
+		tests{name: "Test auth", req: req1, wantCode: 403},
+		tests{name: "Test not activate", req: req2, wantCode: 401},
+		tests{name: "Test wrong pass", req: req3, wantCode: 401},
+		tests{name: "Test empty data", req: req4, wantCode: 422},
+		tests{name: "Test login", req: req5, wantCode: 200, wantHeaders: []string{"Set-Cookie"}},
+	)
+
+	database.DeleteAccount(id)
+	database.DeleteAccount(id1)
 }
