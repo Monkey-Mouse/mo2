@@ -24,7 +24,7 @@ const cookieExpiredTime int = 300000
 // @Tags logs
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} dto.LoginUserInfo
+// @Success 200 {object} dto.UserInfo
 // @Router /api/logs [get]
 func (c *Controller) Log(ctx *gin.Context) {
 
@@ -47,6 +47,15 @@ func (c *Controller) Log(ctx *gin.Context) {
 		jwtToken = mo2utils.GenerateJwtCode(s)
 		//login success: to record the state
 		ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
+	}
+	if dto.Contains(s.Roles, model.OrdinaryUser) {
+		u, ext := database.FindAccountInfo(s.ID)
+		if ext == false {
+			ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseReason("用户不存在"))
+			return
+		}
+		ctx.JSON(http.StatusOK, u)
+		return
 	}
 	ctx.JSON(http.StatusOK, s)
 }
@@ -235,7 +244,7 @@ func (c *Controller) VerifyEmail(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param account body model.LoginAccount true "login account"
-// @Success 200 {object} dto.LoginUserInfo
+// @Success 200 {object} dto.UserInfo
 // @Failure 400 {object} badresponse.ResponseError
 // @Failure 404 {object} badresponse.ResponseError
 // @Router /api/accounts/login [post]
@@ -246,7 +255,7 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 		return
 	}
 	if err := loginAccount.Validation(); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseError(err))
 		return
 	}
 	account, err := database.VerifyAccount(loginAccount)
@@ -254,8 +263,8 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(err))
 		return
 	}
-	var s = dto.Account2SuccessLogin(account)
-	jwtToken := mo2utils.GenerateJwtCode(s)
+	var s = dto.Account2UserPublicInfo(account)
+	jwtToken := mo2utils.GenerateJwtCode(dto.Account2SuccessLogin(account))
 	//login success: to record the state
 	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
 	ctx.JSON(http.StatusOK, s)
