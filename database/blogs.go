@@ -103,7 +103,7 @@ func FindBlogsByUser(u dto.LoginUserInfo, filter model.Filter) (b []model.Blog) 
 	return FindBlogsByUserId(u.ID, filter)
 }
 func getBlogListQueryOption() *options.FindOptions {
-	return options.Find().SetSort(bson.D{{"entity_info", bson.D{{"update_time", -1}}}}).SetProjection(bson.D{{"content", 0}})
+	return options.Find().SetSort(bson.D{{"entity_info.update_time", -1}}).SetProjection(bson.D{{"content", 0}})
 }
 
 //find blog by userId
