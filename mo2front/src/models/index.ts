@@ -35,14 +35,14 @@ export interface EntityInfo {
 }
 export interface BlogUpsert {
     id?: string;
-    content?: string,
-    cover?: string,
-    description?: string,
-    keyWords?: string[],
-    title?: string
+    content?: string;
+    cover?: string;
+    description?: string;
+    keyWords?: string[];
+    title?: string;
 }
 export interface UserSettings {
-    avatar?: string
+    avatar?: string;
 }
 export interface User {
     id: string;
@@ -50,7 +50,7 @@ export interface User {
     email: string;
     roles?: string[];
     entityInfo?: EntityInfo;
-    settings?: UserSettings
+    settings?: UserSettings;
 }
 export interface InputProp {
     errorMsg: { [name: string]: string };

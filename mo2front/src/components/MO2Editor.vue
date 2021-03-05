@@ -741,11 +741,11 @@ export default class MO2Editor extends Vue {
       (that as MO2Editor).update = true;
     },
     onPaste(editorview, event, slice) {
-      var items = (event.clipboardData || event.originalEvent.clipboardData)
+      let items = (event.clipboardData || event.originalEvent.clipboardData)
         .items;
-      var files = [];
+      let files = [];
       for (let index = 0; index < items.length; index++) {
-        var item = items[index] as DataTransferItem;
+        let item = items[index] as DataTransferItem;
         if (
           item.type === "text/html" &&
           items.length >= index + 1 &&
@@ -755,7 +755,7 @@ export default class MO2Editor extends Vue {
           continue;
         }
         if (item.kind === "file") {
-          var blob = item.getAsFile();
+          let blob = item.getAsFile();
           files = files.concat(blob);
           // var reader = new FileReader();
           // reader.onload = function(event){

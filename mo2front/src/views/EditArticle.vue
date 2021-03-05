@@ -213,7 +213,7 @@ export default class EditArticle extends Vue {
       const element = model[key];
       this.blog[key] = element;
     }
-    var data = await UpsertBlog({ draft: draft }, this.blog);
+    let data = await UpsertBlog({ draft: draft }, this.blog);
     if (this.blog.id !== data.id) {
       this.$router.replace(`/edit/${data.id}`);
     }
