@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -42,13 +43,24 @@ func resetVar() {
 	rdb = nil
 }
 
-// SetupRateLimiter setup ddos banner
-func SetupRateLimiter(limitEvery int, unblockevery int, useRedis bool) {
+// OptionalParams config rate limiter
+type OptionalParams struct {
+	LimitEvery   int
+	Unblockevery int
+	UseRedis     bool
+}
+
+// setupRateLimiter setup ddos banner
+func setupRateLimiter(limitEvery int, unblockevery int, useRedis bool) {
 	if useRedis {
+		db, err := strconv.Atoi(os.Getenv("REDIS_DB"))
+		if err != nil {
+			db = 0
+		}
 		rdb = redis.NewClient(&redis.Options{
 			Addr:     os.Getenv("REDIS_URL"),
-			Password: "", // no password set
-			DB:       0,  // use default DB
+			Password: os.Getenv("REDIS_PASS"), // no password set
+			DB:       db,                      // use default DB
 		})
 		rdb.Del(redisHashSet).Err()
 	}
@@ -203,22 +215,6 @@ func checkRoles(uinfo RoleHolder, rolePolicies [][]string) error {
 		}
 	}
 	return nil
-}
-
-type handlerProp struct {
-	handler   gin.HandlerFunc
-	needRoles [][]string
-	limit     int
-}
-type handlerKey struct {
-	url    string
-	method string
-}
-type handlerMap struct {
-	innerMap   map[handlerKey]handlerProp
-	prefixPath string
-	roles      [][]string
-	limit      int
 }
 
 // Group 类似gin router的Group方法，注意group里设置的多个role是以or逻辑连接的
@@ -381,10 +377,18 @@ func (h handlerMap) Put(relativPath string, handler gin.HandlerFunc, roles ...st
 
 // RegisterMapedHandlers 必须要使用的方法，只有用了它，路由和中间件才会真正被注册
 // 使用这个方法请不要手动注册中间件
-func (h handlerMap) RegisterMapedHandlers(r *gin.Engine, getUserFromCTX FromCTX, userKey string) {
+func (h handlerMap) RegisterMapedHandlers(
+	r *gin.Engine,
+	getUserFromCTX FromCTX,
+	userKey string,
+	optinal *OptionalParams) {
+	if optinal != nil {
+		setupRateLimiter(optinal.LimitEvery, optinal.Unblockevery, optinal.UseRedis)
+	}
 	fromCTX = getUserFromCTX
 	userInfoKey = userKey
 	r.Use(AuthMiddleware)
+
 	for k, v := range h.innerMap {
 		r.Handle(k.method, k.url, v.handler)
 	}

@@ -28,13 +28,12 @@ func Test_RedisAuthMiddleware(t *testing.T) {
 }
 func testMiddleware(t *testing.T, useredis bool) {
 	resetVar()
-	SetupRateLimiter(5, 5, useredis)
 	authR := gin.New()
 	req, _ := http.NewRequest("GET", "/apitest/logs", nil)
 	setupTestHandlers()
 	H.RegisterMapedHandlers(authR, func(ctx *gin.Context) (userInfo RoleHolder, err error) {
 		return
-	}, mo2utils.UserInfoKey)
+	}, mo2utils.UserInfoKey, &OptionalParams{5, 5, useredis})
 	ch := make(chan bool, 0)
 	t.Run("Test rate limit block", func(t *testing.T) {
 		for i := 0; i < 100; i++ {
@@ -79,32 +78,6 @@ func testMiddleware(t *testing.T, useredis bool) {
 func Test_AuthMiddleware(t *testing.T) {
 	testMiddleware(t, false)
 }
-
-// func Test_checkRL(t *testing.T) {
-// 	type args struct {
-// 		prop handlerProp
-// 		ip   string
-// 	}
-// 	prop := handlerProp{limit: 3}
-// 	tests := []struct {
-// 		name string
-// 		args args
-// 		want bool
-// 	}{
-// 		{name: "test add 1", args: args{prop: prop, ip: "xxxx"}, want: true},
-// 		{name: "test add 2", args: args{prop: prop, ip: "xxxx"}, want: true},
-// 		{name: "test add 3", args: args{prop: prop, ip: "xxxx"}, want: true},
-// 		{name: "test block ip", args: args{prop: prop, ip: "xxxx"}, want: false},
-// 		{name: "test another ip", args: args{prop: prop, ip: "xxxxy"}, want: true},
-// 	}
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			if got := checkRL(tt.args.prop, tt.args.ip); got != tt.want {
-// 				t.Errorf("checkRateLimit() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
 
 func Test_handlerMap_Group1(t *testing.T) {
 	type args struct {
@@ -321,43 +294,6 @@ func Test_handlerMap_PostWithRL(t *testing.T) {
 		})
 	}
 }
-
-// func Test_checkBlockAndRL(t *testing.T) {
-// 	h := handlerMap{handlers, "", make([][]string, 0), -1}
-// 	unblockEvery = 1
-// 	duration = 1
-// 	h.GetWithRL("/xx", nil, 3)
-// 	handlers = h.innerMap
-// 	type args struct {
-// 		prop handlerProp
-// 		ip   string
-// 	}
-// 	tests := []struct {
-// 		name string
-// 		args args
-// 		want *mo2errors.Mo2Errors
-// 	}{
-// 		{name: "Test ip enter1", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-// 		{name: "Test ip enter2", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-// 		{name: "Test ip enter3", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-// 		{name: "Test ip ban", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: mo2errors.New(429, "Too frequent!")},
-// 		{name: "Test ip block", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: mo2errors.New(403, "IP Blocked!检测到该ip地址存在潜在的ddos行为")},
-// 		{name: "Test ip unblock", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-// 	}
-// 	go cleaner()
-// 	go resetBlocker()
-// 	for _, tt := range tests {
-// 		if tt.name == "Test ip unblock" {
-// 			time.Sleep(2 * time.Second)
-// 		}
-// 		hm := getHandlers()
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			if got := checkBlockAndRL(hm[handlerKey{"/xx", http.MethodGet}], tt.args.ip); !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("checkBlockAndRL() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }
 
 func Test_handlerMap_HandlerWithRL(t *testing.T) {
 	h := handlerMap{handlers, "", make([][]string, 0), -1}

@@ -2,10 +2,16 @@ version: "3.4"
 services:
   mongodb:
     image: mongo
-    ports:
-      - "27017:27017"
     volumes:
       - "./mongo-volume:/data/db"
+  redis:
+    image: "bitnami/redis"
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    volumes:
+      - "./redis:/bitnami/redis/data"
   mo2:
     image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2:latest
     env_file:
@@ -19,6 +25,7 @@ services:
       - 5001:5001
     depends_on:
       - "mongodb"
+      - "redis"
     volumes:
       - "./secrets:/app/secrets"
   nginx:
