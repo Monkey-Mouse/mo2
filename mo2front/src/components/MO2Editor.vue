@@ -1,5 +1,12 @@
 <template>
   <v-container>
+    <input
+      type="file"
+      ref="f"
+      accept="image/*"
+      style="display: none"
+      @change="fileSelected"
+    />
     <v-row justify="center">
       <v-col cols="12" lg="7" class="mo2editor">
         <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
@@ -216,6 +223,9 @@
               "
             >
               <v-icon>mdi-table-large</v-icon>
+            </button>
+            <button class="menubar__button" @click="$refs.f.click()">
+              <v-icon>mdi-image</v-icon>
             </button>
           </div>
         </editor-floating-menu>
@@ -460,6 +470,7 @@ import xquery from "highlight.js/lib/languages/xquery";
 import yaml from "highlight.js/lib/languages/yaml";
 import zephir from "highlight.js/lib/languages/zephir";
 import { Prop, Watch } from "vue-property-decorator";
+import { timeout } from "@/utils";
 //#endregion
 @Component({
   components: {
@@ -482,6 +493,7 @@ export default class MO2Editor extends Vue {
   update = false;
   editable = true;
   load = false;
+  notSync = false;
   editor: Editor = new Editor({
     extensions: [
       new Blockquote(),
@@ -727,7 +739,12 @@ export default class MO2Editor extends Vue {
     content: `
     `,
     onUpdate() {
-      (that as MO2Editor).update = true;
+      if ((that as MO2Editor).update) {
+        (that as MO2Editor).$emit("autosave");
+        (that as MO2Editor).update = false;
+      } else {
+        (that as MO2Editor).notSync = true;
+      }
     },
     onPaste(editorview, event, slice) {
       var items = (event.clipboardData || event.originalEvent.clipboardData)
@@ -768,6 +785,18 @@ export default class MO2Editor extends Vue {
         });
     },
   });
+  fileSelected() {
+    this.isuploading = true;
+    this.uploadImgs(
+      [...(this.$refs.f as HTMLInputElement).files],
+      this.editor.commands.image
+    )
+      .then(() => (that.isuploading = false))
+      .catch(() => {
+        that.isuploading = false;
+      });
+    (this.$refs.f as HTMLInputElement).value = "";
+  }
   mounted() {
     that = this;
     if (this.content) {
@@ -776,14 +805,14 @@ export default class MO2Editor extends Vue {
     this.$emit("loaded", this);
     this.startAutoSave();
   }
-  startAutoSave() {
-    setTimeout(() => {
-      if ((that as MO2Editor).update) {
-        (that as MO2Editor).update = false;
+  async startAutoSave() {
+    while (true) {
+      (that as MO2Editor).update = true;
+      if (this.notSync) {
         (that as MO2Editor).$emit("autosave");
       }
-      this.startAutoSave();
-    }, 5000);
+      await timeout(10000);
+    }
   }
 
   @Watch("content")

@@ -145,7 +145,6 @@ export default class EditArticle extends Vue {
         return;
       }
       this.getTitleAndContent();
-      console.log(this.$route.params["id"], this.blog);
       if (
         this.blog.title &&
         this.blog.content &&
@@ -155,6 +154,9 @@ export default class EditArticle extends Vue {
         UpSertBlogSync({ draft: true }, this.blog);
       }
     };
+  }
+  beforeDestroy() {
+    this.autoSave();
   }
   editorLoad(editor: Editor) {
     this.editor = editor;
@@ -228,6 +230,9 @@ export default class EditArticle extends Vue {
   autoSave() {
     this.$emit("update:autoSaving", true);
     this.getTitleAndContent();
+    if (!this.blog || this.blog.title === "") {
+      return;
+    }
     this.postBlog({}, true)
       .then(() => {
         this.$emit("update:autoSaving", false);

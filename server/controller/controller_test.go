@@ -23,7 +23,6 @@ var c *Controller
 
 func TestMain(m *testing.M) {
 	// Write code here to run before tests
-	middleware.SetupRateLimiter(5, 5)
 	r = gin.Default()
 	c = NewController()
 	SetupHandlers(c)
@@ -34,7 +33,7 @@ func TestMain(m *testing.M) {
 		}
 		userInfo, err = mo2utils.ParseJwt(str)
 		return
-	}, mo2utils.UserInfoKey)
+	}, mo2utils.UserInfoKey, nil)
 	// Run tests
 	exitVal := m.Run()
 

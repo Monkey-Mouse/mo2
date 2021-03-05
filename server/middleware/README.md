@@ -35,7 +35,7 @@ func setupHandlers(c *controller.Controller) {
     周期长度默认10秒，ban时间默认3600秒（1小时）
     也就是说下边这种写法意义是：/logs2这个api最多被一个相同ip在10秒内请求30次，
     如果10秒不到的时间内请求次数达到30，这个ip会被ban 1个小时。
-    周期长度和ban的时间可以使用SetupRateLimiter(limitEvery int, unblockevery int)方法设置
+    周期长度和ban的时间可以使用SetupRateLimiter(limitEvery int, unblockevery int, useRedis bool)方法设置
     */
     middleware.H.GetWithRateLimit("/logs2", c.Log, 30, "Admin", "User")
     // 同理，group也有ratelimit版本
@@ -61,6 +61,11 @@ middleware.H.RegisterMapedHandlers(r,
 - r：指向需要注册到的`gin.Engine`的指针
 - getUserFromCTX：一个方法，接收gin的context，从里边产生出一个`RoleHolder`接口类型的数据和
 - userKey：一个常量，读取的用户信息会被用`ctx.Set(userKey,info)`存在ctx中，方便之后在其它handler中使用  
+
+Ratelimit功能默认会使用服务器内存进行缓存，周期长度默认10秒，ban时间默认3600秒（1小时）。
+它也支持使用redis进行缓存，如果想更改设置，你需要在注册中间件前调用
+`SetupRateLimiter(limitEvery int, unblockevery int, useRedis bool)`方法设置
+注意中间件会试图从环境变量`REDIS_URL`里读取redis的url
 
 
 

@@ -30,7 +30,7 @@ func RunServer() {
 		}
 		userInfo, err = mo2utils.ParseJwt(str)
 		return
-	}, mo2utils.UserInfoKey)
+	}, mo2utils.UserInfoKey, &middleware.OptionalParams{LimitEvery: 10, Unblockevery: 3600, UseRedis: true})
 	pprof.Register(r)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.NoRoute(func(c *gin.Context) {
