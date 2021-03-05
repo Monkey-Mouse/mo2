@@ -13,17 +13,17 @@ import (
 	"github.com/qiniu/go-sdk/v7/storage"
 )
 
-// UploadAllFiles upload all files in a dir to qiniu cdn
-func UploadAllFiles(srcPath string, uploadRootPath string) {
+// ProcessAllFiles use handler function to process each file recursively under srcPath
+func ProcessAllFiles(srcPath string, uploadRootPath string, processHandler func(parameter ...string)) {
 	if _, err := os.Stat(srcPath); os.IsNotExist(err) {
 		fmt.Println("Directory created")
 	} else {
-		uploadAllFiles(srcPath, srcPath, uploadRootPath)
+		processAllFiles(srcPath, srcPath, uploadRootPath, processHandler)
 	}
 	return
 }
 
-func uploadAllFiles(curPath string, rootPath string, uploadRootPath string) {
+func processAllFiles(curPath string, rootPath string, uploadRootPath string, processHandler func(parameter ...string)) {
 
 	files, err := ioutil.ReadDir(curPath)
 	if err != nil {
@@ -33,13 +33,10 @@ func uploadAllFiles(curPath string, rootPath string, uploadRootPath string) {
 		srcNewPath := path.Join(curPath, f.Name())
 		relativePath := strings.TrimPrefix(srcNewPath, rootPath)
 		uploadRelativePath := path.Join(uploadRootPath, relativePath)
-
 		if f.IsDir() {
-			uploadAllFiles(srcNewPath, rootPath, uploadRootPath)
+			processAllFiles(srcNewPath, rootPath, uploadRootPath, processHandler)
 		} else {
-			qiniuFile(srcNewPath, uploadRelativePath)
-			//fmt.Println(srcNewPath)
-			//fmt.Println(uploadRelativePath)
+			processHandler(srcNewPath, rootPath, uploadRelativePath)
 		}
 	}
 }
@@ -54,7 +51,9 @@ func UploadCDN() {
 	if IsEnvRelease() {
 		rootPath := "./dist"
 		uploadRootPath := "dist"
-		UploadAllFiles(rootPath, uploadRootPath)
+		ProcessAllFiles(rootPath, uploadRootPath, func(parameter ...string) {
+			qiniuFile(parameter[0], parameter[3])
+		})
 	}
 }
 
