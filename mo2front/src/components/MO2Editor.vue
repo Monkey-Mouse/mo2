@@ -493,7 +493,6 @@ export default class MO2Editor extends Vue {
   update = false;
   editable = true;
   load = false;
-  notSync = false;
   editor: Editor = new Editor({
     extensions: [
       new Blockquote(),
@@ -739,12 +738,7 @@ export default class MO2Editor extends Vue {
     content: `
     `,
     onUpdate() {
-      if ((that as MO2Editor).update) {
-        (that as MO2Editor).$emit("autosave");
-        (that as MO2Editor).update = false;
-      } else {
-        (that as MO2Editor).notSync = true;
-      }
+      (that as MO2Editor).update = true;
     },
     onPaste(editorview, event, slice) {
       var items = (event.clipboardData || event.originalEvent.clipboardData)
@@ -807,11 +801,11 @@ export default class MO2Editor extends Vue {
   }
   async startAutoSave() {
     while (true) {
-      (that as MO2Editor).update = true;
-      if (this.notSync) {
+      if (this.update) {
         (that as MO2Editor).$emit("autosave");
+        this.update = false;
       }
-      await timeout(10000);
+      await timeout(5000);
     }
   }
 
