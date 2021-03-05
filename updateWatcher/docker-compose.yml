@@ -21,6 +21,7 @@ services:
       - qiniusk=${qiniusk}
       - emailAddr=${emailAddr}
       - emailPass=${emailPass}
+      - REDIS_URL=${REDIS_URL}
     ports:
       - 5001:5001
     depends_on:
