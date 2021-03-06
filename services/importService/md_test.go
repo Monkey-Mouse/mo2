@@ -1,22 +1,46 @@
 package importService
 
 import (
-	"fmt"
 	"io/ioutil"
+	"mo2/mo2utils"
+	"strings"
+	"time"
 )
 
 func ExampleTransform() {
-	//t1:=time.Now()
-	source, err := ioutil.ReadFile("2020-04-16-《生活十讲》-爱与情.md")
-	if err != nil {
-		panic(err)
-	}
-	blog := Transform([]byte(source))
-	//fmt.Println(time.Since(t1))
-	fmt.Println(blog.Title)
-	fmt.Println(blog.EntityInfo.CreateTime)
+	c := make(chan []byte)
+	done := make(chan bool)
+	count := 0
+	t1 := time.Now()
 
+	go func() {
+		for {
+			res, ok := <-c
+			if ok {
+				blog := Transform(res)
+				println(blog.Title)
+				println(count, "write", time.Since(t1))
+				count--
+			} else {
+				println("finished!")
+				done <- true
+				return
+			}
+		}
+	}()
+
+	mo2utils.ProcessAllFiles("./", "", func(parameter ...string) {
+		if strings.HasSuffix(parameter[0], ".md") {
+			source, err := ioutil.ReadFile(parameter[0])
+			if err != nil {
+				panic(err)
+			}
+			c <- source
+			count++
+			println(count, " read", time.Since(t1))
+		}
+	})
+	close(c)
+	<-done
 	// Output:
-	// 《生活十讲》——爱与情
-	// 2020-04-16 00:00:00 +0000 UTC
 }
