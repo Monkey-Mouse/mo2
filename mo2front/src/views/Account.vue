@@ -144,6 +144,7 @@ export default class Account extends Vue implements BlogAutoLoader {
     pagesize: 5,
     nomore: false,
     blogs: [],
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     ReachedButtom: () => {},
   };
   validator = {

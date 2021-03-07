@@ -29,12 +29,17 @@
       <v-spacer />
       <div v-if="$route.path.indexOf('/edit') === 0">
         <v-row>
-          <div v-if="autoSaving" class="grey--text ma-2">Saving...</div>
+          <div v-if="autoSaving" class="grey--text ma-2">
+            <v-progress-circular
+              color="yellow"
+              indeterminate
+            ></v-progress-circular>
+          </div>
           <div v-else-if="autoSaving === null" class="red--text ma-2">
             Auto Save Failed!
           </div>
-          <div v-else class="green--text ma-2">Saved!</div>
-          <v-btn class="ml-10" outlined color="green" @click="publishClick"
+          <div v-else class="light-green--text ma-2">Saved!</div>
+          <v-btn class="ml-10" color="green" outlined @click="publishClick"
             >publish</v-btn
           >
         </v-row>

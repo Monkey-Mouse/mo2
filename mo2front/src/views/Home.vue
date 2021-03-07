@@ -27,7 +27,7 @@ import {
   BlogAutoLoader,
   AddMore,
   ElmReachedButtom,
-} from "@/utils";
+} from "../utils";
 import axios from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";

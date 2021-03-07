@@ -306,14 +306,10 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 		blogs := database.FindBlogsByUserId(id, model.Filter{
 			IsDraft:   isDraft,
 			IsDeleted: isDeleted,
+			Page:      page,
+			PageSize:  pageSize,
 		})
-		qBlogs := dto.QueryBlogs{}
-		qBlogs.Init(blogs)
-		if results, exist := qBlogs.Query(page, pageSize); exist {
-			ctx.JSON(http.StatusOK, results.GetBlogs())
-		} else {
-			ctx.Status(http.StatusNoContent)
-		}
+		ctx.JSON(http.StatusOK, blogs)
 	}
 }
 
@@ -400,17 +396,20 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason("权限不足，请联系管理员"))
 		return
 	}
-	blogs := database.FindAllBlogs(model.Filter{
+	blogs := database.FindBlogs(model.Filter{
 		IsDraft:   isDraft,
 		IsDeleted: isDeleted,
+		Page:      page,
+		PageSize:  pageSize,
 	})
-	qBlogs := dto.QueryBlogs{}
-	qBlogs.Init(blogs)
-	if results, exist := qBlogs.Query(page, pageSize); exist {
-		ctx.JSON(http.StatusOK, results.GetBlogs())
-	} else {
-		ctx.JSON(http.StatusNoContent, results.GetBlogs())
-	}
+	ctx.JSON(http.StatusOK, blogs)
+	// qBlogs := dto.QueryBlogs{}
+	// qBlogs.Init(blogs)
+	// if results, exist := qBlogs.Query(page, pageSize); exist {
+	// 	ctx.JSON(http.StatusOK, results.GetBlogs())
+	// } else {
+	// 	ctx.JSON(http.StatusNoContent, results.GetBlogs())
+	// }
 }
 
 func parseString2Bool(s string) (b bool) {

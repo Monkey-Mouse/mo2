@@ -22,6 +22,8 @@ type Blog struct {
 type Filter struct {
 	IsDraft   bool `json:"is_draft" example:"false"`
 	IsDeleted bool `json:"is_deleted" example:"false"`
+	Page      int  `json:"page"`
+	PageSize  int  `json:"page_size"`
 }
 
 func (b *Blog) Init() {

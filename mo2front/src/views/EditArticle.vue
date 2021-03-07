@@ -67,6 +67,7 @@ export default class EditArticle extends Vue {
   content = "";
   editor: Editor;
   blog: BlogUpsert = {};
+  published = false;
   validator = {
     description: {
       required: required,
@@ -212,7 +213,7 @@ export default class EditArticle extends Vue {
       const element = model[key];
       this.blog[key] = element;
     }
-    var data = await UpsertBlog({ draft: draft }, this.blog);
+    let data = await UpsertBlog({ draft: draft }, this.blog);
     if (this.blog.id !== data.id) {
       this.$router.replace(`/edit/${data.id}`);
     }
@@ -220,17 +221,23 @@ export default class EditArticle extends Vue {
   }
   async confirm(model: BlogUpsert, draft = false) {
     try {
+      this.published = true;
       await this.postBlog(model, draft);
       this.$router.push("/article/" + this.blog.id);
       return { err: "", pass: true };
     } catch (error) {
+      this.published = false;
       return { err: GetErrorMsg(error), pass: false };
     }
   }
   autoSave() {
+    if (this.published) {
+      return;
+    }
     this.$emit("update:autoSaving", true);
     this.getTitleAndContent();
     if (!this.blog || this.blog.title === "") {
+      this.$emit("update:autoSaving", false);
       return;
     }
     this.postBlog({}, true)

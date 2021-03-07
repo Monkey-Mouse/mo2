@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import { User } from "@/models";
-import { GetInitials, UserRole } from "@/utils";
+import { GetInitials, UserRole } from "../utils/index";
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";

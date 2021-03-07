@@ -102,11 +102,14 @@ func UpsertBlog(b *model.Blog, isDraft bool) (success bool) {
 func FindBlogsByUser(u dto.LoginUserInfo, filter model.Filter) (b []model.Blog) {
 	return FindBlogsByUserId(u.ID, filter)
 }
+func getBlogListQueryOption() *options.FindOptions {
+	return options.Find().SetSort(bson.D{{"entity_info.update_time", -1}}).SetProjection(bson.D{{"content", 0}})
+}
 
 //find blog by userId
 func FindBlogsByUserId(id primitive.ObjectID, filter model.Filter) (b []model.Blog) {
 	col := chooseCol(filter.IsDraft)
-	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
+	opts := getBlogListQueryOption().SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
 	cursor, err := col.Find(context.TODO(), bson.M{"author_id": id, "entity_info.isdeleted": filter.IsDeleted}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
@@ -129,9 +132,9 @@ func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
 }
 
 //find blog
-func FindAllBlogs(filter model.Filter) (b []model.Blog) {
+func FindBlogs(filter model.Filter) (b []model.Blog) {
 	col := chooseCol(filter.IsDraft)
-	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
+	opts := getBlogListQueryOption().SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
 	cursor, err := col.Find(context.TODO(), bson.D{{"entity_info.isdeleted", filter.IsDeleted}}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {

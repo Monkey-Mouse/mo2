@@ -493,7 +493,6 @@ export default class MO2Editor extends Vue {
   update = false;
   editable = true;
   load = false;
-  notSync = false;
   editor: Editor = new Editor({
     extensions: [
       new Blockquote(),
@@ -739,19 +738,14 @@ export default class MO2Editor extends Vue {
     content: `
     `,
     onUpdate() {
-      if ((that as MO2Editor).update) {
-        (that as MO2Editor).$emit("autosave");
-        (that as MO2Editor).update = false;
-      } else {
-        (that as MO2Editor).notSync = true;
-      }
+      (that as MO2Editor).update = true;
     },
     onPaste(editorview, event, slice) {
-      var items = (event.clipboardData || event.originalEvent.clipboardData)
+      let items = (event.clipboardData || event.originalEvent.clipboardData)
         .items;
-      var files = [];
+      let files = [];
       for (let index = 0; index < items.length; index++) {
-        var item = items[index] as DataTransferItem;
+        let item = items[index] as DataTransferItem;
         if (
           item.type === "text/html" &&
           items.length >= index + 1 &&
@@ -761,7 +755,7 @@ export default class MO2Editor extends Vue {
           continue;
         }
         if (item.kind === "file") {
-          var blob = item.getAsFile();
+          let blob = item.getAsFile();
           files = files.concat(blob);
           // var reader = new FileReader();
           // reader.onload = function(event){
@@ -807,11 +801,11 @@ export default class MO2Editor extends Vue {
   }
   async startAutoSave() {
     while (true) {
-      (that as MO2Editor).update = true;
-      if (this.notSync) {
+      if (this.update) {
         (that as MO2Editor).$emit("autosave");
+        this.update = false;
       }
-      await timeout(10000);
+      await timeout(5000);
     }
   }
 
