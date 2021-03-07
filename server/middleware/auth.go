@@ -381,9 +381,9 @@ func (h handlerMap) RegisterMapedHandlers(
 	r *gin.Engine,
 	getUserFromCTX FromCTX,
 	userKey string,
-	optinal *OptionalParams) {
-	if optinal != nil {
-		setupRateLimiter(optinal.LimitEvery, optinal.Unblockevery, optinal.UseRedis)
+	optional *OptionalParams) {
+	if optional != nil {
+		setupRateLimiter(optional.LimitEvery, optional.Unblockevery, optional.UseRedis)
 	}
 	fromCTX = getUserFromCTX
 	userInfoKey = userKey
