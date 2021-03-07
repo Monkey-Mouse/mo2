@@ -19,7 +19,6 @@ services:
       - qiniusk=${qiniusk}
       - emailAddr=${emailAddr}
       - emailPass=${emailPass}
-      - REDIS_URL=${REDIS_URL}
     depends_on:
       - "mongodb"
       - "redis"

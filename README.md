@@ -55,6 +55,7 @@
 - go 1.15
 - 尽可能新的 npm 包管理工具
 - 尽可能新的 mongodb
+- 5.x-6.x的redis
 
 ### 编译服务器
 首先，我们需要确保你的mongodb已经在运行。  
@@ -67,6 +68,17 @@ export MO2_MONGO_URL=mongodb://127.0.0.1:27017
 windows powershell:
 ```powershell
 $env:MO2_MONGO_URL=mongodb://127.0.0.1:27017
+```
+之后，我们需要用同样的步骤配置redis  
+首先确保redis的运行状态  
+然后如果您的redis是默认配置的话，您可以使用以下命令：  
+linux bash:  
+```bash
+export REDIS_URL=localhost:6379
+```
+windows powershell:
+```powershell
+$env:REDIS_URL=localhost:6379
 ```
 然后，使用同一个终端，在项目根目录：
 ```bash

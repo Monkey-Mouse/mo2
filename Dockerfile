@@ -33,6 +33,7 @@ RUN chmod -R 777 .
 COPY --from=builder /go/bin /app
 ENV GIN_MODE=release
 ENV MO2_MONGO_URL=mongodb://mongodb:27017
+ENV REDIS_URL=redis:6379
 ENTRYPOINT /app/mo2
 LABEL Name=mo2 Version=0.0.1
 EXPOSE 5001
