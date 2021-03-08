@@ -143,7 +143,11 @@ export default class EditArticle extends Vue {
   async confirmMD({ file: file }: { file: File }) {
     try {
       this.blog = await UploadMD(file);
-      this.content = this.blog.content;
+      if (this.blog.title === "") {
+        this.content = this.blog.content;
+      } else {
+        this.content = `<h1>${this.blog.title}</h1>${this.blog.content}`;
+      }
       this.$router.replace(`/edit/${this.blog.id}`);
       return { err: "", pass: true };
     } catch (error) {
