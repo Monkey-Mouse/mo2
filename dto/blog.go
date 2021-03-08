@@ -31,30 +31,3 @@ func MapBlog2QueryBlog(b model.Blog) (q QueryBlog) {
 	q.CategoryIDs = b.CategoryIDs
 	return
 }
-func (qs *QueryBlogs) Init(bs []model.Blog) {
-	for _, b := range bs {
-		qs.blogs = append(qs.blogs, MapBlog2QueryBlog(b))
-		//qs.blogs[i].BlogMap(b)
-	}
-}
-func (qs *QueryBlogs) Query(page int, pageSize int) (rs QueryBlogs, exist bool) {
-	// check whether index out of scope
-	numWith0 := len(qs.blogs) - 1
-	begin := page * pageSize
-	end := (page + 1) * pageSize
-	if begin > numWith0 {
-		exist = false
-		return
-	}
-	exist = true
-	// if the last page, return all of this page
-	if end > numWith0 {
-		rs.blogs = qs.blogs[begin:]
-	} else {
-		rs.blogs = qs.blogs[begin:end]
-	}
-	return
-}
-func (qs *QueryBlogs) GetBlogs() (bs []QueryBlog) {
-	return qs.blogs
-}

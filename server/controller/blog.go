@@ -2,7 +2,6 @@ package controller
 
 import (
 	"mo2/database"
-	"mo2/dto"
 	"mo2/mo2utils"
 	"mo2/mo2utils/mo2errors"
 	"mo2/server/controller/badresponse"
@@ -238,14 +237,10 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 	blogs := database.FindBlogsByUser(info, model.Filter{
 		IsDraft:   isDraft,
 		IsDeleted: isDeleted,
+		Page:      page,
+		PageSize:  pageSize,
 	})
-	qBlogs := dto.QueryBlogs{}
-	qBlogs.Init(blogs)
-	if results, exist := qBlogs.Query(page, pageSize); exist {
-		ctx.JSON(http.StatusOK, results.GetBlogs())
-	} else {
-		ctx.JSON(http.StatusNoContent, results.GetBlogs())
-	}
+	ctx.JSON(http.StatusOK, blogs)
 }
 
 // FindBlogsByUserId godoc
@@ -403,13 +398,6 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 		PageSize:  pageSize,
 	})
 	ctx.JSON(http.StatusOK, blogs)
-	// qBlogs := dto.QueryBlogs{}
-	// qBlogs.Init(blogs)
-	// if results, exist := qBlogs.Query(page, pageSize); exist {
-	// 	ctx.JSON(http.StatusOK, results.GetBlogs())
-	// } else {
-	// 	ctx.JSON(http.StatusNoContent, results.GetBlogs())
-	// }
 }
 
 func parseString2Bool(s string) (b bool) {
