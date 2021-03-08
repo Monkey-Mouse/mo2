@@ -27,7 +27,7 @@
       :inputProps="inputProps"
       :validator="validator"
       ref="dialog"
-      @confirm="confirm"
+      :confirm="confirm"
       :uploadImgs="uploadImgs"
     />
   </div>
@@ -42,6 +42,7 @@ import {
   GetArticle,
   GetErrorMsg,
   globaldic,
+  timeout,
   UploadImgToQiniu,
   UpsertBlog,
   UpSertBlogSync,
@@ -66,6 +67,7 @@ export default class EditArticle extends Vue {
   content = "";
   editor: Editor;
   blog: BlogUpsert = {};
+  published = false;
   validator = {
     description: {
       required: required,
@@ -112,7 +114,9 @@ export default class EditArticle extends Vue {
   }
   @Watch("$route", { immediate: true, deep: true })
   pageChange() {
-    if (!this.blog.id || this.blog.id === "") {
+    if (!this.$route.params["id"] || this.$route.params["id"] === "") {
+      this.content = "";
+      this.blog = {};
       this.init();
     }
   }
@@ -137,21 +141,33 @@ export default class EditArticle extends Vue {
           }
         });
     } else this.loading = false;
-    window.addEventListener("beforeunload", () => {
+    window.onbeforeunload = () => {
+      if (!this.$route.params["id"] || this.$route.params["id"] === "") {
+        return;
+      }
       this.getTitleAndContent();
-      UpSertBlogSync({ draft: true }, this.blog);
-    });
+      if (
+        this.blog.title &&
+        this.blog.content &&
+        this.blog.title !== "" &&
+        this.blog.content !== ""
+      ) {
+        UpSertBlogSync({ draft: true }, this.blog);
+      }
+    };
+  }
+  beforeDestroy() {
+    this.autoSave();
   }
   editorLoad(editor: Editor) {
     this.editor = editor;
     this.editorLoaded = true;
   }
   getTitleAndContent() {
-    const titleElm = document.querySelector("h1");
-    this.blog.title = titleElm.innerText.trim();
-    this.blog.content = this.editor
-      .GetHTML()
-      .substring(9 + titleElm.innerText.length);
+    const raw = this.editor.GetHTML();
+    const titlePos = raw.indexOf("</h1>");
+    this.blog.title = raw.substring(4, titlePos);
+    this.blog.content = raw.substring(titlePos + 5);
   }
   publish() {
     this.getTitleAndContent();
@@ -197,19 +213,33 @@ export default class EditArticle extends Vue {
       const element = model[key];
       this.blog[key] = element;
     }
-    var data = await UpsertBlog({ draft: draft }, this.blog);
+    let data = await UpsertBlog({ draft: draft }, this.blog);
     if (this.blog.id !== data.id) {
       this.$router.replace(`/edit/${data.id}`);
     }
     this.blog.id = data.id;
   }
   async confirm(model: BlogUpsert, draft = false) {
-    await this.postBlog(model, draft);
-    this.$router.push("/article/" + this.blog.id);
+    try {
+      this.published = true;
+      await this.postBlog(model, draft);
+      this.$router.push("/article/" + this.blog.id);
+      return { err: "", pass: true };
+    } catch (error) {
+      this.published = false;
+      return { err: GetErrorMsg(error), pass: false };
+    }
   }
   autoSave() {
+    if (this.published) {
+      return;
+    }
     this.$emit("update:autoSaving", true);
     this.getTitleAndContent();
+    if (!this.blog || this.blog.title === "") {
+      this.$emit("update:autoSaving", false);
+      return;
+    }
     this.postBlog({}, true)
       .then(() => {
         this.$emit("update:autoSaving", false);

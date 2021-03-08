@@ -166,7 +166,7 @@
 
 <script lang="ts">
 import { User } from "@/models";
-import { GetErrorMsg, LoginAsync, RegisterAsync } from "@/utils";
+import { GetErrorMsg, LoginAsync, RegisterAsync } from "../utils";
 import { AxiosError } from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";

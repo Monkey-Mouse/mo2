@@ -37,10 +37,10 @@ export async function GetUserInfoAsync() {
     let re = await axios.get<User>('/api/logs');
     return re.data
 }
-export async function RegisterAsync(userInfo: { email: string, password: string, userName: string }) {
+export async function RegisterAsync(userInfo: { email: string; password: string; userName: string }) {
     return (await axios.post<User>('/api/accounts', userInfo)).data;
 }
-export async function LoginAsync(userInfo: { userNameOrEmail: string, password: string }) {
+export async function LoginAsync(userInfo: { userNameOrEmail: string; password: string }) {
     return (await axios.post<User>('/api/accounts/login', userInfo)).data;
 }
 export function GetErrorMsg(apiError: any) {
@@ -62,7 +62,7 @@ export const UploadImgToQiniu = async (
         const element = blobs[index];
         const promise = new Promise<void>((resolve, reject) => {
             GetUploadToken(element.name).then(val => {
-                var ob = qiniu.upload(element, val.file_key, val.token);
+                let ob = qiniu.upload(element, val.file_key, val.token);
                 ob.subscribe(null, (err) => {
                     reject(err)
                 }, res => {
@@ -87,41 +87,39 @@ export function ParseQuery(query: { [key: string]: any }) {
     queryStr = queryStr + queryList.join('&');
     return queryStr
 }
-export const GetArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
+export const GetArticles = async (query: { page: number; pageSize: number; draft: boolean }) => {
     return (await axios.get<BlogBrief[]>('/api/blogs/query' + ParseQuery(query))).data
 }
 export async function UpsertBlog(query: { draft: boolean }, blog: BlogUpsert) {
     return (await axios.post<Blog>('/api/blogs/publish' + ParseQuery(query), blog)).data
 }
 export function UpSertBlogSync(query: { draft: boolean }, blog: BlogUpsert) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/blogs/publish" + ParseQuery(query), false);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify(blog));
+
+    navigator.sendBeacon("/api/blogs/publish" + ParseQuery(query), JSON.stringify(blog))
 }
-export async function GetArticle(query: { id: string, draft: boolean }) {
+export async function GetArticle(query: { id: string; draft: boolean }) {
     return (await axios.get<Blog>('/api/blogs/find/id' + ParseQuery(query))).data
 }
-export const GetOwnArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
+export const GetOwnArticles = async (query: { page: number; pageSize: number; draft: boolean }) => {
     return (await axios.get<BlogBrief[]>('/api/blogs/find/own' + ParseQuery(query))).data
 }
 
-export const GetUserArticles = async (query: { page: number, pageSize: number, draft: boolean, id: string }) => {
+export const GetUserArticles = async (query: { page: number; pageSize: number; draft: boolean; id: string }) => {
     return (await axios.get<BlogBrief[]>('/api/blogs/find/userId' + ParseQuery(query))).data
 }
 export function ReachedBottom(): boolean {
     return (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight;
 }
 export interface BlogAutoLoader {
-    blogs: BlogBrief[],
-    loading: boolean,
+    blogs: BlogBrief[];
+    loading: boolean;
     firstloading: boolean;
-    page: number,
-    pagesize: number,
-    nomore: boolean,
-    ReachedButtom: () => void,
+    page: number;
+    pagesize: number;
+    nomore: boolean;
+    ReachedButtom: () => void;
 }
-export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { page: number, pageSize: number }) => Promise<BlogBrief[]>) {
+export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { page: number; pageSize: number }) => Promise<BlogBrief[]>) {
     if (elm.loading === false && !elm.nomore) {
         elm.loading = true;
         getArticles({
@@ -155,3 +153,9 @@ export async function Logout() {
 export const AdminRole = "GeneralAdmin"
 export const UserRole = "OrdinaryUser"
 export const AnonymousRole = "Anonymous"
+export function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+export async function UpdateUserInfo(info: User) {
+    return (await axios.put<User>('/api/accounts', info)).data;
+}

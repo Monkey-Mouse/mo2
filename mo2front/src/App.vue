@@ -29,12 +29,17 @@
       <v-spacer />
       <div v-if="$route.path.indexOf('/edit') === 0">
         <v-row>
-          <div v-if="autoSaving" class="grey--text ma-2">Saving...</div>
+          <div v-if="autoSaving" class="grey--text ma-2">
+            <v-progress-circular
+              color="yellow"
+              indeterminate
+            ></v-progress-circular>
+          </div>
           <div v-else-if="autoSaving === null" class="red--text ma-2">
             Auto Save Failed!
           </div>
-          <div v-else class="green--text ma-2">Saved!</div>
-          <v-btn class="ml-10" outlined color="green" @click="publishClick"
+          <div v-else class="light-green--text ma-2">Saved!</div>
+          <v-btn class="ml-10" color="green" outlined @click="publishClick"
             >publish</v-btn
           >
         </v-row>
@@ -118,7 +123,12 @@
       </template>
     </v-navigation-drawer>
     <v-main>
-      <router-view ref="view" :autoSaving.sync="autoSaving" :user="user" />
+      <router-view
+        ref="view"
+        v-if="userload"
+        :autoSaving.sync="autoSaving"
+        :user="user"
+      />
       <account-modal :enable.sync="enable" :user.sync="userdata" />
       <v-snackbar v-model="snackbar" :timeout="5000">
         {{ "登出成功！" }}
@@ -177,6 +187,7 @@ export default class App extends Vue {
   user: User = BlankUser;
   autoSaving = false;
   snackbar = false;
+  userload = false;
   get userdata() {
     return this.user;
   }
@@ -184,6 +195,7 @@ export default class App extends Vue {
   set userdata(v: User) {
     this.user = v;
     this.items[1].show = this.isUser;
+    this.items[2].show = this.isUser;
   }
 
   enable = false;
@@ -207,7 +219,7 @@ export default class App extends Vue {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
   @Watch("user")
-  userCHange() {
+  userChange() {
     this.items[2].show = this.isUser;
     this.items[1].show = this.isUser;
   }
@@ -230,6 +242,7 @@ export default class App extends Vue {
   created() {
     GetUserInfoAsync().then((u) => {
       this.user = u;
+      this.userload = true;
       this.items[1].show = this.isUser;
       this.items[2].show = this.isUser;
     });

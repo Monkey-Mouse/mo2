@@ -2,9 +2,9 @@
   <v-avatar :size="size" color="brown">
     <v-img
       v-if="
-        user.avatar !== null && user.avatar !== undefined && user.avatar !== ''
+        user.settings && user.settings.avatar && user.settings.avatar !== ''
       "
-      :src="user.avatar"
+      :src="user.settings.avatar + '~thumb'"
     ></v-img>
     <span v-else class="white--text headline">{{
       isUser ? initials : "A"
@@ -14,10 +14,10 @@
 
 <script lang="ts">
 import { User } from "@/models";
-import { GetInitials, UserRole } from "@/utils";
+import { GetInitials, UserRole } from "../utils/index";
 import Vue from "vue";
 import Component from "vue-class-component";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 @Component({
   components: {},
 })
@@ -29,6 +29,7 @@ export default class Avatar extends Vue {
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
+
   get initials(): string {
     return GetInitials(this.user.name);
   }

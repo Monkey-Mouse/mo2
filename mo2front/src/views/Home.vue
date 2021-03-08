@@ -7,7 +7,9 @@
       <v-row align="center" justify="center">
         <v-col class="text-center" cols="12">
           <h1 class="display-1 font-weight-thin mb-4">MO2</h1>
-          <h4 class="subheading">Monkey ❤ Mouse</h4>
+          <h4 class="subheading">
+            Blog site build for everyone, built by everyone
+          </h4>
         </v-col>
       </v-row>
     </v-parallax>
@@ -25,7 +27,7 @@ import {
   BlogAutoLoader,
   AddMore,
   ElmReachedButtom,
-} from "@/utils";
+} from "../utils";
 import axios from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";

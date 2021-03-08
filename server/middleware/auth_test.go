@@ -3,41 +3,80 @@ package middleware
 import (
 	"fmt"
 	"math/rand"
-	"mo2/mo2utils/mo2errors"
+	"mo2/mo2utils"
 	"net/http"
+	"net/http/httptest"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/modern-go/concurrent"
 )
 
-func Test_checkRL(t *testing.T) {
-	type args struct {
-		prop handlerProp
-		ip   string
+func setupTestHandlers() {
+	api := H.Group("/apitest")
+	{
+		api.GetWithRL("/logs", func(c *gin.Context) {
+
+		}, 10)
 	}
-	prop := handlerProp{rates: concurrent.NewMap(), limit: 3}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{name: "test add 1", args: args{prop: prop, ip: "xxxx"}, want: true},
-		{name: "test add 2", args: args{prop: prop, ip: "xxxx"}, want: true},
-		{name: "test add 3", args: args{prop: prop, ip: "xxxx"}, want: true},
-		{name: "test block ip", args: args{prop: prop, ip: "xxxx"}, want: false},
-		{name: "test another ip", args: args{prop: prop, ip: "xxxxy"}, want: true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := checkRL(tt.args.prop, tt.args.ip); got != tt.want {
-				t.Errorf("checkRateLimit() = %v, want %v", got, tt.want)
+}
+
+func Test_RedisAuthMiddleware(t *testing.T) {
+	testMiddleware(t, true)
+}
+func testMiddleware(t *testing.T, useredis bool) {
+	resetVar()
+	authR := gin.New()
+	req, _ := http.NewRequest("GET", "/apitest/logs", nil)
+	setupTestHandlers()
+	H.RegisterMapedHandlers(authR, func(ctx *gin.Context) (userInfo RoleHolder, err error) {
+		return
+	}, mo2utils.UserInfoKey, &OptionalParams{5, 5, useredis})
+	ch := make(chan bool, 0)
+	t.Run("Test rate limit block", func(t *testing.T) {
+		for i := 0; i < 100; i++ {
+			go func() {
+				resp := httptest.NewRecorder()
+				authR.ServeHTTP(resp, req)
+				ch <- resp.Code == 200
+			}()
+		}
+		sucNum := 0
+		for i := 0; i < 100; i++ {
+			success := <-ch
+			if success {
+				sucNum++
 			}
-		})
-	}
+		}
+		if sucNum != 10 {
+			t.Errorf("auth middleware should ban 90 times, actual baned: %v", 100-sucNum)
+		}
+	})
+	time.Sleep(5 * time.Second)
+	t.Run("Test rate limit unblock", func(t *testing.T) {
+		for i := 0; i < 100; i++ {
+			go func() {
+				resp := httptest.NewRecorder()
+				authR.ServeHTTP(resp, req)
+				ch <- resp.Code == 200
+			}()
+		}
+		sucNum := 0
+		for i := 0; i < 100; i++ {
+			success := <-ch
+			if success {
+				sucNum++
+			}
+		}
+		if sucNum != 10 {
+			t.Errorf("auth middleware should ban 90 times, actual baned: %v", 100-sucNum)
+		}
+	})
+}
+func Test_AuthMiddleware(t *testing.T) {
+	testMiddleware(t, false)
 }
 
 func Test_handlerMap_Group1(t *testing.T) {
@@ -251,43 +290,6 @@ func Test_handlerMap_PostWithRL(t *testing.T) {
 			}
 			if v.limit != tt.args.ratelimit {
 				t.Errorf("get test failed! rate limit value is wrong! expect: %v, real: %v", tt.args.ratelimit, v.limit)
-			}
-		})
-	}
-}
-
-func Test_checkBlockAndRL(t *testing.T) {
-	h := handlerMap{handlers, "", make([][]string, 0), -1}
-	unblockEvery = 1
-	duration = 1
-	h.GetWithRL("/xx", nil, 3)
-	handlers = h.innerMap
-	type args struct {
-		prop handlerProp
-		ip   string
-	}
-	tests := []struct {
-		name string
-		args args
-		want *mo2errors.Mo2Errors
-	}{
-		{name: "Test ip enter1", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-		{name: "Test ip enter2", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-		{name: "Test ip enter3", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-		{name: "Test ip ban", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: mo2errors.New(429, "Too frequent!")},
-		{name: "Test ip block", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: mo2errors.New(403, "IP Blocked!检测到该ip地址存在潜在的ddos行为")},
-		{name: "Test ip unblock", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-	}
-	go cleaner()
-	go resetBlocker()
-	for _, tt := range tests {
-		if tt.name == "Test ip unblock" {
-			time.Sleep(2 * time.Second)
-		}
-		hm := getHandlers()
-		t.Run(tt.name, func(t *testing.T) {
-			if got := checkBlockAndRL(hm[handlerKey{"/xx", http.MethodGet}], tt.args.ip); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("checkBlockAndRL() = %v, want %v", got, tt.want)
 			}
 		})
 	}
