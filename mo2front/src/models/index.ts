@@ -59,6 +59,7 @@ export interface InputProp {
     icon?: string;
     label?: string;
     default: any;
+    accept?: string;
     iconClick?: (prop: InputProp) => void;
 }
 export interface ApiError {
