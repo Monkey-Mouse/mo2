@@ -30,6 +30,15 @@
       :confirm="confirm"
       :uploadImgs="uploadImgs"
     />
+    <MO2Dialog
+      :show.sync="uploadMD"
+      confirmText="发布"
+      title="发布文章"
+      :inputProps="uploadProps"
+      :validator="uploadValidator"
+      :confirm="confirmMD"
+      :uploadImgs="uploadImgs"
+    />
   </div>
 </template>
 
@@ -41,14 +50,13 @@ import MO2Dialog from "../components/MO2Dialog.vue";
 import {
   GetArticle,
   GetErrorMsg,
-  globaldic,
-  timeout,
   UploadImgToQiniu,
+  UploadMD,
   UpsertBlog,
   UpSertBlogSync,
 } from "@/utils";
 import { BlogUpsert, InputProp } from "@/models";
-import { required, minLength, email } from "vuelidate/lib/validators";
+import { required, minLength } from "vuelidate/lib/validators";
 import { AxiosError } from "axios";
 import { Prop, Watch } from "vue-property-decorator";
 @Component({
@@ -68,6 +76,22 @@ export default class EditArticle extends Vue {
   editor: Editor;
   blog: BlogUpsert = {};
   published = false;
+  uploadProps: { [name: string]: InputProp } = {
+    file: {
+      errorMsg: { required: "文件不可为空" },
+      label: "Markdown文件",
+      default: {},
+      icon: "mdi-file-document",
+      col: 12,
+      type: "file",
+      accept: ".md",
+    },
+  };
+  uploadValidator = {
+    file: {
+      required: required,
+    },
+  };
   validator = {
     description: {
       required: required,
@@ -77,6 +101,7 @@ export default class EditArticle extends Vue {
       required: required,
     },
   };
+  uploadMD = false;
   get inputProps(): { [name: string]: InputProp } {
     return {
       title: {
@@ -111,6 +136,15 @@ export default class EditArticle extends Vue {
   }
   created() {
     this.init();
+  }
+  async confirmMD({ file: file }: { file: File }) {
+    console.log(file);
+    try {
+      await UploadMD(file);
+      return { err: "", pass: true };
+    } catch (error) {
+      return { err: GetErrorMsg(error), pass: false };
+    }
   }
   @Watch("$route", { immediate: true, deep: true })
   pageChange() {
@@ -171,6 +205,10 @@ export default class EditArticle extends Vue {
   }
   publish() {
     this.getTitleAndContent();
+    if (!this.blog.title || this.blog.title === "") {
+      this.uploadMD = true;
+      return;
+    }
     let elm = document.querySelector(".mo2content p") as any;
     if (this.blog.description === "" || this.blog.description === undefined) {
       this.blog.description = "";

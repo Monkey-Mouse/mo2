@@ -159,3 +159,9 @@ export function timeout(ms) {
 export async function UpdateUserInfo(info: User) {
     return (await axios.put<User>('/api/accounts', info)).data;
 }
+export async function UploadMD(md: File) {
+    let form = new FormData();
+    form.append('upload[]', md)
+    return (await axios.post('/api/file', form)).data;
+}
+

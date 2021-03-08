@@ -28,7 +28,6 @@ import {
   AddMore,
   ElmReachedButtom,
 } from "../utils";
-import axios from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
