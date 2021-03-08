@@ -227,6 +227,7 @@ export default class EditArticle extends Vue {
         elm = elm.nextElementSibling;
       }
     }
+    this.blog.description = this.blog.description.substr(0, 50);
     this.showPublish = true;
     (this.$refs["dialog"] as MO2Dialog).setModel(this.blog);
     let imgEs = document.querySelectorAll(".mo2content img");
