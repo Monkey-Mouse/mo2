@@ -92,6 +92,8 @@ func AddBlogs2Categories(ab2cs dto.AddBlogs2Categories) (results []dto.QueryBlog
 		}
 	}
 	var blog, draft model.Blog
+	//todo insert
+
 	if len(categoryIDs) > 0 {
 		for _, blogID := range ab2cs.BlogIDs {
 			blog = FindBlogById(blogID, false)
