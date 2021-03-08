@@ -137,9 +137,14 @@ export default class EditArticle extends Vue {
   created() {
     this.init();
   }
+  mounted() {
+    this.$emit("update:autoSaving", false);
+  }
   async confirmMD({ file: file }: { file: File }) {
     try {
-      await UploadMD(file);
+      this.blog = await UploadMD(file);
+      this.content = this.blog.content;
+      this.$router.replace(`/edit/${this.blog.id}`);
       return { err: "", pass: true };
     } catch (error) {
       return { err: GetErrorMsg(error), pass: false };

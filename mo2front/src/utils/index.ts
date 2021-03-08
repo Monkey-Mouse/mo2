@@ -162,6 +162,6 @@ export async function UpdateUserInfo(info: User) {
 export async function UploadMD(md: File) {
     let form = new FormData();
     form.append('upload[]', md)
-    return (await axios.post('/api/file', form)).data;
+    return (await axios.post<Blog>('/api/file', form)).data;
 }
 
