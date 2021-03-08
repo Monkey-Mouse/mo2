@@ -41,24 +41,6 @@ definitions:
       token:
         type: string
     type: object
-  dto.LoginUserInfo:
-    properties:
-      email:
-        example: email@qq.com
-        type: string
-      id:
-        example: xxxxxxxxxxxxx==
-        type: string
-      name:
-        example: account name
-        type: string
-      roles:
-        example:
-        - ordinaryUser
-        items:
-          type: string
-        type: array
-    type: object
   dto.QueryBlog:
     properties:
       authorId:
@@ -417,7 +399,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.LoginUserInfo'
+            $ref: '#/definitions/dto.UserInfo'
         "400":
           description: Bad Request
           schema:
@@ -950,6 +932,38 @@ paths:
       summary: find all Blogs
       tags:
       - blogs
+  /api/file:
+    post:
+      consumes:
+      - multipart/form-data
+      description: say something
+      parameters:
+      - description: file
+        in: body
+        name: form
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: simple test
   /api/img/{filename}:
     get:
       description: add by json
@@ -980,39 +994,8 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.LoginUserInfo'
+            $ref: '#/definitions/dto.UserInfo'
       summary: get user info
       tags:
       - logs
-  /file:
-    post:
-      consumes:
-      - multipart/form-data
-      description: say something
-      parameters:
-      - description: file
-        in: body
-        name: form
-        required: true
-        schema:
-          type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: simple test
-  /sayHello:
-    get:
-      description: say something
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-      summary: simple test
 swagger: "2.0"

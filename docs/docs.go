@@ -289,7 +289,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginUserInfo"
+                            "$ref": "#/definitions/dto.UserInfo"
                         }
                     },
                     "400": {
@@ -1104,6 +1104,55 @@ var doc = `{
                 }
             }
         },
+        "/api/file": {
+            "post": {
+                "description": "say something",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "simple test",
+                "parameters": [
+                    {
+                        "description": "file",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/img/{filename}": {
             "get": {
                 "description": "add by json",
@@ -1150,55 +1199,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginUserInfo"
-                        }
-                    }
-                }
-            }
-        },
-        "/file": {
-            "post": {
-                "description": "say something",
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "simple test",
-                "parameters": [
-                    {
-                        "description": "file",
-                        "name": "form",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/sayHello": {
-            "get": {
-                "description": "say something",
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "simple test",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.UserInfo"
                         }
                     }
                 }
@@ -1266,32 +1267,6 @@ var doc = `{
                 },
                 "token": {
                     "type": "string"
-                }
-            }
-        },
-        "dto.LoginUserInfo": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "email@qq.com"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "xxxxxxxxxxxxx=="
-                },
-                "name": {
-                    "type": "string",
-                    "example": "account name"
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "ordinaryUser"
-                    ]
                 }
             }
         },
