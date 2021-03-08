@@ -138,7 +138,6 @@ export default class EditArticle extends Vue {
     this.init();
   }
   async confirmMD({ file: file }: { file: File }) {
-    console.log(file);
     try {
       await UploadMD(file);
       return { err: "", pass: true };

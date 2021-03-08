@@ -31,9 +31,9 @@
     >
       <v-row align="center" justify="center">
         <v-col class="text-center" cols="12">
-          <a @click="changeAvatar" class="clickable">
+          <b @click="changeAvatar" :class="ownPage ? 'clickable' : ''">
             <avatar :size="80" :user="displayUser" />
-          </a>
+          </b>
           <!-- <v-img class="v-avatar" :src="displayUser.avatar"></v-img> -->
           <h1 class="display-1 font-weight-thin mb-4">
             {{ displayUser.name }}
@@ -223,6 +223,9 @@ export default class Account extends Vue implements BlogAutoLoader {
     this.$emit("update:user", this.user);
   }
   changeAvatar() {
+    if (!this.ownPage) {
+      return;
+    }
     (this.$refs.f as HTMLInputElement).click();
   }
   imgChange() {
