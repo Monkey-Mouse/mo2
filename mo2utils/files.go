@@ -52,7 +52,7 @@ func UploadCDN() {
 		rootPath := "./dist"
 		uploadRootPath := "dist"
 		ProcessAllFiles(rootPath, uploadRootPath, func(parameter ...string) {
-			qiniuFile(parameter[0], parameter[3])
+			qiniuFile(parameter[0], parameter[2])
 		})
 	}
 }
