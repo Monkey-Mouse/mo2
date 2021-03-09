@@ -48,31 +48,17 @@ func (c *Controller) FindAllCategories(ctx *gin.Context) {
 		id, err := primitive.ObjectIDFromHex(idStr)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
+			return
 		}
 		var ids []primitive.ObjectID
+		var mErr mo2errors.Mo2Errors
 		ids = append(ids, id)
-		cats = database.FindCategories(ids)
+		if cats, mErr = database.FindCategories(ids); mErr.IsError() {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(mErr))
+			return
+		}
 	}
 	ctx.JSON(http.StatusOK, cats)
-
-}
-
-// AddBlogs2Categories godoc
-// @Summary add blogs to chosen categories
-// @Description blogs 与 categories皆为id列表，方便批量操作
-// @Tags category
-// @Accept  json
-// @Produce  json
-// @Param id body dto.RelateEntitySet2EntitySet true "dto.RelateEntitySet2EntitySet"
-// @Success 200 {object} []model.Blog
-// @Router /api/blogs/addBlogs2Categories [post]
-func (c *Controller) AddBlogs2Categories(ctx *gin.Context) {
-	var ab2c dto.RelateEntitySet2EntitySet
-	if err := ctx.ShouldBindJSON(&ab2c); err != nil {
-		ctx.JSON(http.StatusBadRequest, badresponse.SetResponseReason("非法参数"))
-	}
-	results := database.RelateBlogs2Categories(ab2c)
-	ctx.JSON(http.StatusOK, results)
 
 }
 

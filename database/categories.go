@@ -39,16 +39,15 @@ func FindSubCategories(ID primitive.ObjectID) (cs []model.Category, mErr mo2erro
 	}
 	return
 }
-func FindCategories(ids []primitive.ObjectID) (cs []model.Category) {
-	var c model.Category
-	for _, id := range ids {
-		err := catCol.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&c)
-		if err != nil {
-			if err != mongo.ErrNoDocuments {
-				log.Fatal(err)
-			}
-		}
-		cs = append(cs, c)
+func FindCategories(ids []primitive.ObjectID) (cs []model.Category, mErr mo2errors.Mo2Errors) {
+	cursor, err := catCol.Find(context.TODO(), bson.M{"_id": bson.M{"$in": ids}})
+	if err != nil {
+		mErr.InitError(err)
+		return
+	}
+	if err = cursor.All(context.TODO(), &cs); err != nil {
+		mErr.InitError(err)
+		return
 	}
 	return
 }
@@ -88,7 +87,7 @@ func FindAllCategories() (cs []model.Category) {
 	}
 	return
 }
-func RelateBlogs2Categories(ab2cs dto.RelateEntitySet2EntitySet) (result []model.Blog) {
+func RelateCategories2Blogs(ab2cs dto.RelateEntitySet2EntitySet) (result []model.Blog) {
 	// 将所有满足条件的blog/draft进行更新
 	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.RelateToIDs}}}})
 	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.RelateToIDs}}}})
@@ -113,22 +112,6 @@ func RelateCategory2Blog(e2e dto.RelateEntity2Entity) {
 func RelateCategories2Blog(s2e dto.RelateEntitySet2Entity) {
 	blogCol.UpdateOne(context.TODO(), bson.M{"_id": s2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": bson.M{"$each": s2e.RelatedIDs}}})
 	draftCol.UpdateOne(context.TODO(), bson.M{"_id": s2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": bson.M{"$each": s2e.RelatedIDs}}})
-}
-func AddCategory2User(category model.Category, userId primitive.ObjectID) {
-	if !category.IsValid() {
-		category.Init()
-	}
-	RelateCategory2User(category.ID, userId)
-}
-func AddCategoryIdStr2User(catIdStr string, userId primitive.ObjectID) {
-	catId, err := primitive.ObjectIDFromHex(catIdStr)
-	var c model.Category
-	if err != nil {
-		// not exist, create one category first
-		UpsertCategory(&c)
-		catId = c.ID
-	}
-	RelateCategory2User(catId, userId)
 }
 
 func RelateCategory2User(catId primitive.ObjectID, userIds ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
@@ -161,7 +144,7 @@ func FindCategoryByUserId(id primitive.ObjectID) (c model.Category) {
 	return
 }
 
-//find categories by user id
+//FindCategoriesByUserId find categories by user id
 func FindCategoriesByUserId(userId ...primitive.ObjectID) (cs []model.Category, mErr mo2errors.Mo2Errors) {
 	// disable sort in backend
 	//m = make(map[string][]model.Category)
