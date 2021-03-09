@@ -1,6 +1,7 @@
 import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
+import router from '../router'
 
 export function randomProperty(obj: any) {
     const keys = Object.keys(obj);
@@ -44,8 +45,12 @@ export async function LoginAsync(userInfo: { userNameOrEmail: string; password: 
     return (await axios.post<User>('/api/accounts/login', userInfo)).data;
 }
 export function GetErrorMsg(apiError: any) {
+    const err = (apiError as AxiosError<ApiError>);
     try {
-        return (apiError as AxiosError<ApiError>).response.data.reason
+        if (err.response.status === 404) {
+            router.push('/404')
+        }
+        return err.response.data.reason
     } catch (error) {
         return 'Unknown Error'
     }
@@ -137,6 +142,8 @@ export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { pag
 export function AddMore(elm: BlogAutoLoader, val: BlogBrief[]) {
     if (!val || val.length < elm.pagesize) {
         elm.nomore = true;
+        elm.loading = false;
+        return
     }
     for (let index = 0; index < val.length; index++) {
         const element = val[index];
