@@ -2,12 +2,14 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"mo2/dto"
+	"mo2/mo2utils/mo2errors"
 	"mo2/server/model"
 )
 
@@ -25,13 +27,15 @@ func UpsertCategory(c *model.Category) {
 		log.Fatal(err)
 	}
 }
-func FindSubCategories(c model.Category) (cs []model.Category) {
-	results, err := catCol.Find(context.TODO(), bson.M{"parent_id": c.ID})
+func FindSubCategories(ID primitive.ObjectID) (cs []model.Category, mErr mo2errors.Mo2Errors) {
+	results, err := catCol.Find(context.TODO(), bson.M{"parent_id": ID})
 	if err != nil {
-		log.Fatal(err)
+		mErr.InitError(err)
+		return
 	}
 	if err = results.All(context.TODO(), &cs); err != nil {
-		log.Fatal(err)
+		mErr.InitError(err)
+		return
 	}
 	return
 }
@@ -51,7 +55,7 @@ func FindCategories(ids []primitive.ObjectID) (cs []model.Category) {
 
 func SortCategories(c model.Category, m map[string][]model.Category) {
 	var cs []model.Category
-	cs = FindSubCategories(c)
+	cs, _ = FindSubCategories(c.ID)
 	if len(cs) == 0 {
 		return
 	} else {
@@ -84,29 +88,17 @@ func FindAllCategories() (cs []model.Category) {
 	}
 	return
 }
-func AddBlogs2Categories(ab2cs dto.AddBlogs2Categories) (results []dto.QueryBlog) {
-	var categoryIDs []primitive.ObjectID
-	for _, categoryID := range ab2cs.CategoryIDs {
-		if !categoryID.IsZero() {
-			categoryIDs = append(categoryIDs, categoryID)
-		}
-	}
-	var blog, draft model.Blog
-	if len(categoryIDs) > 0 {
-		for _, blogID := range ab2cs.BlogIDs {
-			blog = FindBlogById(blogID, false)
-			if blog.IsValid() {
-				AddBlog2Categories(&blog, categoryIDs, false)
-				results = append(results, dto.MapBlog2QueryBlog(blog))
-			}
-			draft = FindBlogById(blogID, true)
-			if draft.IsValid() {
-				AddBlog2Categories(&draft, categoryIDs, true)
-				results = append(results, dto.MapBlog2QueryBlog(draft))
-			}
-		}
-	}
-	return results
+func AddBlogs2Categories(ab2cs dto.AddBlogs2Categories) (result []model.Blog) {
+	// 将所有满足条件的blog/draft进行更新
+	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.BlogIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.CategoryIDs}}}})
+	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.BlogIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.CategoryIDs}}}})
+
+	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.M{"_id": bson.M{"$in": ab2cs.BlogIDs}}}}, options.Find().SetProjection(bson.M{"content": 0}))
+	cursor.All(context.TODO(), &result)
+	return
+}
+func AddCategories2Category(parCategoryID primitive.ObjectID, subCategoryIDs ...primitive.ObjectID) {
+	catCol.UpdateOne(context.TODO(), bson.M{"_id": bson.M{"$in": subCategoryIDs}}, bson.M{"$set": bson.M{"parent_id": parCategoryID}})
 }
 func AddBlog2Categories(blog *model.Blog, categoryIDs []primitive.ObjectID, isDraft bool) {
 	blog.CategoryIDs = append(blog.CategoryIDs, categoryIDs...)
@@ -128,16 +120,15 @@ func AddCategoryIdStr2User(catIdStr string, userId primitive.ObjectID) {
 	}
 	AddCategoryId2User(catId, userId)
 }
-func AddCategoryId2User(catId primitive.ObjectID, userId primitive.ObjectID) {
-	catUser := model.CategoryUser{
-		UserID:     userId,
-		CategoryID: catId,
-	}
+func AddCategoryId2User(catId primitive.ObjectID, userIds ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	//todo check if valid
-	if _, err := catUserCol.InsertOne(context.TODO(), catUser); err != nil {
-		log.Fatal(err)
+	res, err := catCol.UpdateMany(context.TODO(), bson.M{"_id": catId}, bson.M{"$addToSet": bson.M{"owner_ids": bson.M{"$each": userIds}}})
+	if err != nil {
+		mErr.Init(mo2errors.Mo2Error, err.Error())
+		return
 	}
-
+	mErr.Init(mo2errors.Mo2NoError, fmt.Sprintf("%v modified", res.ModifiedCount))
+	return
 }
 
 //find category by userid
@@ -160,14 +151,18 @@ func FindCategoryByUserId(id primitive.ObjectID) (c model.Category) {
 }
 
 //find categories by user id
-func FindCategoriesByUserId(id primitive.ObjectID) (m map[string][]model.Category) {
-	c := FindCategoryByUserId(id)
-	if c.ID.IsZero() {
+func FindCategoriesByUserId(userId ...primitive.ObjectID) (cs []model.Category, mErr mo2errors.Mo2Errors) {
+	// disable sort in backend
+	//m = make(map[string][]model.Category)
+	//SortCategories(c, m)
+	cursor, err := catCol.Find(context.TODO(), bson.M{"owner_ids": bson.M{"$in": userId}})
+	if err != nil {
+		mErr.InitError(err)
 		return
 	}
-	m = make(map[string][]model.Category)
-	SortCategories(c, m)
-
+	if err = cursor.All(context.TODO(), &cs); err != nil {
+		mErr.InitError(err)
+		return
+	}
 	return
-
 }

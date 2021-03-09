@@ -18,14 +18,6 @@ definitions:
           type: string
         type: array
     type: object
-  dto.AddCategory2Category:
-    properties:
-      category_id:
-        $ref: '#/definitions/model.Category'
-      parent_id:
-        example: xxxxxxx
-        type: string
-    type: object
   dto.AddCategory2User:
     properties:
       category_id:
@@ -41,38 +33,14 @@ definitions:
       token:
         type: string
     type: object
-  dto.QueryBlog:
+  dto.RelateEntitySet2Entity:
     properties:
-      authorId:
-        example: xxxxxxxxxxxxx==
+      relateTo_id:
         type: string
-      categories:
+      related_ids:
         items:
           type: string
         type: array
-      cover:
-        example: https://xxx/xxx
-        type: string
-      description:
-        example: mouse ❤ monkey
-        type: string
-      entityInfo:
-        $ref: '#/definitions/model.Entity'
-      id:
-        example: xxxxxxxxxxxxx==
-        type: string
-      keyWords:
-        example:
-        - xxx
-        - xxx
-        items:
-          type: string
-        type: array
-      title:
-        example: mouse ❤ monkey
-        type: string
-    type: object
-  dto.QueryBlogs:
     type: object
   dto.UserInfo:
     properties:
@@ -184,6 +152,10 @@ definitions:
       name:
         example: records
         type: string
+      owner_ids:
+        items:
+          type: string
+        type: array
       parent_id:
         example: xxxxxxxxxxxxxx==
         type: string
@@ -578,12 +550,31 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlog'
+              $ref: '#/definitions/model.Blog'
             type: array
       summary: add blogs to chosen categories
       tags:
       - category
-  /api/blogs/addCategory:
+  /api/blogs/category:
+    get:
+      description: 若id为空，返回所有categories；若id不为空，返回该id的category
+      parameters:
+      - description: string ObjectID
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Category'
+            type: array
+      summary: find categories
+      tags:
+      - category
     post:
       consumes:
       - application/json
@@ -605,40 +596,73 @@ paths:
       summary: upsert category
       tags:
       - category
-  /api/blogs/addCategory2Category:
-    post:
-      consumes:
-      - application/json
-      description: category为model.Category(若id存在，直接存放；否则新建) parent category 为id
+  /api/blogs/category/parent:
+    get:
+      description: id不为空，返回该id的子目录subCategories
       parameters:
-      - description: category info and parent id
-        in: body
+      - description: string ObjectID
+        in: query
         name: id
         required: true
-        schema:
-          $ref: '#/definitions/dto.AddCategory2Category'
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Category'
-      summary: add category to parent category
+            items:
+              $ref: '#/definitions/model.Category'
+            type: array
+      summary: find subCategories of parent
       tags:
       - category
-  /api/blogs/addCategory2User:
+  /api/blogs/category/user/{userID}:
+    get:
+      consumes:
+      - application/json
+      description: return (main category)个人的主存档 于前端不可见，用于后端存储
+      parameters:
+      - description: user ID
+        in: path
+        name: userID
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Category'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: find categories by user id
+      tags:
+      - category
     post:
       consumes:
       - application/json
       description: user 与 category 皆为id
       parameters:
-      - description: category id and user id
+      - description: user id
+        in: path
+        name: userID
+        required: true
+        type: string
+      - description: category ids to be added
         in: body
         name: id
         required: true
         schema:
-          $ref: '#/definitions/dto.AddCategory2User'
+          type: string
       produces:
       - application/json
       responses:
@@ -712,13 +736,13 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlogs'
+              $ref: '#/definitions/model.Blog'
             type: array
         "204":
           description: No Content
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlogs'
+              $ref: '#/definitions/model.Blog'
             type: array
         "400":
           description: Bad Request
@@ -767,7 +791,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlogs'
+              $ref: '#/definitions/model.Blog'
             type: array
         "204":
           description: ""
@@ -786,48 +810,6 @@ paths:
       summary: find Blog by userid
       tags:
       - blogs
-  /api/blogs/findAllCategories:
-    get:
-      description: 若id为空，返回所有categories；若id不为空，返回该id的category
-      parameters:
-      - description: string ObjectID
-        in: query
-        name: id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Category'
-            type: array
-      summary: find categories
-      tags:
-      - category
-  /api/blogs/findCategoriesByUserId:
-    get:
-      description: return (main category)个人的主存档 于前端不可见，用于后端存储
-      parameters:
-      - description: string ObjectID
-        in: query
-        name: userId
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              items:
-                $ref: '#/definitions/model.Category'
-              type: array
-            type: object
-      summary: find categories by user id
-      tags:
-      - category
   /api/blogs/findCategoryByUserId:
     get:
       description: return (main category)个人的主存档 于前端不可见，用于后端存储
@@ -909,13 +891,13 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlog'
+              $ref: '#/definitions/model.Blog'
             type: array
         "204":
           description: No Content
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlog'
+              $ref: '#/definitions/model.Blog'
             type: array
         "400":
           description: Bad Request
@@ -998,4 +980,31 @@ paths:
       summary: get user info
       tags:
       - logs
+  /api/relation/categories/{type}:
+    post:
+      consumes:
+      - application/json
+      description: （根据path中提供的关联类型选择对应方法）目前有：父category
+      parameters:
+      - description: types to relate
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: sub category id and parent id
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RelateEntitySet2Entity'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Category'
+      summary: 将列表内的子categories关联到单个实体上
+      tags:
+      - relate
 swagger: "2.0"

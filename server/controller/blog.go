@@ -206,8 +206,8 @@ func (c *Controller) RestoreBlog(ctx *gin.Context) {
 // @Param deleted query bool false "bool default false" false
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
-// @Success 200 {object} []dto.QueryBlogs
-// @Success 204 {object} []dto.QueryBlogs
+// @Success 200 {object} []model.Blog
+// @Success 204 {object} []model.Blog
 // @Failure 400 {object} badresponse.ResponseError
 // @Failure 401 {object} badresponse.ResponseError
 // @Failure 404 {object} badresponse.ResponseError
@@ -254,7 +254,7 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Param id query string false "string xxxxxxxx" "xxxxxxx"
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
-// @Success 200 {object} []dto.QueryBlogs
+// @Success 200 {object} []model.Blog
 // @Success 204
 // @Failure 400 {object} badresponse.ResponseError
 // @Failure 401 {object} badresponse.ResponseError
@@ -365,8 +365,8 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 // @Param deleted query bool false "bool default false" false
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
-// @Success 200 {object} []dto.QueryBlog
-// @Success 204 {object} []dto.QueryBlog
+// @Success 200 {object} []model.Blog
+// @Success 204 {object} []model.Blog
 // @Failure 400 {object} badresponse.ResponseError
 // @Failure 401 {object} badresponse.ResponseError
 // @Failure 404 {object} badresponse.ResponseError
