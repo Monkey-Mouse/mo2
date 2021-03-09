@@ -97,6 +97,9 @@ func AddBlogs2Categories(ab2cs dto.AddBlogs2Categories) (result []model.Blog) {
 	cursor.All(context.TODO(), &result)
 	return
 }
+func AddCategories2Category(parCategoryID primitive.ObjectID, subCategoryIDs ...primitive.ObjectID) {
+	catCol.UpdateOne(context.TODO(), bson.M{"_id": bson.M{"$in": subCategoryIDs}}, bson.M{"$set": bson.M{"parent_id": parCategoryID}})
+}
 func AddBlog2Categories(blog *model.Blog, categoryIDs []primitive.ObjectID, isDraft bool) {
 	blog.CategoryIDs = append(blog.CategoryIDs, categoryIDs...)
 	upsertBlog(blog, isDraft)

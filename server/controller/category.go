@@ -171,22 +171,26 @@ func (c *Controller) FindCategoriesByUserId(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, cs)
 }
 
-// AddCategory2Category godoc
-// @Summary add category to parent category
-// @Description category为model.Category(若id存在，直接存放；否则新建) parent category 为id
-// @Tags category
+// Categories2RelatedType godoc
+// @Summary 将列表内的子categories关联到单个实体上
+// @Description （根据path中提供的关联类型选择对应方法）目前有：父category
+// @Tags relate
 // @Accept  json
 // @Produce  json
-// @Param id body dto.AddCategory2Category true "category info and parent id"
+// @Param type path string true "types to relate"
+// @Param id body dto.RelateEntitySet2Entity true "sub category id and parent id"
 // @Success 200 {object} model.Category
-// @Router /api/blogs/addCategory2Category [post]
-func (c *Controller) AddCategory2Category(ctx *gin.Context) {
-	var c2c dto.AddCategory2Category
-	if err := ctx.ShouldBindJSON(&c2c); err != nil {
-		ctx.JSON(http.StatusBadRequest, badresponse.SetResponseReason("非法参数"))
-	}
-	c2c.Category.ParentID = c2c.ParentCategoryID
-	database.UpsertCategory(&c2c.Category)
-	ctx.JSON(http.StatusOK, c2c.Category)
+// @Router /api/relation/categories/{type} [post]
+func (c *Controller) Categories2RelatedType(ctx *gin.Context) {
 
+	var multi2single dto.RelateEntitySet2Entity
+	if err := ctx.ShouldBindJSON(&multi2single); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法参数"))
+		return
+	}
+	switch ctx.Param(typeKey) {
+	case typeCategory:
+		database.AddCategories2Category(multi2single.RelateToID, multi2single.RelatedIDs...)
+	}
+	ctx.JSON(http.StatusOK, multi2single)
 }

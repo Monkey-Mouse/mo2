@@ -22,6 +22,9 @@ type Message struct {
 const (
 	apiImgGenToken = "/img/:filename"
 	apiLogs        = "/logs"
+	typeKey        = "type"
+	typeCategory   = "category"
+	typeCategories = "categories"
 )
 
 // SetupHandlers set up
@@ -33,6 +36,11 @@ func SetupHandlers(c *Controller) {
 		{
 			uploads.Get("/img/:filename", c.GenUploadToken)
 			uploads.Post("/file", c.Upload)
+		}
+		relation := api.Group("relation", model.OrdinaryUser)
+		{
+
+			relation.Post("/categories/:type", c.Categories2RelatedType)
 		}
 		blogs := api.Group("blogs", model.Anonymous, model.OrdinaryUser)
 		{
@@ -47,7 +55,7 @@ func SetupHandlers(c *Controller) {
 				user.Get("findCategoryByUserId", c.FindCategoryByUserId)
 				user.Post("category/user/:userID", c.AddCategory2User)
 				user.Get("category/user/:userID", c.FindCategoriesByUserId)
-				user.Post("addCategory2Category", c.AddCategory2Category)
+
 				user.Post("publish", c.UpsertBlog)
 				user.Delete(":id", c.DeleteBlog)
 				user.Put(":id", c.RestoreBlog)

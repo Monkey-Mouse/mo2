@@ -455,40 +455,6 @@ var doc = `{
                 }
             }
         },
-        "/api/blogs/addCategory2Category": {
-            "post": {
-                "description": "category为model.Category(若id存在，直接存放；否则新建) parent category 为id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "add category to parent category",
-                "parameters": [
-                    {
-                        "description": "category info and parent id",
-                        "name": "id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.AddCategory2Category"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Category"
-                        }
-                    }
-                }
-            }
-        },
         "/api/blogs/category": {
             "get": {
                 "description": "若id为空，返回所有categories；若id不为空，返回该id的category",
@@ -1251,6 +1217,47 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/api/relation/categories/{type}": {
+            "post": {
+                "description": "（根据path中提供的关联类型选择对应方法）目前有：父category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relate"
+                ],
+                "summary": "将列表内的子categories关联到单个实体上",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "types to relate",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "sub category id and parent id",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RelateEntitySet2Entity"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Category"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1282,18 +1289,6 @@ var doc = `{
                 }
             }
         },
-        "dto.AddCategory2Category": {
-            "type": "object",
-            "properties": {
-                "category_id": {
-                    "$ref": "#/definitions/model.Category"
-                },
-                "parent_id": {
-                    "type": "string",
-                    "example": "xxxxxxx"
-                }
-            }
-        },
         "dto.AddCategory2User": {
             "type": "object",
             "properties": {
@@ -1314,6 +1309,20 @@ var doc = `{
                 },
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.RelateEntitySet2Entity": {
+            "type": "object",
+            "properties": {
+                "relateTo_id": {
+                    "type": "string"
+                },
+                "related_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

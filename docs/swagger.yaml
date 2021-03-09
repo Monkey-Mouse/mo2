@@ -18,14 +18,6 @@ definitions:
           type: string
         type: array
     type: object
-  dto.AddCategory2Category:
-    properties:
-      category_id:
-        $ref: '#/definitions/model.Category'
-      parent_id:
-        example: xxxxxxx
-        type: string
-    type: object
   dto.AddCategory2User:
     properties:
       category_id:
@@ -40,6 +32,15 @@ definitions:
         type: string
       token:
         type: string
+    type: object
+  dto.RelateEntitySet2Entity:
+    properties:
+      relateTo_id:
+        type: string
+      related_ids:
+        items:
+          type: string
+        type: array
     type: object
   dto.UserInfo:
     properties:
@@ -554,28 +555,6 @@ paths:
       summary: add blogs to chosen categories
       tags:
       - category
-  /api/blogs/addCategory2Category:
-    post:
-      consumes:
-      - application/json
-      description: category为model.Category(若id存在，直接存放；否则新建) parent category 为id
-      parameters:
-      - description: category info and parent id
-        in: body
-        name: id
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AddCategory2Category'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Category'
-      summary: add category to parent category
-      tags:
-      - category
   /api/blogs/category:
     get:
       description: 若id为空，返回所有categories；若id不为空，返回该id的category
@@ -1001,4 +980,31 @@ paths:
       summary: get user info
       tags:
       - logs
+  /api/relation/categories/{type}:
+    post:
+      consumes:
+      - application/json
+      description: （根据path中提供的关联类型选择对应方法）目前有：父category
+      parameters:
+      - description: types to relate
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: sub category id and parent id
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RelateEntitySet2Entity'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Category'
+      summary: 将列表内的子categories关联到单个实体上
+      tags:
+      - relate
 swagger: "2.0"
