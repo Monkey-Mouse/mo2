@@ -10,7 +10,13 @@ module.exports = {
       appleTouchIcon: 'img/icons/tile150x150.png',
       maskIcon: 'img/icons/tile150x150.png',
       msTileImage: 'img/icons/tile150x150.png',
-    }
+    },
+    manifestOptions: {
+      name: "Mo2",
+      short_name: "Mo2",
+      start_url: "https://www.motwo.cn",
+      display: "standalone",
+    },
   },
   transpileDependencies: [
     'vuetify'
