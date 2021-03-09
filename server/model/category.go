@@ -3,9 +3,10 @@ package model
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Category struct {
-	ID       primitive.ObjectID `json:"id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"_id,omitempty"`
-	ParentID primitive.ObjectID `json:"parent_id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"parent_id,omitempty"`
-	Name     string             `json:"name,omitempty" example:"records" bson:"name,omitempty"`
+	ID       primitive.ObjectID   `json:"id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"_id,omitempty"`
+	ParentID primitive.ObjectID   `json:"parent_id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"parent_id,omitempty"`
+	Name     string               `json:"name,omitempty" example:"records" bson:"name,omitempty"`
+	OwnerIDs []primitive.ObjectID `json:"owner_ids,omitempty"  bson:"owner_ids,omitempty"`
 }
 type CategoryUser struct {
 	UserID     primitive.ObjectID `json:"user_id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"user_id,omitempty"`

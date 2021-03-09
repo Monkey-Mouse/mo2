@@ -433,42 +433,8 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlog"
+                                "$ref": "#/definitions/model.Blog"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/addCategory": {
-            "post": {
-                "description": "add by json",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "upsert category",
-                "parameters": [
-                    {
-                        "description": "Add category",
-                        "name": "account",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Category"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Category"
                         }
                     }
                 }
@@ -508,7 +474,104 @@
                 }
             }
         },
-        "/api/blogs/addCategory2User": {
+        "/api/blogs/category": {
+            "get": {
+                "description": "若id为空，返回所有categories；若id不为空，返回该id的category",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "find categories",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "string ObjectID",
+                        "name": "id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Category"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "add by json",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "upsert category",
+                "parameters": [
+                    {
+                        "description": "Add category",
+                        "name": "account",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Category"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Category"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/category/:userID": {
+            "get": {
+                "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "find categories by user id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "string ObjectID",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/model.Category"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/category/user/{userID}": {
             "post": {
                 "description": "user 与 category 皆为id",
                 "consumes": [
@@ -523,12 +586,19 @@
                 "summary": "add category to user",
                 "parameters": [
                     {
-                        "description": "category id and user id",
+                        "type": "string",
+                        "description": "user id",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "category ids to be added",
                         "name": "id",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddCategory2User"
+                            "type": "string"
                         }
                     }
                 ],
@@ -747,71 +817,6 @@
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/findAllCategories": {
-            "get": {
-                "description": "若id为空，返回所有categories；若id不为空，返回该id的category",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find categories",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "string ObjectID",
-                        "name": "id",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Category"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/findCategoriesByUserId": {
-            "get": {
-                "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find categories by user id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "string ObjectID",
-                        "name": "userId",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/model.Category"
-                                }
-                            }
                         }
                     }
                 }
@@ -1455,6 +1460,12 @@
                 "name": {
                     "type": "string",
                     "example": "records"
+                },
+                "owner_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "parent_id": {
                     "type": "string",

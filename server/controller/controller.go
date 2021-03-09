@@ -40,12 +40,12 @@ func SetupHandlers(c *Controller) {
 
 			user := blogs.Group("", model.OrdinaryUser)
 			{
-				user.Post("addCategory", c.UpsertCategory)
-				user.Get("findAllCategories", c.FindAllCategories)
+				user.Post("category", c.UpsertCategory)
+				user.Get("category", c.FindAllCategories)
 				user.Post("addBlogs2Categories", c.AddBlogs2Categories)
 				user.Get("findCategoryByUserId", c.FindCategoryByUserId)
-				user.Post("addCategory2User", c.AddCategory2User)
-				user.Get("findCategoriesByUserId", c.FindCategoriesByUserId)
+				user.Post("category/user/:userID", c.AddCategory2User)
+				user.Get("category/user/:userID", c.FindCategoriesByUserId)
 				user.Post("addCategory2Category", c.AddCategory2Category)
 				user.Post("publish", c.UpsertBlog)
 				user.Delete(":id", c.DeleteBlog)

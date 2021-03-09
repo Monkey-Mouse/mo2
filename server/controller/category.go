@@ -19,7 +19,7 @@ import (
 // @Produce  json
 // @Param account body model.Category true "Add category"
 // @Success 200 {object} model.Category
-// @Router /api/blogs/addCategory [post]
+// @Router /api/blogs/category [post]
 func (c *Controller) UpsertCategory(ctx *gin.Context) {
 	var cat model.Category
 	if err := ctx.ShouldBindJSON(&cat); err != nil {
@@ -37,7 +37,7 @@ func (c *Controller) UpsertCategory(ctx *gin.Context) {
 // @Produce  json
 // @Param id query string false "string ObjectID" ""
 // @Success 200 {object} []model.Category
-// @Router /api/blogs/findAllCategories [get]
+// @Router /api/blogs/category [get]
 func (c *Controller) FindAllCategories(ctx *gin.Context) {
 	idStr := ctx.Query("id")
 	var cats []model.Category
@@ -101,16 +101,23 @@ func (c *Controller) FindCategoryByUserId(ctx *gin.Context) {
 // @Tags category
 // @Accept  json
 // @Produce  json
-// @Param id body dto.AddCategory2User true "category id and user id"
+// @Param userID path string true "user id"
+// @Param id body primitive.ObjectID true "category ids to be added"
 // @Success 200 {object} dto.AddCategory2User
-// @Router /api/blogs/addCategory2User [post]
+// @Router /api/blogs/category/user/{userID} [post]
 func (c *Controller) AddCategory2User(ctx *gin.Context) {
-	var c2u dto.AddCategory2User
+	var c2u primitive.ObjectID
 	if err := ctx.ShouldBindJSON(&c2u); err != nil {
-		ctx.JSON(http.StatusBadRequest, badresponse.SetResponseReason("非法参数"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法参数"))
+		return
+	}
+	userID, err := primitive.ObjectIDFromHex(ctx.Param("userID"))
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法参数"))
+		return
 	}
 	// todo 唯一性
-	database.AddCategoryIdStr2User(c2u.CategoryID, c2u.UserID)
+	database.AddCategoryId2User(c2u, userID)
 	ctx.JSON(http.StatusOK, c2u)
 
 }
@@ -122,7 +129,7 @@ func (c *Controller) AddCategory2User(ctx *gin.Context) {
 // @Produce  json
 // @Param userId query string false "string ObjectID" ""
 // @Success 200 {object} map[string][]model.Category
-// @Router /api/blogs/findCategoriesByUserId [get]
+// @Router /api/blogs/category/:userID [get]
 func (c *Controller) FindCategoriesByUserId(ctx *gin.Context) {
 	idStr := ctx.Query("userId")
 	id, err := primitive.ObjectIDFromHex(idStr)

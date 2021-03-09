@@ -2,12 +2,14 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"mo2/dto"
+	"mo2/mo2utils/mo2errors"
 	"mo2/server/model"
 )
 
@@ -89,7 +91,7 @@ func AddBlogs2Categories(ab2cs dto.AddBlogs2Categories) (result []model.Blog) {
 	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.BlogIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.CategoryIDs}}}})
 	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.BlogIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.CategoryIDs}}}})
 
-	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.BlogIDs}}}}) //bson.M{"_id":bson.M{"$in":ab2cs.BlogIDs}})//,options.Find().SetProjection(bson.M{"content":0}))
+	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.M{"_id": bson.M{"$in": ab2cs.BlogIDs}}}}, options.Find().SetProjection(bson.M{"content": 0}))
 	cursor.All(context.TODO(), &result)
 	return
 }
@@ -113,16 +115,15 @@ func AddCategoryIdStr2User(catIdStr string, userId primitive.ObjectID) {
 	}
 	AddCategoryId2User(catId, userId)
 }
-func AddCategoryId2User(catId primitive.ObjectID, userId primitive.ObjectID) {
-	catUser := model.CategoryUser{
-		UserID:     userId,
-		CategoryID: catId,
-	}
+func AddCategoryId2User(catId primitive.ObjectID, userIds ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	//todo check if valid
-	if _, err := catUserCol.InsertOne(context.TODO(), catUser); err != nil {
-		log.Fatal(err)
+	res, err := catCol.UpdateMany(context.TODO(), bson.M{"_id": catId}, bson.M{"$addToSet": bson.M{"owner_ids": bson.M{"$each": userIds}}})
+	if err != nil {
+		mErr.Init(mo2errors.Mo2Error, err.Error())
+		return
 	}
-
+	mErr.Init(mo2errors.Mo2NoError, fmt.Sprintf("%v modified", res.ModifiedCount))
+	return
 }
 
 //find category by userid

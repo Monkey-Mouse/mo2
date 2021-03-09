@@ -184,6 +184,10 @@ definitions:
       name:
         example: records
         type: string
+      owner_ids:
+        items:
+          type: string
+        type: array
       parent_id:
         example: xxxxxxxxxxxxxx==
         type: string
@@ -578,31 +582,9 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlog'
+              $ref: '#/definitions/model.Blog'
             type: array
       summary: add blogs to chosen categories
-      tags:
-      - category
-  /api/blogs/addCategory:
-    post:
-      consumes:
-      - application/json
-      description: add by json
-      parameters:
-      - description: Add category
-        in: body
-        name: account
-        required: true
-        schema:
-          $ref: '#/definitions/model.Category'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Category'
-      summary: upsert category
       tags:
       - category
   /api/blogs/addCategory2Category:
@@ -627,18 +609,86 @@ paths:
       summary: add category to parent category
       tags:
       - category
-  /api/blogs/addCategory2User:
+  /api/blogs/category:
+    get:
+      description: 若id为空，返回所有categories；若id不为空，返回该id的category
+      parameters:
+      - description: string ObjectID
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Category'
+            type: array
+      summary: find categories
+      tags:
+      - category
+    post:
+      consumes:
+      - application/json
+      description: add by json
+      parameters:
+      - description: Add category
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/model.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Category'
+      summary: upsert category
+      tags:
+      - category
+  /api/blogs/category/:userID:
+    get:
+      description: return (main category)个人的主存档 于前端不可见，用于后端存储
+      parameters:
+      - description: string ObjectID
+        in: query
+        name: userId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/model.Category'
+              type: array
+            type: object
+      summary: find categories by user id
+      tags:
+      - category
+  /api/blogs/category/user/{userID}:
     post:
       consumes:
       - application/json
       description: user 与 category 皆为id
       parameters:
-      - description: category id and user id
+      - description: user id
+        in: path
+        name: userID
+        required: true
+        type: string
+      - description: category ids to be added
         in: body
         name: id
         required: true
         schema:
-          $ref: '#/definitions/dto.AddCategory2User'
+          type: string
       produces:
       - application/json
       responses:
@@ -786,48 +836,6 @@ paths:
       summary: find Blog by userid
       tags:
       - blogs
-  /api/blogs/findAllCategories:
-    get:
-      description: 若id为空，返回所有categories；若id不为空，返回该id的category
-      parameters:
-      - description: string ObjectID
-        in: query
-        name: id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Category'
-            type: array
-      summary: find categories
-      tags:
-      - category
-  /api/blogs/findCategoriesByUserId:
-    get:
-      description: return (main category)个人的主存档 于前端不可见，用于后端存储
-      parameters:
-      - description: string ObjectID
-        in: query
-        name: userId
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              items:
-                $ref: '#/definitions/model.Category'
-              type: array
-            type: object
-      summary: find categories by user id
-      tags:
-      - category
   /api/blogs/findCategoryByUserId:
     get:
       description: return (main category)个人的主存档 于前端不可见，用于后端存储
