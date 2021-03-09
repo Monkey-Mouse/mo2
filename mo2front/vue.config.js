@@ -49,7 +49,7 @@ module.exports = {
     proxy: {
       '/api': {
         // 要访问的跨域的域名
-        target: 'http://8.135.117.116/', //'http://localhost:5001',
+        target: 'https://www.motwo.cn/', //'http://localhost:5001',
         // target: 'https://limfx.pro',
         ws: true, // 是否启用websockets
         pathRewrite: {

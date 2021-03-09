@@ -10,7 +10,7 @@
     <v-row justify="center">
       <v-col cols="12" lg="7" class="mo2editor">
         <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
-          <div class="menubar">
+          <div class="menubar" style="z-index: 9999">
             <div class="toolbar row">
               <span v-if="isActive.table()">
                 <button class="menubar__button" @click="commands.deleteTable">
