@@ -123,6 +123,7 @@ func RelateCategories2Blog(s2e dto.RelateEntitySet2Entity) {
 }
 
 // RelateCategories2Blogs 在blogs及drafts的categories中添加categories的id
+// Todo find nice way to make of use
 func RelateCategories2Blogs(s2s dto.RelateEntitySet2EntitySet) (result []model.Blog) {
 	// 将所有满足条件的blog/draft进行更新
 	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelateToIDs}}}})
