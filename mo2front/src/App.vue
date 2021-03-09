@@ -154,6 +154,9 @@
           {{ new Date().getFullYear() }} — <strong>MO2</strong>
         </v-card-text>
       </v-card>
+      <a class="ml-16" target="blank" href="http://beian.miit.gov.cn/"
+        >冀ICP备20007570号-2</a
+      >
     </v-footer>
   </v-app>
 </template>

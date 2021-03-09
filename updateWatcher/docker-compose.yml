@@ -2,16 +2,19 @@ version: "3.4"
 services:
   mongodb:
     image: mongo
+    restart: always
     volumes:
       - "./mongo-volume:/data/db"
   redis:
     image: "bitnami/redis"
+    restart: always
     environment:
       # ALLOW_EMPTY_PASSWORD is recommended only for development.
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
   mo2:
     image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2:latest
+    restart: always
     env_file:
       - var.env
     environment:
@@ -24,7 +27,35 @@ services:
       - "redis"
     volumes:
       - "./secrets:/app/secrets"
+    # nginx:
+    #   build: .
+    #   ports:
+    #     - 80:80
   nginx:
-    build: .
+    image: umputun/nginx-le:latest
+    hostname: nginx
+    restart: always
+    container_name: nginx
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    volumes:
+      - ./ssl:/etc/nginx/ssl
+      - ./nginx.conf:/etc/nginx/service.conf
+      # - ./etc/service-example-2.conf:/etc/nginx/service2.conf # more services, should be service*.conf
     ports:
-      - 80:80
+      - "80:80"
+      - "443:443"
+
+    environment:
+      - TZ=Asia/Shanghai
+      - LETSENCRYPT=true
+      - LE_EMAIL=chronos@mo2.com
+      - LE_FQDN=www.motwo.cn
+      #- SSL_CERT=le-crt.pem
+      #- SSL_KEY=le-key.pem
+      #- SSL_CHAIN_CERT=le-chain-crt.pem

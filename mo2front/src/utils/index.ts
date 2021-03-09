@@ -142,6 +142,8 @@ export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { pag
 export function AddMore(elm: BlogAutoLoader, val: BlogBrief[]) {
     if (!val || val.length < elm.pagesize) {
         elm.nomore = true;
+    }
+    if (!val) {
         elm.loading = false;
         return
     }
