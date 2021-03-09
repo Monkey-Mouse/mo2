@@ -42,7 +42,7 @@ func SetupHandlers(c *Controller) {
 			{
 				user.Post("category", c.UpsertCategory)
 				user.Get("category", c.FindAllCategories)
-				user.Get("category/:parentID", c.FindSubCategories)
+				user.Get("category/parent", c.FindSubCategories)
 				user.Post("addBlogs2Categories", c.AddBlogs2Categories)
 				user.Get("findCategoryByUserId", c.FindCategoryByUserId)
 				user.Post("category/user/:userID", c.AddCategory2User)

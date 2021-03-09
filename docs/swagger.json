@@ -537,6 +537,38 @@
                 }
             }
         },
+        "/api/blogs/category/parent": {
+            "get": {
+                "description": "id不为空，返回该id的子目录subCategories",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "find subCategories of parent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "string ObjectID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Category"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/blogs/category/user/{userID}": {
             "get": {
                 "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",

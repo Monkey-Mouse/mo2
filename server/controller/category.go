@@ -56,28 +56,27 @@ func (c *Controller) FindAllCategories(ctx *gin.Context) {
 
 }
 
-// FindAllCategories godoc
-// @Summary find categories
+// FindSubCategories godoc
+// @Summary find subCategories of parent
 // @Description id不为空，返回该id的子目录subCategories
 // @Tags category
 // @Produce  json
 // @Param id query string true "string ObjectID" ""
 // @Success 200 {object} []model.Category
-// @Router /api/blogs/category/{parentID} [get]
+// @Router /api/blogs/category/parent [get]
 func (c *Controller) FindSubCategories(ctx *gin.Context) {
-	idStr := ctx.Query("parentID")
-	var cats []model.Category
-
+	idStr := ctx.Query("id")
 	id, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
+		return
 	}
-	var ids []primitive.ObjectID
-	ids = append(ids, id)
-	cats = database.FindCategories(ids)
-
+	cats, mErr := database.FindSubCategories(id)
+	if mErr.IsError() {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(mErr))
+		return
+	}
 	ctx.JSON(http.StatusOK, cats)
-
 }
 
 // AddBlogs2Categories godoc

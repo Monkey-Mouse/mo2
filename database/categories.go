@@ -27,13 +27,15 @@ func UpsertCategory(c *model.Category) {
 		log.Fatal(err)
 	}
 }
-func FindSubCategories(c model.Category) (cs []model.Category) {
-	results, err := catCol.Find(context.TODO(), bson.M{"parent_id": c.ID})
+func FindSubCategories(ID primitive.ObjectID) (cs []model.Category, mErr mo2errors.Mo2Errors) {
+	results, err := catCol.Find(context.TODO(), bson.M{"parent_id": ID})
 	if err != nil {
-		log.Fatal(err)
+		mErr.InitError(err)
+		return
 	}
 	if err = results.All(context.TODO(), &cs); err != nil {
-		log.Fatal(err)
+		mErr.InitError(err)
+		return
 	}
 	return
 }
@@ -53,7 +55,7 @@ func FindCategories(ids []primitive.ObjectID) (cs []model.Category) {
 
 func SortCategories(c model.Category, m map[string][]model.Category) {
 	var cs []model.Category
-	cs = FindSubCategories(c)
+	cs, _ = FindSubCategories(c.ID)
 	if len(cs) == 0 {
 		return
 	} else {
