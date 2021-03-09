@@ -596,57 +596,7 @@ paths:
       summary: upsert category
       tags:
       - category
-  /api/blogs/category/parent:
-    get:
-      description: id不为空，返回该id的子目录subCategories
-      parameters:
-      - description: string ObjectID
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Category'
-            type: array
-      summary: find subCategories of parent
-      tags:
-      - category
   /api/blogs/category/user/{userID}:
-    get:
-      consumes:
-      - application/json
-      description: return (main category)个人的主存档 于前端不可见，用于后端存储
-      parameters:
-      - description: user ID
-        in: path
-        name: userID
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Category'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/badresponse.ResponseError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/badresponse.ResponseError'
-      summary: find categories by user id
-      tags:
-      - category
     post:
       consumes:
       - application/json
@@ -1006,5 +956,41 @@ paths:
             $ref: '#/definitions/model.Category'
       summary: 将列表内的子categories关联到单个实体上
       tags:
-      - relate
+      - relation
+  /api/relation/category/{type}/{ID}:
+    get:
+      consumes:
+      - application/json
+      description: 根据type返回不同结果：[user] 个人的所有category|[sub] 所有子category
+      parameters:
+      - description: find by user/sub
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: ID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Category'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: find categories by given type
+      tags:
+      - relation
 swagger: "2.0"

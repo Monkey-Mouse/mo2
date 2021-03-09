@@ -3,6 +3,7 @@ package controller
 import (
 	"mo2/database"
 	"mo2/dto"
+	"mo2/mo2utils/mo2errors"
 	"mo2/server/controller/badresponse"
 	"mo2/server/model"
 	"net/http"
@@ -56,29 +57,6 @@ func (c *Controller) FindAllCategories(ctx *gin.Context) {
 
 }
 
-// FindSubCategories godoc
-// @Summary find subCategories of parent
-// @Description id不为空，返回该id的子目录subCategories
-// @Tags category
-// @Produce  json
-// @Param id query string true "string ObjectID" ""
-// @Success 200 {object} []model.Category
-// @Router /api/blogs/category/parent [get]
-func (c *Controller) FindSubCategories(ctx *gin.Context) {
-	idStr := ctx.Query("id")
-	id, err := primitive.ObjectIDFromHex(idStr)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
-		return
-	}
-	cats, mErr := database.FindSubCategories(id)
-	if mErr.IsError() {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(mErr))
-		return
-	}
-	ctx.JSON(http.StatusOK, cats)
-}
-
 // AddBlogs2Categories godoc
 // @Summary add blogs to chosen categories
 // @Description blogs 与 categories皆为id列表，方便批量操作
@@ -96,26 +74,6 @@ func (c *Controller) AddBlogs2Categories(ctx *gin.Context) {
 	results := database.AddBlogs2Categories(ab2c)
 	ctx.JSON(http.StatusOK, results)
 
-}
-
-// FindCategoryByUserId godoc
-// @Summary find category by user id
-// @Description  return (main category)个人的主存档 于前端不可见，用于后端存储
-// @Tags category
-// @Produce  json
-// @Param userId query string false "string ObjectID" ""
-// @Success 200 {object} model.Category
-// @Router /api/blogs/findCategoryByUserId [get]
-func (c *Controller) FindCategoryByUserId(ctx *gin.Context) {
-	idStr := ctx.Query("userId")
-	var cat model.Category
-	id, err := primitive.ObjectIDFromHex(idStr)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
-		return
-	}
-	cat = database.FindCategoryByUserId(id)
-	ctx.JSON(http.StatusOK, cat)
 }
 
 // AddCategory2User godoc
@@ -145,36 +103,44 @@ func (c *Controller) AddCategory2User(ctx *gin.Context) {
 
 }
 
-// FindCategoriesByUserId godoc
-// @Summary find categories by user id
-// @Description  return (main category)个人的主存档 于前端不可见，用于后端存储
-// @Tags category
+// FindCategoriesByType godoc
+// @Summary find categories by given type
+// @Description  根据type返回不同结果：[user] 个人的所有category|[sub] 所有子category
+// @Tags relation
 // @Accept  json
 // @Produce  json
-// @Param userID path string false "user ID"
+// @Param type path string true "find by user/sub"
+// @Param ID path string true "ID"
 // @Success 200 {object} []model.Category
 // @Failure 400 {object} badresponse.ResponseError
 // @Failure 404 {object} badresponse.ResponseError
-// @Router /api/blogs/category/user/{userID} [get]
-func (c *Controller) FindCategoriesByUserId(ctx *gin.Context) {
-	idStr := ctx.Param("userID")
+// @Router /api/relation/category/{type}/{ID} [get]
+func (c *Controller) FindCategoriesByType(ctx *gin.Context) {
+	idStr := ctx.Param("ID")
 	id, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
-	cs, mErr := database.FindCategoriesByUserId(id)
+	var cats []model.Category
+	var mErr mo2errors.Mo2Errors
+	switch ctx.Param(typeKey) {
+	case typeUser:
+		cats, mErr = database.FindCategoriesByUserId(id)
+	case typeSubCategories:
+		cats, mErr = database.FindSubCategories(id)
+	}
 	if mErr.IsError() {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(mErr))
 		return
 	}
-	ctx.JSON(http.StatusOK, cs)
+	ctx.JSON(http.StatusOK, cats)
 }
 
 // Categories2RelatedType godoc
 // @Summary 将列表内的子categories关联到单个实体上
 // @Description （根据path中提供的关联类型选择对应方法）目前有：父category
-// @Tags relate
+// @Tags relation
 // @Accept  json
 // @Produce  json
 // @Param type path string true "types to relate"

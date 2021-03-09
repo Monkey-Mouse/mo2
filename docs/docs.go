@@ -518,83 +518,7 @@ var doc = `{
                 }
             }
         },
-        "/api/blogs/category/parent": {
-            "get": {
-                "description": "id不为空，返回该id的子目录subCategories",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find subCategories of parent",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "string ObjectID",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Category"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/blogs/category/user/{userID}": {
-            "get": {
-                "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find categories by user id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user ID",
-                        "name": "userID",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Category"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "user 与 category 皆为id",
                 "consumes": [
@@ -1228,7 +1152,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "relate"
+                    "relation"
                 ],
                 "summary": "将列表内的子categories关联到单个实体上",
                 "parameters": [
@@ -1254,6 +1178,60 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.Category"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/relation/category/{type}/{ID}": {
+            "get": {
+                "description": "根据type返回不同结果：[user] 个人的所有category|[sub] 所有子category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relation"
+                ],
+                "summary": "find categories by given type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "find by user/sub",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "ID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Category"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
