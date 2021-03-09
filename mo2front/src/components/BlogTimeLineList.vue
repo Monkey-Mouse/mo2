@@ -142,14 +142,8 @@
       </v-row>
       <v-row justify="center">
         <v-col class="text-center"
-          ><v-btn
-            height="50"
-            outlined
-            to="/edit"
-            color="primary"
-            class="text-h4"
-          >
-            Click here to create your own article
+          ><v-btn outlined to="/edit" color="primary">
+            Create your own article
           </v-btn>
         </v-col>
       </v-row>
