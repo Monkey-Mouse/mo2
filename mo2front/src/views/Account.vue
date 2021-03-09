@@ -128,7 +128,7 @@ export default class Account extends Vue implements BlogAutoLoader {
   page = 0;
   pagesize = 5;
   nomore = false;
-  tab = 1;
+  tab = "tab-1";
   ownPage = false;
   create = false;
   edit = false;
@@ -241,6 +241,9 @@ export default class Account extends Vue implements BlogAutoLoader {
     this.create = true;
   }
   async initPage() {
+    if (this.$route.query["tab"]) {
+      this.tab = this.$route.query["tab"] as string;
+    }
     this.uid = this.$route.params["id"];
     this.inputProps["name"].default = this.user.name;
     if (this.uid === undefined || this.uid === this.user.id) {
@@ -278,6 +281,12 @@ export default class Account extends Vue implements BlogAutoLoader {
 
   @Watch("$route", { immediate: true, deep: true })
   pageChange() {
+    if (
+      (!this.$route.params["id"] && this.uid === this.user.id) ||
+      this.uid === this.$route.params["id"]
+    ) {
+      return;
+    }
     if (this.create) {
       this.initPage();
     }
@@ -292,6 +301,7 @@ export default class Account extends Vue implements BlogAutoLoader {
   }
   @Watch("tab")
   loadDraft() {
+    this.$router.replace(`/account?tab=${this.tab}`);
     if (this.draftProps.firstloading) {
       if (this.ownPage) {
         GetOwnArticles({
@@ -307,7 +317,7 @@ export default class Account extends Vue implements BlogAutoLoader {
   }
 
   public ReachedButtom() {
-    if (this.tab === 1) {
+    if (this.tab === "tab-1") {
       ElmReachedButtom(this, ({ page, pageSize }) =>
         GetOwnArticles({ page: page, pageSize: pageSize, draft: false })
       );
