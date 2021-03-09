@@ -1,6 +1,7 @@
 import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
+import router from '../router'
 
 export function randomProperty(obj: any) {
     const keys = Object.keys(obj);
@@ -44,8 +45,12 @@ export async function LoginAsync(userInfo: { userNameOrEmail: string; password: 
     return (await axios.post<User>('/api/accounts/login', userInfo)).data;
 }
 export function GetErrorMsg(apiError: any) {
+    const err = (apiError as AxiosError<ApiError>);
     try {
-        return (apiError as AxiosError<ApiError>).response.data.reason
+        if (err.response.status === 404) {
+            router.push('/404')
+        }
+        return err.response.data.reason
     } catch (error) {
         return 'Unknown Error'
     }

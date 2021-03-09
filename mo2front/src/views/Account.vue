@@ -259,18 +259,20 @@ export default class Account extends Vue implements BlogAutoLoader {
         this.firstloading = false;
       });
     } else {
-      GetUserData(this.uid).then((u) => {
-        this.displayUser = u;
-        GetUserArticles({
-          page: this.page++,
-          pageSize: this.pagesize,
-          draft: false,
-          id: this.uid,
-        }).then((data) => {
-          AddMore(this, data);
-          this.firstloading = false;
-        });
-      });
+      GetUserData(this.uid)
+        .then((u) => {
+          this.displayUser = u;
+          GetUserArticles({
+            page: this.page++,
+            pageSize: this.pagesize,
+            draft: false,
+            id: this.uid,
+          }).then((data) => {
+            AddMore(this, data);
+            this.firstloading = false;
+          });
+        })
+        .catch((err) => GetErrorMsg(err));
     }
   }
 

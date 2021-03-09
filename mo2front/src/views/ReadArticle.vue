@@ -118,8 +118,8 @@ export default class ReadArticle extends Vue {
     if (this.$route.query["draft"]) {
       this.draft = (this.$route.query["draft"] as string) === "true";
     }
-    GetArticle({ id: this.$route.params["id"], draft: this.draft }).then(
-      (val) => {
+    GetArticle({ id: this.$route.params["id"], draft: this.draft })
+      .then((val) => {
         this.loading = false;
         this.blog = val;
         this.title = val.title;
@@ -135,8 +135,8 @@ export default class ReadArticle extends Vue {
             hljs.highlightBlock(block);
           });
         }, 50);
-      }
-    );
+      })
+      .catch((err) => GetErrorMsg(err));
   }
   edit() {
     globaldic.article = `<h1>${this.title}</h1>${this.html}`;
