@@ -418,12 +418,12 @@
                 "summary": "add blogs to chosen categories",
                 "parameters": [
                     {
-                        "description": "dto.AddBlogs2Categories",
+                        "description": "dto.RelateEntitySet2EntitySet",
                         "name": "id",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddBlogs2Categories"
+                            "$ref": "#/definitions/dto.RelateEntitySet2EntitySet"
                         }
                     }
                 ],
@@ -498,47 +498,6 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.Category"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/category/user/{userID}": {
-            "post": {
-                "description": "user 与 category 皆为id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "add category to user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user id",
-                        "name": "userID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "category ids to be added",
-                        "name": "id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.AddCategory2User"
                         }
                     }
                 }
@@ -749,34 +708,6 @@
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/findCategoryByUserId": {
-            "get": {
-                "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find category by user id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "string ObjectID",
-                        "name": "userId",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Category"
                         }
                     }
                 }
@@ -1168,6 +1099,46 @@
                 }
             }
         },
+        "/api/relation/category/{type}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relation"
+                ],
+                "summary": "relate category to given type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "relatedTo user/blog/category/userMain",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "category id to be related",
+                        "name": "e2e",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RelateEntity2Entity"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RelateEntity2Entity"
+                        }
+                    }
+                }
+            }
+        },
         "/api/relation/category/{type}/{ID}": {
             "get": {
                 "description": "根据type返回不同结果：[user] 个人的所有category|[sub] 所有子category",
@@ -1235,35 +1206,6 @@
                 }
             }
         },
-        "dto.AddBlogs2Categories": {
-            "type": "object",
-            "properties": {
-                "blog_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "category_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "dto.AddCategory2User": {
-            "type": "object",
-            "properties": {
-                "category_id": {
-                    "type": "string",
-                    "example": "xxxxxxx"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
         "dto.ImgUploadToken": {
             "type": "object",
             "properties": {
@@ -1275,11 +1217,39 @@
                 }
             }
         },
+        "dto.RelateEntity2Entity": {
+            "type": "object",
+            "properties": {
+                "relateTo_id": {
+                    "type": "string"
+                },
+                "related_id": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.RelateEntitySet2Entity": {
             "type": "object",
             "properties": {
                 "relateTo_id": {
                     "type": "string"
+                },
+                "related_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.RelateEntitySet2EntitySet": {
+            "type": "object",
+            "properties": {
+                "relateTo_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "related_ids": {
                     "type": "array",

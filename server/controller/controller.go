@@ -26,6 +26,10 @@ const (
 	typeCategory      = "category"
 	typeCategories    = "categories"
 	typeUser          = "user"
+	typeUserMain      = "userMain"
+	typeBlog          = "blog"
+	typeUsers         = "users"
+	typeBlogs         = "blogs"
 	typeSubCategories = "sub"
 )
 
@@ -42,7 +46,8 @@ func SetupHandlers(c *Controller) {
 		relation := api.Group("relation", model.OrdinaryUser)
 		{
 
-			relation.Post("categories/:type", c.Categories2RelatedType)
+			relation.Post("categories/:type", c.RelateCategories2Entity)
+			relation.Post("category/:type", c.RelateCategory2Entity)
 			relation.Get("category/:type/:ID", c.FindCategoriesByType)
 		}
 		blogs := api.Group("blogs", model.Anonymous, model.OrdinaryUser)
@@ -55,9 +60,6 @@ func SetupHandlers(c *Controller) {
 				user.Get("category", c.FindAllCategories)
 
 				user.Post("addBlogs2Categories", c.AddBlogs2Categories)
-
-				user.Post("category/user/:userID", c.AddCategory2User)
-
 				user.Post("publish", c.UpsertBlog)
 				user.Delete(":id", c.DeleteBlog)
 				user.Put(":id", c.RestoreBlog)

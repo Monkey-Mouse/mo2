@@ -88,27 +88,37 @@ func FindAllCategories() (cs []model.Category) {
 	}
 	return
 }
-func AddBlogs2Categories(ab2cs dto.AddBlogs2Categories) (result []model.Blog) {
+func RelateBlogs2Categories(ab2cs dto.RelateEntitySet2EntitySet) (result []model.Blog) {
 	// 将所有满足条件的blog/draft进行更新
-	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.BlogIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.CategoryIDs}}}})
-	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.BlogIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.CategoryIDs}}}})
-
-	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.M{"_id": bson.M{"$in": ab2cs.BlogIDs}}}}, options.Find().SetProjection(bson.M{"content": 0}))
+	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.RelateToIDs}}}})
+	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.RelateToIDs}}}})
+	// todo delete useless result
+	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.M{"_id": bson.M{"$in": ab2cs.RelatedIDs}}}}, options.Find().SetProjection(bson.M{"content": 0}))
 	cursor.All(context.TODO(), &result)
 	return
 }
-func AddCategories2Category(parCategoryID primitive.ObjectID, subCategoryIDs ...primitive.ObjectID) {
-	catCol.UpdateOne(context.TODO(), bson.M{"_id": bson.M{"$in": subCategoryIDs}}, bson.M{"$set": bson.M{"parent_id": parCategoryID}})
+func RelateMainCategory2User(e2e dto.RelateEntity2Entity) {
+	catCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelatedID}, bson.M{"$set": bson.M{"parent_id": e2e.RelateToID}})
 }
-func AddBlog2Categories(blog *model.Blog, categoryIDs []primitive.ObjectID, isDraft bool) {
-	blog.CategoryIDs = append(blog.CategoryIDs, categoryIDs...)
-	upsertBlog(blog, isDraft)
+func RelateSubCategory2Category(e2e dto.RelateEntity2Entity) {
+	catCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelatedID}, bson.M{"$set": bson.M{"parent_id": e2e.RelateToID}})
+}
+func RelateSubCategories2Category(s2e dto.RelateEntitySet2Entity) {
+	catCol.UpdateMany(context.TODO(), bson.M{"_id": bson.M{"$in": s2e.RelatedIDs}}, bson.M{"$set": bson.M{"parent_id": s2e.RelateToID}})
+}
+func RelateCategory2Blog(e2e dto.RelateEntity2Entity) {
+	blogCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": e2e.RelatedID}})
+	draftCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": e2e.RelatedID}})
+}
+func RelateCategories2Blog(s2e dto.RelateEntitySet2Entity) {
+	blogCol.UpdateOne(context.TODO(), bson.M{"_id": s2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": bson.M{"$each": s2e.RelatedIDs}}})
+	draftCol.UpdateOne(context.TODO(), bson.M{"_id": s2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": bson.M{"$each": s2e.RelatedIDs}}})
 }
 func AddCategory2User(category model.Category, userId primitive.ObjectID) {
 	if !category.IsValid() {
 		category.Init()
 	}
-	AddCategoryId2User(category.ID, userId)
+	RelateCategory2User(category.ID, userId)
 }
 func AddCategoryIdStr2User(catIdStr string, userId primitive.ObjectID) {
 	catId, err := primitive.ObjectIDFromHex(catIdStr)
@@ -118,9 +128,10 @@ func AddCategoryIdStr2User(catIdStr string, userId primitive.ObjectID) {
 		UpsertCategory(&c)
 		catId = c.ID
 	}
-	AddCategoryId2User(catId, userId)
+	RelateCategory2User(catId, userId)
 }
-func AddCategoryId2User(catId primitive.ObjectID, userIds ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+
+func RelateCategory2User(catId primitive.ObjectID, userIds ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	//todo check if valid
 	res, err := catCol.UpdateMany(context.TODO(), bson.M{"_id": catId}, bson.M{"$addToSet": bson.M{"owner_ids": bson.M{"$each": userIds}}})
 	if err != nil {
