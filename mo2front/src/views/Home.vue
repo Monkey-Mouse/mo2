@@ -1,9 +1,6 @@
 <template>
   <div>
-    <v-parallax
-      src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
-      height="200"
-    >
+    <v-parallax src="https://cdn.mo2.leezeeyee.com/material.jpg" height="200">
       <v-row align="center" justify="center">
         <v-col class="text-center" cols="12">
           <h1 class="display-1 font-weight-thin mb-4">MO2</h1>
