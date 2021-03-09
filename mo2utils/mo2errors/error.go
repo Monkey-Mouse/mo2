@@ -17,13 +17,19 @@ func (e *Mo2Errors) SetErrorTip(s string) {
 	e.ErrorTip = s
 }
 
-// Init as name
+// Init init with code and tip
 func (e *Mo2Errors) Init(c int, s string) {
 	e.ErrorCode = c
 	e.ErrorTip = s
 }
 
-// InitCode as name
+// InitError init with error
+func (e *Mo2Errors) InitError(err error) {
+	e.ErrorCode = Mo2Error
+	e.ErrorTip = err.Error()
+}
+
+// InitCode init with code
 func (e *Mo2Errors) InitCode(c int) {
 	e.ErrorCode = c
 	e.ErrorTip = CodeText(c)
