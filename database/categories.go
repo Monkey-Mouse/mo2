@@ -84,31 +84,14 @@ func FindAllCategories() (cs []model.Category) {
 	}
 	return
 }
-func AddBlogs2Categories(ab2cs dto.AddBlogs2Categories) (results []dto.QueryBlog) {
-	var categoryIDs []primitive.ObjectID
-	for _, categoryID := range ab2cs.CategoryIDs {
-		if !categoryID.IsZero() {
-			categoryIDs = append(categoryIDs, categoryID)
-		}
-	}
-	var blog, draft model.Blog
-	//todo insert
+func AddBlogs2Categories(ab2cs dto.AddBlogs2Categories) (result []model.Blog) {
+	// 将所有满足条件的blog/draft进行更新
+	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.BlogIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.CategoryIDs}}}})
+	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.BlogIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.CategoryIDs}}}})
 
-	if len(categoryIDs) > 0 {
-		for _, blogID := range ab2cs.BlogIDs {
-			blog = FindBlogById(blogID, false)
-			if blog.IsValid() {
-				AddBlog2Categories(&blog, categoryIDs, false)
-				results = append(results, dto.MapBlog2QueryBlog(blog))
-			}
-			draft = FindBlogById(blogID, true)
-			if draft.IsValid() {
-				AddBlog2Categories(&draft, categoryIDs, true)
-				results = append(results, dto.MapBlog2QueryBlog(draft))
-			}
-		}
-	}
-	return results
+	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.BlogIDs}}}}) //bson.M{"_id":bson.M{"$in":ab2cs.BlogIDs}})//,options.Find().SetProjection(bson.M{"content":0}))
+	cursor.All(context.TODO(), &result)
+	return
 }
 func AddBlog2Categories(blog *model.Blog, categoryIDs []primitive.ObjectID, isDraft bool) {
 	blog.CategoryIDs = append(blog.CategoryIDs, categoryIDs...)

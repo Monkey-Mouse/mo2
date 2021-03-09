@@ -63,7 +63,7 @@ func (c *Controller) FindAllCategories(ctx *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id body dto.AddBlogs2Categories true "dto.AddBlogs2Categories"
-// @Success 200 {object} []dto.QueryBlog
+// @Success 200 {object} []model.Blog
 // @Router /api/blogs/addBlogs2Categories [post]
 func (c *Controller) AddBlogs2Categories(ctx *gin.Context) {
 	var ab2c dto.AddBlogs2Categories
