@@ -14,8 +14,8 @@ import (
 )
 
 var catCol = GetCollection("category")
-var catUserCol = GetCollection("userCategory")
 
+// upsertCategory 更新、插入category
 func UpsertCategory(c *model.Category) {
 	if c.ID.IsZero() {
 		c.Init()
@@ -27,6 +27,8 @@ func UpsertCategory(c *model.Category) {
 		log.Fatal(err)
 	}
 }
+
+// FindSubCategories 寻找一个categoryid的所有子category的详细信息
 func FindSubCategories(ID primitive.ObjectID) (cs []model.Category, mErr mo2errors.Mo2Errors) {
 	results, err := catCol.Find(context.TODO(), bson.M{"parent_id": ID})
 	if err != nil {
@@ -39,6 +41,8 @@ func FindSubCategories(ID primitive.ObjectID) (cs []model.Category, mErr mo2erro
 	}
 	return
 }
+
+// FindCategories 寻找位于ids列表中所有categories的详细信息
 func FindCategories(ids []primitive.ObjectID) (cs []model.Category, mErr mo2errors.Mo2Errors) {
 	cursor, err := catCol.Find(context.TODO(), bson.M{"_id": bson.M{"$in": ids}})
 	if err != nil {
@@ -52,6 +56,7 @@ func FindCategories(ids []primitive.ObjectID) (cs []model.Category, mErr mo2erro
 	return
 }
 
+// SortCategories 递归建立categories的树形结构
 func SortCategories(c model.Category, m map[string][]model.Category) {
 	var cs []model.Category
 	cs, _ = FindSubCategories(c.ID)
@@ -65,7 +70,7 @@ func SortCategories(c model.Category, m map[string][]model.Category) {
 	}
 }
 
-//find category by id
+//FindCategoryById find category by id
 func FindCategoryById(id primitive.ObjectID) (c model.Category) {
 	err := catCol.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&c)
 	if err != nil {
@@ -76,6 +81,8 @@ func FindCategoryById(id primitive.ObjectID) (c model.Category) {
 	}
 	return
 }
+
+//FindAllCategories find all categories
 func FindAllCategories() (cs []model.Category) {
 	results, err := catCol.Find(context.TODO(), bson.D{{}})
 	if err != nil {
@@ -87,33 +94,46 @@ func FindAllCategories() (cs []model.Category) {
 	}
 	return
 }
-func RelateCategories2Blogs(ab2cs dto.RelateEntitySet2EntitySet) (result []model.Blog) {
-	// 将所有满足条件的blog/draft进行更新
-	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.RelateToIDs}}}})
-	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", ab2cs.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": ab2cs.RelateToIDs}}}})
-	// todo delete useless result
-	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.M{"_id": bson.M{"$in": ab2cs.RelatedIDs}}}}, options.Find().SetProjection(bson.M{"content": 0}))
-	cursor.All(context.TODO(), &result)
-	return
-}
+
+// RelateMainCategory2User 为用户创建主归档目录
 func RelateMainCategory2User(e2e dto.RelateEntity2Entity) {
 	catCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelatedID}, bson.M{"$set": bson.M{"parent_id": e2e.RelateToID}})
 }
+
+// RelateSubCategory2Category 将子归档subCategory的parent_id设为category
 func RelateSubCategory2Category(e2e dto.RelateEntity2Entity) {
 	catCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelatedID}, bson.M{"$set": bson.M{"parent_id": e2e.RelateToID}})
 }
+
+// RelateSubCategories2Category 将子归档subCategories的parent_id设为category
 func RelateSubCategories2Category(s2e dto.RelateEntitySet2Entity) {
 	catCol.UpdateMany(context.TODO(), bson.M{"_id": bson.M{"$in": s2e.RelatedIDs}}, bson.M{"$set": bson.M{"parent_id": s2e.RelateToID}})
 }
+
+// RelateCategory2Blog 在blog及draft的categories中添加category的id
 func RelateCategory2Blog(e2e dto.RelateEntity2Entity) {
 	blogCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": e2e.RelatedID}})
 	draftCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": e2e.RelatedID}})
 }
+
+// RelateCategory2Blog 在blog及draft的categories中添加categories的id
 func RelateCategories2Blog(s2e dto.RelateEntitySet2Entity) {
 	blogCol.UpdateOne(context.TODO(), bson.M{"_id": s2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": bson.M{"$each": s2e.RelatedIDs}}})
 	draftCol.UpdateOne(context.TODO(), bson.M{"_id": s2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": bson.M{"$each": s2e.RelatedIDs}}})
 }
 
+// RelateCategories2Blogs 在blogs及drafts的categories中添加categories的id
+func RelateCategories2Blogs(s2s dto.RelateEntitySet2EntitySet) (result []model.Blog) {
+	// 将所有满足条件的blog/draft进行更新
+	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelateToIDs}}}})
+	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelateToIDs}}}})
+	// todo delete useless result
+	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.M{"_id": bson.M{"$in": s2s.RelatedIDs}}}}, options.Find().SetProjection(bson.M{"content": 0}))
+	cursor.All(context.TODO(), &result)
+	return
+}
+
+// RelateCategory2User 在category的ownerIds中添加userIDs
 func RelateCategory2User(catId primitive.ObjectID, userIds ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	//todo check if valid
 	res, err := catCol.UpdateMany(context.TODO(), bson.M{"_id": catId}, bson.M{"$addToSet": bson.M{"owner_ids": bson.M{"$each": userIds}}})
@@ -122,25 +142,6 @@ func RelateCategory2User(catId primitive.ObjectID, userIds ...primitive.ObjectID
 		return
 	}
 	mErr.Init(mo2errors.Mo2NoError, fmt.Sprintf("%v modified", res.ModifiedCount))
-	return
-}
-
-//find category by userid
-func FindCategoryByUserId(id primitive.ObjectID) (c model.Category) {
-	var cu model.CategoryUser
-	err := catUserCol.FindOne(context.TODO(), bson.D{{"user_id", id}}).Decode(&cu)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return
-		}
-		log.Fatal(err)
-	}
-	if err = catCol.FindOne(context.TODO(), bson.D{{"_id", cu.CategoryID}}).Decode(&c); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return
-		}
-		log.Fatal(err)
-	}
 	return
 }
 
