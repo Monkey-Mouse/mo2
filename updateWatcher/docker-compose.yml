@@ -32,7 +32,7 @@ services:
     #   ports:
     #     - 80:80
   nginx:
-    image: umputun/nginx-le:latest
+    build: .
     hostname: nginx
     restart: always
     container_name: nginx
