@@ -433,12 +433,12 @@ var doc = `{
                 "summary": "add blogs to chosen categories",
                 "parameters": [
                     {
-                        "description": "dto.AddBlogs2Categories",
+                        "description": "dto.RelateEntitySet2EntitySet",
                         "name": "id",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddBlogs2Categories"
+                            "$ref": "#/definitions/dto.RelateEntitySet2EntitySet"
                         }
                     }
                 ],
@@ -513,123 +513,6 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.Category"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/category/parent": {
-            "get": {
-                "description": "id不为空，返回该id的子目录subCategories",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find subCategories of parent",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "string ObjectID",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Category"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/category/user/{userID}": {
-            "get": {
-                "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find categories by user id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user ID",
-                        "name": "userID",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Category"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "user 与 category 皆为id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "add category to user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user id",
-                        "name": "userID",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "category ids to be added",
-                        "name": "id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.AddCategory2User"
                         }
                     }
                 }
@@ -840,34 +723,6 @@ var doc = `{
                         "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/findCategoryByUserId": {
-            "get": {
-                "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find category by user id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "string ObjectID",
-                        "name": "userId",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Category"
                         }
                     }
                 }
@@ -1228,7 +1083,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "relate"
+                    "relation"
                 ],
                 "summary": "将列表内的子categories关联到单个实体上",
                 "parameters": [
@@ -1258,6 +1113,100 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/api/relation/category/{type}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relation"
+                ],
+                "summary": "relate category to given type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "relatedTo user/blog/category/userMain",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "category id to be related",
+                        "name": "e2e",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RelateEntity2Entity"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RelateEntity2Entity"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/relation/category/{type}/{ID}": {
+            "get": {
+                "description": "根据type返回不同结果：[user] 个人的所有category|[sub] 所有子category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relation"
+                ],
+                "summary": "find categories by given type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "find by user/sub",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "ID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Category"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1268,35 +1217,6 @@ var doc = `{
                     "type": "string"
                 },
                 "time": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.AddBlogs2Categories": {
-            "type": "object",
-            "properties": {
-                "blog_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "category_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "dto.AddCategory2User": {
-            "type": "object",
-            "properties": {
-                "category_id": {
-                    "type": "string",
-                    "example": "xxxxxxx"
-                },
-                "user_id": {
                     "type": "string"
                 }
             }
@@ -1312,11 +1232,39 @@ var doc = `{
                 }
             }
         },
+        "dto.RelateEntity2Entity": {
+            "type": "object",
+            "properties": {
+                "relateTo_id": {
+                    "type": "string"
+                },
+                "related_id": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.RelateEntitySet2Entity": {
             "type": "object",
             "properties": {
                 "relateTo_id": {
                     "type": "string"
+                },
+                "related_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.RelateEntitySet2EntitySet": {
+            "type": "object",
+            "properties": {
+                "relateTo_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "related_ids": {
                     "type": "array",

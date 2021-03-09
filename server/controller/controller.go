@@ -20,11 +20,17 @@ type Message struct {
 }
 
 const (
-	apiImgGenToken = "/img/:filename"
-	apiLogs        = "/logs"
-	typeKey        = "type"
-	typeCategory   = "category"
-	typeCategories = "categories"
+	apiImgGenToken    = "/img/:filename"
+	apiLogs           = "/logs"
+	typeKey           = "type"
+	typeCategory      = "category"
+	typeCategories    = "categories"
+	typeUser          = "user"
+	typeUserMain      = "userMain"
+	typeBlog          = "blog"
+	typeUsers         = "users"
+	typeBlogs         = "blogs"
+	typeSubCategories = "sub"
 )
 
 // SetupHandlers set up
@@ -40,7 +46,9 @@ func SetupHandlers(c *Controller) {
 		relation := api.Group("relation", model.OrdinaryUser)
 		{
 
-			relation.Post("/categories/:type", c.Categories2RelatedType)
+			relation.Post("categories/:type", c.RelateCategories2Entity)
+			relation.Post("category/:type", c.RelateCategory2Entity)
+			relation.Get("category/:type/:ID", c.FindCategoriesByType)
 		}
 		blogs := api.Group("blogs", model.Anonymous, model.OrdinaryUser)
 		{
@@ -50,11 +58,6 @@ func SetupHandlers(c *Controller) {
 			{
 				user.Post("category", c.UpsertCategory)
 				user.Get("category", c.FindAllCategories)
-				user.Get("category/parent", c.FindSubCategories)
-				user.Post("addBlogs2Categories", c.AddBlogs2Categories)
-				user.Get("findCategoryByUserId", c.FindCategoryByUserId)
-				user.Post("category/user/:userID", c.AddCategory2User)
-				user.Get("category/user/:userID", c.FindCategoriesByUserId)
 
 				user.Post("publish", c.UpsertBlog)
 				user.Delete(":id", c.DeleteBlog)
