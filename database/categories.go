@@ -146,14 +146,18 @@ func FindCategoryByUserId(id primitive.ObjectID) (c model.Category) {
 }
 
 //find categories by user id
-func FindCategoriesByUserId(id primitive.ObjectID) (m map[string][]model.Category) {
-	c := FindCategoryByUserId(id)
-	if c.ID.IsZero() {
+func FindCategoriesByUserId(userId ...primitive.ObjectID) (cs []model.Category, mErr mo2errors.Mo2Errors) {
+	// disable sort in backend
+	//m = make(map[string][]model.Category)
+	//SortCategories(c, m)
+	cursor, err := catCol.Find(context.TODO(), bson.M{"owner_ids": bson.M{"$in": userId}})
+	if err != nil {
+		mErr.InitError(err)
 		return
 	}
-	m = make(map[string][]model.Category)
-	SortCategories(c, m)
-
+	if err = cursor.All(context.TODO(), &cs); err != nil {
+		mErr.InitError(err)
+		return
+	}
 	return
-
 }

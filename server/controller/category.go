@@ -56,6 +56,30 @@ func (c *Controller) FindAllCategories(ctx *gin.Context) {
 
 }
 
+// FindAllCategories godoc
+// @Summary find categories
+// @Description id不为空，返回该id的子目录subCategories
+// @Tags category
+// @Produce  json
+// @Param id query string true "string ObjectID" ""
+// @Success 200 {object} []model.Category
+// @Router /api/blogs/category/{parentID} [get]
+func (c *Controller) FindSubCategories(ctx *gin.Context) {
+	idStr := ctx.Query("parentID")
+	var cats []model.Category
+
+	id, err := primitive.ObjectIDFromHex(idStr)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
+	}
+	var ids []primitive.ObjectID
+	ids = append(ids, id)
+	cats = database.FindCategories(ids)
+
+	ctx.JSON(http.StatusOK, cats)
+
+}
+
 // AddBlogs2Categories godoc
 // @Summary add blogs to chosen categories
 // @Description blogs 与 categories皆为id列表，方便批量操作
@@ -126,23 +150,26 @@ func (c *Controller) AddCategory2User(ctx *gin.Context) {
 // @Summary find categories by user id
 // @Description  return (main category)个人的主存档 于前端不可见，用于后端存储
 // @Tags category
+// @Accept  json
 // @Produce  json
-// @Param userId query string false "string ObjectID" ""
-// @Success 200 {object} map[string][]model.Category
-// @Router /api/blogs/category/:userID [get]
+// @Param userID path string false "user ID"
+// @Success 200 {object} []model.Category
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
+// @Router /api/blogs/category/user/{userID} [get]
 func (c *Controller) FindCategoriesByUserId(ctx *gin.Context) {
-	idStr := ctx.Query("userId")
+	idStr := ctx.Param("userID")
 	id, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
-	m := database.FindCategoriesByUserId(id)
-	if m == nil {
-		ctx.JSON(http.StatusNotFound, badresponse.SetResponseReason("没有任何归档"))
+	cs, mErr := database.FindCategoriesByUserId(id)
+	if mErr.IsError() {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(mErr))
 		return
 	}
-	ctx.JSON(http.StatusOK, m)
+	ctx.JSON(http.StatusOK, cs)
 }
 
 // AddCategory2Category godoc

@@ -41,39 +41,6 @@ definitions:
       token:
         type: string
     type: object
-  dto.QueryBlog:
-    properties:
-      authorId:
-        example: xxxxxxxxxxxxx==
-        type: string
-      categories:
-        items:
-          type: string
-        type: array
-      cover:
-        example: https://xxx/xxx
-        type: string
-      description:
-        example: mouse ❤ monkey
-        type: string
-      entityInfo:
-        $ref: '#/definitions/model.Entity'
-      id:
-        example: xxxxxxxxxxxxx==
-        type: string
-      keyWords:
-        example:
-        - xxx
-        - xxx
-        items:
-          type: string
-        type: array
-      title:
-        example: mouse ❤ monkey
-        type: string
-    type: object
-  dto.QueryBlogs:
-    type: object
   dto.UserInfo:
     properties:
       email:
@@ -650,13 +617,15 @@ paths:
       summary: upsert category
       tags:
       - category
-  /api/blogs/category/:userID:
+  /api/blogs/category/user/{userID}:
     get:
+      consumes:
+      - application/json
       description: return (main category)个人的主存档 于前端不可见，用于后端存储
       parameters:
-      - description: string ObjectID
-        in: query
-        name: userId
+      - description: user ID
+        in: path
+        name: userID
         type: string
       produces:
       - application/json
@@ -664,15 +633,20 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties:
-              items:
-                $ref: '#/definitions/model.Category'
-              type: array
-            type: object
+            items:
+              $ref: '#/definitions/model.Category'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: find categories by user id
       tags:
       - category
-  /api/blogs/category/user/{userID}:
     post:
       consumes:
       - application/json
@@ -762,13 +736,13 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlogs'
+              $ref: '#/definitions/model.Blog'
             type: array
         "204":
           description: No Content
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlogs'
+              $ref: '#/definitions/model.Blog'
             type: array
         "400":
           description: Bad Request
@@ -817,7 +791,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlogs'
+              $ref: '#/definitions/model.Blog'
             type: array
         "204":
           description: ""
@@ -917,13 +891,13 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlog'
+              $ref: '#/definitions/model.Blog'
             type: array
         "204":
           description: No Content
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlog'
+              $ref: '#/definitions/model.Blog'
             type: array
         "400":
           description: Bad Request

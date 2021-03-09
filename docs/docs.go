@@ -552,9 +552,12 @@ var doc = `{
                 }
             }
         },
-        "/api/blogs/category/:userID": {
+        "/api/blogs/category/user/{userID}": {
             "get": {
                 "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -565,28 +568,35 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "string ObjectID",
-                        "name": "userId",
-                        "in": "query"
+                        "description": "user ID",
+                        "name": "userID",
+                        "in": "path"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/model.Category"
-                                }
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Category"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
-            }
-        },
-        "/api/blogs/category/user/{userID}": {
+            },
             "post": {
                 "description": "user 与 category 皆为id",
                 "consumes": [
@@ -725,7 +735,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlogs"
+                                "$ref": "#/definitions/model.Blog"
                             }
                         }
                     },
@@ -734,7 +744,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlogs"
+                                "$ref": "#/definitions/model.Blog"
                             }
                         }
                     },
@@ -809,7 +819,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlogs"
+                                "$ref": "#/definitions/model.Blog"
                             }
                         }
                     },
@@ -962,7 +972,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlog"
+                                "$ref": "#/definitions/model.Blog"
                             }
                         }
                     },
@@ -971,7 +981,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlog"
+                                "$ref": "#/definitions/model.Blog"
                             }
                         }
                     },
@@ -1274,53 +1284,6 @@ var doc = `{
                     "type": "string"
                 }
             }
-        },
-        "dto.QueryBlog": {
-            "type": "object",
-            "properties": {
-                "authorId": {
-                    "type": "string",
-                    "example": "xxxxxxxxxxxxx=="
-                },
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "cover": {
-                    "type": "string",
-                    "example": "https://xxx/xxx"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "mouse ❤ monkey"
-                },
-                "entityInfo": {
-                    "$ref": "#/definitions/model.Entity"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "xxxxxxxxxxxxx=="
-                },
-                "keyWords": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "xxx",
-                        "xxx"
-                    ]
-                },
-                "title": {
-                    "type": "string",
-                    "example": "mouse ❤ monkey"
-                }
-            }
-        },
-        "dto.QueryBlogs": {
-            "type": "object"
         },
         "dto.UserInfo": {
             "type": "object",
