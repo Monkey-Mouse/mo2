@@ -1,6 +1,8 @@
 package mo2errors
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Mo2Errors standard mo2 err
 type Mo2Errors struct {
@@ -38,7 +40,7 @@ func (e *Mo2Errors) InitCode(c int) {
 // IsError as name
 func (e Mo2Errors) IsError() (error bool) {
 	error = true
-	if e.ErrorCode == Mo2NoError {
+	if e.ErrorCode == Mo2NoError || e == (Mo2Errors{}) {
 		error = false
 	}
 	return
