@@ -1,11 +1,13 @@
 package emailservice
 
 import (
+	"crypto/tls"
 	"fmt"
 	"mo2/mo2utils/mo2errors"
 	"net/http"
 	"net/smtp"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/modern-go/concurrent"
@@ -109,17 +111,70 @@ func startWorker(emailChan <-chan emailProp) {
 	// Sender data.
 
 	// smtp server configuration.
-	smtpHost := "smtp.qq.com"
-	smtpPort := "587"
+	smtpHost := "smtpdm.aliyun.com"
+	smtpPort := "465"
 	addr := smtpHost + ":" + smtpPort
+	// TLS config
+	tlsconfig := &tls.Config{
+		InsecureSkipVerify: true,
+		ServerName:         smtpHost,
+	}
+	fromH := []byte(fmt.Sprintf("From: %s\r\n", from))
 	// Authentication.
 	auth := smtp.PlainAuth("", from, password, smtpHost)
 	for {
 		email := <-emailChan
-		// Sending email.
-		err := smtp.SendMail(addr, auth, from, email.receivers, email.msg)
+		toH := []byte(fmt.Sprintf("To: %s\r\n", strings.Join(email.receivers, ",")))
+		// Here is the key, you need to call tls.Dial instead of smtp.Dial
+		// for smtp servers running on 465 that require an ssl connection
+		// from the very beginning (no starttls)
+		conn, err := tls.Dial("tcp", addr, tlsconfig)
 		if err != nil {
 			fmt.Println(err)
 		}
+		c, err := smtp.NewClient(conn, smtpHost)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		// Auth
+		if err = c.Auth(auth); err != nil {
+			fmt.Println(err)
+		}
+
+		// To && From
+		if err = c.Mail(from); err != nil {
+			fmt.Println(err)
+		}
+
+		for _, v := range email.receivers {
+			if err = c.Rcpt(v); err != nil {
+				fmt.Println(err)
+			}
+		}
+
+		// Data
+		w, err := c.Data()
+		if err != nil {
+			fmt.Println(err)
+		}
+		_, err = w.Write(fromH)
+		if err != nil {
+			fmt.Println(err)
+		}
+		_, err = w.Write(toH)
+		if err != nil {
+			fmt.Println(err)
+		}
+		_, err = w.Write(email.msg)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		err = w.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+		c.Quit()
 	}
 }
