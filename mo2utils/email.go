@@ -9,8 +9,8 @@ import (
 // VerifyEmailMessage build email body for verify email
 func VerifyEmailMessage(url string, name string) []byte {
 
-	subject := "Subject: 确认Mo2邮箱!\n"
-	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	subject := "Subject: 确认Mo2邮箱!\r\n"
+	mime := "MIME-version: 1.0;\r\nContent-Type: text/html; charset=\"UTF-8\";\r\n"
 	body := "<html><body>" +
 		"  <tr>\n        <td>\n            <div style=\"border: #36649d 1px dashed;margin: 30px;padding: 20px\">\n                <div style=\"margin: 40px\">\n                    <label style=\"font-size: 22px;color: #36649d;font-weight: bold\">请确认你的邮箱！</label>\n                    <p style=\"font-size: 16px\">亲爱的&nbsp;<label style=\"font-weight: bold\"> " +
 		name + "</label>&nbsp; 您好！欢迎来到Mo2\n                    </p>\n                    <p style=\"font-size: 16px\">在开始使用Mo2之前，您必须先确认您的电子邮件地址</p>\n                </div>\n\n                <div class=\"col-pad-left-3 col-pad-right-2\" style=\"color:#0a0a0a;font-family:'Cereal', Helvetica, Arial, sans-serif;font-weight:normal;padding:40px;margin:0;text-align:center;font-size:16px;line-height:19px;padding-left:16px;padding-right:16px\">\n        " +

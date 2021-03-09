@@ -8,6 +8,7 @@ import (
 	"net/smtp"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/modern-go/concurrent"
@@ -20,6 +21,13 @@ type emailProp struct {
 	receivers []string
 }
 
+// Mo2Email struct for send a html
+type Mo2Email struct {
+	Content   string
+	receivers []string
+	Subject   string
+}
+
 var emailChan chan<- emailProp
 var initialed = false
 var blockMap = concurrent.NewMap()
@@ -28,6 +36,7 @@ var sec int64 = 5
 var max int64 = 10
 var blockTime int = 3600
 var blockFilter = bloom.NewWithEstimates(10000, 0.01)
+var lock = sync.Mutex{}
 
 // SetFrequencyLimit set shortest resend time
 func SetFrequencyLimit(seconds int64, limit int64, blocksec int) {
@@ -56,19 +65,23 @@ func QueueEmail(msg []byte, receivers []string, remoteAddr string) (err *mo2erro
 		return
 	}
 	val, ok := bm.Load(remoteAddr)
+	lock.Lock()
 	prop := emailProp{msg: msg, receivers: receivers}
 	if !ok {
 		bm.Store(remoteAddr, int64(1))
 		emailChan <- prop
+		lock.Unlock()
 		return
 	}
 	num := val.(int64)
 	if num >= max {
 		err = mo2errors.New(http.StatusTooManyRequests, "请求次数过多")
 		blockFilter.AddString(remoteAddr)
+		lock.Unlock()
 		return
 	}
 	bm.Store(remoteAddr, num+1)
+	lock.Unlock()
 	emailChan <- prop
 	return
 }
@@ -114,6 +127,9 @@ func startWorker(emailChan <-chan emailProp) {
 	smtpHost := "smtpdm.aliyun.com"
 	smtpPort := "465"
 	addr := smtpHost + ":" + smtpPort
+
+	subject := "Subject: %s\r\n"
+	mimeH := []byte("MIME-version: 1.0;\r\nContent-Type: text/html; charset=\"UTF-8\";\r\n")
 	// TLS config
 	tlsconfig := &tls.Config{
 		InsecureSkipVerify: true,
