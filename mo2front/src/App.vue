@@ -243,6 +243,7 @@ export default class App extends Vue {
     (this.$refs["view"] as any).publish();
   }
   created() {
+    document.title = "Mo2";
     GetUserInfoAsync().then((u) => {
       this.user = u;
       this.userload = true;

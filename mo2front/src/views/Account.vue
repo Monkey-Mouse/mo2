@@ -26,7 +26,7 @@
     />
     <v-parallax
       dark
-      src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
+      src="https://cdn.mo2.leezeeyee.com/material.jpg"
       height="400"
     >
       <v-row align="center" justify="center">
