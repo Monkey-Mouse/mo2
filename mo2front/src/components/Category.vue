@@ -24,11 +24,27 @@
         </v-breadcrumbs>
       </v-col>
 
-      <v-btn class="mt-5" small @click="addCate = true" fab color="primary">
+      <v-btn
+        v-if="own"
+        class="mt-5"
+        small
+        @click="addCate = true"
+        fab
+        color="primary"
+      >
         <v-icon> mdi-plus </v-icon>
       </v-btn>
     </v-row>
-    <v-row v-if="cate.length > 0">
+    <v-row v-if="loading" justify="center">
+      <v-sheet v-for="i in 4" :key="i">
+        <v-skeleton-loader
+          class="ma-4"
+          min-width="200"
+          type="card@2"
+        ></v-skeleton-loader>
+      </v-sheet>
+    </v-row>
+    <v-row v-else-if="cate.length > 0">
       <v-col :key="i" v-for="(c, i) in cate">
         <v-hover v-slot="{ hover }">
           <v-card class="mx-auto" max-width="344">
@@ -64,7 +80,11 @@
         </v-hover>
       </v-col>
     </v-row>
-    <nothing v-else btnText="Create New" @click="addCate = true" />
+    <nothing
+      v-else
+      :btnText="own ? 'Create New' : ''"
+      @click="addCate = true"
+    />
     <v-row justify="center">
       <v-divider></v-divider>
     </v-row>
@@ -85,6 +105,8 @@ import Nothing from "./NothingHere.vue";
 export default class Mo2Category extends Vue {
   @Prop()
   user!: User;
+  @Prop()
+  own: boolean;
   items: { text: string; id: string }[] = [];
   cate: Category[] = [];
   lev = 1;
@@ -107,6 +129,7 @@ export default class Mo2Category extends Vue {
     },
   };
   addCate = false;
+  loading = true;
   async confirm({ name }: { name: string }) {
     try {
       const data = await UpsertCate({
@@ -120,6 +143,7 @@ export default class Mo2Category extends Vue {
     }
   }
   gotoLevel(item: { text: string; id: string }) {
+    this.loading = true;
     const pos = this.items.indexOf(item);
     this.items = this.items.slice(0, pos + 1);
     const c = this.items[this.items.length - 1];
@@ -154,8 +178,10 @@ export default class Mo2Category extends Vue {
     this.loadData(this.user.id);
   }
   loadData(id: string) {
+    this.loading = true;
     GetCategories(id).then((data) => {
       this.cate = data;
+      this.loading = false;
     });
   }
   setCol(name: string, id: string) {
@@ -176,6 +202,7 @@ export default class Mo2Category extends Vue {
     this.setCol(name, c.id);
   }
   nextCate(c: Category) {
+    this.loading = true;
     this.nextLev(c);
   }
 }

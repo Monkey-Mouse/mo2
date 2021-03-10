@@ -61,7 +61,7 @@
         <v-tab href="#tab-1"> Articles </v-tab>
 
         <v-tab v-if="ownPage" href="#tab-2"> DraftBox </v-tab>
-        <v-tab v-if="ownPage" href="#tab-3"> Categories </v-tab>
+        <v-tab href="#tab-3"> Categories </v-tab>
       </v-tabs>
 
       <v-tabs-items v-model="tab">
@@ -83,7 +83,7 @@
         </v-tab-item>
         <v-tab-item :value="'tab-3'">
           <v-card flat>
-            <Category :user="user" />
+            <Category v-if="!firstloading" :own="ownPage" :user="displayUser" />
           </v-card>
         </v-tab-item>
       </v-tabs-items>

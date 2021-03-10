@@ -12,12 +12,12 @@
         </h1>
       </v-col>
     </v-row>
-    <v-row justify="center">
+    <v-row v-if="btnText" justify="center">
       <v-col class="text-center"
         ><v-icon size="128">mdi-arrow-down-bold</v-icon></v-col
       >
     </v-row>
-    <v-row justify="center">
+    <v-row v-if="btnText" justify="center">
       <v-col class="text-center"
         ><v-btn outlined @click="$emit('click')" color="primary">
           {{ btnText }}
