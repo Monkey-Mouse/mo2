@@ -284,13 +284,6 @@ export default class EditArticle extends Vue {
     this.blog.id = data.id;
   }
   async confirm(model: BlogUpsert, draft = false) {
-    // for (let index = 0; index < model.categories.length; index++) {
-    //   const element = model.categories[index];
-    //   if (element.length<3) {
-    //     model.categories = [];
-    //     break
-    //   }
-    // }
     try {
       this.published = true;
       await this.postBlog(model, draft);

@@ -83,7 +83,7 @@
                     {{ c.name }}
                   </p>
                 </v-card-text>
-                <v-card-actions>
+                <v-card-actions v-if="own">
                   <v-spacer />
                   <v-btn
                     @click="edit(c)"
