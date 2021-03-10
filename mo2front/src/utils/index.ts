@@ -185,3 +185,6 @@ export async function GetCategories(id: string) {
     return (await axios.get<Category[]>('/api/relation/category/sub/' + id)).data ?? []
 }
 
+export async function UpsertCate(cate: Category) {
+    return await (await axios.post<Category>("/api/blogs/category", cate)).data
+}
