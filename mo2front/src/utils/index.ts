@@ -179,7 +179,7 @@ export async function addQuery(that: Vue, key: string, val: string | string[]) {
         (k) => (query[k] = that.$route.query[k])
     );
     query[key] = val;
-    that.$router.replace({ query: query });
+    that.$router.replace({ query: query }).catch(() => { });
 }
 export async function GetCategories(id: string) {
     return (await axios.get<Category[]>('/api/relation/category/sub/' + id)).data ?? []

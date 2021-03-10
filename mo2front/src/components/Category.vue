@@ -146,9 +146,11 @@ export default class Mo2Category extends Vue {
   gotoLevel(item: { text: string; id: string }) {
     this.loading = true;
     const pos = this.items.indexOf(item);
+    this.lev = pos + 1;
     this.items = this.items.slice(0, pos + 1);
-    const c = this.items[this.items.length - 1];
+    const c = this.items[pos];
     this.parentId = c.id;
+    addQuery(this, "cur", c.id);
     this.loadData(c.id);
   }
   created() {
@@ -158,8 +160,8 @@ export default class Mo2Category extends Vue {
     });
     const urlParams = new URLSearchParams(window.location.search);
     const cur = urlParams.get("cur");
-    console.log(this.$route.fullPath);
     if (cur) {
+      this.items = [];
       for (
         let index = 0;
         index < Object.keys(this.$route.query).length;
@@ -172,6 +174,13 @@ export default class Mo2Category extends Vue {
           break;
         }
       }
+      this.lev = this.items.length + 1;
+      // if (this.items[0].id != this.user.id) {
+      //   this.items.unshift({
+      //     text: "Root",
+      //     id: this.user.id,
+      //   });
+      // }
       this.loadData(cur);
       return;
     }
