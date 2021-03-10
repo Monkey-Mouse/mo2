@@ -49,6 +49,7 @@ func SetupHandlers(c *Controller) {
 			relation.Post("categories/:type", c.RelateCategories2Entity)
 			relation.Post("category/:type", c.RelateCategory2Entity)
 			relation.Get("category/:type/:ID", c.FindCategoriesByType)
+			relation.Get("blogs/:type/:ID", c.FindBlogsByType)
 		}
 		blogs := api.Group("blogs", model.Anonymous, model.OrdinaryUser)
 		{

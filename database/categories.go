@@ -56,6 +56,20 @@ func FindCategories(ids []primitive.ObjectID) (cs []model.Directory, mErr mo2err
 	return
 }
 
+// FindBlogsByCategoryId 寻找包括categoriyId的所有blogs的信息
+func FindBlogsByCategoryId(id primitive.ObjectID) (bs []model.Blog, mErr mo2errors.Mo2Errors) {
+	cursor, err := blogCol.Find(context.TODO(), bson.M{"categories": id})
+	if err != nil {
+		mErr.InitError(err)
+		return
+	}
+	if err = cursor.All(context.TODO(), &bs); err != nil {
+		mErr.InitError(err)
+		return
+	}
+	return
+}
+
 // SortCategories 递归建立categories的树形结构
 func SortCategories(c model.Directory, m map[string][]model.Directory) {
 	var cs []model.Directory
@@ -135,9 +149,9 @@ func RelateCategories2Blogs(s2s dto.RelateEntitySet2EntitySet) (result []model.B
 }
 
 // RelateCategory2User 在category的ownerIds中添加userIDs
-func RelateCategory2User(catId primitive.ObjectID, userIds ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+func RelateCategory2User(catID primitive.ObjectID, userIds ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	//todo check if valid
-	res, err := catCol.UpdateMany(context.TODO(), bson.M{"_id": catId}, bson.M{"$addToSet": bson.M{"owner_ids": bson.M{"$each": userIds}}})
+	res, err := catCol.UpdateMany(context.TODO(), bson.M{"_id": catID}, bson.M{"$addToSet": bson.M{"owner_ids": bson.M{"$each": userIds}}})
 	if err != nil {
 		mErr.Init(mo2errors.Mo2Error, err.Error())
 		return

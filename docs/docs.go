@@ -1036,6 +1036,60 @@ var doc = `{
                 }
             }
         },
+        "/api/relation/blogs/{type}/{ID}": {
+            "get": {
+                "description": "根据type返回不同结果：[category] 所有category包含的blog",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relation"
+                ],
+                "summary": "find blogs by given type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "find by category",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "ID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Blog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/relation/categories/{type}": {
             "post": {
                 "description": "（根据path中提供的关联类型选择对应方法）目前有：父category",
