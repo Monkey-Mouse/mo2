@@ -82,9 +82,7 @@
           </v-card>
         </v-tab-item>
         <v-tab-item :value="'tab-3'">
-          <v-card flat>
-            <Category v-if="!firstloading" :own="ownPage" :user="displayUser" />
-          </v-card>
+          <Category v-if="!firstloading" :own="ownPage" :user="displayUser" />
         </v-tab-item>
       </v-tabs-items>
     </v-container>

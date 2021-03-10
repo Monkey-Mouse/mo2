@@ -26,7 +26,7 @@
 
       <v-btn
         v-if="own"
-        class="mt-5"
+        class="mt-5 mr-3"
         small
         @click="addCate = true"
         fab
@@ -47,7 +47,7 @@
     <v-row v-else-if="cate.length > 0">
       <v-col :key="i" v-for="(c, i) in cate">
         <v-hover v-slot="{ hover }">
-          <v-card class="mx-auto" max-width="344">
+          <v-card elevation="10" class="mx-auto" max-width="344">
             <v-card-text>
               <div>mo2 category</div>
               <p class="display-1 text--primary">{{ c.name }}</p>
@@ -61,6 +61,7 @@
 
             <v-expand-transition>
               <v-card
+                elevation="10"
                 v-if="hover"
                 class="transition-fast-in-fast-out v-card--reveal"
                 style="height: 100%"
