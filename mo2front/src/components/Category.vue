@@ -78,10 +78,10 @@
               >
                 <v-card-text class="pb-0">
                   <p class="display-1 text--primary">Click to enter</p>
-                  <!-- <p class="display-1 text--primary">Contains:</p>
+                  <!-- <p class="display-1 text--primary">Contains:</p> -->
                   <p class="display-1 text--secondary">
-                    Sub Catagories + 64 articles
-                  </p> -->
+                    {{ c.name }}
+                  </p>
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer />
@@ -101,18 +101,30 @@
       </v-col>
     </v-row>
     <nothing
-      v-else
+      v-else-if="blogs.length === 0"
       :btnText="own ? 'Create New' : ''"
       @click="addCate = true"
     />
-    <v-row justify="center">
+    <v-container>
       <v-divider></v-divider>
-    </v-row>
+      <blog-time-line-list
+        v-if="!loading"
+        :blogs="blogs"
+        :showNothing="false"
+      />
+      <blog-skeleton v-else :num="5" />
+    </v-container>
   </v-container>
 </template>
 <script lang="ts">
-import { Category, InputProp, User } from "@/models";
-import { addQuery, GetCategories, GetErrorMsg, UpsertCate } from "@/utils";
+import { Blog, Category, InputProp, User } from "@/models";
+import {
+  addQuery,
+  GetCateBlogs,
+  GetCategories,
+  GetErrorMsg,
+  UpsertCate,
+} from "@/utils";
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop } from "vue-property-decorator";
@@ -165,6 +177,8 @@ export default class Mo2Category extends Vue {
   addCate = false;
   editCate = false;
   loading = true;
+  ec: Category = {};
+  blogs: Blog[] = [];
   async confirm({ name }: { name: string }) {
     try {
       const data = await UpsertCate({
@@ -177,7 +191,6 @@ export default class Mo2Category extends Vue {
       return { err: GetErrorMsg(error), pass: false };
     }
   }
-  ec: Category = {};
   async edit(c: Category) {
     this.inputPropsEdit.name.default = c.name;
     this.editCate = true;
@@ -237,6 +250,9 @@ export default class Mo2Category extends Vue {
     GetCategories(id).then((data) => {
       this.cate = data;
       this.loading = false;
+    });
+    GetCateBlogs(id).then((data) => {
+      this.blogs = data;
     });
   }
   setCol(name: string, id: string) {

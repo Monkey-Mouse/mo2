@@ -40,6 +40,7 @@ export interface BlogUpsert {
     description?: string;
     keyWords?: string[];
     title?: string;
+    categories?: string[]
 }
 export interface UserSettings {
     avatar?: string;
@@ -60,7 +61,12 @@ export interface InputProp {
     label?: string;
     default: any;
     accept?: string;
+    options?: Option[];
     iconClick?: (prop: InputProp) => void;
+}
+export interface Option {
+    text: string;
+    value: string;
 }
 export interface ApiError {
     reason: string;
