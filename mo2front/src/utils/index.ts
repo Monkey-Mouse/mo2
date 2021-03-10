@@ -1,4 +1,4 @@
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 import router from '../router'
@@ -172,5 +172,16 @@ export async function UploadMD(md: File) {
     let form = new FormData();
     form.append('upload[]', md)
     return (await axios.post<Blog>('/api/file', form)).data;
+}
+export async function addQuery(that: Vue, key: string, val: string | string[]) {
+    const query: { [key: string]: string | string[] } = {};
+    Object.keys(that.$route.query).map(
+        (k) => (query[k] = that.$route.query[k])
+    );
+    query[key] = val;
+    that.$router.replace({ query: query });
+}
+export async function GetCategories(id: string) {
+    return (await axios.get<Category[]>('/api/relation/category/sub/' + id)).data ?? []
 }
 

@@ -70,3 +70,9 @@ export interface ImgToken {
     token: string;
     file_key: string;
 }
+
+export interface Category {
+    id: string;
+    parent_id: string;
+    name: string;
+}
