@@ -259,7 +259,7 @@ export default class Account extends Vue implements BlogAutoLoader {
       this.uid = this.user.id;
       this.displayUser = this.user;
       this.ownPage = true;
-      if (this.$route.fullPath !== "/account") {
+      if (this.$route.path !== "/account") {
         this.$router.replace("/account");
       }
       GetOwnArticles({

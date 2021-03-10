@@ -23,12 +23,10 @@
           </template>
         </v-breadcrumbs>
       </v-col>
-      <v-spacer />
-      <v-col class="text-right">
-        <v-btn small @click="addCate = true" fab color="primary">
-          <v-icon> mdi-plus </v-icon>
-        </v-btn></v-col
-      >
+
+      <v-btn class="mt-5" small @click="addCate = true" fab color="primary">
+        <v-icon> mdi-plus </v-icon>
+      </v-btn>
     </v-row>
     <v-row v-if="cate.length > 0">
       <v-col :key="i" v-for="(c, i) in cate">
@@ -87,12 +85,7 @@ import Nothing from "./NothingHere.vue";
 export default class Mo2Category extends Vue {
   @Prop()
   user!: User;
-  items = [
-    {
-      text: "Root",
-      id: this.user.id,
-    },
-  ];
+  items: { text: string; id: string }[] = [];
   cate: Category[] = [];
   lev = 1;
   parentId = "";
@@ -134,7 +127,30 @@ export default class Mo2Category extends Vue {
     this.loadData(c.id);
   }
   created() {
-    this.setCol("root");
+    this.items.push({
+      text: "Root",
+      id: this.user.id,
+    });
+    const urlParams = new URLSearchParams(window.location.search);
+    const cur = urlParams.get("cur");
+    console.log(this.$route.fullPath);
+    if (cur) {
+      for (
+        let index = 0;
+        index < Object.keys(this.$route.query).length;
+        index++
+      ) {
+        const element = this.$route.query[`lvid${index + 1}`] as string;
+        const name = this.$route.query[`lv${index + 1}`] as string;
+        this.items.push({ text: name, id: element });
+        if (element === cur) {
+          break;
+        }
+      }
+      this.loadData(cur);
+      return;
+    }
+    this.setCol("root", this.user.id);
     this.loadData(this.user.id);
   }
   loadData(id: string) {
@@ -142,9 +158,12 @@ export default class Mo2Category extends Vue {
       this.cate = data;
     });
   }
-  setCol(name: string) {
-    addQuery(this, `lv${this.lev++}`, name);
-    addQuery(this, "cur", name);
+  setCol(name: string, id: string) {
+    // addQuery(this, `lvid1`, this.user.id);
+    addQuery(this, `lv${this.lev}`, name);
+    addQuery(this, `lvid${this.lev}`, id);
+    this.lev++;
+    addQuery(this, "cur", id);
   }
   nextLev(c: Category) {
     this.parentId = c.id;
@@ -154,7 +173,7 @@ export default class Mo2Category extends Vue {
       text: name,
       id: c.id,
     });
-    this.setCol(name);
+    this.setCol(name, c.id);
   }
   nextCate(c: Category) {
     this.nextLev(c);
