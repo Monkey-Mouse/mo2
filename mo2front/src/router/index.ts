@@ -58,6 +58,9 @@ const router = new VueRouter({
   // hard code base, sothat router won't change to cdn url
   base: '/',
   scrollBehavior(to, from, savedPosition) {
+    if (to.path === from.path) {
+      return
+    }
     return { x: 0, y: 0 };
   },
   routes

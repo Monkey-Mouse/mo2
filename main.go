@@ -28,7 +28,9 @@ func main() {
 
 func init() {
 	if mo2utils.IsEnvRelease() {
-		docs.SwaggerInfo.Host = "8.135.117.116"
+		docs.SwaggerInfo.Version = "v0.2 alpha"
+		docs.SwaggerInfo.Schemes = []string{"https"}
+		docs.SwaggerInfo.Host = "www.motwo.cn"
 	}
 	mo2utils.UploadCDN()
 }
