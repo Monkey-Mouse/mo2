@@ -113,8 +113,25 @@ type RelateEntitySet2Entity struct {
       - 多对一
         - api/relation/categories/:type [post]
           - 建立categories与type之间的联系，目前可选：
-          - 
+          - category:将多实体集categories的父categoryid均设为单实体的id
+          - blog:将多实体集categories的ids添加到blog的categories列表中去
+        
       - (x)多对多
+    - category
+      - 一对一
+        - api/relation/category/:type [post]
+          - 建立category与type之间的联系，目前可选：
+          - user:将user的id添加到category的ownerIDs列表中
+          - userMain:将user的id设定为category的parent_id
+          - category:将related id的parent_id设定为relateTo的category的id
+          - blog:将category的id添加到blog的categories列表中去
+      - 一对一/多  
+        - api/relation/category/:type/:id [get]
+          - 获取categories与type之间的联系，目前可选：
+          - user:将多实体集categories的父categoryid均设为单实体的id
+          - sub:将多实体集categories添加到blog的categories列表中去
+      
+    
     
         
 
