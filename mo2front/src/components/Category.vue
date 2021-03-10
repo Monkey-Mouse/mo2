@@ -100,8 +100,10 @@ import { Prop } from "vue-property-decorator";
 import { required } from "vuelidate/lib/validators";
 import MO2Dialog from "./MO2Dialog.vue";
 import Nothing from "./NothingHere.vue";
+import BlogTimeLineList from "../components/BlogTimeLineList.vue";
+import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 @Component({
-  components: { MO2Dialog, Nothing },
+  components: { MO2Dialog, Nothing, BlogTimeLineList, BlogSkeleton },
 })
 export default class Mo2Category extends Vue {
   @Prop()
@@ -175,12 +177,6 @@ export default class Mo2Category extends Vue {
         }
       }
       this.lev = this.items.length + 1;
-      // if (this.items[0].id != this.user.id) {
-      //   this.items.unshift({
-      //     text: "Root",
-      //     id: this.user.id,
-      //   });
-      // }
       this.loadData(cur);
       return;
     }
