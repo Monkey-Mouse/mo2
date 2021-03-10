@@ -106,6 +106,7 @@ type RelateEntitySet2Entity struct {
         - 查询category信息
   - (x) api/blog/category [delete]
       - 删除category信息
+      - 解除与该category相关的所有联系：blog字段寻找相关字段并删去
 
  
 - relation部分

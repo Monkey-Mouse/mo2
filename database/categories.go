@@ -11,6 +11,7 @@ import (
 	"mo2/dto"
 	"mo2/mo2utils/mo2errors"
 	"mo2/server/model"
+	"sync"
 )
 
 var catCol = GetCollection("category")
@@ -26,6 +27,45 @@ func UpsertCategory(c *model.Directory) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// DeleteCategory 删除category，并删除blog中的冗余数据
+func DeleteCategory(id primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+	var cat model.Directory
+	var removeAll sync.WaitGroup
+	removeAll.Add(1)
+	errSignal := make(chan mo2errors.Mo2Errors)
+	err := catCol.FindOneAndDelete(context.TODO(), bson.M{"_id": id}).Decode(&cat)
+	if err != nil {
+		mErr.InitError(err)
+		log.Println(err)
+		return
+	}
+	go func() {
+		defer removeAll.Done()
+		errSignal <- RemoveCategoriesInAllBlogs(id)
+	}()
+	for errSig := range errSignal {
+		log.Println(id, errSig.Error())
+	}
+	removeAll.Wait()
+	return
+}
+
+// RemoveCategoriesInAllBlogs 删除所有blog中的category存在id
+func RemoveCategoriesInAllBlogs(catIDs ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+	resBlog, err := blogCol.UpdateMany(context.TODO(), bson.M{"categories": bson.M{"$in": catIDs}}, bson.M{"$pullAll": bson.M{"categories": catIDs}})
+	if err != nil {
+		mErr.InitError(err)
+		log.Println(err)
+	}
+	resDraft, err := draftCol.UpdateMany(context.TODO(), bson.M{"categories": bson.M{"$in": catIDs}}, bson.M{"$pullAll": bson.M{"categories": catIDs}})
+	if err != nil {
+		mErr.InitError(err)
+		log.Println(err)
+	}
+	mErr.Init(mo2errors.Mo2NoError, fmt.Sprintf("update %v blog(s),%v draft(s)", resBlog.MatchedCount, resDraft.MatchedCount))
+	return
 }
 
 // FindSubCategories 寻找一个categoryid的所有子category的详细信息

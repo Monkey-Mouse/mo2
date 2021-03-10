@@ -31,6 +31,26 @@ func (c *Controller) UpsertCategory(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, cat)
 }
 
+// DeleteCategory godoc
+// @Summary delete category
+// @Description 根据id删除，并解除与之相关实体的所有关联
+// @Tags category
+// @Accept  json
+// @Produce  json
+// @Param id path primitive.ObjectID true "category id to delete"
+// @Success 200 {object} model.Directory
+// @Router /api/blogs/category [post]
+func (c *Controller) DeleteCategory(ctx *gin.Context) {
+	var cat model.Directory
+	if err := ctx.ShouldBindJSON(&cat); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
+		return
+	}
+
+	database.UpsertCategory(&cat)
+	ctx.JSON(http.StatusOK, cat)
+}
+
 // FindAllCategories godoc
 // @Summary find categories
 // @Description 若id为空，返回所有categories；若id不为空，返回该id的category

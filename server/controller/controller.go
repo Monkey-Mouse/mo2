@@ -59,6 +59,7 @@ func SetupHandlers(c *Controller) {
 			{
 				user.Post("category", c.UpsertCategory)
 				user.Get("category", c.FindAllCategories)
+				user.Delete("category", c.DeleteCategory)
 
 				user.Post("publish", c.UpsertBlog)
 				user.Delete(":id", c.DeleteBlog)
