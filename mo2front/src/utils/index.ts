@@ -20,8 +20,11 @@ export async function GetUserData(uid: string): Promise<User> {
     let re = await axios.get<User>('/api/accounts/detail/' + uid);
     return re.data[0]
 }
+function onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
+}
 export async function GetUserDatas(uids: string[]): Promise<UserListData[]> {
-    let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.join('&id='));
+    let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.filter(onlyUnique).join('&id='));
     return re.data
 }
 

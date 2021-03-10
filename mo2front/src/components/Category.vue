@@ -8,6 +8,14 @@
       confirmText="确认"
       :confirm="confirm"
     />
+    <MO2Dialog
+      :validator="validator"
+      :inputProps="inputPropsEdit"
+      :show.sync="editCate"
+      title="添加集合"
+      confirmText="确认"
+      :confirm="confirmEdit"
+    />
     <v-row>
       <v-col>
         <v-breadcrumbs :items="items">
@@ -75,6 +83,17 @@
                     Sub Catagories + 64 articles
                   </p> -->
                 </v-card-text>
+                <v-card-actions>
+                  <v-spacer />
+                  <v-btn
+                    @click="edit(c)"
+                    v-on:click.prevent
+                    v-on:click.stop
+                    color="accent"
+                    >Edit</v-btn
+                  >
+                  <v-btn color="red">delete</v-btn>
+                </v-card-actions>
               </v-card>
             </v-expand-transition>
           </v-card>
@@ -131,7 +150,20 @@ export default class Mo2Category extends Vue {
       type: "text",
     },
   };
+  inputPropsEdit: { [name: string]: InputProp } = {
+    name: {
+      errorMsg: {
+        required: "集合名不可为空",
+      },
+      label: "Name",
+      default: "",
+      icon: "mdi-folder",
+      col: 12,
+      type: "text",
+    },
+  };
   addCate = false;
+  editCate = false;
   loading = true;
   async confirm({ name }: { name: string }) {
     try {
@@ -140,6 +172,23 @@ export default class Mo2Category extends Vue {
         parent_id: this.parentId === "" ? this.user.id : this.parentId,
       });
       this.cate.push(data);
+      return { err: "", pass: true };
+    } catch (error) {
+      return { err: GetErrorMsg(error), pass: false };
+    }
+  }
+  ec: Category = {};
+  async edit(c: Category) {
+    this.inputPropsEdit.name.default = c.name;
+    this.editCate = true;
+    this.ec = c;
+  }
+  async confirmEdit({ name }: { name: string }) {
+    try {
+      const c = this.ec;
+      c.name = name;
+      const data = await UpsertCate(c);
+      c.name = data.name;
       return { err: "", pass: true };
     } catch (error) {
       return { err: GetErrorMsg(error), pass: false };
