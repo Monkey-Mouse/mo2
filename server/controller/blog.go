@@ -400,6 +400,38 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, blogs)
 }
 
+// FindBlogsByType godoc
+// @Summary find blogs by given type
+// @Description  根据type返回不同结果：[category] 所有category包含的blog
+// @Tags relation
+// @Accept  json
+// @Produce  json
+// @Param type path string true "find by category"
+// @Param ID path string true "ID"
+// @Success 200 {object} []model.Blog
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 404 {object} badresponse.ResponseError
+// @Router /api/relation/blogs/{type}/{ID} [get]
+func (c *Controller) FindBlogsByType(ctx *gin.Context) {
+	idStr := ctx.Param("ID")
+	id, err := primitive.ObjectIDFromHex(idStr)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
+		return
+	}
+	var blogs []model.Blog
+	var mErr mo2errors.Mo2Errors
+	switch ctx.Param(typeKey) {
+	case typeCategory:
+		blogs, mErr = database.FindBlogsByCategoryId(id)
+	}
+	if mErr.IsError() {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(mErr))
+		return
+	}
+	ctx.JSON(http.StatusOK, blogs)
+}
+
 func parseString2Bool(s string) (b bool) {
 	b = true
 	if s == "false" {

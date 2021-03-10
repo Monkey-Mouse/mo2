@@ -18,11 +18,11 @@ import (
 // @Tags category
 // @Accept  json
 // @Produce  json
-// @Param account body model.Category true "Add category"
-// @Success 200 {object} model.Category
+// @Param account body model.Directory true "Add category"
+// @Success 200 {object} model.Directory
 // @Router /api/blogs/category [post]
 func (c *Controller) UpsertCategory(ctx *gin.Context) {
-	var cat model.Category
+	var cat model.Directory
 	if err := ctx.ShouldBindJSON(&cat); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
@@ -37,11 +37,11 @@ func (c *Controller) UpsertCategory(ctx *gin.Context) {
 // @Tags category
 // @Produce  json
 // @Param id query string false "string ObjectID" ""
-// @Success 200 {object} []model.Category
+// @Success 200 {object} []model.Directory
 // @Router /api/blogs/category [get]
 func (c *Controller) FindAllCategories(ctx *gin.Context) {
 	idStr := ctx.Query("id")
-	var cats []model.Category
+	var cats []model.Directory
 	if len(idStr) == 0 {
 		cats = database.FindAllCategories()
 	} else {
@@ -100,7 +100,7 @@ func (c *Controller) RelateCategory2Entity(ctx *gin.Context) {
 // @Produce  json
 // @Param type path string true "find by user/sub"
 // @Param ID path string true "ID"
-// @Success 200 {object} []model.Category
+// @Success 200 {object} []model.Directory
 // @Failure 400 {object} badresponse.ResponseError
 // @Failure 404 {object} badresponse.ResponseError
 // @Router /api/relation/category/{type}/{ID} [get]
@@ -111,7 +111,7 @@ func (c *Controller) FindCategoriesByType(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
-	var cats []model.Category
+	var cats []model.Directory
 	var mErr mo2errors.Mo2Errors
 	switch ctx.Param(typeKey) {
 	case typeUser:
@@ -134,7 +134,7 @@ func (c *Controller) FindCategoriesByType(ctx *gin.Context) {
 // @Produce  json
 // @Param type path string true "types to relate"
 // @Param id body dto.RelateEntitySet2Entity true "sub category id and parent id"
-// @Success 200 {object} model.Category
+// @Success 200 {object} model.Directory
 // @Router /api/relation/categories/{type} [post]
 func (c *Controller) RelateCategories2Entity(ctx *gin.Context) {
 
