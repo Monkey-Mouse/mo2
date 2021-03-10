@@ -122,7 +122,7 @@
         </template>
       </v-timeline-item>
     </v-timeline>
-    <v-container v-else>
+    <v-container v-else-if="showNothing">
       <v-row justify="center">
         <v-col class="text-center"
           ><v-icon size="128">mdi-clipboard-text-off-outline</v-icon></v-col
@@ -165,6 +165,9 @@ export default class BlogTimeLineList extends Vue {
   blogs!: DisplayBlogBrief[];
   @Prop({ default: false })
   draft: boolean;
+  @Prop({ default: true })
+  showNothing: boolean;
+
   prevlen = -1;
   displayColors: string[] = [];
   showI = false;

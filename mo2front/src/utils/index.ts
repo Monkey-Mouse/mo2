@@ -1,4 +1,4 @@
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 import router from '../router'
@@ -20,8 +20,11 @@ export async function GetUserData(uid: string): Promise<User> {
     let re = await axios.get<User>('/api/accounts/detail/' + uid);
     return re.data[0]
 }
+function onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
+}
 export async function GetUserDatas(uids: string[]): Promise<UserListData[]> {
-    let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.join('&id='));
+    let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.filter(onlyUnique).join('&id='));
     return re.data
 }
 
@@ -173,4 +176,26 @@ export async function UploadMD(md: File) {
     form.append('upload[]', md)
     return (await axios.post<Blog>('/api/file', form)).data;
 }
+export async function addQuery(that: Vue, key: string, val: string | string[]) {
+    const query: { [key: string]: string | string[] } = {};
+    Object.keys(that.$route.query).map(
+        (k) => (query[k] = that.$route.query[k])
+    );
+    query[key] = val;
+    that.$router.replace({ query: query }).catch(() => { });
+}
+export async function GetCategories(id: string) {
+    return (await axios.get<Category[]>('/api/relation/category/sub/' + id)).data ?? []
+}
 
+export async function UpsertCate(cate: Category) {
+    return await (await axios.post<Category>("/api/blogs/category", cate)).data
+}
+
+export async function GetCateBlogs(id: string) {
+    return (await axios.get<Blog[]>('/api/relation/blogs/category/' + id)).data ?? []
+}
+
+export async function GetCates() {
+    return (await axios.get<Category[]>('/api/blogs/category')).data ?? []
+}

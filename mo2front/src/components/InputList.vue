@@ -20,6 +20,15 @@
           :uploadImgs="uploadImgs"
           @imgselect="(img) => (model[key] = img)"
         />
+        <v-select
+          v-else-if="value['type'] === 'select'"
+          v-model="model[key]"
+          :items="value['options']"
+          deletable-chips
+          chips
+          :label="value.label"
+          multiple
+        />
         <v-file-input
           v-else-if="value['type'] === 'file'"
           :label="value.label"

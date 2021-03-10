@@ -61,6 +61,7 @@
         <v-tab href="#tab-1"> Articles </v-tab>
 
         <v-tab v-if="ownPage" href="#tab-2"> DraftBox </v-tab>
+        <v-tab href="#tab-3"> Categories </v-tab>
       </v-tabs>
 
       <v-tabs-items v-model="tab">
@@ -80,6 +81,11 @@
             <blog-skeleton v-if="draftProps.loading" :num="pagesize" />
           </v-card>
         </v-tab-item>
+        <v-tab-item :value="'tab-3'">
+          <v-card flat>
+            <Category v-if="!firstloading" :own="ownPage" :user="displayUser" />
+          </v-card>
+        </v-tab-item>
       </v-tabs-items>
     </v-container>
   </div>
@@ -89,6 +95,7 @@
 import { BlankUser, BlogBrief, User, InputProp } from "@/models";
 import {
   AddMore,
+  addQuery,
   BlogAutoLoader,
   Copy,
   ElmReachedButtom,
@@ -108,6 +115,7 @@ import Avatar from "../components/UserAvatar.vue";
 import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 import MO2Dialog from "../components/MO2Dialog.vue";
 import Cropper from "../components/ImageCropper.vue";
+import Category from "../components/Category.vue";
 @Component({
   components: {
     BlogTimeLineList,
@@ -115,6 +123,7 @@ import Cropper from "../components/ImageCropper.vue";
     BlogSkeleton,
     MO2Dialog,
     Cropper,
+    Category,
   },
 })
 export default class Account extends Vue implements BlogAutoLoader {
@@ -250,7 +259,7 @@ export default class Account extends Vue implements BlogAutoLoader {
       this.uid = this.user.id;
       this.displayUser = this.user;
       this.ownPage = true;
-      if (this.$route.fullPath !== "/account") {
+      if (this.$route.path !== "/account") {
         this.$router.replace("/account");
       }
       GetOwnArticles({
@@ -301,8 +310,8 @@ export default class Account extends Vue implements BlogAutoLoader {
   }
   @Watch("tab")
   loadDraft() {
-    this.$router.replace(`/account?tab=${this.tab}`);
-    if (this.draftProps.firstloading) {
+    addQuery(this, "tab", this.tab);
+    if (this.draftProps.firstloading && this.tab === "tab-2") {
       if (this.ownPage) {
         GetOwnArticles({
           page: this.draftProps.page++,
@@ -321,7 +330,7 @@ export default class Account extends Vue implements BlogAutoLoader {
       ElmReachedButtom(this, ({ page, pageSize }) =>
         GetOwnArticles({ page: page, pageSize: pageSize, draft: false })
       );
-    } else {
+    } else if (this.tab === "tab-2") {
       ElmReachedButtom(this.draftProps, ({ page, pageSize }) =>
         GetOwnArticles({ page: page, pageSize: pageSize, draft: true })
       );

@@ -21,6 +21,7 @@
       @autosave="autoSave"
     />
     <MO2Dialog
+      v-if="propLoad"
       :show.sync="showPublish"
       confirmText="发布"
       title="发布文章"
@@ -31,6 +32,7 @@
       :uploadImgs="uploadImgs"
     />
     <MO2Dialog
+      v-if="propLoad"
       :show.sync="uploadMD"
       confirmText="发布"
       title="发布文章"
@@ -49,13 +51,14 @@ import Editor from "../components/MO2Editor.vue";
 import MO2Dialog from "../components/MO2Dialog.vue";
 import {
   GetArticle,
+  GetCates,
   GetErrorMsg,
   UploadImgToQiniu,
   UploadMD,
   UpsertBlog,
   UpSertBlogSync,
 } from "@/utils";
-import { BlogUpsert, InputProp } from "@/models";
+import { BlogUpsert, Category, InputProp } from "@/models";
 import { required, minLength } from "vuelidate/lib/validators";
 import { AxiosError } from "axios";
 import { Prop, Watch } from "vue-property-decorator";
@@ -76,6 +79,7 @@ export default class EditArticle extends Vue {
   editor: Editor;
   blog: BlogUpsert = {};
   published = false;
+  propLoad = false;
   uploadProps: { [name: string]: InputProp } = {
     file: {
       errorMsg: { required: "文件不可为空" },
@@ -102,40 +106,53 @@ export default class EditArticle extends Vue {
     },
   };
   uploadMD = false;
-  get inputProps(): { [name: string]: InputProp } {
-    return {
-      title: {
-        errorMsg: {
-          required: "标题不可为空",
-        },
-        label: "Title",
-        default: "",
-        icon: "mdi-format-title",
-        col: 12,
-        type: "text",
+  inputProps: { [name: string]: InputProp } = {
+    title: {
+      errorMsg: {
+        required: "标题不可为空",
       },
-      description: {
-        errorMsg: {
-          required: "描述不可为空",
-        },
-        label: "Description",
-        default: "",
-        icon: "mdi-text",
-        col: 12,
-        type: "textarea",
+      label: "Title",
+      default: "",
+      icon: "mdi-format-title",
+      col: 12,
+      type: "text",
+    },
+    description: {
+      errorMsg: {
+        required: "描述不可为空",
       },
-      cover: {
-        errorMsg: {},
-        label: "Cover",
-        default: {},
-        icon: "mdi-image",
-        col: 12,
-        type: "imgselector",
-      },
-    };
-  }
+      label: "Description",
+      default: "",
+      icon: "mdi-text",
+      col: 12,
+      type: "textarea",
+    },
+    cover: {
+      errorMsg: {},
+      label: "Cover",
+      default: {},
+      icon: "mdi-image",
+      col: 12,
+      type: "imgselector",
+    },
+    categories: {
+      errorMsg: {},
+      label: "Categories",
+      default: "",
+      col: 12,
+      options: [],
+      type: "select",
+    },
+  };
+
   created() {
     this.init();
+    GetCates().then((data) => {
+      this.inputProps.categories.options = data.map((v, i, a) => {
+        return { text: v.name, value: v.id };
+      });
+      this.propLoad = true;
+    });
   }
   mounted() {
     this.$emit("update:autoSaving", false);
@@ -267,6 +284,13 @@ export default class EditArticle extends Vue {
     this.blog.id = data.id;
   }
   async confirm(model: BlogUpsert, draft = false) {
+    // for (let index = 0; index < model.categories.length; index++) {
+    //   const element = model.categories[index];
+    //   if (element.length<3) {
+    //     model.categories = [];
+    //     break
+    //   }
+    // }
     try {
       this.published = true;
       await this.postBlog(model, draft);
