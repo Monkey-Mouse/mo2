@@ -65,7 +65,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
 	}
 	if !isDraft {
 		log.Println("发布时删除草稿" + b.ID.String())
-		deleteBlog(*b, true)
+		deleteBlogs(true, b.ID)
 	}
 	if result.UpsertedCount != 0 {
 		log.Println("新建文章" + b.ID.String())
@@ -73,10 +73,10 @@ func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
 	return
 }
 
-// deleteBlog set flag of blog or draft to isDeleted
-func deleteBlog(b model.Blog, isDraft bool) (success bool) {
+// deleteBlogs set flag of blog or draft to isDeleted
+func deleteBlogs(isDraft bool, blogIDs ...primitive.ObjectID) (success bool) {
 	success = true
-	res, err := chooseCol(isDraft).DeleteMany(context.TODO(), bson.M{"_id": b.ID})
+	res, err := chooseCol(isDraft).DeleteMany(context.TODO(), bson.M{"_id": bson.M{"$in": blogIDs}})
 	if err != nil {
 		log.Fatal(err)
 	}
