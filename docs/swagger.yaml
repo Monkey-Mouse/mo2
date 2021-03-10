@@ -30,17 +30,6 @@ definitions:
           type: string
         type: array
     type: object
-  dto.RelateEntitySet2EntitySet:
-    properties:
-      relateTo_ids:
-        items:
-          type: string
-        type: array
-      related_ids:
-        items:
-          type: string
-        type: array
-    type: object
   dto.UserInfo:
     properties:
       email:
@@ -143,11 +132,22 @@ definitions:
         example: mouse ❤ monkey
         type: string
     type: object
-  model.Category:
+  model.DeleteAccount:
+    properties:
+      email:
+        example: email@mo2.com
+        type: string
+      password:
+        example: p@ssword
+        type: string
+    type: object
+  model.Directory:
     properties:
       id:
         example: xxxxxxxxxxxxxx==
         type: string
+      info:
+        $ref: '#/definitions/model.DirectoryInfo'
       name:
         example: records
         type: string
@@ -159,13 +159,13 @@ definitions:
         example: xxxxxxxxxxxxxx==
         type: string
     type: object
-  model.DeleteAccount:
+  model.DirectoryInfo:
     properties:
-      email:
-        example: email@mo2.com
+      cover:
+        example: https://www.motwo.cn/cover
         type: string
-      password:
-        example: p@ssword
+      description:
+        example: course materials
         type: string
     type: object
   model.Entity:
@@ -530,30 +530,6 @@ paths:
       summary: restore Blog
       tags:
       - blogs
-  /api/blogs/addBlogs2Categories:
-    post:
-      consumes:
-      - application/json
-      description: blogs 与 categories皆为id列表，方便批量操作
-      parameters:
-      - description: dto.RelateEntitySet2EntitySet
-        in: body
-        name: id
-        required: true
-        schema:
-          $ref: '#/definitions/dto.RelateEntitySet2EntitySet'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Blog'
-            type: array
-      summary: add blogs to chosen categories
-      tags:
-      - category
   /api/blogs/category:
     get:
       description: 若id为空，返回所有categories；若id不为空，返回该id的category
@@ -569,7 +545,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.Category'
+              $ref: '#/definitions/model.Directory'
             type: array
       summary: find categories
       tags:
@@ -584,14 +560,14 @@ paths:
         name: account
         required: true
         schema:
-          $ref: '#/definitions/model.Category'
+          $ref: '#/definitions/model.Directory'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Category'
+            $ref: '#/definitions/model.Directory'
       summary: upsert category
       tags:
       - category
@@ -907,7 +883,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Category'
+            $ref: '#/definitions/model.Directory'
       summary: 将列表内的子categories关联到单个实体上
       tags:
       - relation
@@ -960,7 +936,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/model.Category'
+              $ref: '#/definitions/model.Directory'
             type: array
         "400":
           description: Bad Request

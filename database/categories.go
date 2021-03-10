@@ -15,13 +15,13 @@ import (
 
 var catCol = GetCollection("category")
 
-// upsertCategory 更新、插入category
+// UpsertCategory 更新、插入category
 func UpsertCategory(c *model.Directory) {
 	if c.ID.IsZero() {
 		c.Init()
 	}
 	_, err := catCol.UpdateOne(context.TODO(), bson.D{{"_id", c.ID}},
-		bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name}},
+		bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name, "info": c.Info}},
 		options.Update().SetUpsert(true))
 	if err != nil {
 		log.Fatal(err)

@@ -418,43 +418,6 @@ var doc = `{
                 }
             }
         },
-        "/api/blogs/addBlogs2Categories": {
-            "post": {
-                "description": "blogs 与 categories皆为id列表，方便批量操作",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "add blogs to chosen categories",
-                "parameters": [
-                    {
-                        "description": "dto.RelateEntitySet2EntitySet",
-                        "name": "id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.RelateEntitySet2EntitySet"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Blog"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/api/blogs/category": {
             "get": {
                 "description": "若id为空，返回所有categories；若id不为空，返回该id的category",
@@ -479,7 +442,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Category"
+                                "$ref": "#/definitions/model.Directory"
                             }
                         }
                     }
@@ -504,7 +467,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Category"
+                            "$ref": "#/definitions/model.Directory"
                         }
                     }
                 ],
@@ -512,7 +475,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Category"
+                            "$ref": "#/definitions/model.Directory"
                         }
                     }
                 }
@@ -1108,7 +1071,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Category"
+                            "$ref": "#/definitions/model.Directory"
                         }
                     }
                 }
@@ -1189,7 +1152,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.Category"
+                                "$ref": "#/definitions/model.Directory"
                             }
                         }
                     },
@@ -1248,23 +1211,6 @@ var doc = `{
             "properties": {
                 "relateTo_id": {
                     "type": "string"
-                },
-                "related_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "dto.RelateEntitySet2EntitySet": {
-            "type": "object",
-            "properties": {
-                "relateTo_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 },
                 "related_ids": {
                     "type": "array",
@@ -1417,12 +1363,28 @@ var doc = `{
                 }
             }
         },
-        "model.Category": {
+        "model.DeleteAccount": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "email@mo2.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "p@ssword"
+                }
+            }
+        },
+        "model.Directory": {
             "type": "object",
             "properties": {
                 "id": {
                     "type": "string",
                     "example": "xxxxxxxxxxxxxx=="
+                },
+                "info": {
+                    "$ref": "#/definitions/model.DirectoryInfo"
                 },
                 "name": {
                     "type": "string",
@@ -1440,16 +1402,16 @@ var doc = `{
                 }
             }
         },
-        "model.DeleteAccount": {
+        "model.DirectoryInfo": {
             "type": "object",
             "properties": {
-                "email": {
+                "cover": {
                     "type": "string",
-                    "example": "email@mo2.com"
+                    "example": "https://www.motwo.cn/cover"
                 },
-                "password": {
+                "description": {
                     "type": "string",
-                    "example": "p@ssword"
+                    "example": "course materials"
                 }
             }
         },

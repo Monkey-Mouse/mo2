@@ -2,11 +2,18 @@ package model
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
+// DirectoryInfo 归档信息
+type DirectoryInfo struct {
+	Description string `json:"description,omitempty" example:"course materials" bson:"description,omitempty"`
+	Cover       string `json:"cover,omitempty" example:"https://www.motwo.cn/cover" bson:"cover,omitempty"`
+}
+
 // Directory 归档
 type Directory struct {
 	ID       primitive.ObjectID   `json:"id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"_id,omitempty"`
 	ParentID primitive.ObjectID   `json:"parent_id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"parent_id,omitempty"`
 	Name     string               `json:"name,omitempty" example:"records" bson:"name,omitempty"`
+	Info     DirectoryInfo        `json:"info,omitempty" bson:"info,omitempty"`
 	OwnerIDs []primitive.ObjectID `json:"owner_ids,omitempty"  bson:"owner_ids,omitempty"`
 }
 
