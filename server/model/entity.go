@@ -7,6 +7,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// Praiseable 可被点赞的
+type Praiseable struct {
+	Up       uint64 `json:"up,omitempty" bson:"up,omitempty"`
+	Down     uint64 `json:"down,omitempty" bson:"down,omitempty"`
+	Weighted uint64 `json:"weighted,omitempty" bson:"weighted,omitempty"`
+}
+
 // Entity example
 type Entity struct {
 	CreateTime time.Time `json:"createTime" example:"2020-10-1" bson:"create_time,omitempty"`
