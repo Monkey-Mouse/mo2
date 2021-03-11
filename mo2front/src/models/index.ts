@@ -82,3 +82,19 @@ export interface Category {
     parent_id?: string;
     name?: string;
 }
+export interface SubComment {
+    aurhor?: string;
+    content?: string;
+    entity_info?: EntityInfo;
+    id?: string;
+    praise?: Praise;
+}
+export interface Praise {
+    up?: number;
+    down?: number;
+    weight?: number;
+}
+export interface Comment extends SubComment {
+    article?: string;
+    subs?: SubComment[];
+}

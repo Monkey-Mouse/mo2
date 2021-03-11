@@ -67,7 +67,7 @@
           <div style="padding-bottom: 1rem"></div>
           <v-row>
             <v-col
-              ><v-icon @click="comment = true"
+              ><v-icon @click="loadComment"
                 >mdi-message-reply-outline</v-icon
               ></v-col
             >
@@ -83,7 +83,7 @@
           >
             <template v-slot:prepend>
               <v-list-item two-line class="ml-16">
-                <v-list-item-avatar :rounded="0">
+                <v-list-item-avatar :rounded="false">
                   <v-icon x-large>mdi-message-reply-outline</v-icon>
                 </v-list-item-avatar>
 
@@ -96,20 +96,24 @@
             <v-divider></v-divider>
             <v-list-item class="ma-4"
               ><v-textarea
+                :loading="commentPosting"
                 auto-grow
                 placeholder="Write what you think about"
                 flat
                 reverse
                 rows="1"
+                v-model="commentmsg"
                 @click="writeCommentShow = true"
               >
               </v-textarea>
-              <br />
               <v-expand-transition>
-                <div v-if="writeCommentShow"><v-icon>mdi-send</v-icon></div>
+                <div v-if="writeCommentShow">
+                  <v-icon @click="postComment">mdi-send</v-icon>
+                </div>
               </v-expand-transition>
             </v-list-item>
-            <v-list nav dense>
+            <v-skeleton-loader v-if="commentLoading" type="card" />
+            <v-list v-else v-for="(c, i) in cs" :key="i" nav dense>
               <div>
                 <v-list-item two-line>
                   <v-list-item-avatar class="clickable">
@@ -123,10 +127,7 @@
                 </v-list-item>
 
                 <v-list-item>
-                  <v-list-item-content
-                    >dsadsaas dsadadadas dsadadadasdsada dsadasdasd
-                    dsadsadasdasda dsadsa
-                  </v-list-item-content>
+                  <v-list-item-content>{{ c.content }} </v-list-item-content>
                 </v-list-item>
                 <v-list-item>
                   <v-spacer />
@@ -154,14 +155,16 @@ import Editor from "../components/MO2Editor.vue";
 import {
   DeleteArticle,
   GetArticle,
+  GetComments,
   GetErrorMsg,
   GetUserData,
   globaldic,
   UploadImgToQiniu,
   UpsertBlog,
+  UpsertComment,
 } from "@/utils";
 import hljs from "highlight.js";
-import { Blog, User } from "@/models";
+import { Blog, User, Comment } from "@/models";
 import Avatar from "@/components/UserAvatar.vue";
 import { Prop } from "vue-property-decorator";
 import DeleteConfirm from "@/components/DeleteConfirm.vue";
@@ -189,7 +192,13 @@ export default class ReadArticle extends Vue {
   authorLoad = false;
   showDelete = false;
   draft = false;
-  comment = true;
+  comment = false;
+  commentmsg = "";
+  p = 0;
+  ps = 5;
+  cs: Comment[] = [];
+  commentLoading = true;
+  commentPosting = false;
   get deleteContent() {
     return '你确定要删除"' + this.title + '"吗？';
   }
@@ -217,10 +226,32 @@ export default class ReadArticle extends Vue {
       })
       .catch((err) => GetErrorMsg(err));
   }
+  async postComment() {
+    this.commentPosting = true;
+    const c = await UpsertComment({
+      article: this.blog.id,
+      content: this.commentmsg,
+    });
+    this.cs.unshift(c);
+    this.commentPosting = false;
+  }
   edit() {
     globaldic.article = `<h1>${this.title}</h1>${this.html}`;
     // UpsertBlog({ draft: true }, this.blog);
     this.$router.push("/edit/" + this.blog.id);
+  }
+  async loadComment() {
+    this.comment = true;
+    if (this.p !== 0) {
+      return;
+    }
+    this.cs = this.cs.concat(
+      await GetComments(this.blog.id, {
+        page: this.p++,
+        pagesize: this.ps,
+      })
+    );
+    this.commentLoading = false;
   }
   deleteArticle() {
     this.showDelete = true;
