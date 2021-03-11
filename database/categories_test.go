@@ -120,7 +120,7 @@ func ExampleUpdateSubCategories() {
 	//Output:
 	//relate to old:  10
 	//relate to new:  0
-	//200: update [10] subCategories
+	//200: update 10 subCategories
 	//relate to old:  0
 	//relate to new:  10
 }
