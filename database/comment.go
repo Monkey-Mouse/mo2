@@ -12,12 +12,22 @@ import (
 
 var commentCol *mongo.Collection = GetCollection("comment")
 
+func init() {
+	commentCol.Indexes().CreateMany(context.Background(), append([]mongo.IndexModel{
+		{Keys: bson.M{"article": -1}},
+		{Keys: bson.M{"author": -1}},
+		{Keys: bson.M{"praise.up": -1}},
+		{Keys: bson.M{"praise.weight": -1}},
+		{Keys: bson.M{"subs.id": -1}},
+	}, model.IndexModels...))
+}
+
 // GetComments get comments
 func GetComments(articleID primitive.ObjectID, page int64, pagesize int64) (cs []model.Comment) {
 	cursor, err := commentCol.Find(
 		context.TODO(),
 		bson.M{"article": articleID},
-		getPaginationOption(page, pagesize))
+		getPaginationOption(page, pagesize).SetSort(bson.M{"entity_info.update_time": -1}))
 	if err != nil {
 		log.Fatal(err)
 	}

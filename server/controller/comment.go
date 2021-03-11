@@ -89,13 +89,3 @@ func (c *Controller) PostSubComment(ctx *gin.Context) {
 	database.UpsertSubComment(id, &cmt)
 	ctx.JSON(200, &cmt)
 }
-
-// DeleteComment delete comments
-func (c *Controller) DeleteComment(ctx *gin.Context) {
-
-}
-
-// DeleteSubComment delete subcomments
-func (c *Controller) DeleteSubComment(ctx *gin.Context) {
-
-}
