@@ -576,6 +576,29 @@ paths:
       tags:
       - blogs
   /api/blogs/category:
+    delete:
+      consumes:
+      - application/json
+      description: 根据id删除，并解除与之相关实体的所有关联
+      parameters:
+      - description: category id to delete
+        in: body
+        name: ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Directory'
+      summary: delete category
+      tags:
+      - category
     get:
       description: 若id为空，返回所有categories；若id不为空，返回该id的category
       parameters:

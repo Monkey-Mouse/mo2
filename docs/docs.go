@@ -479,6 +479,41 @@ var doc = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "根据id删除，并解除与之相关实体的所有关联",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "delete category",
+                "parameters": [
+                    {
+                        "description": "category id to delete",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Directory"
+                        }
+                    }
+                }
             }
         },
         "/api/blogs/find/id": {
