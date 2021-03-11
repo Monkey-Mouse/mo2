@@ -81,7 +81,7 @@ type RelateEntitySet2Entity struct {
 - 关联单实体到多实体集
 - 关联实体集到单实体
 
-#### api使用
+### api使用
 [controller.go](../controller/controller.go)
 ```go
     api := middleware.H.Group("/api")
@@ -104,7 +104,7 @@ type RelateEntitySet2Entity struct {
         - upsert增改category信息
     - api/blog/category [get]
         - 查询category信息
-  - (x) api/blog/category [delete]
+  - (x) api/blog/category [delete] (important)
       - 删除category信息
       - 解除与该category相关的所有联系：blog字段寻找相关字段并删去
 
@@ -134,8 +134,12 @@ type RelateEntitySet2Entity struct {
       
     
     
-        
-
+#### 删除部分
+因为删除某directory涉及到冗余关联数据的删除，因此需要：
+- 对blog端：删除所有blog中categories列表里的相关id即可
+- 对category端：所有删除category(`dCat`)的子category加入到其上一级(`id=dCat.parent_id`)中
+- 增加鉴权，只有操作用户id in owner_ids匹配成功的可以进行删除操作
+    - 新思路，增加过滤器，在请求的id列表中过滤出可以进行操作的id列表
 
 
 

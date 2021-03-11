@@ -124,3 +124,45 @@ func ExampleUpdateSubCategories() {
 	//relate to old:  0
 	//relate to new:  10
 }
+
+func ExampleRelateCategories2User() {
+	ownCatNum := 100
+	ownCatIDs := InsertCategories4Test(ownCatNum)
+	userID := primitive.NewObjectID()
+	defer func() {
+		DeleteCategoryCompletely(ownCatIDs...)
+	}()
+
+	RelateCategories2User(ownCatIDs, userID)
+	cs, _ := FindCategoriesByUserId(userID)
+	if len(cs) == ownCatNum {
+		fmt.Println("after relate, len(cs) equals to ownCatIDs")
+	}
+
+	//Output:
+	//after relate, len(cs) equals to ownCatIDs
+}
+
+func ExampleRightFilter() {
+	ownCatNum := 100
+	notOwnCatNum := 200
+	ownCatIDs := InsertCategories4Test(ownCatNum)
+	notOwnCatIDs := InsertCategories4Test(notOwnCatNum)
+	userID := primitive.NewObjectID()
+	defer func() {
+		DeleteCategoryCompletely(ownCatIDs...)
+		DeleteCategoryCompletely(notOwnCatIDs...)
+	}()
+
+	RelateCategories2User(ownCatIDs, userID)
+
+	allowIDs, _ := RightFilter(userID, append(ownCatIDs, notOwnCatIDs...)...)
+	if len(allowIDs) == ownCatNum {
+		fmt.Println("success")
+	} else {
+		fmt.Printf("allow: %v; own: %v", len(allowIDs), ownCatNum)
+	}
+
+	//Output:
+	//success
+}

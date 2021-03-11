@@ -62,7 +62,7 @@ func DeleteCategoryCompletely(ids ...primitive.ObjectID) (mErr mo2errors.Mo2Erro
 	}()
 	for errSig := range errSignal {
 		mErr = errSig
-		log.Println(ids, errSig.Error())
+		log.Println(len(ids), errSig.Error())
 	}
 	removeAll.Wait()
 	return
@@ -138,17 +138,22 @@ func FindCategories(ids []primitive.ObjectID) (cs []model.Directory, mErr mo2err
 
 // 根据用户id，返回请求的ids中有权限进行某种操作的过滤id列表
 func RightFilter(userID primitive.ObjectID, requestIDs ...primitive.ObjectID) (allowIDs []primitive.ObjectID, mErr mo2errors.Mo2Errors) {
-	cursor, err := catCol.Find(context.TODO(), bson.M{"$and": bson.D{{"_id", bson.M{"$in": requestIDs}}, {"owner_id", userID}}}, options.Find().SetProjection(bson.M{"_id": 1}))
+	cursor, err := catCol.Find(context.TODO(), bson.M{"$and": []bson.M{bson.M{"_id": bson.M{"$in": requestIDs}}, bson.M{"owner_ids": userID}}}, options.Find().SetProjection(bson.M{"_id": 1}))
+	var allowDirects []model.Directory
 	if err != nil {
 		mErr.InitError(err)
 		log.Println(mErr)
 	} else {
-		if err = cursor.All(context.TODO(), &allowIDs); err != nil {
+		if err = cursor.All(context.TODO(), &allowDirects); err != nil {
 			mErr.InitError(err)
 			log.Println(mErr)
 		} else {
-			mErr.InitNoError("%v of %v are allowed", len(allowIDs), len(requestIDs))
+			mErr.InitNoError("%v of %v are allowed", len(allowDirects), len(requestIDs))
+			log.Println(mErr)
 		}
+	}
+	for _, allowDirect := range allowDirects {
+		allowIDs = append(allowIDs, allowDirect.ID)
 	}
 	return
 }
