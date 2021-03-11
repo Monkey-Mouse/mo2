@@ -136,6 +136,23 @@ func FindCategories(ids []primitive.ObjectID) (cs []model.Directory, mErr mo2err
 	return
 }
 
+// 根据用户id，返回请求的ids中有权限进行某种操作的过滤id列表
+func RightFilter(userID primitive.ObjectID, requestIDs ...primitive.ObjectID) (allowIDs []primitive.ObjectID, mErr mo2errors.Mo2Errors) {
+	cursor, err := catCol.Find(context.TODO(), bson.M{"$and": bson.D{{"_id", bson.M{"$in": requestIDs}}, {"owner_id", userID}}}, options.Find().SetProjection(bson.M{"_id": 1}))
+	if err != nil {
+		mErr.InitError(err)
+		log.Println(mErr)
+	} else {
+		if err = cursor.All(context.TODO(), &allowIDs); err != nil {
+			mErr.InitError(err)
+			log.Println(mErr)
+		} else {
+			mErr.InitNoError("%v of %v are allowed", len(allowIDs), len(requestIDs))
+		}
+	}
+	return
+}
+
 // FindBlogsByCategoryId 寻找包括categoryId的所有blogs的信息
 func FindBlogsByCategoryId(id primitive.ObjectID, isDraft bool) (bs []model.Blog, mErr mo2errors.Mo2Errors) {
 	var cursor *mongo.Cursor
@@ -196,8 +213,13 @@ func FindAllCategories() (cs []model.Directory) {
 }
 
 // RelateMainCategory2User 为用户创建主归档目录
-func RelateMainCategory2User(e2e dto.RelateEntity2Entity) {
-	catCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelatedID}, bson.M{"$set": bson.M{"parent_id": e2e.RelateToID}})
+func RelateMainCategory2User(e2e dto.RelateEntity2Entity) (mErr mo2errors.Mo2Errors) {
+	if _, err := catCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelatedID}, bson.M{"$set": bson.M{"parent_id": e2e.RelateToID}}); err != nil {
+		mErr.InitError(err)
+	} else {
+		mErr = RelateCategory2User(e2e.RelatedID, e2e.RelateToID)
+	}
+	return
 }
 
 // RelateSubCategory2Category 将子归档subCategory的parent_id设为category
@@ -238,6 +260,17 @@ func RelateCategories2Blogs(s2s dto.RelateEntitySet2EntitySet) (result []model.B
 func RelateCategory2User(catID primitive.ObjectID, userIds ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	//todo check if valid
 	res, err := catCol.UpdateMany(context.TODO(), bson.M{"_id": catID}, bson.M{"$addToSet": bson.M{"owner_ids": bson.M{"$each": userIds}}})
+	if err != nil {
+		mErr.Init(mo2errors.Mo2Error, err.Error())
+		return
+	}
+	mErr.Init(mo2errors.Mo2NoError, fmt.Sprintf("%v modified", res.ModifiedCount))
+	return
+}
+
+// RelateCategories2User 在列表category的ownerIds中添加userIDs
+func RelateCategories2User(catIDs []primitive.ObjectID, userIds ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+	res, err := catCol.UpdateMany(context.TODO(), bson.M{"_id": bson.M{"$in": catIDs}}, bson.M{"$addToSet": bson.M{"owner_ids": bson.M{"$each": userIds}}})
 	if err != nil {
 		mErr.Init(mo2errors.Mo2Error, err.Error())
 		return
