@@ -20,6 +20,7 @@ export const BlankUser = {
 export interface UserListData {
     id: string;
     name: string;
+    settings?: UserSettings;
 }
 export interface DisplayBlogBrief extends BlogBrief {
     userLoad: boolean;
@@ -81,4 +82,24 @@ export interface Category {
     id?: string;
     parent_id?: string;
     name?: string;
+}
+export interface SubComment {
+    authorProfile?: UserListData;
+    aurhor?: string;
+    content?: string;
+    entity_info?: EntityInfo;
+    id?: string;
+    praise?: Praise;
+    edit?: boolean;
+}
+export interface Praise {
+    up?: number;
+    down?: number;
+    weight?: number;
+}
+export interface Comment extends SubComment {
+    article?: string;
+    subs?: SubComment[];
+    tempC?: string;
+    showSub?: boolean
 }

@@ -1,4 +1,4 @@
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment, SubComment } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 import router from '../router'
@@ -24,8 +24,11 @@ function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 export async function GetUserDatas(uids: string[]): Promise<UserListData[]> {
+    if (uids.length === 0) {
+        return [];
+    }
     let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.filter(onlyUnique).join('&id='));
-    return re.data
+    return re.data ?? []
 }
 
 export function GetInitials(name: string) {
@@ -198,4 +201,14 @@ export async function GetCateBlogs(id: string) {
 
 export async function GetCates() {
     return (await axios.get<Category[]>('/api/blogs/category')).data ?? []
+}
+
+export async function GetComments(id: string, query: { page: number; pagesize: number }) {
+    return (await axios.get<Comment[]>('/api/comment/' + id + ParseQuery(query))).data ?? []
+}
+export async function UpsertComment(c: Comment) {
+    return (await axios.post<Comment>('/api/comment', c)).data
+}
+export async function UpsertSubComment(id: string, c: SubComment) {
+    return (await axios.post<SubComment>('/api/comment/' + id, c)).data
 }
