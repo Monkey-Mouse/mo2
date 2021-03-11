@@ -2,12 +2,14 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"mo2/dto"
+	"mo2/mo2utils/mo2errors"
 	"mo2/server/model"
 )
 
@@ -28,19 +30,19 @@ func chooseCol(isDraft bool) (col *mongo.Collection) {
 }
 
 // InsertBlog insert
-func insertBlog(b *model.Blog, isDraft bool) (success bool) {
-	b.Init()
+func insertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	col := chooseCol(isDraft)
-	success = true
-	if _, err := col.InsertOne(context.TODO(), b); err != nil {
+	if res, err := col.InsertOne(context.TODO(), b); err != nil {
 		log.Println(err)
-		success = false
+		mErr.InitError(err)
+	} else {
+		mErr.InitNoError("insert %v", res.InsertedID)
 	}
 	return
 }
 
 // upsertBlog
-func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
+func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	col := chooseCol(isDraft)
 	b.EntityInfo.Update()
 	result, err := col.UpdateOne(
@@ -58,41 +60,42 @@ func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
 		}}},
 		options.Update().SetUpsert(true),
 	)
-	success = true
 	if err != nil {
 		log.Println(err)
-		success = false
+		mErr.InitError(err)
+		return
 	}
 	if !isDraft {
 		log.Println("发布时删除草稿" + b.ID.String())
-		deleteBlogs(true, b.ID)
+		mErr = deleteBlogs(true, b.ID)
 	}
 	if result.UpsertedCount != 0 {
-		log.Println("新建文章" + b.ID.String())
+		mErr.InitNoError("新建文章" + b.ID.String())
 	}
 	return
 }
 
 // deleteBlogs set flag of blog or draft to isDeleted
-func deleteBlogs(isDraft bool, blogIDs ...primitive.ObjectID) (success bool) {
-	success = true
-	res, err := chooseCol(isDraft).DeleteMany(context.TODO(), bson.M{"_id": bson.M{"$in": blogIDs}})
-	if err != nil {
-		log.Fatal(err)
-	}
-	if res.DeletedCount == 0 {
-		success = false
+func deleteBlogs(isDraft bool, blogIDs ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+	if res, err := chooseCol(isDraft).DeleteMany(context.TODO(), bson.M{"_id": bson.M{"$in": blogIDs}}); err != nil {
+		log.Println(err)
+		mErr.InitError(err)
+	} else {
+		tip := fmt.Sprintf("delete %v %v blogs\n", res.DeletedCount, isDraft)
+		log.Printf(tip)
+		mErr.InitNoError(tip)
 	}
 	return
 }
 
 // UpsertBlog upsert blog or draft
-func UpsertBlog(b *model.Blog, isDraft bool) (success bool) {
+func UpsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 
 	if b.ID == primitive.NilObjectID {
-		success = insertBlog(b, isDraft)
+		b.Init()
+		mErr = insertBlog(b, isDraft)
 	} else {
-		success = upsertBlog(b, isDraft)
+		mErr = upsertBlog(b, isDraft)
 	}
 	return
 }

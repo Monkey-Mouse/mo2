@@ -43,9 +43,11 @@ func DeleteCategory(id primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	}
 	go func() {
 		defer removeAll.Done()
+		defer close(errSignal)
 		errSignal <- RemoveCategoriesInAllBlogs(id)
 	}()
 	for errSig := range errSignal {
+		mErr = errSig
 		log.Println(id, errSig.Error())
 	}
 	removeAll.Wait()
@@ -58,17 +60,19 @@ func RemoveCategoriesInAllBlogs(catIDs ...primitive.ObjectID) (mErr mo2errors.Mo
 	if err != nil {
 		mErr.InitError(err)
 		log.Println(err)
+		return
 	}
 	resDraft, err := draftCol.UpdateMany(context.TODO(), bson.M{"categories": bson.M{"$in": catIDs}}, bson.M{"$pullAll": bson.M{"categories": catIDs}})
 	if err != nil {
 		mErr.InitError(err)
 		log.Println(err)
+		return
 	}
 	mErr.Init(mo2errors.Mo2NoError, fmt.Sprintf("update %v blog(s),%v draft(s)", resBlog.MatchedCount, resDraft.MatchedCount))
 	return
 }
 
-// FindSubCategories 寻找一个categoryid的所有子category的详细信息
+// FindSubCategories 寻找一个category id的所有子category的详细信息
 func FindSubCategories(ID primitive.ObjectID) (cs []model.Directory, mErr mo2errors.Mo2Errors) {
 	results, err := catCol.Find(context.TODO(), bson.M{"parent_id": ID})
 	if err != nil {
@@ -96,9 +100,15 @@ func FindCategories(ids []primitive.ObjectID) (cs []model.Directory, mErr mo2err
 	return
 }
 
-// FindBlogsByCategoryId 寻找包括categoriyId的所有blogs的信息
-func FindBlogsByCategoryId(id primitive.ObjectID) (bs []model.Blog, mErr mo2errors.Mo2Errors) {
-	cursor, err := blogCol.Find(context.TODO(), bson.M{"categories": id})
+// FindBlogsByCategoryId 寻找包括categoryId的所有blogs的信息
+func FindBlogsByCategoryId(id primitive.ObjectID, isDraft bool) (bs []model.Blog, mErr mo2errors.Mo2Errors) {
+	var cursor *mongo.Cursor
+	var err error
+	if isDraft {
+		cursor, err = draftCol.Find(context.TODO(), bson.M{"categories": id})
+	} else {
+		cursor, err = blogCol.Find(context.TODO(), bson.M{"categories": id})
+	}
 	if err != nil {
 		mErr.InitError(err)
 		return
@@ -180,10 +190,10 @@ func RelateCategories2Blog(s2e dto.RelateEntitySet2Entity) {
 // Todo find nice way to make of use
 func RelateCategories2Blogs(s2s dto.RelateEntitySet2EntitySet) (result []model.Blog) {
 	// 将所有满足条件的blog/draft进行更新
-	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelateToIDs}}}})
-	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelatedIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelateToIDs}}}})
+	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelateToIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelatedIDs}}}})
+	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelateToIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelatedIDs}}}})
 	// todo delete useless result
-	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.M{"_id": bson.M{"$in": s2s.RelatedIDs}}}}, options.Find().SetProjection(bson.M{"content": 0}))
+	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.M{"_id": bson.M{"$in": s2s.RelateToIDs}}}}, options.Find().SetProjection(bson.M{"content": 0}))
 	cursor.All(context.TODO(), &result)
 	return
 }
