@@ -1,4 +1,4 @@
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment, SubComment } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 import router from '../router'
@@ -205,4 +205,7 @@ export async function GetComments(id: string, query: { page: number; pagesize: n
 }
 export async function UpsertComment(c: Comment) {
     return (await axios.post<Comment>('/api/comment', c)).data
+}
+export async function UpsertSubComment(id: string, c: SubComment) {
+    return (await axios.post<SubComment>('/api/comment/' + id, c)).data
 }

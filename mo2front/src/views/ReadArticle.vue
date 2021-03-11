@@ -112,7 +112,7 @@
                 </div>
               </v-expand-transition>
             </v-list-item>
-            <v-skeleton-loader v-if="commentLoading" type="card" />
+            <v-skeleton-loader v-if="commentLoading" type="card@3" />
             <v-list v-else v-for="(c, i) in cs" :key="i" nav dense>
               <div>
                 <v-list-item two-line>
@@ -125,25 +125,79 @@
                       c.authorProfile.name
                     }}</v-list-item-title>
                     <time-ago
-                      :refresh="1"
+                      :refresh="60"
                       :datetime="c.entity_info.updateTime"
                       tooltip
+                      long
                     ></time-ago>
                   </v-list-item-content>
                 </v-list-item>
-
                 <v-list-item>
                   <v-list-item-content>{{ c.content }} </v-list-item-content>
                 </v-list-item>
                 <v-list-item>
                   <v-spacer />
-                  <v-icon>mdi-message-reply-outline</v-icon>{{ c.subs.length }}
+                  <v-icon @click="loadSub(c)">mdi-message-reply-outline</v-icon
+                  >{{ c.subs.length }}
                   <v-list-item-action
-                    ><v-icon
-                      >mdi-pencil-circle-outline</v-icon
+                    ><v-icon @click="c.edit = !c.edit"
+                      >mdi-reply</v-icon
                     ></v-list-item-action
                   >
                 </v-list-item>
+                <v-expand-transition>
+                  <v-list-item v-if="c.edit" class="ma-4"
+                    ><v-textarea
+                      :loading="commentPosting"
+                      auto-grow
+                      placeholder="Write what you think about"
+                      flat
+                      reverse
+                      rows="1"
+                      v-model="c.tempC"
+                    >
+                    </v-textarea>
+                    <div>
+                      <v-icon @click="postSubComment(c)">mdi-send</v-icon>
+                    </div>
+                  </v-list-item>
+                </v-expand-transition>
+                <v-divider />
+                <div v-if="c.showSub">
+                  <v-list
+                    class="ml-16"
+                    v-for="(s, i) in c.subs"
+                    :key="i"
+                    nav
+                    dense
+                  >
+                    <div>
+                      <v-list-item two-line>
+                        <v-list-item-avatar class="clickable">
+                          <avatar :size="30" :user="s.authorProfile"></avatar>
+                        </v-list-item-avatar>
+
+                        <v-list-item-content>
+                          <v-list-item-title>{{
+                            s.authorProfile.name
+                          }}</v-list-item-title>
+                          <time-ago
+                            :refresh="60"
+                            :datetime="s.entity_info.updateTime"
+                            tooltip
+                            long
+                          ></time-ago>
+                        </v-list-item-content>
+                      </v-list-item>
+                      <v-list-item>
+                        <v-list-item-content
+                          >{{ s.content }}
+                        </v-list-item-content>
+                      </v-list-item>
+                    </div>
+                    <v-divider />
+                  </v-list>
+                </div>
               </div>
             </v-list>
           </v-navigation-drawer>
@@ -168,6 +222,7 @@ import {
   UploadImgToQiniu,
   UpsertBlog,
   UpsertComment,
+  UpsertSubComment,
 } from "@/utils";
 import hljs from "highlight.js";
 import { Blog, User, Comment, UserListData } from "@/models";
@@ -185,7 +240,7 @@ import DeleteConfirm from "@/components/DeleteConfirm.vue";
 })
 export default class ReadArticle extends Vue {
   @Prop()
-  user;
+  user: User;
   title = "";
   html = "";
   writeCommentShow = false;
@@ -234,6 +289,34 @@ export default class ReadArticle extends Vue {
       })
       .catch((err) => GetErrorMsg(err));
   }
+  async loadSub(c: Comment) {
+    if (c.showSub === true) {
+      c.showSub = false;
+      return;
+    }
+    if (c.subs.length > 0 && c.subs[0].authorProfile) {
+      c.showSub = true;
+      return;
+    }
+    const map: { [key: string]: UserListData } = {};
+    (await GetUserDatas(c.subs.map((v) => v.aurhor))).forEach(
+      (v) => (map[v.id] = v)
+    );
+    c.subs.forEach((v) => {
+      v.authorProfile = map[v.aurhor];
+      v.edit = false;
+    });
+    c.showSub = true;
+  }
+  async postSubComment(c: Comment) {
+    this.commentPosting = true;
+    const sub = await UpsertSubComment(c.id, { content: c.tempC });
+    sub.authorProfile = this.user;
+    c.showSub = true;
+    c.subs.unshift(sub);
+    c.tempC = "";
+    this.commentPosting = false;
+  }
   async postComment() {
     this.commentPosting = true;
     const c = await UpsertComment({
@@ -241,7 +324,11 @@ export default class ReadArticle extends Vue {
       content: this.commentmsg,
     });
     c.authorProfile = this.user;
+    c.edit = false;
+    c.tempC = "";
+    c.showSub = false;
     this.cs.unshift(c);
+    this.commentmsg = "";
     this.commentPosting = false;
   }
   edit() {
@@ -262,7 +349,12 @@ export default class ReadArticle extends Vue {
     (await GetUserDatas(newCs.map((v) => v.aurhor))).forEach(
       (v) => (map[v.id] = v)
     );
-    newCs.forEach((v) => (v.authorProfile = map[v.aurhor]));
+    newCs.forEach((v) => {
+      v.authorProfile = map[v.aurhor];
+      v.edit = false;
+      v.tempC = "";
+      v.showSub = false;
+    });
     this.cs = this.cs.concat(newCs);
     this.commentLoading = false;
   }

@@ -90,6 +90,7 @@ export interface SubComment {
     entity_info?: EntityInfo;
     id?: string;
     praise?: Praise;
+    edit?: boolean;
 }
 export interface Praise {
     up?: number;
@@ -99,4 +100,6 @@ export interface Praise {
 export interface Comment extends SubComment {
     article?: string;
     subs?: SubComment[];
+    tempC?: string;
+    showSub?: boolean
 }
