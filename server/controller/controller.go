@@ -46,8 +46,8 @@ func SetupHandlers(c *Controller) {
 		relation := api.Group("relation", model.OrdinaryUser)
 		{
 
-			relation.Post("categories/:type", c.RelateCategories2Entity)
-			relation.Post("category/:type", c.RelateCategory2Entity)
+			relation.Post("categories/:type", c.RelateCategories2Entity, model.GeneralAdmin)
+			relation.Post("category/:type", c.RelateCategory2Entity, model.GeneralAdmin)
 			relation.Get("category/:type/:ID", c.FindCategoriesByType)
 			relation.Get("blogs/:type/:ID", c.FindBlogsByType)
 		}
