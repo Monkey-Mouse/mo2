@@ -64,6 +64,83 @@
             :show.sync="showDelete"
             @confirm="confirmDelete"
           />
+          <div style="padding-bottom: 1rem"></div>
+          <v-row>
+            <v-col
+              ><v-icon @click="comment = true"
+                >mdi-message-reply-outline</v-icon
+              ></v-col
+            >
+          </v-row>
+
+          <div style="padding-bottom: 5rem"></div>
+          <v-navigation-drawer
+            v-model="comment"
+            width="30%"
+            bottom
+            fixed
+            temporary
+          >
+            <template v-slot:prepend>
+              <v-list-item two-line class="ml-16">
+                <v-list-item-avatar :rounded="0">
+                  <v-icon x-large>mdi-message-reply-outline</v-icon>
+                </v-list-item-avatar>
+
+                <v-list-item-content>
+                  <v-list-item-title>Comments</v-list-item-title>
+                  <!-- <v-list-item-subtitle>Logged In</v-list-item-subtitle> -->
+                </v-list-item-content>
+              </v-list-item>
+            </template>
+            <v-divider></v-divider>
+            <v-list-item class="ma-4"
+              ><v-textarea
+                auto-grow
+                placeholder="Write what you think about"
+                flat
+                reverse
+                rows="1"
+                @click="writeCommentShow = true"
+              >
+              </v-textarea>
+              <br />
+              <v-expand-transition>
+                <div v-if="writeCommentShow"><v-icon>mdi-send</v-icon></div>
+              </v-expand-transition>
+            </v-list-item>
+            <v-list nav dense>
+              <div>
+                <v-list-item two-line>
+                  <v-list-item-avatar class="clickable">
+                    <avatar :size="30" :user="author"></avatar>
+                  </v-list-item-avatar>
+
+                  <v-list-item-content>
+                    <v-list-item-title>Comments</v-list-item-title>
+                    <v-list-item-subtitle>2020</v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+
+                <v-list-item>
+                  <v-list-item-content
+                    >dsadsaas dsadadadas dsadadadasdsada dsadasdasd
+                    dsadsadasdasda dsadsa
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item>
+                  <v-spacer />
+                  <v-icon>mdi-message-reply-outline</v-icon>6
+
+                  <v-list-item-action
+                    ><v-icon
+                      >mdi-pencil-circle-outline</v-icon
+                    ></v-list-item-action
+                  >
+                </v-list-item>
+              </div>
+            </v-list>
+          </v-navigation-drawer>
         </div>
       </v-col>
     </v-row>
@@ -100,6 +177,7 @@ export default class ReadArticle extends Vue {
   user;
   title = "";
   html = "";
+  writeCommentShow = false;
   attrs = {
     class: "mb-6 mt-6",
     boilerplate: false,
@@ -111,6 +189,7 @@ export default class ReadArticle extends Vue {
   authorLoad = false;
   showDelete = false;
   draft = false;
+  comment = true;
   get deleteContent() {
     return '你确定要删除"' + this.title + '"吗？';
   }

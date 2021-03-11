@@ -47,7 +47,7 @@
       <v-sheet v-for="i in 4" :key="i">
         <v-skeleton-loader
           class="ma-4"
-          min-width="200"
+          min-width="300"
           type="card@2"
         ></v-skeleton-loader>
       </v-sheet>
@@ -55,7 +55,12 @@
     <v-row v-else-if="cate.length > 0">
       <v-col :key="i" v-for="(c, i) in cate">
         <v-hover v-slot="{ hover }">
-          <v-card elevation="10" class="mx-auto" max-width="344">
+          <v-card
+            elevation="10"
+            class="mx-auto"
+            min-width="300"
+            max-width="344"
+          >
             <v-card-text>
               <div>mo2 category</div>
               <p class="display-1 text--primary">{{ c.name }}</p>
