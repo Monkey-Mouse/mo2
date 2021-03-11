@@ -46,8 +46,8 @@ func SetupHandlers(c *Controller) {
 		relation := api.Group("relation", model.OrdinaryUser)
 		{
 
-			relation.Post("categories/:type", c.RelateCategories2Entity)
-			relation.Post("category/:type", c.RelateCategory2Entity)
+			relation.Post("categories/:type", c.RelateCategories2Entity, model.GeneralAdmin)
+			relation.Post("category/:type", c.RelateCategory2Entity, model.GeneralAdmin)
 			relation.Get("category/:type/:ID", c.FindCategoriesByType)
 			relation.Get("blogs/:type/:ID", c.FindBlogsByType)
 		}
@@ -84,6 +84,12 @@ func SetupHandlers(c *Controller) {
 			accounts.Post("logout", c.LogoutAccount)
 			accounts.Get("detail/:id", c.ShowAccount)
 			accounts.Get("listBrief", c.ListAccountsInfo)
+		}
+		comment := api.Group("/comment", model.Anonymous, model.OrdinaryUser)
+		{
+			comment.Get(":id", c.GetComment)
+			comment.Post("", c.PostComment, model.OrdinaryUser)
+			comment.Post(":id", c.PostSubComment, model.OrdinaryUser)
 		}
 	}
 }
