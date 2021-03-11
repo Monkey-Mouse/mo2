@@ -34,7 +34,7 @@ func (e *Mo2Errors) InitError(err error) {
 // InitNoError init with no error tips
 func (e *Mo2Errors) InitNoError(format string, a ...interface{}) {
 	e.ErrorCode = Mo2NoError
-	e.ErrorTip = fmt.Sprintf(format, a)
+	e.ErrorTip = fmt.Sprintf(format, a...)
 }
 
 // InitCode init with code
