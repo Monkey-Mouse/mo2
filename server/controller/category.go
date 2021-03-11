@@ -3,6 +3,7 @@ package controller
 import (
 	"mo2/database"
 	"mo2/dto"
+	"mo2/mo2utils"
 	"mo2/mo2utils/mo2errors"
 	"mo2/server/controller/badresponse"
 	"mo2/server/model"
@@ -37,18 +38,31 @@ func (c *Controller) UpsertCategory(ctx *gin.Context) {
 // @Tags category
 // @Accept  json
 // @Produce  json
-// @Param id path primitive.ObjectID true "category id to delete"
+// @Param ids body []primitive.ObjectID true "category id to delete"
 // @Success 200 {object} model.Directory
-// @Router /api/blogs/category [post]
+// @Router /api/blogs/category [delete]
 func (c *Controller) DeleteCategory(ctx *gin.Context) {
-	var cat model.Directory
-	if err := ctx.ShouldBindJSON(&cat); err != nil {
+	var catIDs []primitive.ObjectID
+	if err := ctx.ShouldBindJSON(&catIDs); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
-
-	database.UpsertCategory(&cat)
-	ctx.JSON(http.StatusOK, cat)
+	if userInfo, exist := mo2utils.GetUserInfo(ctx); exist {
+		if allowIDs, mErr := database.RightFilter(userInfo.ID, catIDs...); mErr.IsError() {
+			ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
+			return
+		} else {
+			if mErr = database.DeleteCategoryCompletely(allowIDs...); mErr.IsError() {
+				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
+				return
+			} else {
+				ctx.Status(http.StatusOK)
+			}
+		}
+	} else {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason("请先登录"))
+		return
+	}
 }
 
 // FindAllCategories godoc
