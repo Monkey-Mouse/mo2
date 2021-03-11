@@ -51,6 +51,12 @@ func SetupHandlers(c *Controller) {
 			relation.Get("category/:type/:ID", c.FindCategoriesByType)
 			relation.Get("blogs/:type/:ID", c.FindBlogsByType)
 		}
+
+		directories := api.Group("directories", model.OrdinaryUser)
+		{
+			directories.Delete("category", c.DeleteCategory)
+		}
+
 		blogs := api.Group("blogs", model.Anonymous, model.OrdinaryUser)
 		{
 			blogs.Get("query", c.QueryBlogs)
@@ -59,7 +65,6 @@ func SetupHandlers(c *Controller) {
 			{
 				user.Post("category", c.UpsertCategory)
 				user.Get("category", c.FindAllCategories)
-				user.Delete("category", c.DeleteCategory)
 
 				user.Post("publish", c.UpsertBlog)
 				user.Delete(":id", c.DeleteBlog)

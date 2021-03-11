@@ -40,7 +40,7 @@ func (c *Controller) UpsertCategory(ctx *gin.Context) {
 // @Produce  json
 // @Param ids body []primitive.ObjectID true "category id to delete"
 // @Success 200 {object} model.Directory
-// @Router /api/blogs/category [delete]
+// @Router /api/directories/category [delete]
 func (c *Controller) DeleteCategory(ctx *gin.Context) {
 	var catIDs []primitive.ObjectID
 	if err := ctx.ShouldBindJSON(&catIDs); err != nil {
