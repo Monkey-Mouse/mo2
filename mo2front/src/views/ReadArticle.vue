@@ -66,7 +66,7 @@
           />
           <div style="padding-bottom: 1rem"></div>
           <v-row>
-            <v-col
+            <v-col class="offset-11"
               ><v-icon @click="loadComment"
                 >mdi-message-reply-outline</v-icon
               ></v-col
@@ -77,41 +77,52 @@
           <v-navigation-drawer
             v-model="comment"
             width="30%"
+            height="100%"
+            style="max-height: 100%"
             bottom
             fixed
             temporary
           >
             <template v-slot:prepend>
               <v-list-item two-line class="ml-16">
-                <v-list-item-avatar :rounded="false">
+                <v-list-item-content>
                   <v-icon x-large>mdi-message-reply-outline</v-icon>
-                </v-list-item-avatar>
+                </v-list-item-content>
 
                 <v-list-item-content>
                   <v-list-item-title>Comments</v-list-item-title>
                   <!-- <v-list-item-subtitle>Logged In</v-list-item-subtitle> -->
                 </v-list-item-content>
+                <v-list-item-content>
+                  <v-icon
+                    v-if="$vuetify.breakpoint.mobile"
+                    @click="comment = false"
+                    x-large
+                    >mdi-chevron-triple-down</v-icon
+                  >
+                  <!-- <v-list-item-subtitle>Logged In</v-list-item-subtitle> -->
+                </v-list-item-content>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item class="ma-4"
+                ><v-textarea
+                  :loading="commentPosting"
+                  auto-grow
+                  placeholder="Write what you think about"
+                  flat
+                  reverse
+                  rows="1"
+                  v-model="commentmsg"
+                  @click="writeCommentShow = true"
+                >
+                </v-textarea>
+                <v-expand-transition>
+                  <div v-if="writeCommentShow">
+                    <v-icon @click="postComment">mdi-send</v-icon>
+                  </div>
+                </v-expand-transition>
               </v-list-item>
             </template>
-            <v-divider></v-divider>
-            <v-list-item class="ma-4"
-              ><v-textarea
-                :loading="commentPosting"
-                auto-grow
-                placeholder="Write what you think about"
-                flat
-                reverse
-                rows="1"
-                v-model="commentmsg"
-                @click="writeCommentShow = true"
-              >
-              </v-textarea>
-              <v-expand-transition>
-                <div v-if="writeCommentShow">
-                  <v-icon @click="postComment">mdi-send</v-icon>
-                </div>
-              </v-expand-transition>
-            </v-list-item>
             <v-skeleton-loader v-if="commentLoading" type="card@3" />
             <v-list v-else v-for="(c, i) in cs" :key="i" nav dense>
               <div>
@@ -200,6 +211,20 @@
                 </div>
               </div>
             </v-list>
+            <v-skeleton-loader v-if="commentLoadingMore" type="card@3" />
+            <v-list v-if="!nomore">
+              <v-row justify="center" class="text-center">
+                <v-btn
+                  @click="loadMoreComments"
+                  class="ma-5"
+                  fab
+                  dark
+                  color="primary"
+                >
+                  <v-icon dark> mdi-plus </v-icon>
+                </v-btn></v-row
+              ></v-list
+            >
           </v-navigation-drawer>
         </div>
       </v-col>
@@ -262,6 +287,8 @@ export default class ReadArticle extends Vue {
   cs: Comment[] = [];
   commentLoading = true;
   commentPosting = false;
+  commentLoadingMore = true;
+  nomore = false;
   get deleteContent() {
     return '你确定要删除"' + this.title + '"吗？';
   }
@@ -338,13 +365,18 @@ export default class ReadArticle extends Vue {
   }
   async loadComment() {
     this.comment = true;
-    if (this.p !== 0) {
-      return;
-    }
+    await this.loadMoreComments();
+    this.commentLoading = false;
+  }
+  async loadMoreComments() {
+    this.commentLoadingMore = true;
     const newCs = await GetComments(this.blog.id, {
       page: this.p++,
       pagesize: this.ps,
     });
+    if (newCs.length < this.ps) {
+      this.nomore = true;
+    }
     const map: { [key: string]: UserListData } = {};
     (await GetUserDatas(newCs.map((v) => v.aurhor))).forEach(
       (v) => (map[v.id] = v)
@@ -356,7 +388,7 @@ export default class ReadArticle extends Vue {
       v.showSub = false;
     });
     this.cs = this.cs.concat(newCs);
-    this.commentLoading = false;
+    this.commentLoadingMore = false;
   }
   deleteArticle() {
     this.showDelete = true;

@@ -24,8 +24,11 @@ function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 export async function GetUserDatas(uids: string[]): Promise<UserListData[]> {
+    if (uids.length === 0) {
+        return [];
+    }
     let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.filter(onlyUnique).join('&id='));
-    return re.data
+    return re.data ?? []
 }
 
 export function GetInitials(name: string) {
