@@ -84,5 +84,11 @@ func SetupHandlers(c *Controller) {
 			accounts.Get("detail/:id", c.ShowAccount)
 			accounts.Get("listBrief", c.ListAccountsInfo)
 		}
+		comment := api.Group("/comment", model.Anonymous, model.OrdinaryUser)
+		{
+			comment.Get(":id", c.GetComment)
+			comment.Post("", c.PostComment, model.OrdinaryUser)
+			comment.Post(":id", c.PostSubComment, model.OrdinaryUser)
+		}
 	}
 }

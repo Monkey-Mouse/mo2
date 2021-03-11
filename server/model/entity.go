@@ -7,6 +7,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// Praiseable 可被点赞的
+type Praiseable struct {
+	Up       uint64 `json:"up" bson:"up"`
+	Down     uint64 `json:"down" bson:"down"`
+	Weighted uint64 `json:"weighted" bson:"weighted"`
+}
+
 // Entity example
 type Entity struct {
 	CreateTime time.Time `json:"createTime" example:"2020-10-1" bson:"create_time,omitempty"`
@@ -16,8 +23,8 @@ type Entity struct {
 
 // IndexModels Index Models to index entity
 var IndexModels = []mongo.IndexModel{
-	{Keys: bson.M{"entity_info.create_time": 1}},
-	{Keys: bson.M{"entity_info.update_time": 1}},
+	{Keys: bson.M{"entity_info.create_time": -1}},
+	{Keys: bson.M{"entity_info.update_time": -1}},
 }
 
 // InitEntity init new entity

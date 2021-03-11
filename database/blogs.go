@@ -2,21 +2,28 @@ package database
 
 import (
 	"context"
+	"log"
+	"mo2/dto"
+	"mo2/server/model"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"mo2/dto"
-	"mo2/server/model"
 )
 
 var blogCol *mongo.Collection = GetCollection("blog")
 var draftCol *mongo.Collection = GetCollection("draft")
 
-func ensureBlogIndex() {
-	blogCol.Indexes().CreateMany(context.TODO(), append([]mongo.IndexModel{
+func init() {
+	createBlogIndexes(blogCol)
+	createBlogIndexes(draftCol)
+}
+
+func createBlogIndexes(col *mongo.Collection) {
+	col.Indexes().CreateMany(context.TODO(), append([]mongo.IndexModel{
 		{Keys: bson.M{"ket_words": 1}},
+		{Keys: bson.M{"author_id": 1}},
 	}, model.IndexModels...))
 }
 func chooseCol(isDraft bool) (col *mongo.Collection) {

@@ -935,6 +935,144 @@ var doc = `{
                 }
             }
         },
+        "/api/comment": {
+            "post": {
+                "description": "upsert json comments",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "upsert comments",
+                "parameters": [
+                    {
+                        "description": "comment",
+                        "name": "comment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Comment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Comment"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/comment/{id}": {
+            "get": {
+                "description": "get json comments",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "get comments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 0",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 5",
+                        "name": "pagesize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Comment"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "upsert json comments",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "upsert subcomments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "comment id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "subcomment",
+                        "name": "comment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Subcomment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Subcomment"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/file": {
             "post": {
                 "description": "say something",
@@ -1417,6 +1555,37 @@ var doc = `{
                 }
             }
         },
+        "model.Comment": {
+            "type": "object",
+            "properties": {
+                "article": {
+                    "type": "string"
+                },
+                "aurhor": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string",
+                    "example": "a comment"
+                },
+                "entity_info": {
+                    "$ref": "#/definitions/model.Entity"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxxx=="
+                },
+                "praise": {
+                    "$ref": "#/definitions/model.Praiseable"
+                },
+                "subs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Subcomment"
+                    }
+                }
+            }
+        },
         "model.DeleteAccount": {
             "type": "object",
             "properties": {
@@ -1495,6 +1664,42 @@ var doc = `{
                 "userNameOrEmail": {
                     "type": "string",
                     "example": "account name/email@mo2.com"
+                }
+            }
+        },
+        "model.Praiseable": {
+            "type": "object",
+            "properties": {
+                "down": {
+                    "type": "integer"
+                },
+                "up": {
+                    "type": "integer"
+                },
+                "weighted": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.Subcomment": {
+            "type": "object",
+            "properties": {
+                "aurhor": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string",
+                    "example": "a comment"
+                },
+                "entity_info": {
+                    "$ref": "#/definitions/model.Entity"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxxx=="
+                },
+                "praise": {
+                    "$ref": "#/definitions/model.Praiseable"
                 }
             }
         }

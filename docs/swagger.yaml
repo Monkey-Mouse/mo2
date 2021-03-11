@@ -132,6 +132,27 @@ definitions:
         example: mouse ❤ monkey
         type: string
     type: object
+  model.Comment:
+    properties:
+      article:
+        type: string
+      aurhor:
+        type: string
+      content:
+        example: a comment
+        type: string
+      entity_info:
+        $ref: '#/definitions/model.Entity'
+      id:
+        example: xxxxxxxxxxxxxx==
+        type: string
+      praise:
+        $ref: '#/definitions/model.Praiseable'
+      subs:
+        items:
+          $ref: '#/definitions/model.Subcomment'
+        type: array
+    type: object
   model.DeleteAccount:
     properties:
       email:
@@ -187,6 +208,30 @@ definitions:
       userNameOrEmail:
         example: account name/email@mo2.com
         type: string
+    type: object
+  model.Praiseable:
+    properties:
+      down:
+        type: integer
+      up:
+        type: integer
+      weighted:
+        type: integer
+    type: object
+  model.Subcomment:
+    properties:
+      aurhor:
+        type: string
+      content:
+        example: a comment
+        type: string
+      entity_info:
+        $ref: '#/definitions/model.Entity'
+      id:
+        example: xxxxxxxxxxxxxx==
+        type: string
+      praise:
+        $ref: '#/definitions/model.Praiseable'
     type: object
 host: localhost:5001
 info:
@@ -794,6 +839,97 @@ paths:
       summary: find all Blogs
       tags:
       - blogs
+  /api/comment:
+    post:
+      consumes:
+      - application/json
+      description: upsert json comments
+      parameters:
+      - description: comment
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/model.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Comment'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: upsert comments
+      tags:
+      - comments
+  /api/comment/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get json comments
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: int 0
+        in: query
+        name: page
+        type: integer
+      - description: int 5
+        in: query
+        name: pagesize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Comment'
+            type: array
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: get comments
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      description: upsert json comments
+      parameters:
+      - description: comment id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: subcomment
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/model.Subcomment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Subcomment'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: upsert subcomments
+      tags:
+      - comments
   /api/file:
     post:
       consumes:
