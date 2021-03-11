@@ -176,6 +176,7 @@ import {
 } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
 import { Watch } from "vue-property-decorator";
+import "vue2-timeago/dist/vue2-timeago.css";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 

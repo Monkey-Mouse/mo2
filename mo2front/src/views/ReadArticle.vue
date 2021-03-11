@@ -117,12 +117,18 @@
               <div>
                 <v-list-item two-line>
                   <v-list-item-avatar class="clickable">
-                    <avatar :size="30" :user="author"></avatar>
+                    <avatar :size="30" :user="c.authorProfile"></avatar>
                   </v-list-item-avatar>
 
                   <v-list-item-content>
-                    <v-list-item-title>Comments</v-list-item-title>
-                    <v-list-item-subtitle>2020</v-list-item-subtitle>
+                    <v-list-item-title>{{
+                      c.authorProfile.name
+                    }}</v-list-item-title>
+                    <time-ago
+                      :refresh="1"
+                      :datetime="c.entity_info.updateTime"
+                      tooltip
+                    ></time-ago>
                   </v-list-item-content>
                 </v-list-item>
 
@@ -131,8 +137,7 @@
                 </v-list-item>
                 <v-list-item>
                   <v-spacer />
-                  <v-icon>mdi-message-reply-outline</v-icon>6
-
+                  <v-icon>mdi-message-reply-outline</v-icon>{{ c.subs.length }}
                   <v-list-item-action
                     ><v-icon
                       >mdi-pencil-circle-outline</v-icon
@@ -158,21 +163,24 @@ import {
   GetComments,
   GetErrorMsg,
   GetUserData,
+  GetUserDatas,
   globaldic,
   UploadImgToQiniu,
   UpsertBlog,
   UpsertComment,
 } from "@/utils";
 import hljs from "highlight.js";
-import { Blog, User, Comment } from "@/models";
+import { Blog, User, Comment, UserListData } from "@/models";
 import Avatar from "@/components/UserAvatar.vue";
 import { Prop } from "vue-property-decorator";
+import { TimeAgo } from "vue2-timeago";
 import DeleteConfirm from "@/components/DeleteConfirm.vue";
 @Component({
   components: {
     Editor,
     Avatar,
     DeleteConfirm,
+    TimeAgo,
   },
 })
 export default class ReadArticle extends Vue {
@@ -232,6 +240,7 @@ export default class ReadArticle extends Vue {
       article: this.blog.id,
       content: this.commentmsg,
     });
+    c.authorProfile = this.user;
     this.cs.unshift(c);
     this.commentPosting = false;
   }
@@ -245,12 +254,16 @@ export default class ReadArticle extends Vue {
     if (this.p !== 0) {
       return;
     }
-    this.cs = this.cs.concat(
-      await GetComments(this.blog.id, {
-        page: this.p++,
-        pagesize: this.ps,
-      })
+    const newCs = await GetComments(this.blog.id, {
+      page: this.p++,
+      pagesize: this.ps,
+    });
+    const map: { [key: string]: UserListData } = {};
+    (await GetUserDatas(newCs.map((v) => v.aurhor))).forEach(
+      (v) => (map[v.id] = v)
     );
+    newCs.forEach((v) => (v.authorProfile = map[v.aurhor]));
+    this.cs = this.cs.concat(newCs);
     this.commentLoading = false;
   }
   deleteArticle() {

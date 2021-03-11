@@ -17,6 +17,7 @@ const sanitize = (dirty) => {
   });
 }
 Vue.prototype.$sanitize = sanitize;
+Vue.prototype.$d = Date.parse;
 Vue.use(VueCookies);
 
 // set default config
