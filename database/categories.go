@@ -17,40 +17,76 @@ import (
 var catCol = GetCollection("category")
 
 // UpsertCategory 更新、插入category
-func UpsertCategory(c *model.Directory) {
+func UpsertCategory(c *model.Directory) (mErr mo2errors.Mo2Errors) {
 	if c.ID.IsZero() {
 		c.Init()
 	}
-	_, err := catCol.UpdateOne(context.TODO(), bson.D{{"_id", c.ID}},
+	res, err := catCol.UpdateOne(context.TODO(), bson.D{{"_id", c.ID}},
 		bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name, "info": c.Info}},
 		options.Update().SetUpsert(true))
 	if err != nil {
-		log.Fatal(err)
+		mErr.InitError(err)
+		log.Println(mErr)
+	} else {
+		mErr.InitNoError("update %v ", res.ModifiedCount)
 	}
+	return
 }
 
-// DeleteCategory 删除category，并删除blog中的冗余数据
-func DeleteCategory(id primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+// DeleteCategoryCompletely 删除category，并删除blog中的冗余数据
+func DeleteCategoryCompletely(ids ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	var cat model.Directory
 	var removeAll sync.WaitGroup
 	removeAll.Add(1)
+	removeAll.Add(len(ids))
 	errSignal := make(chan mo2errors.Mo2Errors)
-	err := catCol.FindOneAndDelete(context.TODO(), bson.M{"_id": id}).Decode(&cat)
-	if err != nil {
-		mErr.InitError(err)
-		log.Println(err)
-		return
+	for _, id := range ids {
+		go func(id primitive.ObjectID) {
+			defer removeAll.Done()
+			err := catCol.FindOneAndDelete(context.TODO(), bson.M{"_id": id}).Decode(&cat)
+			if err != nil {
+				mErr.InitError(err)
+				//errSignal<-mErr
+				log.Println(id)
+				log.Println(err)
+			} else {
+			}
+			UpdateSubCategories(id, cat.ParentID)
+		}(id)
 	}
+
 	go func() {
 		defer removeAll.Done()
 		defer close(errSignal)
-		errSignal <- RemoveCategoriesInAllBlogs(id)
+		errSignal <- RemoveCategoriesInAllBlogs(ids...)
 	}()
 	for errSig := range errSignal {
 		mErr = errSig
-		log.Println(id, errSig.Error())
+		log.Println(ids, errSig.Error())
 	}
 	removeAll.Wait()
+	return
+}
+
+// DeleteCategory
+func DeleteCategory(ids ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+	if res, err := catCol.DeleteMany(context.TODO(), bson.M{"_id": bson.M{"$in": ids}}); err != nil {
+		mErr.InitError(err)
+	} else {
+		mErr.InitNoError("delete %v categories", res.DeletedCount)
+	}
+	log.Println(mErr)
+	return
+}
+
+func UpdateSubCategories(catID primitive.ObjectID, parentID primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+	res, err := catCol.UpdateMany(context.TODO(), bson.M{"parent_id": catID}, bson.M{"$set": bson.M{"parent_id": parentID}})
+	if err != nil {
+		mErr.InitError(err)
+		log.Println(mErr)
+		return
+	}
+	mErr.InitNoError("update %v subCategories", res.ModifiedCount)
 	return
 }
 
