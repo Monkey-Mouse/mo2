@@ -16,6 +16,17 @@ import (
 
 var catCol = GetCollection("category")
 
+func init() {
+	createCategoryIndexes(catCol)
+}
+
+func createCategoryIndexes(col *mongo.Collection) {
+	col.Indexes().CreateMany(context.TODO(), append([]mongo.IndexModel{
+		{Keys: bson.M{"_id": 1}},
+		{Keys: bson.M{"parent_id": 1}},
+	}, model.IndexModels...))
+}
+
 // UpsertCategory 更新、插入category
 func UpsertCategory(c *model.Directory) (mErr mo2errors.Mo2Errors) {
 	update := bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name, "info": c.Info, "owner_ids": c.OwnerIDs}}
