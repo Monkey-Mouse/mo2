@@ -47,7 +47,7 @@ type Directory struct {
 
 
 #### [dto/directory.go](../../dto/directory.go)
-```go
+``` go
 // file: dto/directory.go
 
 // RelateEntity2Entity 将单实体关联到单实体dto
@@ -83,7 +83,7 @@ type RelateEntitySet2Entity struct {
 
 ### api使用
 [controller.go](../controller/controller.go)
-```go
+``` go
     api := middleware.H.Group("/api")
     {
     	//...
