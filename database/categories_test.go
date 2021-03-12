@@ -29,7 +29,7 @@ func InsertCategories4Test(num int) (ids []primitive.ObjectID) {
 	ids = make([]primitive.ObjectID, num)
 	for i := 0; i < num; i++ {
 		ids[i] = primitive.NewObjectID()
-		if mErr := UpsertCategory(&model.Directory{ID: ids[i]}); mErr.IsError() {
+		if mErr := UpsertCategory(&model.Directory{ID: ids[i], OwnerIDs: []primitive.ObjectID{}}); mErr.IsError() {
 			log.Println(mErr)
 		}
 	}
@@ -300,11 +300,10 @@ func ExampleRelateCategories2User() {
 	RelateCategories2User(ownCatIDs, userID)
 	cs, _ := FindCategoriesByUserId(userID)
 	if len(cs) == ownCatNum {
-		fmt.Println("after relate, len(cs) equals to ownCatIDs")
+		fmt.Println("success")
 	}
-
 	//Output:
-	//after relate, len(cs) equals to ownCatIDs
+	//success
 }
 
 func ExampleRightFilter() {

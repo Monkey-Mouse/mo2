@@ -18,15 +18,14 @@ var catCol = GetCollection("category")
 
 // UpsertCategory 更新、插入category
 func UpsertCategory(c *model.Directory) (mErr mo2errors.Mo2Errors) {
-
 	update := bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name, "info": c.Info, "owner_ids": c.OwnerIDs}}
 	res, err := catCol.UpdateOne(context.TODO(), bson.D{{"_id", c.ID}}, update, options.Update().SetUpsert(true))
 	if err != nil {
 		mErr.InitError(err)
+		log.Println(mErr)
 	} else {
 		mErr.InitNoError("update %v ", res.UpsertedID)
 	}
-	log.Println(mErr)
 	return
 }
 
@@ -332,9 +331,10 @@ func RelateCategories2User(catIDs []primitive.ObjectID, userIds ...primitive.Obj
 	res, err := catCol.UpdateMany(context.TODO(), bson.M{"_id": bson.M{"$in": catIDs}}, bson.M{"$addToSet": bson.M{"owner_ids": bson.M{"$each": userIds}}})
 	if err != nil {
 		mErr.Init(mo2errors.Mo2Error, err.Error())
-		return
+	} else {
+		mErr.Init(mo2errors.Mo2NoError, fmt.Sprintf("%v modified", res.ModifiedCount))
 	}
-	mErr.Init(mo2errors.Mo2NoError, fmt.Sprintf("%v modified", res.ModifiedCount))
+	log.Println(mErr)
 	return
 }
 
