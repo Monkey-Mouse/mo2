@@ -5,7 +5,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
 	"mo2/dto"
+	"mo2/mo2utils/mo2errors"
 	"mo2/server/model"
+	"reflect"
+	"testing"
 	"time"
 )
 
@@ -31,6 +34,105 @@ func InsertCategories4Test(num int) (ids []primitive.ObjectID) {
 		}
 	}
 	return
+}
+
+func TestUpsertCategory(t *testing.T) {
+	fooID := primitive.NewObjectID()
+	parentID := primitive.NewObjectID()
+	defer DeleteCategory(fooID)
+	foo := model.Directory{
+		ID:       fooID,
+		ParentID: primitive.NewObjectID(),
+		Name:     "FOO",
+		Info: model.DirectoryInfo{
+			Description: "TEST",
+			Cover:       "HTTP://FOO.COM",
+		},
+		OwnerIDs: []primitive.ObjectID{primitive.NewObjectID()},
+	}
+	tests := []struct {
+		name          string
+		args          model.Directory
+		wantFindCat   model.Directory
+		wantErrorType int
+	}{
+		{"foo", foo, foo, mo2errors.Mo2NoError},
+		{"addParentID", model.Directory{
+			ID:       fooID,
+			Name:     foo.Name,
+			Info:     foo.Info,
+			ParentID: parentID,
+			OwnerIDs: foo.OwnerIDs,
+		}, model.Directory{
+			ID:       fooID,
+			ParentID: parentID,
+			Name:     foo.Name,
+			Info:     foo.Info,
+			OwnerIDs: foo.OwnerIDs,
+		}, mo2errors.Mo2NoError},
+		{"addOwnerID", model.Directory{
+			ID:       fooID,
+			ParentID: parentID,
+			Name:     foo.Name,
+			Info:     foo.Info,
+			OwnerIDs: []primitive.ObjectID{parentID},
+		}, model.Directory{
+			ID:       fooID,
+			ParentID: parentID,
+			Name:     foo.Name,
+			Info:     foo.Info,
+			OwnerIDs: []primitive.ObjectID{parentID},
+		}, mo2errors.Mo2NoError},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			defer DeleteCategory(test.args.ID)
+			if mErr := UpsertCategory(&test.args); mErr.ErrorCode != test.wantErrorType {
+				t.Errorf("UpsertCategory() gotError = %v, want %v", mErr.ErrorCode, test.args)
+			}
+			findCat := FindCategoryById(test.args.ID)
+
+			if !reflect.DeepEqual(findCat, test.wantFindCat) {
+				t.Errorf("UpsertCategory() gotFindCat = %v, want %v", findCat, test.wantFindCat)
+			}
+		})
+	}
+}
+
+func TestFindOrCreateRoot4User(t *testing.T) {
+	userID := primitive.NewObjectID()
+	noRootUserID := primitive.NewObjectID()
+	root := model.Directory{
+		ID:       primitive.NewObjectID(),
+		ParentID: userID,
+		Name:     "",
+		Info:     model.DirectoryInfo{},
+		OwnerIDs: nil,
+	}
+	defer DeleteCategory(root.ID)
+	UpsertCategory(&root)
+
+	tests := []struct {
+		name   string
+		userID primitive.ObjectID
+	}{
+		{"hasRoot", userID},
+		{"notHasRoot", noRootUserID},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if cat, mErr := FindOrCreateRoot4User(test.userID); mErr.IsError() {
+				t.Error(mErr)
+			} else {
+				defer DeleteCategory(cat.ID)
+				if cat.ParentID != test.userID {
+					t.Errorf("FindOrCreateRoot4User() want parentID %v get %v \n", test.userID, cat.ParentID)
+				}
+			}
+		})
+	}
 }
 
 func ExampleDeleteCategoryCompletely() {

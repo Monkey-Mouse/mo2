@@ -18,15 +18,15 @@ var catCol = GetCollection("category")
 
 // UpsertCategory 更新、插入category
 func UpsertCategory(c *model.Directory) (mErr mo2errors.Mo2Errors) {
-	res, err := catCol.UpdateOne(context.TODO(), bson.D{{"_id", c.ID}},
-		bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name, "info": c.Info}},
-		options.Update().SetUpsert(true))
+
+	update := bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name, "info": c.Info, "owner_ids": c.OwnerIDs}}
+	res, err := catCol.UpdateOne(context.TODO(), bson.D{{"_id", c.ID}}, update, options.Update().SetUpsert(true))
 	if err != nil {
 		mErr.InitError(err)
-		log.Println(mErr)
 	} else {
-		mErr.InitNoError("update %v ", res.ModifiedCount)
+		mErr.InitNoError("update %v ", res.UpsertedID)
 	}
+	log.Println(mErr)
 	return
 }
 
@@ -36,7 +36,8 @@ func FindOrCreateRoot4User(userID primitive.ObjectID) (cat model.Directory, mErr
 	if err := catCol.FindOne(context.TODO(), bson.M{"parent_id": userID}).Decode(&cat); err != nil {
 		if err == mongo.ErrNoDocuments {
 			//create new root for user
-			mErr = UpsertCategory(&model.Directory{ID: primitive.NewObjectID(), ParentID: userID, OwnerIDs: []primitive.ObjectID{userID}})
+			cat = model.Directory{ID: primitive.NewObjectID(), ParentID: userID, OwnerIDs: []primitive.ObjectID{userID}}
+			mErr = UpsertCategory(&cat)
 			return
 		}
 		mErr.InitError(err)
@@ -54,21 +55,14 @@ func UpsertDirectoryByUser(c *model.Directory, userID primitive.ObjectID) (mErr 
 	}
 	if c.ParentID.IsZero() {
 		// find add people's root directory(category)
-		if root, mErr := FindOrCreateRoot4User(userID); mErr.IsError() {
+		var root model.Directory
+		if root, mErr = FindOrCreateRoot4User(userID); mErr.IsError() {
 			return
 		} else {
 			c.ParentID = root.ID
 		}
 	}
-	res, err := catCol.UpdateOne(context.TODO(), bson.D{{"_id", c.ID}},
-		bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name, "info": c.Info, "owner_ids": c.OwnerIDs}},
-		options.Update().SetUpsert(true))
-	if err != nil {
-		mErr.InitError(err)
-		log.Println(mErr)
-	} else {
-		mErr.InitNoError("update %v ", res.ModifiedCount)
-	}
+	mErr = UpsertCategory(c)
 	return
 }
 
