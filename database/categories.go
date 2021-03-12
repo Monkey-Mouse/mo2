@@ -60,7 +60,10 @@ func idExistInList(checkId primitive.ObjectID, ids []primitive.ObjectID) (exist 
 
 // UpsertDirectoryByUser 用户id为userID的用户更新、插入category
 // 若插入的ownerIDs不存在，则将请求方加入
-// 否则检查请求方id是否存在访问权限
+// 		若存在，则检查请求方id是否存在访问权限，若无则直接返回
+// 若插入的parentID不存在，则检查请求用户是否有root
+// 				若有root，则使用root的id做为parentID插入
+// 				若无root，则创建并使用新建的root的id做为parentID插入
 func UpsertDirectoryByUser(c *model.Directory, userID primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	if len(c.OwnerIDs) == 0 {
 		c.OwnerIDs = append(c.OwnerIDs, userID)
@@ -189,6 +192,7 @@ func FindCategories(ids []primitive.ObjectID) (cs []model.Directory, mErr mo2err
 	return
 }
 
+// RightFilter
 // 根据用户id，返回请求的ids中有权限进行某种操作的过滤id列表
 func RightFilter(userID primitive.ObjectID, requestIDs ...primitive.ObjectID) (allowIDs []primitive.ObjectID, mErr mo2errors.Mo2Errors) {
 	cursor, err := catCol.Find(context.TODO(), bson.M{"$and": []bson.M{bson.M{"_id": bson.M{"$in": requestIDs}}, bson.M{"owner_ids": userID}}}, options.Find().SetProjection(bson.M{"_id": 1}))
