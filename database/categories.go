@@ -18,11 +18,50 @@ var catCol = GetCollection("category")
 
 // UpsertCategory 更新、插入category
 func UpsertCategory(c *model.Directory) (mErr mo2errors.Mo2Errors) {
+	res, err := catCol.UpdateOne(context.TODO(), bson.D{{"_id", c.ID}},
+		bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name, "info": c.Info}},
+		options.Update().SetUpsert(true))
+	if err != nil {
+		mErr.InitError(err)
+		log.Println(mErr)
+	} else {
+		mErr.InitNoError("update %v ", res.ModifiedCount)
+	}
+	return
+}
+
+// FindOrCreateRoot4User
+// 寻找用户的根目录，若不存在，新建并返回
+func FindOrCreateRoot4User(userID primitive.ObjectID) (cat model.Directory, mErr mo2errors.Mo2Errors) {
+	if err := catCol.FindOne(context.TODO(), bson.M{"parent_id": userID}).Decode(&cat); err != nil {
+		if err == mongo.ErrNoDocuments {
+			//create new root for user
+			mErr = UpsertCategory(&model.Directory{ID: primitive.NewObjectID(), ParentID: userID, OwnerIDs: []primitive.ObjectID{userID}})
+			return
+		}
+		mErr.InitError(err)
+		log.Println(mErr)
+	} else {
+		mErr.InitNoError("have already exists")
+	}
+	return
+}
+
+// UpsertDirectoryByUser 用户id为userID的用户更新、插入category
+func UpsertDirectoryByUser(c *model.Directory, userID primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	if c.ID.IsZero() {
 		c.Init()
 	}
+	if c.ParentID.IsZero() {
+		// find add people's root directory(category)
+		if root, mErr := FindOrCreateRoot4User(userID); mErr.IsError() {
+			return
+		} else {
+			c.ParentID = root.ID
+		}
+	}
 	res, err := catCol.UpdateOne(context.TODO(), bson.D{{"_id", c.ID}},
-		bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name, "info": c.Info}},
+		bson.M{"$set": bson.M{"parent_id": c.ParentID, "name": c.Name, "info": c.Info, "owner_ids": c.OwnerIDs}},
 		options.Update().SetUpsert(true))
 	if err != nil {
 		mErr.InitError(err)

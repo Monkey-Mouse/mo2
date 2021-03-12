@@ -104,7 +104,7 @@ type RelateEntitySet2Entity struct {
         - upsert增改category信息
     - api/blog/category [get]
         - 查询category信息
-  - (x) api/blog/category [delete] (important)
+  -  api/directories/category [delete] (important)
       - 删除category信息
       - 解除与该category相关的所有联系：blog字段寻找相关字段并删去
 
@@ -132,7 +132,14 @@ type RelateEntitySet2Entity struct {
           - user:将多实体集categories的父categoryid均设为单实体的id
           - sub:将多实体集categories添加到blog的categories列表中去
       
-    
+#### 新增部分
+
+- 若upsert中的id为零值，初始化id  
+- 若parentID为零值，寻找此次请求用户的根目录`root`id，亦即ownerIDs的最末一位
+    - 若`root`不存在，则为该用户新建root，并返回新建root的id
+    - 若`root`存在，则返回已有root的id
+    - 返回id作为本次新增directory的parentID
+
     
 #### 删除部分
 因为删除某directory涉及到冗余关联数据的删除，因此需要：

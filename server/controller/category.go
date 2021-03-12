@@ -25,11 +25,22 @@ import (
 func (c *Controller) UpsertCategory(ctx *gin.Context) {
 	var cat model.Directory
 	if err := ctx.ShouldBindJSON(&cat); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason(badresponse.BadRequestReason))
 		return
 	}
-	database.UpsertCategory(&cat)
-	ctx.JSON(http.StatusOK, cat)
+	if userInfo, exist := mo2utils.GetUserInfo(ctx); exist {
+		cat.OwnerIDs = append(cat.OwnerIDs, userInfo.ID)
+		if mErr := database.UpsertDirectoryByUser(&cat, userInfo.ID); mErr.IsError() {
+			ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
+			return
+		} else {
+			ctx.JSON(http.StatusOK, cat)
+		}
+
+	} else {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason(badresponse.UnauthorizeReason))
+		return
+	}
 }
 
 // DeleteCategory godoc
