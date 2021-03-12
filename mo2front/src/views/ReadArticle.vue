@@ -64,6 +64,168 @@
             :show.sync="showDelete"
             @confirm="confirmDelete"
           />
+          <div style="padding-bottom: 1rem"></div>
+          <v-row>
+            <v-col class="offset-11"
+              ><v-icon @click="loadComment"
+                >mdi-message-reply-outline</v-icon
+              ></v-col
+            >
+          </v-row>
+
+          <div style="padding-bottom: 5rem"></div>
+          <v-navigation-drawer
+            v-model="comment"
+            width="30%"
+            height="100%"
+            style="max-height: 100%"
+            bottom
+            fixed
+            temporary
+          >
+            <template v-slot:prepend>
+              <v-list-item two-line class="ml-16">
+                <v-list-item-content>
+                  <v-icon x-large>mdi-message-reply-outline</v-icon>
+                </v-list-item-content>
+
+                <v-list-item-content>
+                  <v-list-item-title>Comments</v-list-item-title>
+                  <!-- <v-list-item-subtitle>Logged In</v-list-item-subtitle> -->
+                </v-list-item-content>
+                <v-list-item-content>
+                  <v-icon
+                    v-if="$vuetify.breakpoint.mobile"
+                    @click="comment = false"
+                    x-large
+                    >mdi-chevron-triple-down</v-icon
+                  >
+                  <!-- <v-list-item-subtitle>Logged In</v-list-item-subtitle> -->
+                </v-list-item-content>
+              </v-list-item>
+              <v-divider></v-divider>
+              <v-list-item class="ma-4"
+                ><v-textarea
+                  :loading="commentPosting"
+                  auto-grow
+                  placeholder="Write what you think about"
+                  flat
+                  reverse
+                  rows="1"
+                  v-model="commentmsg"
+                  @click="writeCommentShow = true"
+                >
+                </v-textarea>
+                <v-expand-transition>
+                  <div v-if="writeCommentShow">
+                    <v-icon @click="postComment">mdi-send</v-icon>
+                  </div>
+                </v-expand-transition>
+              </v-list-item>
+            </template>
+            <v-skeleton-loader v-if="commentLoading" type="card@3" />
+            <v-list v-else v-for="(c, i) in cs" :key="i" nav dense>
+              <div>
+                <v-list-item two-line>
+                  <v-list-item-avatar class="clickable">
+                    <avatar :size="30" :user="c.authorProfile"></avatar>
+                  </v-list-item-avatar>
+
+                  <v-list-item-content>
+                    <v-list-item-title>{{
+                      c.authorProfile.name
+                    }}</v-list-item-title>
+                    <time-ago
+                      :refresh="60"
+                      :datetime="c.entity_info.updateTime"
+                      tooltip
+                      long
+                    ></time-ago>
+                  </v-list-item-content>
+                </v-list-item>
+                <v-list-item>
+                  <v-list-item-content>{{ c.content }} </v-list-item-content>
+                </v-list-item>
+                <v-list-item>
+                  <v-spacer />
+                  <v-icon @click="loadSub(c)">mdi-message-reply-outline</v-icon
+                  >{{ c.subs.length }}
+                  <v-list-item-action
+                    ><v-icon @click="c.edit = !c.edit"
+                      >mdi-reply</v-icon
+                    ></v-list-item-action
+                  >
+                </v-list-item>
+                <v-expand-transition>
+                  <v-list-item v-if="c.edit" class="ma-4"
+                    ><v-textarea
+                      :loading="commentPosting"
+                      auto-grow
+                      placeholder="Write what you think about"
+                      flat
+                      reverse
+                      rows="1"
+                      v-model="c.tempC"
+                    >
+                    </v-textarea>
+                    <div>
+                      <v-icon @click="postSubComment(c)">mdi-send</v-icon>
+                    </div>
+                  </v-list-item>
+                </v-expand-transition>
+                <v-divider />
+                <div v-if="c.showSub">
+                  <v-list
+                    class="ml-16"
+                    v-for="(s, i) in c.subs"
+                    :key="i"
+                    nav
+                    dense
+                  >
+                    <div>
+                      <v-list-item two-line>
+                        <v-list-item-avatar class="clickable">
+                          <avatar :size="30" :user="s.authorProfile"></avatar>
+                        </v-list-item-avatar>
+
+                        <v-list-item-content>
+                          <v-list-item-title>{{
+                            s.authorProfile.name
+                          }}</v-list-item-title>
+                          <time-ago
+                            :refresh="60"
+                            :datetime="s.entity_info.updateTime"
+                            tooltip
+                            long
+                          ></time-ago>
+                        </v-list-item-content>
+                      </v-list-item>
+                      <v-list-item>
+                        <v-list-item-content
+                          >{{ s.content }}
+                        </v-list-item-content>
+                      </v-list-item>
+                    </div>
+                    <v-divider />
+                  </v-list>
+                </div>
+              </div>
+            </v-list>
+            <v-skeleton-loader v-if="commentLoadingMore" type="card@3" />
+            <v-list v-if="!nomore">
+              <v-row justify="center" class="text-center">
+                <v-btn
+                  @click="loadMoreComments"
+                  class="ma-5"
+                  fab
+                  dark
+                  color="primary"
+                >
+                  <v-icon dark> mdi-plus </v-icon>
+                </v-btn></v-row
+              ></v-list
+            >
+          </v-navigation-drawer>
         </div>
       </v-col>
     </v-row>
@@ -77,29 +239,36 @@ import Editor from "../components/MO2Editor.vue";
 import {
   DeleteArticle,
   GetArticle,
+  GetComments,
   GetErrorMsg,
   GetUserData,
+  GetUserDatas,
   globaldic,
   UploadImgToQiniu,
   UpsertBlog,
+  UpsertComment,
+  UpsertSubComment,
 } from "@/utils";
 import hljs from "highlight.js";
-import { Blog, User } from "@/models";
+import { Blog, User, Comment, UserListData } from "@/models";
 import Avatar from "@/components/UserAvatar.vue";
 import { Prop } from "vue-property-decorator";
+import { TimeAgo } from "vue2-timeago";
 import DeleteConfirm from "@/components/DeleteConfirm.vue";
 @Component({
   components: {
     Editor,
     Avatar,
     DeleteConfirm,
+    TimeAgo,
   },
 })
 export default class ReadArticle extends Vue {
   @Prop()
-  user;
+  user: User;
   title = "";
   html = "";
+  writeCommentShow = false;
   attrs = {
     class: "mb-6 mt-6",
     boilerplate: false,
@@ -111,6 +280,15 @@ export default class ReadArticle extends Vue {
   authorLoad = false;
   showDelete = false;
   draft = false;
+  comment = false;
+  commentmsg = "";
+  p = 0;
+  ps = 5;
+  cs: Comment[] = [];
+  commentLoading = true;
+  commentPosting = false;
+  commentLoadingMore = true;
+  nomore = false;
   get deleteContent() {
     return '你确定要删除"' + this.title + '"吗？';
   }
@@ -138,10 +316,79 @@ export default class ReadArticle extends Vue {
       })
       .catch((err) => GetErrorMsg(err));
   }
+  async loadSub(c: Comment) {
+    if (c.showSub === true) {
+      c.showSub = false;
+      return;
+    }
+    if (c.subs.length > 0 && c.subs[0].authorProfile) {
+      c.showSub = true;
+      return;
+    }
+    const map: { [key: string]: UserListData } = {};
+    (await GetUserDatas(c.subs.map((v) => v.aurhor))).forEach(
+      (v) => (map[v.id] = v)
+    );
+    c.subs.forEach((v) => {
+      v.authorProfile = map[v.aurhor];
+      v.edit = false;
+    });
+    c.showSub = true;
+  }
+  async postSubComment(c: Comment) {
+    this.commentPosting = true;
+    const sub = await UpsertSubComment(c.id, { content: c.tempC });
+    sub.authorProfile = this.user;
+    c.showSub = true;
+    c.subs.unshift(sub);
+    c.tempC = "";
+    this.commentPosting = false;
+  }
+  async postComment() {
+    this.commentPosting = true;
+    const c = await UpsertComment({
+      article: this.blog.id,
+      content: this.commentmsg,
+    });
+    c.authorProfile = this.user;
+    c.edit = false;
+    c.tempC = "";
+    c.showSub = false;
+    this.cs.unshift(c);
+    this.commentmsg = "";
+    this.commentPosting = false;
+  }
   edit() {
     globaldic.article = `<h1>${this.title}</h1>${this.html}`;
     // UpsertBlog({ draft: true }, this.blog);
     this.$router.push("/edit/" + this.blog.id);
+  }
+  async loadComment() {
+    this.comment = true;
+    await this.loadMoreComments();
+    this.commentLoading = false;
+  }
+  async loadMoreComments() {
+    this.commentLoadingMore = true;
+    const newCs = await GetComments(this.blog.id, {
+      page: this.p++,
+      pagesize: this.ps,
+    });
+    if (newCs.length < this.ps) {
+      this.nomore = true;
+    }
+    const map: { [key: string]: UserListData } = {};
+    (await GetUserDatas(newCs.map((v) => v.aurhor))).forEach(
+      (v) => (map[v.id] = v)
+    );
+    newCs.forEach((v) => {
+      v.authorProfile = map[v.aurhor];
+      v.edit = false;
+      v.tempC = "";
+      v.showSub = false;
+    });
+    this.cs = this.cs.concat(newCs);
+    this.commentLoadingMore = false;
   }
   deleteArticle() {
     this.showDelete = true;
