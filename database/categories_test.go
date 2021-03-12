@@ -135,6 +135,68 @@ func TestFindOrCreateRoot4User(t *testing.T) {
 	}
 }
 
+func TestUpsertDirectoryByUser(t *testing.T) {
+	type args struct {
+		cat    *model.Directory
+		userID primitive.ObjectID
+	}
+	userID := primitive.NewObjectID()
+	fooID := primitive.NewObjectID()
+	foo := model.Directory{
+		ID:       fooID,
+		ParentID: primitive.NewObjectID(),
+		Name:     "FOO",
+		Info: model.DirectoryInfo{
+			Description: "TEST",
+			Cover:       "HTTP://FOO.COM",
+		},
+		OwnerIDs: []primitive.ObjectID{primitive.NewObjectID()},
+	}
+	tests := []struct {
+		name          string
+		args          args
+		wantErrorCode int
+	}{
+		{"initNoId", args{
+			cat:    &model.Directory{Name: "noID"},
+			userID: userID},
+			mo2errors.Mo2NoError},
+		{"foo", args{
+			cat:    &foo,
+			userID: userID,
+		}, mo2errors.Mo2Unauthorized},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mErr := UpsertDirectoryByUser(test.args.cat, test.args.userID)
+			if mErr.ErrorCode != test.wantErrorCode {
+				t.Errorf("UpsertDirectoryByUser() want errorCode %v get %v \n", test.wantErrorCode, mErr.ErrorCode)
+			}
+			if mErr.IsError() {
+			} else {
+				if test.args.cat.ID.IsZero() {
+					t.Error("id of upsert directory is zero")
+				}
+				if test.args.cat.ParentID.IsZero() {
+					t.Error("parent id of upsert directory is zero")
+				}
+				var inOwner bool
+				for _, id := range test.args.cat.OwnerIDs {
+					if id == test.args.userID {
+						inOwner = true
+					}
+				}
+				if inOwner == false {
+					t.Error("user id not in owner id")
+				}
+			}
+			DeleteCategory(test.args.cat.ID)
+			DeleteCategory(test.args.cat.ParentID)
+		})
+	}
+}
+
 func ExampleDeleteCategoryCompletely() {
 	testNum := 100
 	catNum := 10

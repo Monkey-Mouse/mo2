@@ -29,7 +29,6 @@ func (c *Controller) UpsertCategory(ctx *gin.Context) {
 		return
 	}
 	if userInfo, exist := mo2utils.GetUserInfo(ctx); exist {
-		cat.OwnerIDs = append(cat.OwnerIDs, userInfo.ID)
 		if mErr := database.UpsertDirectoryByUser(&cat, userInfo.ID); mErr.IsError() {
 			ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
 			return

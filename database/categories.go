@@ -48,8 +48,29 @@ func FindOrCreateRoot4User(userID primitive.ObjectID) (cat model.Directory, mErr
 	return
 }
 
+// idExistInList 检查id是否存在与给的的id列表中，若存在，返回true；否则返回false
+func idExistInList(checkId primitive.ObjectID, ids []primitive.ObjectID) (exist bool) {
+	exist = false
+	for _, id := range ids {
+		if id == checkId {
+			exist = true
+		}
+	}
+	return
+}
+
 // UpsertDirectoryByUser 用户id为userID的用户更新、插入category
+// 若插入的ownerIDs不存在，则将请求方加入
+// 否则检查请求方id是否存在访问权限
 func UpsertDirectoryByUser(c *model.Directory, userID primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+	if len(c.OwnerIDs) == 0 {
+		c.OwnerIDs = append(c.OwnerIDs, userID)
+	} else {
+		if idExistInList(userID, c.OwnerIDs) == false {
+			mErr.Init(mo2errors.Mo2Unauthorized, "无访问权限")
+			return
+		}
+	}
 	if c.ID.IsZero() {
 		c.Init()
 	}
