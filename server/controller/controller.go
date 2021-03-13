@@ -43,7 +43,7 @@ func SetupHandlers(c *Controller) {
 			uploads.Get("/img/:filename", c.GenUploadToken)
 			uploads.Post("/file", c.Upload)
 		}
-		relation := api.Group("relation", model.OrdinaryUser)
+		relation := api.Group("relation", model.OrdinaryUser, model.Anonymous)
 		{
 
 			relation.Post("categories/:type", c.RelateCategories2Entity, model.GeneralAdmin)
