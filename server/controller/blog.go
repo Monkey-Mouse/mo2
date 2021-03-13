@@ -44,11 +44,11 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 	JudgeAuthorize(ctx, &b)
 	if passAuthValue, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
 		if passAuthValue.(bool) {
-			if success := database.UpsertBlog(&b, isDraft); success {
+			if mErr := database.UpsertBlog(&b, isDraft); mErr.IsError() {
+				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
+			} else {
 				ctx.Header("location", ctx.FullPath())
 				ctx.JSON(http.StatusCreated, b)
-			} else {
-				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
 			}
 			return
 		} else {
@@ -102,10 +102,10 @@ func (c *Controller) DeleteBlog(ctx *gin.Context) {
 	if passAuth, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
 		if passAuth.(bool) {
 			blog.EntityInfo.IsDeleted = true
-			if success := database.UpsertBlog(&blog, isDraft); success {
-				ctx.Status(http.StatusAccepted)
-			} else {
+			if mErr := database.UpsertBlog(&blog, isDraft); mErr.IsError() {
 				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
+			} else {
+				ctx.Status(http.StatusAccepted)
 			}
 			return
 		} else {
@@ -178,10 +178,10 @@ func (c *Controller) RestoreBlog(ctx *gin.Context) {
 	if passAuth, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
 		if passAuth.(bool) {
 			blog.EntityInfo.IsDeleted = false
-			if success := database.UpsertBlog(&blog, isDraft); success {
-				ctx.Status(http.StatusAccepted)
-			} else {
+			if mErr := database.UpsertBlog(&blog, isDraft); mErr.IsError() {
 				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
+			} else {
+				ctx.Status(http.StatusAccepted)
 			}
 			return
 		} else {
@@ -423,7 +423,7 @@ func (c *Controller) FindBlogsByType(ctx *gin.Context) {
 	var mErr mo2errors.Mo2Errors
 	switch ctx.Param(typeKey) {
 	case typeCategory:
-		blogs, mErr = database.FindBlogsByCategoryId(id)
+		blogs, mErr = database.FindBlogsByCategoryId(id, false)
 	}
 	if mErr.IsError() {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(mErr))

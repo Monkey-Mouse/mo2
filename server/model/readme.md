@@ -47,7 +47,7 @@ type Directory struct {
 
 
 #### [dto/directory.go](../../dto/directory.go)
-```go
+``` go
 // file: dto/directory.go
 
 // RelateEntity2Entity 将单实体关联到单实体dto
@@ -81,9 +81,9 @@ type RelateEntitySet2Entity struct {
 - 关联单实体到多实体集
 - 关联实体集到单实体
 
-#### api使用
+### api使用
 [controller.go](../controller/controller.go)
-```go
+``` go
     api := middleware.H.Group("/api")
     {
     	//...
@@ -104,8 +104,9 @@ type RelateEntitySet2Entity struct {
         - upsert增改category信息
     - api/blog/category [get]
         - 查询category信息
-  - (x) api/blog/category [delete]
+  -  api/directories/category [delete] (important)
       - 删除category信息
+      - 解除与该category相关的所有联系：blog字段寻找相关字段并删去
 
  
 - relation部分
@@ -113,11 +114,39 @@ type RelateEntitySet2Entity struct {
       - 多对一
         - api/relation/categories/:type [post]
           - 建立categories与type之间的联系，目前可选：
-          - 
-      - (x)多对多
-    
+          - category:将多实体集categories的父categoryid均设为单实体的id
+          - blog:将多实体集categories的ids添加到blog的categories列表中去
         
+      - (x)多对多
+    - category
+      - 一对一
+        - api/relation/category/:type [post]
+          - 建立category与type之间的联系，目前可选：
+          - user:将user的id添加到category的ownerIDs列表中
+          - userMain:将user的id设定为category的parent_id
+          - category:将related id的parent_id设定为relateTo的category的id
+          - blog:将category的id添加到blog的categories列表中去
+      - 一对一/多  
+        - api/relation/category/:type/:id [get]
+          - 获取categories与type之间的联系，目前可选：
+          - user:将多实体集categories的父categoryid均设为单实体的id
+          - sub:将多实体集categories添加到blog的categories列表中去
+      
+#### 新增部分
 
+- 若upsert中的id为零值，初始化id  
+- 若parentID为零值，寻找此次请求用户的根目录`root`id，亦即ownerIDs的最末一位
+    - 若`root`不存在，则为该用户新建root，并返回新建root的id
+    - 若`root`存在，则返回已有root的id
+    - 返回id作为本次新增directory的parentID
+
+    
+#### 删除部分
+因为删除某directory涉及到冗余关联数据的删除，因此需要：
+- 对blog端：删除所有blog中categories列表里的相关id即可
+- 对category端：所有删除category(`dCat`)的子category加入到其上一级(`id=dCat.parent_id`)中
+- 增加鉴权，只有操作用户id in owner_ids匹配成功的可以进行删除操作
+    - 新思路，增加过滤器，在请求的id列表中过滤出可以进行操作的id列表
 
 
 

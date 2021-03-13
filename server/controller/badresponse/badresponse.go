@@ -6,6 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	BadRequestReason  = "非法输入"
+	UnauthorizeReason = "请先登录"
+)
+
 // ResponseError 返回的错误
 type ResponseError struct {
 	Time   time.Time `json:"time"`

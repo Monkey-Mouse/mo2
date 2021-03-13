@@ -3,6 +3,7 @@ package controller
 import (
 	"mo2/database"
 	"mo2/dto"
+	"mo2/mo2utils"
 	"mo2/mo2utils/mo2errors"
 	"mo2/server/controller/badresponse"
 	"mo2/server/model"
@@ -24,11 +25,54 @@ import (
 func (c *Controller) UpsertCategory(ctx *gin.Context) {
 	var cat model.Directory
 	if err := ctx.ShouldBindJSON(&cat); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason(badresponse.BadRequestReason))
+		return
+	}
+	if userInfo, exist := mo2utils.GetUserInfo(ctx); exist {
+		if mErr := database.UpsertDirectoryByUser(&cat, userInfo.ID); mErr.IsError() {
+			ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
+			return
+		} else {
+			ctx.JSON(http.StatusOK, cat)
+		}
+
+	} else {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason(badresponse.UnauthorizeReason))
+		return
+	}
+}
+
+// DeleteCategory godoc
+// @Summary delete category
+// @Description 根据id删除，并解除与之相关实体的所有关联
+// @Tags category
+// @Accept  json
+// @Produce  json
+// @Param ids body []primitive.ObjectID true "category id to delete"
+// @Success 200 {object} model.Directory
+// @Router /api/directories/category [delete]
+func (c *Controller) DeleteCategory(ctx *gin.Context) {
+	var catIDs []primitive.ObjectID
+	if err := ctx.ShouldBindJSON(&catIDs); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
-	database.UpsertCategory(&cat)
-	ctx.JSON(http.StatusOK, cat)
+	if userInfo, exist := mo2utils.GetUserInfo(ctx); exist {
+		if allowIDs, mErr := database.RightFilter(userInfo.ID, catIDs...); mErr.IsError() {
+			ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
+			return
+		} else {
+			if mErr = database.DeleteCategoryCompletely(allowIDs...); mErr.IsError() {
+				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
+				return
+			} else {
+				ctx.Status(http.StatusOK)
+			}
+		}
+	} else {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason("请先登录"))
+		return
+	}
 }
 
 // FindAllCategories godoc
