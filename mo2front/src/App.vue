@@ -9,8 +9,9 @@
     >
       <div class="d-flex align-center">
         <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
+          @click="$router.push('/')"
+          alt="Logo"
+          class="shrink mr-2 clickable"
           contain
           src="./assets/logo.png"
           transition="scale-transition"
