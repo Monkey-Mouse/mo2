@@ -97,7 +97,13 @@
                     color="accent"
                     >Edit</v-btn
                   >
-                  <v-btn color="red">delete</v-btn>
+                  <v-btn
+                    color="red"
+                    v-on:click.prevent
+                    v-on:click.stop
+                    @click="deleteCate(c)"
+                    >delete</v-btn
+                  >
                 </v-card-actions>
               </v-card>
             </v-expand-transition>
@@ -125,6 +131,7 @@
 import { Blog, Category, InputProp, User } from "@/models";
 import {
   addQuery,
+  DeleteCategories,
   GetCateBlogs,
   GetCategories,
   GetErrorMsg,
@@ -200,6 +207,10 @@ export default class Mo2Category extends Vue {
     this.inputPropsEdit.name.default = c.name;
     this.editCate = true;
     this.ec = c;
+  }
+  async deleteCate(c: Category) {
+    await DeleteCategories([c.id]);
+    this.cate.splice(this.cate.indexOf(c));
   }
   async confirmEdit({ name }: { name: string }) {
     try {
