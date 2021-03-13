@@ -58,7 +58,7 @@ import {
   UpsertBlog,
   UpSertBlogSync,
 } from "@/utils";
-import { BlogUpsert, Category, InputProp, User } from "@/models";
+import { BlogUpsert, InputProp, User } from "@/models";
 import { required, minLength } from "vuelidate/lib/validators";
 import { AxiosError } from "axios";
 import { Prop, Watch } from "vue-property-decorator";
@@ -122,6 +122,7 @@ export default class EditArticle extends Vue {
     description: {
       errorMsg: {
         required: "描述不可为空",
+        min: "描述长度不小于8",
       },
       label: "Description",
       default: "",

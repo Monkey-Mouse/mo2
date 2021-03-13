@@ -65,7 +65,7 @@
             @confirm="confirmDelete"
           />
           <div style="padding-bottom: 1rem"></div>
-          <v-row>
+          <v-row v-if="!draft">
             <v-col class="offset-11"
               ><v-icon @click="loadComment"
                 >mdi-message-reply-outline</v-icon
@@ -244,8 +244,6 @@ import {
   GetUserData,
   GetUserDatas,
   globaldic,
-  UploadImgToQiniu,
-  UpsertBlog,
   UpsertComment,
   UpsertSubComment,
 } from "@/utils";

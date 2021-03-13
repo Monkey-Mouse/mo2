@@ -102,6 +102,9 @@ export const GetArticles = async (query: { page: number; pageSize: number; draft
     return (await axios.get<BlogBrief[]>('/api/blogs/query' + ParseQuery(query))).data
 }
 export async function UpsertBlog(query: { draft: boolean }, blog: BlogUpsert) {
+    if (blog.categories.length === 0) {
+        blog.categories = []
+    }
     return (await axios.post<Blog>('/api/blogs/publish' + ParseQuery(query), blog)).data
 }
 export function UpSertBlogSync(query: { draft: boolean }, blog: BlogUpsert) {
