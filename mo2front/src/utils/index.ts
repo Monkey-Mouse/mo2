@@ -190,7 +190,9 @@ export async function addQuery(that: Vue, key: string, val: string | string[]) {
 export async function GetCategories(id: string) {
     return (await axios.get<Category[]>('/api/relation/category/sub/' + id)).data ?? []
 }
-
+export async function DeleteCategories(ids: string[]) {
+    await axios.delete('/api/directories/category', { data: ids });
+}
 export async function UpsertCate(cate: Category) {
     return await (await axios.post<Category>("/api/blogs/category", cate)).data
 }
@@ -199,8 +201,8 @@ export async function GetCateBlogs(id: string) {
     return (await axios.get<Blog[]>('/api/relation/blogs/category/' + id)).data ?? []
 }
 
-export async function GetCates() {
-    return (await axios.get<Category[]>('/api/blogs/category')).data ?? []
+export async function GetCates(id: string) {
+    return (await axios.get<Category[]>('/api/relation/category/user/' + id)).data ?? []
 }
 
 export async function GetComments(id: string, query: { page: number; pagesize: number }) {

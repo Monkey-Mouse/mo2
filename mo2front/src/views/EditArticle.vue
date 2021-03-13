@@ -58,7 +58,7 @@ import {
   UpsertBlog,
   UpSertBlogSync,
 } from "@/utils";
-import { BlogUpsert, Category, InputProp } from "@/models";
+import { BlogUpsert, Category, InputProp, User } from "@/models";
 import { required, minLength } from "vuelidate/lib/validators";
 import { AxiosError } from "axios";
 import { Prop, Watch } from "vue-property-decorator";
@@ -71,6 +71,8 @@ import { Prop, Watch } from "vue-property-decorator";
 export default class EditArticle extends Vue {
   @Prop()
   autoSaving: boolean;
+  @Prop()
+  user: User;
   showPublish = false;
   uploadImgs = UploadImgToQiniu;
   loading = true;
@@ -147,7 +149,7 @@ export default class EditArticle extends Vue {
 
   created() {
     this.init();
-    GetCates().then((data) => {
+    GetCates(this.user.id).then((data) => {
       this.inputProps.categories.options = data.map((v, i, a) => {
         return { text: v.name, value: v.id };
       });
