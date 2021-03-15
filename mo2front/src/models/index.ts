@@ -25,6 +25,7 @@ export interface UserListData {
 export interface DisplayBlogBrief extends BlogBrief {
     userLoad: boolean;
     userName: string;
+    user?: User;
 }
 
 export interface Blog extends BlogBrief {

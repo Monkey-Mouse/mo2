@@ -1,15 +1,20 @@
 <template>
-  <v-avatar :size="size" color="brown">
-    <v-img
-      v-if="
-        user.settings && user.settings.avatar && user.settings.avatar !== ''
-      "
-      :src="user.settings.avatar + '~thumb'"
-    ></v-img>
-    <span v-else class="white--text headline">{{
-      isUser ? initials : "A"
-    }}</span>
-  </v-avatar>
+  <v-tooltip bottom content-class="">
+    <template v-slot:activator="{ on, attrs }">
+      <v-avatar v-bind="attrs" v-on="on" :size="size" color="brown">
+        <v-img
+          v-if="
+            user.settings && user.settings.avatar && user.settings.avatar !== ''
+          "
+          :src="user.settings.avatar + '~thumb'"
+        ></v-img>
+        <span v-else class="white--text headline">{{ initials }}</span>
+      </v-avatar>
+    </template>
+    <v-card-title>{{ user.name }}</v-card-title>
+    <v-divider />
+    <v-card-subtitle>{{ user.email }}</v-card-subtitle>
+  </v-tooltip>
 </template>
 
 <script lang="ts">
@@ -31,7 +36,11 @@ export default class Avatar extends Vue {
   }
 
   get initials(): string {
-    return GetInitials(this.user.name);
+    try {
+      return GetInitials(this.user.name);
+    } catch (error) {
+      return "A";
+    }
   }
 }
 </script>
