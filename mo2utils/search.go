@@ -24,14 +24,14 @@ type blogI struct {
 
 // IndexBlog index the blog
 func IndexBlog(blog *model.Blog) {
-	mo2search.Indexes[blogIndex].Index(blog.ID.Hex(), blogI{blog.Title, blog.Content, blog.KeyWords})
+	mo2search.Indexes[blogIndex].Index(blog.ID.Hex(), blogI{blog.Title, blog.Description, blog.KeyWords})
 }
 
 // IndexBlogs index multiple blogs
 func IndexBlogs(blog []model.Blog) {
 	batch := mo2search.Indexes[blogIndex].NewBatch()
 	for _, v := range blog {
-		batch.Index(v.ID.Hex(), blogI{v.Title, v.Content, v.KeyWords})
+		batch.Index(v.ID.Hex(), blogI{v.Title, v.Description, v.KeyWords})
 	}
 	mo2search.Indexes[blogIndex].Batch(batch)
 }
