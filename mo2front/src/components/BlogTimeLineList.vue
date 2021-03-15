@@ -118,11 +118,20 @@
             }"
             min-height="200"
             transition="fade-transition"
+            class="justify-center row"
           >
-            <div class="py-4 text-break">
-              <div>
-                {{ blog.description }}
-              </div>
+            <div
+              style="max-width: 400px; display: table; height: 200px"
+              class="text-left col text-break"
+            >
+              <span
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  display: table-cell;
+                "
+                >{{ blog.description }}</span
+              >
             </div>
           </v-lazy>
         </template>
