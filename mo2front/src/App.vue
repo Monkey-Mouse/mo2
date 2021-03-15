@@ -167,6 +167,18 @@
         >switch theme</v-btn
       >
       <v-btn @click="sideNavVisible = !sideNavVisible">show side bar</v-btn> -->
+      <v-snackbar v-model="refresh">
+        发现新版本，请刷新
+
+        <template v-slot:action="{ attrs }">
+          <v-btn color="accent" text v-bind="attrs" @click="reload">
+            Refresh
+          </v-btn>
+          <v-btn color="pink" text v-bind="attrs" @click="refresh = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
     </v-main>
     <v-footer padless>
       <v-card flat tile class="indigo lighten-1 white--text text-center">
@@ -194,6 +206,8 @@ import {
   GetUserInfoAsync,
   Logout,
   ReachedBottom,
+  SetApp,
+  ShowRefresh,
   UserRole,
 } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
@@ -216,6 +230,7 @@ export default class App extends Vue {
   userload = false;
   search = false;
   searchString = "";
+  refresh = false;
   keyDown(event: KeyboardEvent) {
     // Number 13 is the "Enter" key on the keyboard
     if (event.key === "Enter") {
@@ -227,6 +242,10 @@ export default class App extends Vue {
         .push("/search?q=" + this.searchString)
         .then(() => (this.searchString = ""));
     }
+  }
+  reload() {
+    this.refresh = false;
+    window.location.reload();
   }
   get userdata() {
     return this.user;
@@ -279,6 +298,7 @@ export default class App extends Vue {
     (this.$refs["view"] as any).publish();
   }
   created() {
+    SetApp(this);
     document.title = "Mo2";
     GetUserInfoAsync().then((u) => {
       this.user = u;
