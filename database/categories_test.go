@@ -216,7 +216,7 @@ func ExampleDeleteCategoryCompletely() {
 		RelateToIDs: ids,
 	})
 
-	if bs, mErr := FindBlogsByCategoryId(catIDs[0], isDraft); mErr.IsError() {
+	if bs, mErr := FindBlogsByCategoryId(catIDs[0], model.Filter{IsDeleted: false, IsDraft: isDraft}); mErr.IsError() {
 		log.Println(mErr)
 	} else {
 		fmt.Println("before delete: ", len(bs))
@@ -227,7 +227,7 @@ func ExampleDeleteCategoryCompletely() {
 	}
 	log.Println(time.Since(t1))
 
-	if bs, mErr := FindBlogsByCategoryId(catIDs[0], isDraft); mErr.IsError() {
+	if bs, mErr := FindBlogsByCategoryId(catIDs[0], model.Filter{IsDeleted: false, IsDraft: isDraft}); mErr.IsError() {
 		log.Println(mErr)
 	} else {
 		fmt.Println("after delete: ", len(bs))

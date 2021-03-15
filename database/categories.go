@@ -226,26 +226,6 @@ func RightFilter(userID primitive.ObjectID, requestIDs ...primitive.ObjectID) (a
 	return
 }
 
-// FindBlogsByCategoryId 寻找包括categoryId的所有blogs的信息
-func FindBlogsByCategoryId(id primitive.ObjectID, isDraft bool) (bs []model.Blog, mErr mo2errors.Mo2Errors) {
-	var cursor *mongo.Cursor
-	var err error
-	if isDraft {
-		cursor, err = draftCol.Find(context.TODO(), bson.M{"categories": id})
-	} else {
-		cursor, err = blogCol.Find(context.TODO(), bson.M{"categories": id})
-	}
-	if err != nil {
-		mErr.InitError(err)
-		return
-	}
-	if err = cursor.All(context.TODO(), &bs); err != nil {
-		mErr.InitError(err)
-		return
-	}
-	return
-}
-
 // SortCategories 递归建立categories的树形结构
 func SortCategories(c model.Directory, m map[string][]model.Directory) {
 	var cs []model.Directory

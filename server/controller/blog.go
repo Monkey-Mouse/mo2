@@ -442,7 +442,7 @@ func (c *Controller) FindBlogsByType(ctx *gin.Context) {
 	var mErr mo2errors.Mo2Errors
 	switch ctx.Param(typeKey) {
 	case typeCategory:
-		blogs, mErr = database.FindBlogsByCategoryId(id, false)
+		blogs, mErr = database.FindBlogsByCategoryId(id, model.Filter{IsDraft: false, IsDeleted: false})
 	}
 	if mErr.IsError() {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(mErr))

@@ -144,7 +144,7 @@ func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
 	return
 }
 
-//find blog
+// FindBlogs find blog
 func FindBlogs(filter model.Filter) (b []model.Blog) {
 	col := chooseCol(filter.IsDraft)
 	opts := getBlogListQueryOption().SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
@@ -159,6 +159,26 @@ func FindBlogs(filter model.Filter) (b []model.Blog) {
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		log.Fatal(err)
+	}
+	return
+}
+
+// FindBlogsByCategoryId 寻找包括categoryId的所有blogs的信息
+func FindBlogsByCategoryId(catID primitive.ObjectID, filter model.Filter) (bs []model.Blog, mErr mo2errors.Mo2Errors) {
+	var cursor *mongo.Cursor
+	var err error
+	col := chooseCol(filter.IsDraft)
+	opts := getBlogListQueryOption() //.SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
+
+	cursor, err = col.Find(context.TODO(), bson.M{"categories": catID, "entity_info.isdeleted": filter.IsDeleted}, opts)
+
+	if err != nil {
+		mErr.InitError(err)
+		return
+	}
+	if err = cursor.All(context.TODO(), &bs); err != nil {
+		mErr.InitError(err)
+		return
 	}
 	return
 }
