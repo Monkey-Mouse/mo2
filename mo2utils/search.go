@@ -19,11 +19,12 @@ func init() {
 type blogI struct {
 	Title       string
 	Description string
+	KeyWords    []string
 }
 
 // IndexBlog index the blog
 func IndexBlog(blog *model.Blog) {
-	mo2search.Indexes[blogIndex].Index(blog.ID.Hex(), blogI{blog.Title, blog.Content})
+	mo2search.Indexes[blogIndex].Index(blog.ID.Hex(), blogI{blog.Title, blog.Content, blog.KeyWords})
 }
 
 // IndexBlogs index multiple blogs
@@ -35,7 +36,10 @@ func IndexBlogs(blog []model.Blog) {
 	mo2search.Indexes[blogIndex].Batch(batch)
 }
 
-func QueryBlogs(search string) search.DocumentMatchCollection {
+func QueryBlog(search string) search.DocumentMatchCollection {
 	re := mo2search.Query(blogIndex, bleve.NewQueryStringQuery(search))
 	return re.Hits
+}
+func DeleteBlogIndex(id string) {
+	mo2search.Indexes[blogIndex].Delete(id)
 }

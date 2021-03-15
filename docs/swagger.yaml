@@ -500,6 +500,15 @@ paths:
       summary: verify an account's email
       tags:
       - accounts
+  /api/admin/indexblogs:
+    post:
+      description: none
+      responses:
+        "200":
+          description: ""
+      summary: index all blogs
+      tags:
+      - admin
   /api/blogs/{id}:
     delete:
       consumes:
@@ -809,6 +818,10 @@ paths:
         in: query
         name: pageSize
         type: integer
+      - description: aaaa
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:

@@ -418,6 +418,20 @@ var doc = `{
                 }
             }
         },
+        "/api/admin/indexblogs": {
+            "post": {
+                "description": "none",
+                "tags": [
+                    "admin"
+                ],
+                "summary": "index all blogs",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/blogs/category": {
             "get": {
                 "description": "若id为空，返回所有categories；若id不为空，返回该id的category",
@@ -779,6 +793,12 @@ var doc = `{
                         "type": "integer",
                         "description": "int 5",
                         "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "aaaa",
+                        "name": "search",
                         "in": "query"
                     }
                 ],

@@ -149,7 +149,7 @@ func FindBlogs(filter model.Filter) (b []model.Blog) {
 	col := chooseCol(filter.IsDraft)
 	opts := getBlogListQueryOption().SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
 	f := bson.D{{"entity_info.isdeleted", filter.IsDeleted}}
-	if filter.Ids != nil && len(filter.Ids) > 0 {
+	if filter.Ids != nil {
 		f = bson.D{
 			{"entity_info.isdeleted", filter.IsDeleted},
 			{"_id", bson.M{"$in": filter.Ids}},

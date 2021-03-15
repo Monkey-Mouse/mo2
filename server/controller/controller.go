@@ -38,6 +38,10 @@ func SetupHandlers(c *Controller) {
 	api := middleware.H.Group("/api")
 	{
 		api.GetWithRL("/logs", c.Log, 10)
+		admin := api.Group("/admin", model.GeneralAdmin)
+		{
+			admin.Post("indexblogs", c.IndexAllBlogs)
+		}
 		uploads := api.Group("", model.OrdinaryUser)
 		{
 			uploads.Get("/img/:filename", c.GenUploadToken)
