@@ -48,7 +48,7 @@ func DeleteByRecycleItemID(ID primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	} else {
 		mErr.InitNoError("delete %v item(s)", res.DeletedCount)
 	}
-	log.Printf("delete %v rec item(s)", res.DeletedCount)
+	log.Println(mErr)
 	return
 }
 
@@ -61,7 +61,7 @@ func DeleteByRecycleItemInfo(ID primitive.ObjectID, handler string) (mErr mo2err
 	} else {
 		mErr.InitNoError("delete %v item(s)", res.DeletedCount)
 	}
-	log.Printf("delete %v rec item(s)", res.DeletedCount)
+	log.Println(mErr)
 	return
 }
 
