@@ -31,11 +31,7 @@ const reasonKey = "reason"
 // @Failure 401 {object} badresponse.ResponseError
 // @Router /api/blogs/publish [post]
 func (c *Controller) UpsertBlog(ctx *gin.Context) {
-	isDraftStr := ctx.DefaultQuery("draft", "true")
-	isDraft := true
-	if isDraftStr == "false" {
-		isDraft = false
-	}
+	isDraft := parseString2Bool(ctx.DefaultQuery("draft", "true"))
 	var b model.Blog
 	if err := ctx.ShouldBindJSON(&b); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("内容含非法字符，请检查"))
@@ -208,20 +204,11 @@ func (c *Controller) ProcessBlog(ctx *gin.Context) {
 // @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/find/own [get]
 func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
-	pageStr := ctx.DefaultQuery("page", "0")
-	pageSizeStr := ctx.DefaultQuery("pageSize", "5")
-	page, err := strconv.Atoi(pageStr)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("query with page"))
+	filter, mErr := parseFilter(ctx)
+	if mErr.IsError() {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
+		return
 	}
-	pageSize, err := strconv.Atoi(pageSizeStr)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("query with pageSize"))
-	}
-	isDraftStr := ctx.DefaultQuery("draft", "true")
-	isDraft := parseString2Bool(isDraftStr)
-	isDeletedStr := ctx.DefaultQuery("deleted", "false")
-	isDeleted := parseString2Bool(isDeletedStr)
 	// get user info due to cookie information
 	info, ext := mo2utils.GetUserInfo(ctx)
 	if !ext {
@@ -229,12 +216,7 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 		return
 	}
 
-	blogs := database.FindBlogsByUser(info, model.Filter{
-		IsDraft:   isDraft,
-		IsDeleted: isDeleted,
-		Page:      page,
-		PageSize:  pageSize,
-	})
+	blogs := database.FindBlogsByUser(info, filter)
 	ctx.JSON(http.StatusOK, blogs)
 }
 
@@ -256,18 +238,11 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/find/userId [get]
 func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
-	pageStr := ctx.DefaultQuery("page", "0")
-	pageSizeStr := ctx.DefaultQuery("pageSize", "5")
-	page, err := strconv.Atoi(pageStr)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("query with page"))
+	filter, mErr := parseFilter(ctx)
+	if mErr.IsError() {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
+		return
 	}
-	pageSize, err := strconv.Atoi(pageSizeStr)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("query with pageSize"))
-	}
-	isDraft := parseString2Bool(ctx.DefaultQuery("draft", "true"))
-	isDeleted := parseString2Bool(ctx.DefaultQuery("deleted", "false"))
 	idStr := ctx.Query("id")
 	id, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
@@ -275,7 +250,7 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 		return
 	}
 	var passAuth bool
-	if isDraft {
+	if filter.IsDraft {
 		JudgeAuthorize(ctx, &model.Blog{AuthorID: id})
 		if passAuthValue, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
 			passAuth, _ = passAuthValue.(bool)
@@ -290,13 +265,8 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 		}
 		ctx.Status(http.StatusNoContent)
 	}
-	if !isDraft || passAuth {
-		blogs := database.FindBlogsByUserId(id, model.Filter{
-			IsDraft:   isDraft,
-			IsDeleted: isDeleted,
-			Page:      page,
-			PageSize:  pageSize,
-		})
+	if !filter.IsDraft || passAuth {
+		blogs := database.FindBlogsByUserId(id, filter)
 		ctx.JSON(http.StatusOK, blogs)
 	}
 }
@@ -315,10 +285,8 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 // @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/find/id [get]
 func (c *Controller) FindBlogById(ctx *gin.Context) {
-	isDraftStr := ctx.DefaultQuery("draft", "true")
-	isDraft := parseString2Bool(isDraftStr)
-	idStr := ctx.Query("id")
-	id, err := primitive.ObjectIDFromHex(idStr)
+	isDraft := parseString2Bool(ctx.DefaultQuery("draft", "true"))
+	id, err := primitive.ObjectIDFromHex(ctx.Query("id"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
@@ -366,22 +334,12 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 // @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/query [get]
 func (c *Controller) QueryBlogs(ctx *gin.Context) {
-	pageStr := ctx.DefaultQuery("page", "0")
-	pageSizeStr := ctx.DefaultQuery("pageSize", "5")
-	page, err := strconv.Atoi(pageStr)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("query with page"))
+	filter, mErr := parseFilter(ctx)
+	if mErr.IsError() {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
+		return
 	}
-	pageSize, err := strconv.Atoi(pageSizeStr)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("query with pageSize"))
-	}
-
-	isDraftStr := ctx.DefaultQuery("draft", "false")
-	isDraft := parseString2Bool(isDraftStr)
-	isDeletedStr := ctx.DefaultQuery("deleted", "false")
-	isDeleted := parseString2Bool(isDeletedStr)
-	if (isDraft || isDeleted) && !mo2utils.IsInRole(ctx, model.GeneralAdmin) {
+	if (filter.IsDraft || filter.IsDeleted) && !mo2utils.IsInRole(ctx, model.GeneralAdmin) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason("权限不足，请联系管理员"))
 		return
 	}
@@ -389,8 +347,8 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 	var ids []primitive.ObjectID
 	if search != "" {
 		hits := mo2utils.QueryBlog(search)
-		len := pageSize
-		if hits.Len() < pageSize {
+		len := filter.PageSize
+		if hits.Len() < filter.PageSize {
 			len = hits.Len()
 		}
 		ids = make([]primitive.ObjectID, len)
@@ -402,10 +360,10 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 		}
 	}
 	blogs := database.FindBlogs(model.Filter{
-		IsDraft:   isDraft,
-		IsDeleted: isDeleted,
-		Page:      page,
-		PageSize:  pageSize,
+		IsDraft:   filter.IsDraft,
+		IsDeleted: filter.IsDeleted,
+		Page:      filter.Page,
+		PageSize:  filter.PageSize,
 		Ids:       ids,
 	})
 	ctx.JSON(http.StatusOK, blogs)
@@ -459,5 +417,23 @@ func parseString2Bool(s string) (b bool) {
 	if s == "false" {
 		b = false
 	}
+	return
+}
+
+func parseFilter(ctx *gin.Context) (filter model.Filter, mErr mo2errors.Mo2Errors) {
+	if page, err := strconv.Atoi(ctx.DefaultQuery("page", "0")); err != nil {
+		mErr.Init(mo2errors.Mo2Error, "query with page")
+		return
+	} else {
+		filter.Page = page
+	}
+	if pageSize, err := strconv.Atoi(ctx.DefaultQuery("pageSize", "5")); err != nil {
+		mErr.Init(mo2errors.Mo2Error, "query with pageSize")
+		return
+	} else {
+		filter.PageSize = pageSize
+	}
+	filter.IsDraft = parseString2Bool(ctx.DefaultQuery("draft", "true"))
+	filter.IsDeleted = parseString2Bool(ctx.DefaultQuery("deleted", "false"))
 	return
 }
