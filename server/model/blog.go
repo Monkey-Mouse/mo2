@@ -24,6 +24,7 @@ type Filter struct {
 	IsDeleted bool `json:"is_deleted" example:"false"`
 	Page      int  `json:"page"`
 	PageSize  int  `json:"page_size"`
+	Ids       []primitive.ObjectID
 }
 
 func (b *Blog) Init() {

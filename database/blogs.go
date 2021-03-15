@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"mo2/dto"
+	"mo2/mo2utils"
 	"mo2/server/model"
 
 	"mo2/mo2utils/mo2errors"
@@ -98,12 +99,14 @@ func deleteBlogs(isDraft bool, blogIDs ...primitive.ObjectID) (mErr mo2errors.Mo
 
 // UpsertBlog upsert blog or draft
 func UpsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
-
 	if b.ID == primitive.NilObjectID {
 		b.Init()
 		mErr = insertBlog(b, isDraft)
 	} else {
 		mErr = upsertBlog(b, isDraft)
+	}
+	if !isDraft {
+		mo2utils.IndexBlog(b)
 	}
 	return
 }
@@ -145,7 +148,14 @@ func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
 func FindBlogs(filter model.Filter) (b []model.Blog) {
 	col := chooseCol(filter.IsDraft)
 	opts := getBlogListQueryOption().SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
-	cursor, err := col.Find(context.TODO(), bson.D{{"entity_info.isdeleted", filter.IsDeleted}}, opts)
+	f := bson.D{{"entity_info.isdeleted", filter.IsDeleted}}
+	if filter.Ids != nil {
+		f = bson.D{
+			{"entity_info.isdeleted", filter.IsDeleted},
+			{"_id", bson.M{"$in": filter.Ids}},
+		}
+	}
+	cursor, err := col.Find(context.TODO(), f, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		log.Fatal(err)

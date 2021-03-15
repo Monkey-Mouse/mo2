@@ -102,6 +102,7 @@ func (c *Controller) DeleteBlog(ctx *gin.Context) {
 	if passAuth, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
 		if passAuth.(bool) {
 			blog.EntityInfo.IsDeleted = true
+			mo2utils.DeleteBlogIndex(blog.ID.Hex())
 			if mErr := database.UpsertBlog(&blog, isDraft); mErr.IsError() {
 				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
 			} else {
@@ -365,6 +366,7 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 // @Param deleted query bool false "bool default false" false
 // @Param page query int false "int 0" 0
 // @Param pageSize query int false "int 5" 5
+// @Param search query string false "aaaa" "aaa"
 // @Success 200 {object} []model.Blog
 // @Success 204 {object} []model.Blog
 // @Failure 400 {object} badresponse.ResponseError
@@ -391,11 +393,28 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason("权限不足，请联系管理员"))
 		return
 	}
+	search := ctx.Query("search")
+	var ids []primitive.ObjectID
+	if search != "" {
+		hits := mo2utils.QueryBlog(search)
+		len := pageSize
+		if hits.Len() < pageSize {
+			len = hits.Len()
+		}
+		ids = make([]primitive.ObjectID, len)
+		for i, v := range hits {
+			if i == len {
+				break
+			}
+			ids[i], _ = primitive.ObjectIDFromHex(v.ID)
+		}
+	}
 	blogs := database.FindBlogs(model.Filter{
 		IsDraft:   isDraft,
 		IsDeleted: isDeleted,
 		Page:      page,
 		PageSize:  pageSize,
+		Ids:       ids,
 	})
 	ctx.JSON(http.StatusOK, blogs)
 }
@@ -430,6 +449,17 @@ func (c *Controller) FindBlogsByType(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, blogs)
+}
+
+// IndexAllBlogs godoc
+// @Summary index all blogs
+// @Description  none
+// @Tags admin
+// @Success 200
+// @Router /api/admin/indexblogs [post]
+func (c *Controller) IndexAllBlogs(ctx *gin.Context) {
+	mo2utils.IndexBlogs(database.FindBlogs(model.Filter{IsDeleted: false, IsDraft: false, Page: 0, PageSize: 1000}))
+	ctx.Status(200)
 }
 
 func parseString2Bool(s string) (b bool) {
