@@ -20,13 +20,6 @@ RUN go install -v ./...
 FROM ubuntu:latest
 RUN apt-get update
 RUN apt-get install ca-certificates -y
-# RUN apt-get install graphviz -y
-# RUN apt-get install wget -y
-# RUN wget -O go.tar.gz https://dl.google.com/go/go1.9.2.linux-amd64.tar.gz && \
-#     tar -C /usr/local -xzf go.tar.gz && \
-#     rm go.tar.gz
-# ENV PATH=$PATH:/usr/local/go/bin
-# RUN go version
 COPY --from=front /home/dist /app/dist
 WORKDIR /app
 RUN chmod -R 777 .

@@ -22,10 +22,7 @@ services:
       - "redis"
     volumes:
       - "./secrets:/app/secrets"
-    # nginx:
-    #   build: .
-    #   ports:
-    #     - 80:80
+      - "./bleve:/app/bleve"
   nginx:
     build: .
     hostname: nginx
