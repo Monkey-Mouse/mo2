@@ -1,14 +1,14 @@
 package mo2search
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/search/query"
+	_ "github.com/leopku/bleve-gse-tokenizer"
 )
 
-var Indexes map[string]bleve.Index
+var Indexes map[string]bleve.Index = make(map[string]bleve.Index, 0)
 
 // CreateOrLoadIndex as name
 func CreateOrLoadIndex(name string) {
@@ -44,8 +44,8 @@ func CreateOrLoadIndex(name string) {
 }
 
 // Query query
-func Query(index string, query query.Query) {
+func Query(index string, query query.Query) *bleve.SearchResult {
 	searchRequest := bleve.NewSearchRequest(query)
 	searchResult, _ := Indexes[index].Search(searchRequest)
-	fmt.Println(searchResult)
+	return searchResult
 }

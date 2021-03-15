@@ -391,11 +391,28 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason("权限不足，请联系管理员"))
 		return
 	}
+	search := ctx.Query("search")
+	var ids []primitive.ObjectID
+	if search != "" {
+		hits := mo2utils.QueryBlogs(search)
+		len := pageSize
+		if hits.Len() < pageSize {
+			len = hits.Len()
+		}
+		ids = make([]primitive.ObjectID, len)
+		for i, v := range hits {
+			if i == len {
+				break
+			}
+			ids[i], _ = primitive.ObjectIDFromHex(v.ID)
+		}
+	}
 	blogs := database.FindBlogs(model.Filter{
 		IsDraft:   isDraft,
 		IsDeleted: isDeleted,
 		Page:      page,
 		PageSize:  pageSize,
+		Ids:       ids,
 	})
 	ctx.JSON(http.StatusOK, blogs)
 }
