@@ -42,11 +42,17 @@
                       @click="$router.push('/account/' + blog.authorId)"
                       class="subtitle-1"
                     >
+                      <user-avatar :size="24" :user="blog.user" />
                       {{ blog.userName }}
                     </a>
                     <v-skeleton-loader v-else type="card-heading" />
                     <div class="subtitle-2">
-                      {{ blog.entityInfo.createTime.substr(0, 10) }}
+                      <time-ago
+                        :refresh="60"
+                        :datetime="blog.entityInfo.updateTime"
+                        tooltip
+                        long
+                      ></time-ago>
                     </div>
                   </div>
                 </v-card-title>
@@ -112,11 +118,20 @@
             }"
             min-height="200"
             transition="fade-transition"
+            class="justify-center row"
           >
-            <div class="py-4 text-break">
-              <div>
-                {{ blog.description }}
-              </div>
+            <div
+              style="max-width: 400px; display: table; height: 200px"
+              class="text-left col text-break"
+            >
+              <span
+                style="
+                  display: inline-block;
+                  vertical-align: middle;
+                  display: table-cell;
+                "
+                >{{ blog.description }}</span
+              >
             </div>
           </v-lazy>
         </template>
@@ -159,7 +174,14 @@ import { Colors } from "vuetify/es5/util/colors";
 import { colors } from "vuetify/lib";
 import { BlogBrief, DisplayBlogBrief } from "../models/index";
 import { randomProperty, Copy, GetUserDatas } from "../utils/index";
-@Component
+import UserAvatar from "./UserAvatar.vue";
+import { TimeAgo } from "vue2-timeago";
+@Component({
+  components: {
+    UserAvatar,
+    TimeAgo,
+  },
+})
 export default class BlogTimeLineList extends Vue {
   @Prop()
   blogs!: DisplayBlogBrief[];
@@ -192,10 +214,11 @@ export default class BlogTimeLineList extends Vue {
         const dic: any = {};
         for (let index = 0; index < data.length; index++) {
           const element = data[index];
-          dic[element.id] = element.name;
+          dic[element.id] = element;
         }
         for (let index = 0; index < this.blogs.length; index++) {
-          this.blogs[index].userName = dic[this.blogs[index].authorId];
+          this.blogs[index].userName = dic[this.blogs[index].authorId].name;
+          this.blogs[index].user = dic[this.blogs[index].authorId];
           this.blogs[index].userLoad = true;
           this.blogs[index].rate = 5;
         }
@@ -215,10 +238,11 @@ export default class BlogTimeLineList extends Vue {
       const dic: any = {};
       for (let index = 0; index < data.length; index++) {
         const element = data[index];
-        dic[element.id] = element.name;
+        dic[element.id] = element;
       }
       for (let index = this.prevlen; index < this.blogs.length; index++) {
-        this.blogs[index].userName = dic[this.blogs[index].authorId];
+        this.blogs[index].userName = dic[this.blogs[index].authorId].name;
+        this.blogs[index].user = dic[this.blogs[index].authorId];
         this.blogs[index].userLoad = true;
         this.blogs[index].rate = 5;
       }

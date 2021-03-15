@@ -98,7 +98,7 @@ export function ParseQuery(query: { [key: string]: any }) {
     queryStr = queryStr + queryList.join('&');
     return queryStr
 }
-export const GetArticles = async (query: { page: number; pageSize: number; draft: boolean }) => {
+export const GetArticles = async (query: { page: number; pageSize: number; draft: boolean; search?: string }) => {
     return (await axios.get<BlogBrief[]>('/api/blogs/query' + ParseQuery(query))).data
 }
 export async function UpsertBlog(query: { draft: boolean }, blog: BlogUpsert) {

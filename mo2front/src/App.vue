@@ -28,6 +28,27 @@
         /> -->
       </div>
       <v-spacer />
+      <v-btn
+        v-if="this.$route.name !== 'Search Article'"
+        @click="search = true"
+        icon
+      >
+        <v-icon>mdi-magnify</v-icon>
+      </v-btn>
+      <v-expand-transition v-if="this.$route.name !== 'Search Article'">
+        <v-text-field
+          v-if="search"
+          autofocus
+          @blur="search = false"
+          class="pa-1"
+          style="max-width: 300px"
+          label="Search"
+          clearable
+          v-model="searchString"
+          hide-details="auto"
+          @keydown="keyDown"
+        ></v-text-field>
+      </v-expand-transition>
       <div v-if="$route.path.indexOf('/edit') === 0">
         <v-row>
           <div v-if="autoSaving" class="grey--text ma-2">
@@ -40,7 +61,7 @@
             Auto Save Failed!
           </div>
           <div v-else class="light-green--text ma-2">Saved!</div>
-          <v-btn class="ml-10" color="green" outlined @click="publishClick"
+          <v-btn class="ml-1" color="green" outlined @click="publishClick"
             >publish</v-btn
           >
         </v-row>
@@ -193,10 +214,23 @@ export default class App extends Vue {
   autoSaving = false;
   snackbar = false;
   userload = false;
+  search = false;
+  searchString = "";
+  keyDown(event: KeyboardEvent) {
+    // Number 13 is the "Enter" key on the keyboard
+    if (event.key === "Enter") {
+      // Cancel the default action, if needed
+      event.preventDefault();
+      // Trigger the button element with a click
+      this.search = false;
+      this.$router
+        .push("/search?q=" + this.searchString)
+        .then(() => (this.searchString = ""));
+    }
+  }
   get userdata() {
     return this.user;
   }
-
   set userdata(v: User) {
     this.user = v;
     this.items[1].show = this.isUser;

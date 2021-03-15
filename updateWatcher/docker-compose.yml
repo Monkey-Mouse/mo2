@@ -17,20 +17,12 @@ services:
     restart: always
     env_file:
       - var.env
-    environment:
-      - qiniuak=${qiniuak}
-      - qiniusk=${qiniusk}
-      - emailAddr=${emailAddr}
-      - emailPass=${emailPass}
     depends_on:
       - "mongodb"
       - "redis"
     volumes:
       - "./secrets:/app/secrets"
-    # nginx:
-    #   build: .
-    #   ports:
-    #     - 80:80
+      - "./bleve:/app/.bleve"
   nginx:
     build: .
     hostname: nginx
