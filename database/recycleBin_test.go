@@ -29,6 +29,38 @@ func upsertBlogs4Test(num int, isDraft bool) (ids []primitive.ObjectID) {
 	return
 }
 
+func TestDeleteByRecycleItemID(t *testing.T) {
+	itemID := primitive.NewObjectID()
+	item := model.RecycleItem{ID: primitive.NewObjectID(), ItemID: itemID}
+	defer DeleteRecycleItems(item.ID)
+	UpsertRecycleItem(item)
+	if mErr := DeleteByRecycleItemID(itemID); mErr.IsError() {
+		t.Error(mErr)
+	}
+	if err := binCol.FindOne(context.TODO(), bson.M{"item_id": itemID}).Decode(&item); err != mongo.ErrNoDocuments {
+		t.Error(err)
+	}
+}
+
+func TestDeleteByRecycleItemInfo(t *testing.T) {
+	itemID := primitive.NewObjectID()
+	item := model.RecycleItem{ID: primitive.NewObjectID(), ItemID: itemID, Handler: "test"}
+	defer DeleteRecycleItems(item.ID)
+	UpsertRecycleItem(item)
+	if mErr := DeleteByRecycleItemInfo(item.ItemID, "falseHandler"); mErr.IsError() {
+		t.Error(mErr)
+	}
+	if err := binCol.FindOne(context.TODO(), bson.M{"item_id": itemID}).Decode(&item); err != nil {
+		t.Error(err)
+	}
+	if mErr := DeleteByRecycleItemInfo(item.ItemID, item.Handler); mErr.IsError() {
+		t.Error(mErr)
+	}
+	if err := binCol.FindOne(context.TODO(), bson.M{"item_id": itemID}).Decode(&item); err != mongo.ErrNoDocuments {
+		t.Error(err)
+	}
+}
+
 func TestDeleteExpireItems(t *testing.T) {
 
 	ids := upsertRecycleItem4Test(3)

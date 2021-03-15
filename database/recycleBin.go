@@ -33,9 +33,9 @@ func DeleteRecycleItems(ids ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	if err != nil {
 		mErr.InitError(err)
 	} else {
-		mErr.InitNoError("delete %v item(s)", res.DeletedCount)
+		mErr.InitNoError("delete %v rec item(s)", res.DeletedCount)
 	}
-	log.Printf("delete %v rec item(s)", res.DeletedCount)
+	log.Println(mErr)
 	return
 }
 
@@ -53,7 +53,7 @@ func DeleteByRecycleItemID(ID primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 }
 
 // DeleteByRecycleItemInfo
-// 根据itemID删除Item
+// 根据itemInfo id&handler 删除Item
 func DeleteByRecycleItemInfo(ID primitive.ObjectID, handler string) (mErr mo2errors.Mo2Errors) {
 	res, err := binCol.DeleteMany(context.TODO(), bson.M{"item_id": ID, "handler": handler})
 	if err != nil {
