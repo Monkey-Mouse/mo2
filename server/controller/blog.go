@@ -14,9 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const passAuthKey = "passAuth"
-const reasonKey = "reason"
-
 // UpsertBlog godoc
 // @Summary Publish Blog
 // @Description add by json
@@ -31,34 +28,29 @@ const reasonKey = "reason"
 // @Failure 401 {object} badresponse.ResponseError
 // @Router /api/blogs/publish [post]
 func (c *Controller) UpsertBlog(ctx *gin.Context) {
+
 	isDraft := parseString2Bool(ctx.DefaultQuery("draft", "true"))
-	var b model.Blog
-	if err := ctx.ShouldBindJSON(&b); err != nil {
+	var blog model.Blog
+	if err := ctx.ShouldBindJSON(&blog); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("内容含非法字符，请检查"))
 		return
 	}
-	JudgeAuthorize(ctx, &b)
-	if passAuthValue, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
-		if passAuthValue.(bool) {
-			if mErr := database.UpsertBlog(&b, isDraft); mErr.IsError() {
-				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
-			} else {
-				ctx.Header("location", ctx.FullPath())
-				ctx.JSON(http.StatusCreated, b)
-			}
+	if mErr := JudgeAuthorize(ctx, &blog); mErr.IsError() {
+		if mErr.ErrorCode == mo2errors.Mo2NoLogin {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
 			return
-		} else {
-			if err, ok := ctx.Get(reasonKey); ok {
-				merr, ok := err.(mo2errors.Mo2Errors)
-				if ok && merr.ErrorCode == mo2errors.Mo2NoLogin {
-					ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason(merr.ErrorTip))
-					return
-				}
-			}
 		}
-
+	} else {
+		if mErr = database.UpsertBlog(&blog, isDraft); mErr.IsError() {
+			ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
+		} else {
+			ctx.Header("location", ctx.FullPath())
+			ctx.JSON(http.StatusCreated, blog)
+		}
+		return
 	}
 	ctx.Status(http.StatusNoContent)
+	return
 }
 
 // DeleteBlog godoc
@@ -83,55 +75,45 @@ func (c *Controller) DeleteBlog(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	} else {
-		blog = database.FindBlogById(id, isDraft)
-		if blog.ID.IsZero() {
+		if blog = database.FindBlogById(id, isDraft); blog.ID.IsZero() {
 			ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
 			return
 		}
 	}
-	JudgeAuthorize(ctx, &blog)
-	if passAuth, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
-		if passAuth.(bool) {
-			blog.EntityInfo.IsDeleted = true
-			mo2utils.DeleteBlogIndex(blog.ID.Hex())
-			if mErr := database.DeleteBlogs(isDraft, blog.ID); mErr.IsError() {
-				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
-			} else {
-				ctx.Status(http.StatusAccepted)
-			}
+	if mErr := JudgeAuthorize(ctx, &blog); mErr.IsError() {
+		if mErr.ErrorCode == mo2errors.Mo2NoLogin {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
 			return
-		} else {
-			if err, ok := ctx.Get(reasonKey); ok {
-				if merr := err.(mo2errors.Mo2Errors); merr.ErrorCode == mo2errors.Mo2NoLogin {
-					ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason(merr.ErrorTip))
-					return
-				}
-			}
 		}
+	} else {
+		if mErr = database.DeleteBlogs(isDraft, blog.ID); mErr.IsError() {
+			ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
+		} else {
+			ctx.Status(http.StatusAccepted)
+		}
+		return
 	}
 	ctx.Status(http.StatusNoContent)
 }
 
 // JudgeAuthorize only for user of same ID
 // 只有本人id与blog的authorID一致可以继续
-func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) {
+func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) (mErr mo2errors.Mo2Errors) {
 	userInfo, exist := mo2utils.GetUserInfo(ctx)
 	if blog.AuthorID == primitive.NilObjectID {
 		if exist {
 			blog.AuthorID = userInfo.ID
 		} else {
-			ctx.Set(passAuthKey, false)
-			ctx.Set(reasonKey, *mo2errors.New(mo2errors.Mo2NoLogin, "权限不足，请先登录"))
+			mErr.Init(mo2errors.Mo2NoLogin, "权限不足，请先登录")
 			return
 		}
 	} else {
 		if blog.AuthorID != userInfo.ID {
-			ctx.Set(passAuthKey, false)
-			ctx.Set(reasonKey, *mo2errors.New(mo2errors.Mo2Unauthorized, "没有权限修改文章"))
+			mErr.Init(mo2errors.Mo2Unauthorized, "没有权限修改文章")
 			return
 		}
 	}
-	ctx.Set(passAuthKey, true)
+	mErr.InitCode(mo2errors.Mo2NoError)
 	return
 }
 
@@ -156,33 +138,27 @@ func (c *Controller) ProcessBlog(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	} else {
-		blog = database.FindBlogById(id, isDraft)
-		if blog.ID.IsZero() {
+		if blog = database.FindBlogById(id, isDraft); blog.ID.IsZero() {
 			ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
 			return
 		}
 	}
-	JudgeAuthorize(ctx, &blog)
-	if passAuth, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
-		if passAuth.(bool) {
-			if mErr := database.ProcessBlog(isDraft, &blog, ctx.Param(database.OperationKey)); mErr.IsError() {
+	if mErr := JudgeAuthorize(ctx, &blog); mErr.IsError() {
+		if mErr.ErrorCode == mo2errors.Mo2NoLogin {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
+			return
+		}
+	} else {
+		if mErr = database.ProcessBlog(isDraft, &blog, ctx.Param(database.OperationKey)); mErr.IsError() {
+			ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
+		} else {
+			if mErr = database.UpsertBlog(&blog, isDraft); mErr.IsError() {
 				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
 			} else {
-				if mErr = database.UpsertBlog(&blog, isDraft); mErr.IsError() {
-					ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
-				} else {
-					ctx.Status(http.StatusAccepted)
-				}
-			}
-			return
-		} else {
-			if err, ok := ctx.Get(reasonKey); ok {
-				if merr := err.(mo2errors.Mo2Errors); merr.ErrorCode == mo2errors.Mo2NoLogin {
-					ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason(merr.ErrorTip))
-					return
-				}
+				ctx.Status(http.StatusAccepted)
 			}
 		}
+		return
 	}
 	ctx.Status(http.StatusNoContent)
 }
@@ -249,26 +225,19 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	}
-	var passAuth bool
 	if filter.IsDraft {
-		JudgeAuthorize(ctx, &model.Blog{AuthorID: id})
-		if passAuthValue, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
-			passAuth, _ = passAuthValue.(bool)
-			if !passAuth {
-				if err, ok := ctx.Get(reasonKey); ok {
-					if merr := err.(mo2errors.Mo2Errors); merr.ErrorCode == mo2errors.Mo2NoLogin {
-						ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason(merr.ErrorTip))
-						return
-					}
-				}
+		if mErr = JudgeAuthorize(ctx, &model.Blog{AuthorID: id}); mErr.IsError() {
+			if mErr.ErrorCode == mo2errors.Mo2NoLogin {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
+				return
 			}
 		}
-		ctx.Status(http.StatusNoContent)
 	}
-	if !filter.IsDraft || passAuth {
+	if !filter.IsDraft || !mErr.IsError() {
 		blogs := database.FindBlogsByUserId(id, filter)
 		ctx.JSON(http.StatusOK, blogs)
 	}
+	ctx.Status(http.StatusNoContent)
 }
 
 // FindBlogById godoc
@@ -296,25 +265,19 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
 		return
 	}
-	var passAuth bool
+	var mErr mo2errors.Mo2Errors
 	if isDraft {
-		JudgeAuthorize(ctx, &blog)
-		if passAuthValue, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
-			passAuth, _ = passAuthValue.(bool)
-			if !passAuth {
-				if err, ok := ctx.Get(reasonKey); ok {
-					if merr := err.(mo2errors.Mo2Errors); merr.ErrorCode == mo2errors.Mo2NoLogin {
-						ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason(merr.ErrorTip))
-						return
-					}
-				}
+		if mErr = JudgeAuthorize(ctx, &model.Blog{AuthorID: id}); mErr.IsError() {
+			if mErr.ErrorCode == mo2errors.Mo2NoLogin {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
+				return
 			}
 		}
-		ctx.Status(http.StatusNoContent)
 	}
-	if !isDraft || passAuth {
+	if !isDraft || !mErr.IsError() {
 		ctx.JSON(http.StatusOK, blog)
 	}
+	ctx.Status(http.StatusNoContent)
 }
 
 // QueryBlogs godoc
@@ -359,13 +322,8 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 			ids[i], _ = primitive.ObjectIDFromHex(v.ID)
 		}
 	}
-	blogs := database.FindBlogs(model.Filter{
-		IsDraft:   filter.IsDraft,
-		IsDeleted: filter.IsDeleted,
-		Page:      filter.Page,
-		PageSize:  filter.PageSize,
-		Ids:       ids,
-	})
+	filter.Ids = ids
+	blogs := database.FindBlogs(filter)
 	ctx.JSON(http.StatusOK, blogs)
 }
 
