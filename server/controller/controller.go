@@ -72,7 +72,7 @@ func SetupHandlers(c *Controller) {
 
 				user.Post("publish", c.UpsertBlog)
 				user.Delete(":id", c.DeleteBlog)
-				user.Put(":id", c.RestoreBlog)
+				user.Put(":operation/:id", c.ProcessBlog)
 			}
 
 			find := blogs.Group("/find")

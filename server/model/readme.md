@@ -148,6 +148,53 @@ type RelateEntitySet2Entity struct {
 - 增加鉴权，只有操作用户id in owner_ids匹配成功的可以进行删除操作
     - 新思路，增加过滤器，在请求的id列表中过滤出可以进行操作的id列表
 
+## [BLOG](blog.go)
+
+### API
+
+#### 删除部分
+
+* UPDATE: 3.15  
+添加回收站规则
+  需要新增/修改api
+  新增表示删除(回收recycle)时间   
+
+  
+- api/blog [delete]
+ - 彻底删除文章
+- api/blog/{operation}/{id} [put]  
+   *`[operation]`:
+    - recycle:加入回收站
+      - 新增关于本blog/draft的recycleBin信息
+      - 且isDeleted字段置为true状态
+    - restore:从回收站还原  
+      - 将recycleBin中关于本blog/draft的信息进行删除 
+      - 且isDeleted字段恢复为false状态   
+    
+  *`[id]`:被操作对象的id
+
+      
+    
+## [recycleItem](recycleItem.go)
+
+为定时清空回收站，新建一个表，用来记录所有需要延时删除的对象，分别记录：
+- 删除对象ID
+- 加入删除列表时间
+- 预计删除时间
+- 删除方法  
+  这样删除工作可统一通过遍历此表进行    
+  
+``` go
+// RecycleItem 回收站中的对象信息，记录加入回收站时间和预计被删除时间，以及处理函数
+type RecycleItem struct {
+	ID         primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	ItemID     primitive.ObjectID `json:"item_id,omitempty" bson:"item_id,omitempty"`
+	CreateTime time.Time          `json:"create_time,omitempty" example:"2020-10-1" bson:"create_time,omitempty"`
+	DeleteTime time.Time          `json:"delete_time,omitempty" example:"2020-10-1" bson:"delete_time,omitempty"`
+	Handler    string             `json:"handler,omitempty" example:"blog" bson:"handler,omitempty"`
+}
+```
+
 
 
 

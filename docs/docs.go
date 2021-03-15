@@ -843,62 +843,8 @@ var doc = `{
             }
         },
         "/api/blogs/{id}": {
-            "put": {
-                "description": "restore by path",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "blogs"
-                ],
-                "summary": "restore Blog",
-                "parameters": [
-                    {
-                        "type": "boolean",
-                        "description": "bool true",
-                        "name": "draft",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "string xxxxxxxx",
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Blog"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    }
-                }
-            },
             "delete": {
-                "description": "delete by path",
+                "description": "delete by id path(draft/blog)",
                 "consumes": [
                     "application/json"
                 ],
@@ -908,7 +854,7 @@ var doc = `{
                 "tags": [
                     "blogs"
                 ],
-                "summary": "delete Blog",
+                "summary": "彻底删除blog",
                 "parameters": [
                     {
                         "type": "boolean",
@@ -932,6 +878,65 @@ var doc = `{
                         "description": ""
                     },
                     "304": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/{operation}/{id}": {
+            "put": {
+                "description": "restore by path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "restore Blog",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool true",
+                        "name": "draft",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "recycle/restore",
+                        "name": "operation",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Blog id",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "202": {
                         "description": ""
                     },
                     "400": {

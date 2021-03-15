@@ -205,7 +205,7 @@ func ExampleDeleteCategoryCompletely() {
 	ids := InsertBlogs4Test(isDraft, testNum)
 
 	defer func() {
-		if mErr := deleteBlogs(isDraft, ids...); mErr.IsError() {
+		if mErr := DeleteBlogs(isDraft, ids...); mErr.IsError() {
 			log.Println(mErr)
 		}
 		DeleteCategory(catIDs...)

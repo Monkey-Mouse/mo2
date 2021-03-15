@@ -217,3 +217,11 @@ export async function UpsertComment(c: Comment) {
 export async function UpsertSubComment(id: string, c: SubComment) {
     return (await axios.post<SubComment>('/api/comment/' + id, c)).data
 }
+var app: { refresh: boolean };
+export function SetApp(params: { refresh: boolean }) {
+    app = params;
+}
+export function ShowRefresh() {
+    app.refresh = true;
+}
+

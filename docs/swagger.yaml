@@ -513,7 +513,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: delete by path
+      description: delete by id path(draft/blog)
       parameters:
       - description: bool true
         in: query
@@ -545,9 +545,10 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/badresponse.ResponseError'
-      summary: delete Blog
+      summary: 彻底删除blog
       tags:
       - blogs
+  /api/blogs/{operation}/{id}:
     put:
       consumes:
       - application/json
@@ -558,17 +559,19 @@ paths:
         name: draft
         required: true
         type: boolean
-      - description: string xxxxxxxx
+      - description: recycle/restore
+        in: path
+        name: operation
+        type: string
+      - description: Blog id
         in: path
         name: id
         type: string
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Blog'
+        "202":
+          description: ""
         "400":
           description: Bad Request
           schema:

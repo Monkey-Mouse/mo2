@@ -2,11 +2,11 @@ package database
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"mo2/dto"
 	"mo2/mo2utils"
 	"mo2/server/model"
+	"time"
 
 	"mo2/mo2utils/mo2errors"
 
@@ -14,6 +14,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+const (
+	OperationKey     = "operation"
+	OperationRecycle = "recycle"
+	OperationRestore = "restore"
+)
+const (
+	DurationBeforeBlogDelete = time.Hour * 24 * 30
 )
 
 var blogCol *mongo.Collection = GetCollection("blog")
@@ -76,7 +85,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	}
 	if !isDraft {
 		log.Println("发布时删除草稿" + b.ID.String())
-		mErr = deleteBlogs(true, b.ID)
+		mErr = DeleteBlogs(true, b.ID)
 	}
 	if result.UpsertedCount != 0 {
 		mErr.InitNoError("新建文章" + b.ID.String())
@@ -84,16 +93,14 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	return
 }
 
-// deleteBlogs set flag of blog or draft to isDeleted
-func deleteBlogs(isDraft bool, blogIDs ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+// DeleteBlogs set flag of blog or draft to isDeleted
+func DeleteBlogs(isDraft bool, blogIDs ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	if res, err := chooseCol(isDraft).DeleteMany(context.TODO(), bson.M{"_id": bson.M{"$in": blogIDs}}); err != nil {
-		log.Println(err)
 		mErr.InitError(err)
 	} else {
-		tip := fmt.Sprintf("delete %v %v blogs\n", res.DeletedCount, isDraft)
-		log.Printf(tip)
-		mErr.InitNoError(tip)
+		mErr.InitNoError("delete %v %v(s)\n", res.DeletedCount, If(isDraft, "draft", "blog"))
 	}
+	log.Println(mErr)
 	return
 }
 
@@ -107,6 +114,33 @@ func UpsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	}
 	if !isDraft {
 		mo2utils.IndexBlog(b)
+	}
+	return
+}
+
+// ProcessBlog process blog or draft
+// 根据operation对blog/draft的信息进行更新
+// recycle:新增关于本blog/draft的recycleBin信息，且isDeleted字段置为true状态
+// restore:将recycleBin中关于本blog/draft的信息进行删除，且isDeleted字段恢复为false状态
+func ProcessBlog(isDraft bool, b *model.Blog, operation string) (mErr mo2errors.Mo2Errors) {
+
+	item := model.RecycleItem{
+		ID:         primitive.NewObjectID(),
+		ItemID:     b.ID,
+		CreateTime: time.Now(),
+		DeleteTime: time.Now().Add(DurationBeforeBlogDelete),
+		Handler:    If(isDraft, model.HandlerDraft, model.HandlerBlog).(string),
+	}
+	switch operation {
+	case OperationRecycle:
+		b.EntityInfo.IsDeleted = true
+		mErr = UpsertRecycleItem(item)
+	case OperationRestore:
+		b.EntityInfo.IsDeleted = false
+		mErr = DeleteByRecycleItemInfo(b.ID, item.Handler)
+	default:
+		log.Println("invalid operation")
+		mErr.Init(mo2errors.Mo2NoExist, "invalid operation")
 	}
 	return
 }
