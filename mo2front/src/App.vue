@@ -39,7 +39,9 @@
         <v-text-field
           v-if="search"
           autofocus
-          class="col-lg-4 pa-1"
+          @blur="search = false"
+          class="pa-1"
+          :class="this.$vuetify.breakpoint.mdAndUp ? 'col-4' : ''"
           label="Search"
           clearable
           v-model="searchString"
