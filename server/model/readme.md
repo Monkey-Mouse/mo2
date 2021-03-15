@@ -148,6 +148,30 @@ type RelateEntitySet2Entity struct {
 - 增加鉴权，只有操作用户id in owner_ids匹配成功的可以进行删除操作
     - 新思路，增加过滤器，在请求的id列表中过滤出可以进行操作的id列表
 
+## [BLOG](blog.go)
+
+### API
+
+#### 删除部分
+
+* UPDATE: 3.15  
+添加回收站规则
+  需要新增/修改api
+  新增表示删除(回收recycle)时间   
+当前想法，可以新建一个表，用来记录所有需要延时删除的对象，分别记录：
+  - 对象ID
+  - 加入删除列表时间
+  - 预计删除时间
+  - 删除方法  
+这样删除工作可统一通过遍历此表进行    
+  
+- api/blog [delete]
+ - 彻底删除文章
+- api/blog/{operation} [put]  
+   `[operation]`:
+    - recycle:加入回收站()
+    - restore:从回收站还原()
+
 
 
 
