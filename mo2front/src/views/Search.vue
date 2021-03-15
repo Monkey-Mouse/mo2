@@ -97,6 +97,9 @@ export default class Search extends Vue implements BlogAutoLoader {
   addMore(val: BlogBrief[]) {
     AddMore(this, val);
   }
+  mounted() {
+    (this.$refs.s as HTMLElement).focus();
+  }
   public ReachedButtom() {
     ElmReachedButtom(this, ({ page, pageSize }) =>
       GetArticles({
