@@ -41,7 +41,7 @@
           autofocus
           @blur="search = false"
           class="pa-1"
-          :class="this.$vuetify.breakpoint.mdAndUp ? 'col-4' : ''"
+          style="max-width: 300px"
           label="Search"
           clearable
           v-model="searchString"
@@ -222,7 +222,10 @@ export default class App extends Vue {
       // Cancel the default action, if needed
       event.preventDefault();
       // Trigger the button element with a click
-      this.$router.push("search?q=" + this.searchString);
+      this.search = false;
+      this.$router
+        .push("search?q=" + this.searchString)
+        .then(() => (this.searchString = ""));
     }
   }
   get userdata() {
