@@ -43,3 +43,7 @@ func QueryBlog(search string) search.DocumentMatchCollection {
 func DeleteBlogIndex(id string) {
 	mo2search.Indexes[blogIndex].Delete(id)
 }
+func QueryPrefix(term string) search.DocumentMatchCollection {
+	re := mo2search.Query(blogIndex, bleve.NewPrefixQuery(term))
+	return re.Hits
+}

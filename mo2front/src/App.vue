@@ -224,7 +224,7 @@ export default class App extends Vue {
       // Trigger the button element with a click
       this.search = false;
       this.$router
-        .push("search?q=" + this.searchString)
+        .push("/search?q=" + this.searchString)
         .then(() => (this.searchString = ""));
     }
   }
