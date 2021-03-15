@@ -31,7 +31,7 @@ func IndexBlog(blog *model.Blog) {
 func IndexBlogs(blog []model.Blog) {
 	batch := mo2search.Indexes[blogIndex].NewBatch()
 	for _, v := range blog {
-		batch.Index(v.ID.Hex(), blogI{v.Title, v.Content})
+		batch.Index(v.ID.Hex(), blogI{v.Title, v.Content, v.KeyWords})
 	}
 	mo2search.Indexes[blogIndex].Batch(batch)
 }
