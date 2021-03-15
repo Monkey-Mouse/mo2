@@ -40,7 +40,7 @@ func TestDeleteExpireItems(t *testing.T) {
 
 	defer func() {
 		DeleteRecycleItems(ids...)
-		deleteBlogs(false, blogID)
+		DeleteBlogs(false, blogID)
 	}()
 	tests := []struct {
 		name        string

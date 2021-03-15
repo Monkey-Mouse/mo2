@@ -39,6 +39,32 @@ func DeleteRecycleItems(ids ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	return
 }
 
+// DeleteByRecycleItemID
+// 根据itemID删除Item
+func DeleteByRecycleItemID(ID primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+	res, err := binCol.DeleteMany(context.TODO(), bson.M{"item_id": ID})
+	if err != nil {
+		mErr.InitError(err)
+	} else {
+		mErr.InitNoError("delete %v item(s)", res.DeletedCount)
+	}
+	log.Printf("delete %v rec item(s)", res.DeletedCount)
+	return
+}
+
+// DeleteByRecycleItemInfo
+// 根据itemID删除Item
+func DeleteByRecycleItemInfo(ID primitive.ObjectID, handler string) (mErr mo2errors.Mo2Errors) {
+	res, err := binCol.DeleteMany(context.TODO(), bson.M{"item_id": ID, "handler": handler})
+	if err != nil {
+		mErr.InitError(err)
+	} else {
+		mErr.InitNoError("delete %v item(s)", res.DeletedCount)
+	}
+	log.Printf("delete %v rec item(s)", res.DeletedCount)
+	return
+}
+
 // DeleteExpireItems
 // 删除已到规定删除时间的Items
 func DeleteExpireItems() (mErr mo2errors.Mo2Errors) {
@@ -69,11 +95,11 @@ func deleteMarkItem(item model.RecycleItem) {
 	var mErr mo2errors.Mo2Errors
 	switch item.Handler {
 	case model.HandlerBlog:
-		if mErr = deleteBlogs(false, item.ItemID); !mErr.IsError() {
+		if mErr = DeleteBlogs(false, item.ItemID); !mErr.IsError() {
 			DeleteRecycleItems(item.ID)
 		}
 	case model.HandlerDraft:
-		if mErr = deleteBlogs(true, item.ItemID); !mErr.IsError() {
+		if mErr = DeleteBlogs(true, item.ItemID); !mErr.IsError() {
 			DeleteRecycleItems(item.ID)
 		}
 	default:

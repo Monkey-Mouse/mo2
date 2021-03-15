@@ -66,8 +66,8 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 }
 
 // DeleteBlog godoc
-// @Summary delete Blog
-// @Description delete by path
+// @Summary 彻底删除blog
+// @Description delete by id path(draft/blog)
 // @Tags blogs
 // @Accept  json
 // @Produce  json
@@ -81,29 +81,24 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 // @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/{id} [delete]
 func (c *Controller) DeleteBlog(ctx *gin.Context) {
-	isDraftStr := ctx.DefaultQuery("draft", "true")
-	isDraft := true
-	if isDraftStr == "false" {
-		isDraft = false
-	}
-	idStr := ctx.Param("id")
-	id, err := primitive.ObjectIDFromHex(idStr)
-	if err != nil {
+	isDraft := parseString2Bool(ctx.DefaultQuery("draft", "true"))
+	var blog model.Blog
+	if id, err := primitive.ObjectIDFromHex(ctx.Param("id")); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
+	} else {
+		blog = database.FindBlogById(id, isDraft)
+		if blog.ID.IsZero() {
+			ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
+			return
+		}
 	}
-	blog := database.FindBlogById(id, isDraft)
-	if blog.ID.IsZero() {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
-		return
-	}
-
 	JudgeAuthorize(ctx, &blog)
 	if passAuth, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
 		if passAuth.(bool) {
 			blog.EntityInfo.IsDeleted = true
 			mo2utils.DeleteBlogIndex(blog.ID.Hex())
-			if mErr := database.UpsertBlog(&blog, isDraft); mErr.IsError() {
+			if mErr := database.DeleteBlogs(isDraft, blog.ID); mErr.IsError() {
 				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
 			} else {
 				ctx.Status(http.StatusAccepted)
@@ -144,45 +139,44 @@ func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) {
 	return
 }
 
-// RestoreBlog godoc
+// ProcessBlog godoc
 // @Summary restore Blog
 // @Description restore by path
 // @Tags blogs
 // @Accept  json
 // @Produce  json
 // @Param draft query bool true "bool true" true
-// @Param id path string false "string xxxxxxxx" "xxxxxxx"
-// @Success 200 {object} model.Blog
+// @Param operation path string false "recycle/restore" "different type operation"
+// @Param id path string false "Blog id" "objectID"
+// @Success 202
 // @Failure 400 {object} badresponse.ResponseError
 // @Failure 401 {object} badresponse.ResponseError
 // @Failure 404 {object} badresponse.ResponseError
-// @Router /api/blogs/{id} [put]
-func (c *Controller) RestoreBlog(ctx *gin.Context) {
-	isDraftStr := ctx.DefaultQuery("draft", "true")
-	isDraft := true
-	if isDraftStr == "false" {
-		isDraft = false
-	}
-	idStr := ctx.Param("id")
-	id, err := primitive.ObjectIDFromHex(idStr)
-	if err != nil {
+// @Router /api/blogs/{operation}/{id} [put]
+func (c *Controller) ProcessBlog(ctx *gin.Context) {
+	isDraft := parseString2Bool(ctx.DefaultQuery("draft", "true"))
+	var blog model.Blog
+	if id, err := primitive.ObjectIDFromHex(ctx.Param("id")); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
+	} else {
+		blog = database.FindBlogById(id, isDraft)
+		if blog.ID.IsZero() {
+			ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
+			return
+		}
 	}
-	blog := database.FindBlogById(id, isDraft)
-	if blog.ID.IsZero() {
-		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
-		return
-	}
-
 	JudgeAuthorize(ctx, &blog)
 	if passAuth, passAuthExist := ctx.Get(passAuthKey); passAuthExist {
 		if passAuth.(bool) {
-			blog.EntityInfo.IsDeleted = false
-			if mErr := database.UpsertBlog(&blog, isDraft); mErr.IsError() {
-				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseReason("访问冲突"))
+			if mErr := database.ProcessBlog(isDraft, &blog, ctx.Param(database.OperationKey)); mErr.IsError() {
+				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
 			} else {
-				ctx.Status(http.StatusAccepted)
+				if mErr = database.UpsertBlog(&blog, isDraft); mErr.IsError() {
+					ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
+				} else {
+					ctx.Status(http.StatusAccepted)
+				}
 			}
 			return
 		} else {
@@ -272,10 +266,8 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("query with pageSize"))
 	}
-	isDraftStr := ctx.DefaultQuery("draft", "true")
-	isDraft := parseString2Bool(isDraftStr)
-	isDeletedStr := ctx.DefaultQuery("deleted", "false")
-	isDeleted := parseString2Bool(isDeletedStr)
+	isDraft := parseString2Bool(ctx.DefaultQuery("draft", "true"))
+	isDeleted := parseString2Bool(ctx.DefaultQuery("deleted", "false"))
 	idStr := ctx.Query("id")
 	id, err := primitive.ObjectIDFromHex(idStr)
 	if err != nil {
