@@ -1,15 +1,15 @@
 <template>
   <div>
-    <v-parallax
-      @click="$router.push('/about')"
-      class="clickable"
-      src="https://cdn.mo2.leezeeyee.com/material.jpg"
-      height="200"
-    >
+    <v-parallax src="https://cdn.mo2.leezeeyee.com/material.jpg" height="200">
       <v-row align="center" justify="center">
         <v-col class="text-center" cols="12">
-          <h1 class="display-1 font-weight-thin mb-4">MO2</h1>
-          <h4 class="subheading">
+          <h1
+            @click="$router.push('/about')"
+            class="display-1 font-weight-thin mb-4 clickable"
+          >
+            MO2
+          </h1>
+          <h4 @click="$router.push('/about')" class="subheading clickable">
             Blog site build for everyone, built by everyone
           </h4>
         </v-col>
