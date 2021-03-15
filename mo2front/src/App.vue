@@ -29,7 +29,7 @@
       </div>
       <v-spacer />
       <v-btn
-        v-if="this.$route.name !== 'Search Article'"
+        v-if="this.$route.name !== 'Search Article' && !search"
         @click="search = true"
         icon
       >

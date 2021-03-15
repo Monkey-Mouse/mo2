@@ -7,6 +7,7 @@ import store from './store'
 import vuetify from './plugins/vuetify';
 import VueCookies from 'vue-cookies'
 import sanitizeHtml from 'sanitize-html'
+import '@mdi/font/css/materialdesignicons.css'
 const list = sanitizeHtml.defaults.allowedTags.concat(sanitizeHtml.defaults.selfClosing);
 const attrs = sanitizeHtml.defaults.allowedAttributes;
 attrs['*'] = ['href', 'align', 'alt', 'center', 'bgcolor', 'data-*', 'class']
