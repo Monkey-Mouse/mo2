@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"mo2/dto"
 	"mo2/mo2utils"
@@ -87,13 +86,11 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 // deleteBlogs set flag of blog or draft to isDeleted
 func deleteBlogs(isDraft bool, blogIDs ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	if res, err := chooseCol(isDraft).DeleteMany(context.TODO(), bson.M{"_id": bson.M{"$in": blogIDs}}); err != nil {
-		log.Println(err)
 		mErr.InitError(err)
 	} else {
-		tip := fmt.Sprintf("delete %v %v blogs\n", res.DeletedCount, isDraft)
-		log.Printf(tip)
-		mErr.InitNoError(tip)
+		mErr.InitNoError("delete %v %v(s)\n", res.DeletedCount, If(isDraft, "draft", "blog"))
 	}
+	log.Println(mErr)
 	return
 }
 

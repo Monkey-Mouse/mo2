@@ -24,9 +24,10 @@ func getPaginationOption(page int64, pagesize int64) *options.FindOptions {
 	return options.Find().SetSkip(page * pagesize).SetLimit(pagesize)
 }
 
-//TODO implement
-//get max ID in collection
-func GetMaxID(collection string) int {
-	return 1
-
+func If(condition bool, trueVal interface{}, falseVal interface{}) interface{} {
+	if condition {
+		return trueVal
+	} else {
+		return falseVal
+	}
 }
