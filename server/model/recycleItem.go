@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+// 最好与collection名称保持一致！
+const (
+	HandlerDraft = "draft"
+	HandlerBlog  = "blog"
+)
+
 // RecycleItem 回收站中的对象信息，记录加入回收站时间和预计被删除时间，以及处理函数
 type RecycleItem struct {
 	ID         primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
