@@ -304,6 +304,7 @@ export default class EditArticle extends Vue {
     this.$emit("update:autoSaving", true);
     this.getTitleAndContent();
     if (!this.blog || this.blog.title === "") {
+      console.log(this.blog);
       this.$emit("update:autoSaving", false);
       return;
     }
@@ -311,7 +312,8 @@ export default class EditArticle extends Vue {
       .then(() => {
         this.$emit("update:autoSaving", false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error(err);
         this.$emit("update:autoSaving", null);
       });
   }
