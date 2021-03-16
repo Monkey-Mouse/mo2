@@ -17,28 +17,48 @@
             />
           </v-col>
         </v-row>
-        <v-row>
-          <v-col>
-            <h2>Light Theme</h2>
-          </v-col>
-        </v-row>
-        <v-row><v-divider /></v-row>
-        <v-row>
-          <v-col>
-            <input-list :inputProps="inputPropslight" :validator="validator" />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
-            <h2>Dark Theme</h2>
-          </v-col>
-        </v-row>
-        <v-row><v-divider /></v-row>
-        <v-row>
-          <v-col>
-            <input-list :inputProps="inputPropsdark" :validator="validator" />
-          </v-col>
-        </v-row>
+        <v-expansion-panels multiple>
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <v-row>
+                <v-col>
+                  <h2>Light Theme</h2>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-row><v-divider /></v-row>
+              <v-row>
+                <v-col>
+                  <input-list
+                    :inputProps="themeProps('light')"
+                    :validator="validator"
+                  />
+                </v-col>
+              </v-row>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              <v-row>
+                <v-col>
+                  <h2>Dark Theme</h2>
+                </v-col>
+              </v-row>
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <v-row><v-divider /></v-row>
+              <v-row>
+                <v-col>
+                  <input-list
+                    :inputProps="themeProps('dark')"
+                    :validator="validator"
+                  />
+                </v-col>
+              </v-row>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
       </v-col>
     </v-row>
   </v-container>
@@ -60,63 +80,6 @@ export default class Settings extends Vue {
   user: User;
   update = 0;
   validator = {};
-  inputPropsdark: { [name: string]: InputProp } = {
-    primary: {
-      errorMsg: {},
-      label: "Primary color",
-      default: this.$vuetify.theme.themes.dark.primary,
-      icon: "mdi-account",
-      col: 6,
-      type: "color",
-      onChange: (c: { hex: string }) => {
-        this.lightPrimaryChangeEx.Execute(
-          () => (this.$vuetify.theme.themes.dark.primary = c.hex)
-        );
-      },
-    },
-    secondary: {
-      errorMsg: {},
-      label: "Secondary color",
-      default: this.$vuetify.theme.themes.dark.secondary,
-      icon: "mdi-account",
-      col: 6,
-      type: "color",
-      onChange: (c: { hex: string }) => {
-        this.lightSecondaryChangeEx.Execute(
-          () => (this.$vuetify.theme.themes.dark.secondary = c.hex)
-        );
-      },
-    },
-  };
-  inputPropslight: { [name: string]: InputProp } = {
-    primary: {
-      errorMsg: {},
-      label: "Primary color",
-      default: this.$vuetify.theme.themes.light.primary,
-      icon: "mdi-account",
-      col: 6,
-      type: "color",
-      onChange: (c: { hex: string }) => {
-        this.lightPrimaryChangeEx.Execute(() => {
-          this.$vuetify.theme.themes.light.primary = c.hex;
-          console.log(this.$vuetify.theme.themes);
-        });
-      },
-    },
-    secondary: {
-      errorMsg: {},
-      label: "Secondary color",
-      default: this.$vuetify.theme.themes.light.secondary,
-      icon: "mdi-account",
-      col: 6,
-      type: "color",
-      onChange: (c: { hex: string }) => {
-        this.lightSecondaryChangeEx.Execute(
-          () => (this.$vuetify.theme.themes.light.secondary = c.hex)
-        );
-      },
-    },
-  };
   inputProps: { [name: string]: InputProp } = {
     darkMode: {
       label: "prefer dark",
@@ -128,13 +91,36 @@ export default class Settings extends Vue {
       onChange: () => SetTheme(!GetTheme(), this),
     },
   };
-  lightPrimaryChangeEx = new LazyExecutor();
-  lightSecondaryChangeEx = new LazyExecutor();
+  themeColorChangeEx = new LazyExecutor();
   themeChangeEx = new LazyExecutor(() => {
     if (this.$refs["inputs"]) {
       (this.$refs["inputs"] as InputList).setModel({ darkMode: GetTheme() });
     }
   }, 1000);
+
+  themeProps(theme: "light" | "dark") {
+    const props: { [name: string]: InputProp } = {};
+    for (const key in this.$vuetify.theme.themes[theme]) {
+      props[key] = this.propFromThemeColor(key, "light");
+    }
+    return props;
+  }
+
+  propFromThemeColor(name: string, theme: "light" | "dark") {
+    return {
+      errorMsg: {},
+      label: name.toUpperCase() + " COLOR",
+      default: this.$vuetify.theme.themes[theme][name],
+      icon: "mdi-account",
+      col: 6,
+      type: "color",
+      onChange: (c: { hex: string }) => {
+        this.themeColorChangeEx.Execute(
+          () => (this.$vuetify.theme.themes[theme][name] = c.hex)
+        );
+      },
+    };
+  }
   @Watch("$vuetify", { immediate: true, deep: true })
   themeChange() {
     this.themeChangeEx.Execute();
