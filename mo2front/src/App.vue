@@ -4,7 +4,6 @@
       id="appBarElm"
       scroll-target="#scrolling-techniques-6"
       color="primary"
-      dark
       app
     >
       <div class="d-flex align-center">
