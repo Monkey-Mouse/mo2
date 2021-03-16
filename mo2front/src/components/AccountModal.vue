@@ -82,7 +82,7 @@
                   @click="login"
                   >登录</v-btn
                 >
-                <v-btn @click="close" color="red">取消</v-btn>
+                <v-btn @click="close" color="error">取消</v-btn>
               </v-card-actions>
             </v-tab-item>
             <v-tab-item :key="2">
@@ -154,7 +154,7 @@
                     : "注册"
                 }}</v-btn>
 
-                <v-btn @click="close" color="red">取消</v-btn>
+                <v-btn @click="close" color="error">取消</v-btn>
               </v-card-actions>
             </v-tab-item>
           </v-tabs-items>

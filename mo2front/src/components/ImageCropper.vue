@@ -28,8 +28,8 @@
           >
         </v-card-text>
         <v-card-actions>
-          <v-btn color="green" outlined text @click="confirm">确认</v-btn>
-          <v-btn @click="close" color="red">取消</v-btn>
+          <v-btn color="success" outlined text @click="confirm">确认</v-btn>
+          <v-btn @click="close" color="error">取消</v-btn>
         </v-card-actions>
       </v-container>
     </v-card>

@@ -37,6 +37,7 @@
       </v-btn>
       <v-expand-transition v-if="this.$route.name !== 'Search Article'">
         <v-text-field
+          color="secondary"
           v-if="search"
           autofocus
           @blur="search = false"
@@ -57,11 +58,11 @@
               indeterminate
             ></v-progress-circular>
           </div>
-          <div v-else-if="autoSaving === null" class="red--text ma-2">
+          <div v-else-if="autoSaving === null" class="error--text ma-2">
             Failed!
           </div>
-          <div v-else class="light-green--text ma-2">Saved!</div>
-          <v-btn class="ml-1" color="green" outlined @click="publishClick"
+          <div v-else class="success--text ma-2">Saved!</div>
+          <v-btn class="ml-1" color="success" outlined @click="publishClick"
             >publish</v-btn
           >
         </v-row>
@@ -92,7 +93,7 @@
         }}</v-list-item-title>
 
         <v-btn icon v-if="!isUser" @click="showLogin()"> 登录 </v-btn>
-        <v-btn icon v-else color="red" @click="logOut"> 登出 </v-btn>
+        <v-btn icon v-else color="error" @click="logOut"> 登出 </v-btn>
       </v-list-item>
 
       <v-divider></v-divider>
