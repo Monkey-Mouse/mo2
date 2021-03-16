@@ -949,7 +949,7 @@ paths:
       summary: upsert subcomments
       tags:
       - comments
-  /api/comment/count/{id}:
+  /api/commentcount/{id}:
     get:
       description: get article comment num
       parameters:

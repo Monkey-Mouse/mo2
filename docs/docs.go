@@ -1000,44 +1000,6 @@ var doc = `{
                 }
             }
         },
-        "/api/comment/count/{id}": {
-            "get": {
-                "description": "get article comment num",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "comments"
-                ],
-                "summary": "count comments",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "article id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "integer"
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/badresponse.ResponseError"
-                        }
-                    }
-                }
-            }
-        },
         "/api/comment/{id}": {
             "get": {
                 "description": "get json comments",
@@ -1125,6 +1087,44 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.Subcomment"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/commentcount/{id}": {
+            "get": {
+                "description": "get article comment num",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "count comments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
                         }
                     },
                     "422": {

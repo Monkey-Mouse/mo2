@@ -104,3 +104,6 @@ export interface Comment extends SubComment {
     tempC?: string;
     showSub?: boolean
 }
+export interface Count {
+    count: number;
+}

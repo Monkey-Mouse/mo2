@@ -1,4 +1,4 @@
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment, SubComment } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment, SubComment, Count } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 import router from '../router'
@@ -211,6 +211,9 @@ export async function GetCates(id: string) {
 export async function GetComments(id: string, query: { page: number; pagesize: number }) {
     return (await axios.get<Comment[]>('/api/comment/' + id + ParseQuery(query))).data ?? []
 }
+export async function GetCommentNum(id: string) {
+    return (await axios.get<Count>('/api/commentcount/' + id)).data
+}
 export async function UpsertComment(c: Comment) {
     return (await axios.post<Comment>('/api/comment', c)).data
 }
@@ -224,4 +227,3 @@ export function SetApp(params: { refresh: boolean }) {
 export function ShowRefresh() {
     app.refresh = true;
 }
-
