@@ -57,6 +57,9 @@ definitions:
     type: object
   dto.UserInfoBrief:
     properties:
+      email:
+        example: email@qq.com
+        type: string
       id:
         example: xxxxxxxxxxxxx==
         type: string
@@ -944,6 +947,31 @@ paths:
           schema:
             $ref: '#/definitions/badresponse.ResponseError'
       summary: upsert subcomments
+      tags:
+      - comments
+  /api/comment/count/{id}:
+    get:
+      description: get article comment num
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: count comments
       tags:
       - comments
   /api/directories/category:
