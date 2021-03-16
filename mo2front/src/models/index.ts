@@ -46,6 +46,8 @@ export interface BlogUpsert {
 }
 export interface UserSettings {
     avatar?: string;
+    perferDark?: string;
+    themes?: string;
 }
 export interface User {
     id: string;

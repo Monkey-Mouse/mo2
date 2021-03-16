@@ -1,6 +1,8 @@
+import Vue from '*.vue';
 import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment, SubComment, Count } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
+import { VuetifyThemeVariant } from 'vuetify/types/services/theme';
 import router from '../router'
 
 export function randomProperty(obj: any) {
@@ -226,4 +228,57 @@ export function SetApp(params: { refresh: boolean }) {
 }
 export function ShowRefresh() {
     app.refresh = true;
+}
+
+export function GetTheme() {
+    return JSON.parse(
+        localStorage.getItem("darkTheme")
+    ) as boolean;
+}
+export function SetTheme(dark: boolean, that: Vue, themes?: { light: VuetifyThemeVariant, dark: VuetifyThemeVariant }, user?: User) {
+    that.$vuetify.theme.dark = dark;
+    localStorage.setItem("darkTheme", String(that.$vuetify.theme.dark));
+    if (themes) {
+        localStorage.setItem("themes", JSON.stringify(themes));
+    }
+    if (user && user.roles && user.roles.indexOf(UserRole) > -1) {
+        if (!user.settings) {
+            user.settings = {};
+        }
+        user.settings.perferDark = localStorage.getItem("darkTheme");
+        user.settings.themes = localStorage.getItem("themes");
+        UpdateUserInfo(user);
+    }
+}
+export function SetThemeColors(that: Vue, themes?: { light: VuetifyThemeVariant, dark: VuetifyThemeVariant }) {
+    for (const k in themes.dark) {
+        that.$vuetify.theme.themes.dark[k] = themes.dark[k]
+    }
+    for (const k in themes.light) {
+        that.$vuetify.theme.themes.light[k] = themes.light[k]
+    }
+}
+
+export class LazyExecutor {
+    private i = 0;
+    private f: () => void;
+    private delay = 0;
+    constructor(f?: () => void, delay: number = 200) {
+        this.f = f;
+        this.delay = delay;
+    }
+    /**
+     * Execute
+     */
+    public Execute(f?: () => void,) {
+        this.i++;
+        const num = this.i;
+        setTimeout(() => {
+            if (num === this.i) {
+                if (f) {
+                    f()
+                } else this.f();
+            }
+        }, 200);
+    }
 }
