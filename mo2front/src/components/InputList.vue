@@ -12,6 +12,24 @@
           :type="value['type']"
           :append-icon="value.icon"
         />
+        <v-switch
+          v-else-if="value['type'] === 'switch'"
+          :label="value.label"
+          v-model="model[key]"
+        >
+          <v-icon
+            class="clickable"
+            v-if="value.icon && value['iconClick']"
+            slot="append"
+            color="gray"
+            @click="value['iconClick'](value)"
+          >
+            {{ value.icon }}
+          </v-icon>
+          <v-icon v-else-if="value.icon" slot="append" color="gray">
+            {{ value.icon }}
+          </v-icon>
+        </v-switch>
         <img-selector
           v-else-if="value['type'] === 'imgselector'"
           :imgs="imgVals[key]"

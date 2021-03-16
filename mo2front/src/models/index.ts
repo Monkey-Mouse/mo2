@@ -65,6 +65,7 @@ export interface InputProp {
     accept?: string;
     options?: Option[];
     iconClick?: (prop: InputProp) => void;
+    onChange?: (c: any) => void;
 }
 export interface Option {
     text: string;
