@@ -9,7 +9,7 @@
             contenteditable="true"
             class="display-1 text-h3 pt-10 font-weight-thin ml-4 mr-4 mb-0 borderless"
           >
-            {{ this.$route.query["q"] }}
+            {{ search }}
           </h1>
         </v-col>
       </v-row>
@@ -44,6 +44,7 @@ export default class Search extends Vue implements BlogAutoLoader {
   blogs: BlogBrief[] = [];
   loading = true;
   firstloading = true;
+  search = "";
   page = 0;
   pagesize = 5;
   nomore = false;
@@ -76,6 +77,7 @@ export default class Search extends Vue implements BlogAutoLoader {
     }
   }
   created() {
+    this.search = this.$route.query["q"] as string;
     this.init();
   }
   init() {
