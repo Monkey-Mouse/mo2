@@ -99,7 +99,8 @@ func SetupHandlers(c *Controller) {
 			comment.Get(":id", c.GetComment)
 			comment.Post("", c.PostComment, model.OrdinaryUser)
 			comment.Post(":id", c.PostSubComment, model.OrdinaryUser)
-			comment.Get("count/:id", c.GetCommentNum)
+
 		}
+		api.Get("commentcount/:id", c.GetCommentNum)
 	}
 }

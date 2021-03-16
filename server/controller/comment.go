@@ -98,7 +98,7 @@ func (c *Controller) PostSubComment(ctx *gin.Context) {
 // @Param id path string true "article id"
 // @Success 200 {object} map[string]int64
 // @Failure 422 {object} badresponse.ResponseError
-// @Router /api/comment/count/{id} [get]
+// @Router /api/commentcount/{id} [get]
 func (c *Controller) GetCommentNum(ctx *gin.Context) {
 	sid := ctx.Param("id")
 	id, err := primitive.ObjectIDFromHex(sid)
