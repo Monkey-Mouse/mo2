@@ -17,8 +17,8 @@
             />
           </v-col>
         </v-row>
-        <v-expansion-panels multiple>
-          <v-expansion-panel>
+        <v-expansion-panels v-model="expansion">
+          <v-expansion-panel :key="0">
             <v-expansion-panel-header>
               <v-row>
                 <v-col>
@@ -38,7 +38,7 @@
               </v-row>
             </v-expansion-panel-content>
           </v-expansion-panel>
-          <v-expansion-panel>
+          <v-expansion-panel :key="1">
             <v-expansion-panel-header>
               <v-row>
                 <v-col>
@@ -97,6 +97,17 @@ export default class Settings extends Vue {
       (this.$refs["inputs"] as InputList).setModel({ darkMode: GetTheme() });
     }
   }, 1000);
+
+  public get expansion() {
+    return this.$vuetify.theme.dark ? 1 : 0;
+  }
+
+  public set expansion(v: number) {
+    if (v === undefined) {
+      return;
+    }
+    SetTheme(v === 1, this);
+  }
 
   themeProps(theme: "light" | "dark") {
     const props: { [name: string]: InputProp } = {};

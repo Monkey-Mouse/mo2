@@ -304,7 +304,6 @@ export default class EditArticle extends Vue {
     this.$emit("update:autoSaving", true);
     this.getTitleAndContent();
     if (!this.blog || this.blog.title === "") {
-      console.log(this.blog);
       this.$emit("update:autoSaving", false);
       return;
     }

@@ -766,7 +766,6 @@ export default class MO2Editor extends Vue {
       if (files.length === 0) {
         return;
       }
-      console.log(files, event);
       (event as Event).stopImmediatePropagation();
       (event as Event).stopPropagation();
       (event as Event).preventDefault();
@@ -812,7 +811,6 @@ export default class MO2Editor extends Vue {
   @Watch("content")
   contentSet() {
     if (this.content !== null && this.content !== undefined) {
-      console.log("set");
       this.editor.setContent(this.content);
     }
   }

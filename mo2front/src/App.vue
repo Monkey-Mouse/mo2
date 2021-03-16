@@ -285,7 +285,6 @@ export default class App extends Vue {
     this.items[2].show = this.isUser;
     this.items[1].show = this.isUser;
     try {
-      console.log(this.user);
       if (this.user.settings && this.user.settings.perferDark) {
         SetTheme(JSON.parse(this.user.settings.perferDark) as boolean, this);
         if (this.user.settings.themes) {
@@ -293,11 +292,9 @@ export default class App extends Vue {
             light: VuetifyThemeVariant;
             dark: VuetifyThemeVariant;
           };
-          console.log(this.user.settings.themes, theme);
           if (!theme) {
             return;
           }
-          console.log("setcolors");
           SetThemeColors(this, theme);
           SetTheme(
             JSON.parse(this.user.settings.perferDark) as boolean,
