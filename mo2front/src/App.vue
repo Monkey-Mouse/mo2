@@ -58,7 +58,7 @@
             ></v-progress-circular>
           </div>
           <div v-else-if="autoSaving === null" class="red--text ma-2">
-            Auto Save Failed!
+            Failed!
           </div>
           <div v-else class="light-green--text ma-2">Saved!</div>
           <v-btn class="ml-1" color="green" outlined @click="publishClick"
