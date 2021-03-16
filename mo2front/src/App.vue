@@ -133,7 +133,7 @@
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item>
+        <v-list-item v-if="isUser" to="settings">
           <v-list-item-icon>
             <v-icon>mdi-account-cog</v-icon>
           </v-list-item-icon>
@@ -207,12 +207,15 @@ import {
   Logout,
   ReachedBottom,
   SetApp,
+  SetTheme,
+  SetThemeColors,
   ShowRefresh,
   UserRole,
 } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
 import { Watch } from "vue-property-decorator";
 import "vue2-timeago/dist/vue2-timeago.css";
+import { VuetifyThemeVariant } from "vuetify/types/services/theme";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 
@@ -280,6 +283,29 @@ export default class App extends Vue {
   userChange() {
     this.items[2].show = this.isUser;
     this.items[1].show = this.isUser;
+    try {
+      console.log(this.user);
+      if (this.user.settings && this.user.settings.perferDark) {
+        SetTheme(JSON.parse(this.user.settings.perferDark) as boolean, this);
+        if (this.user.settings.themes) {
+          const theme = JSON.parse(this.user.settings.themes) as {
+            light: VuetifyThemeVariant;
+            dark: VuetifyThemeVariant;
+          };
+          console.log(this.user.settings.themes, theme);
+          if (!theme) {
+            return;
+          }
+          console.log("setcolors");
+          SetThemeColors(this, theme);
+          SetTheme(
+            JSON.parse(this.user.settings.perferDark) as boolean,
+            this,
+            theme
+          );
+        }
+      }
+    } catch (error) {}
   }
   get initials(): string {
     return GetInitials(this.user.name);
@@ -310,6 +336,15 @@ export default class App extends Vue {
       this.$vuetify.theme.dark = JSON.parse(
         localStorage.getItem("darkTheme")
       ) as boolean;
+    } catch (err) {}
+    try {
+      const themes = JSON.parse(localStorage.getItem("themes")) as {
+        light: VuetifyThemeVariant;
+        dark: VuetifyThemeVariant;
+      };
+      if (themes) {
+        SetThemeColors(this, themes);
+      }
     } catch (err) {}
     window.addEventListener("resize", () => {
       this.onResize();

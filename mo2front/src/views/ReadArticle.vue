@@ -66,10 +66,9 @@
           />
           <div style="padding-bottom: 1rem"></div>
           <v-row v-if="!draft">
-            <v-col class="offset-11"
-              ><v-icon @click="loadComment"
-                >mdi-message-reply-outline</v-icon
-              ></v-col
+            <v-col class="offset-lg-11 offset-10"
+              ><v-icon @click="loadComment">mdi-message-reply-outline</v-icon
+              >{{ commentNum }}</v-col
             >
           </v-row>
 
@@ -104,7 +103,7 @@
                 </v-list-item-content>
               </v-list-item>
               <v-divider></v-divider>
-              <v-list-item class="ma-4"
+              <v-list-item v-if="isUser" class="ma-4"
                 ><v-textarea
                   :loading="commentPosting"
                   auto-grow
@@ -225,6 +224,11 @@
                 </v-btn></v-row
               ></v-list
             >
+            <v-list v-if="nomore && commentNum === 0">
+              <v-list-item>
+                <h1 class="ml-7">暂时没有评论</h1>
+              </v-list-item>
+            </v-list>
           </v-navigation-drawer>
         </div>
       </v-col>
@@ -239,6 +243,7 @@ import Editor from "../components/MO2Editor.vue";
 import {
   DeleteArticle,
   GetArticle,
+  GetCommentNum,
   GetComments,
   GetErrorMsg,
   GetUserData,
@@ -246,6 +251,7 @@ import {
   globaldic,
   UpsertComment,
   UpsertSubComment,
+  UserRole,
 } from "@/utils";
 import hljs from "highlight.js";
 import { Blog, User, Comment, UserListData } from "@/models";
@@ -287,6 +293,10 @@ export default class ReadArticle extends Vue {
   commentPosting = false;
   commentLoadingMore = true;
   nomore = false;
+  commentNum = 0;
+  get isUser() {
+    return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
+  }
   get deleteContent() {
     return '你确定要删除"' + this.title + '"吗？';
   }
@@ -303,6 +313,9 @@ export default class ReadArticle extends Vue {
         GetUserData(this.blog.authorId).then((u) => {
           this.author = u;
           this.authorLoad = true;
+        });
+        GetCommentNum(this.blog.id).then((c) => {
+          this.commentNum = c.count;
         });
         setTimeout(() => {
           // first, find all the code blocks
@@ -354,6 +367,7 @@ export default class ReadArticle extends Vue {
     c.showSub = false;
     this.cs.unshift(c);
     this.commentmsg = "";
+    this.commentNum++;
     this.commentPosting = false;
   }
   edit() {
