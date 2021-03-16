@@ -37,6 +37,7 @@ const (
 func SetupHandlers(c *Controller) {
 	api := middleware.H.Group("/api")
 	{
+		api.GetWithRL("account/verify", c.VerifyEmail, 3)
 		api.GetWithRL("/logs", c.Log, 10)
 		admin := api.Group("/admin", model.GeneralAdmin)
 		{
@@ -87,7 +88,6 @@ func SetupHandlers(c *Controller) {
 			accounts.Post("", c.AddAccount)
 			accounts.Delete("", c.DeleteAccount, model.OrdinaryUser)
 			accounts.Put("", c.UpdateAccount, model.OrdinaryUser)
-			accounts.Get("verify", c.VerifyEmail, model.Anonymous, model.OrdinaryUser)
 			accounts.Post("role", c.AddAccountRole, model.GeneralAdmin, model.OrdinaryUser)
 			accounts.Post("login", c.LoginAccount)
 			accounts.Post("logout", c.LogoutAccount)
