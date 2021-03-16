@@ -167,7 +167,7 @@
         >switch theme</v-btn
       >
       <v-btn @click="sideNavVisible = !sideNavVisible">show side bar</v-btn> -->
-      <v-snackbar v-model="refresh">
+      <v-snackbar v-model="refresh" timeout="-1">
         发现新版本，请刷新
 
         <template v-slot:action="{ attrs }">
