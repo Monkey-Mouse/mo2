@@ -1,10 +1,13 @@
 package main
 
 import (
+	"log"
+	"mo2/database"
 	"mo2/docs"
 	"mo2/mo2utils"
 	"mo2/server"
-	//"time"
+	"mo2/services/mo2ticker"
+	"time"
 )
 
 // @title Mo2
@@ -33,4 +36,9 @@ func init() {
 		docs.SwaggerInfo.Host = "www.motwo.cn"
 	}
 	mo2utils.UploadCDN()
+	mo2ticker.ExecuteFunc(24*time.Hour, func() {
+		if mErr := database.DeleteExpireItems(); mErr.IsError() {
+			log.Println(mErr)
+		}
+	})
 }
