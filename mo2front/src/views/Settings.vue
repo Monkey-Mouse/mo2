@@ -139,7 +139,7 @@ export default class Settings extends Vue {
   themeProps(theme: "light" | "dark") {
     const props: { [name: string]: InputProp } = {};
     for (const key in this.$vuetify.theme.themes[theme]) {
-      props[key] = this.propFromThemeColor(key, "light");
+      props[key] = this.propFromThemeColor(key, theme);
     }
     return props;
   }
