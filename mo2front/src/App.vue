@@ -49,6 +49,14 @@
           @keydown="keyDown"
         ></v-text-field>
       </v-expand-transition>
+      <v-btn
+        v-if="!isUser && !search"
+        color="success"
+        outlined
+        @click="showLogin()"
+      >
+        LOGIN
+      </v-btn>
       <div v-if="$route.path.indexOf('/edit') === 0">
         <v-row>
           <div v-if="autoSaving" class="grey--text ma-2">
@@ -133,7 +141,7 @@
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item v-if="isUser" to="/settings">
+        <v-list-item to="/settings">
           <v-list-item-icon>
             <v-icon>mdi-account-cog</v-icon>
           </v-list-item-icon>

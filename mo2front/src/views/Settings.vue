@@ -7,6 +7,28 @@
             <h1>Settings</h1>
           </v-col>
         </v-row>
+        <v-row>
+          <v-col>
+            <v-alert type="info" elevation="2" outlined
+              >这里所有设置都会实时应用{{
+                isUser ? "，且会在不同机器之间自动同步" : ""
+              }}</v-alert
+            >
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-alert
+              @click="login"
+              v-if="!isUser"
+              type="warning"
+              elevation="2"
+              outlined
+              class="clickable"
+              >只有登录之后设置才会在不同机器之间同步</v-alert
+            >
+          </v-col>
+        </v-row>
         <v-row><v-divider /></v-row>
         <v-row>
           <v-col>
@@ -70,7 +92,7 @@ import { required } from "vuelidate/lib/validators";
 import Vue from "vue";
 import Component from "vue-class-component";
 import InputList from "../components/InputList.vue";
-import { GetTheme, LazyExecutor, SetTheme } from "@/utils";
+import { GetTheme, LazyExecutor, SetTheme, ShowLogin, UserRole } from "@/utils";
 import { Prop, Watch } from "vue-property-decorator";
 @Component({
   components: { InputList },
@@ -97,7 +119,12 @@ export default class Settings extends Vue {
       (this.$refs["inputs"] as InputList).setModel({ darkMode: GetTheme() });
     }
   }, 1000);
-
+  login() {
+    ShowLogin();
+  }
+  get isUser() {
+    return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
+  }
   public get expansion() {
     return this.$vuetify.theme.dark ? 1 : 0;
   }
