@@ -89,3 +89,23 @@ func (c *Controller) PostSubComment(ctx *gin.Context) {
 	database.UpsertSubComment(id, &cmt)
 	ctx.JSON(200, &cmt)
 }
+
+// GetCommentNum godoc
+// @Summary count comments
+// @Description get article comment num
+// @Tags comments
+// @Produce  json
+// @Param id path string true "article id"
+// @Success 200 {object} map[string]int64
+// @Failure 422 {object} badresponse.ResponseError
+// @Router /api/commentcount/{id} [get]
+func (c *Controller) GetCommentNum(ctx *gin.Context) {
+	sid := ctx.Param("id")
+	id, err := primitive.ObjectIDFromHex(sid)
+	if err != nil {
+		badresponse.SetErrResponse(ctx, http.StatusUnprocessableEntity, "格式错误")
+		return
+	}
+	num := database.GetCommentNum(id)
+	ctx.JSON(200, gin.H{"count": num})
+}

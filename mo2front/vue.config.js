@@ -17,6 +17,9 @@ module.exports = {
       start_url: "https://www.motwo.cn",
       display: "standalone",
     },
+    workboxOptions: {
+      skipWaiting: true
+    }
   },
   transpileDependencies: [
     'vuetify'

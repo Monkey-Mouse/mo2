@@ -97,7 +97,6 @@ import {
   AddMore,
   addQuery,
   BlogAutoLoader,
-  Copy,
   ElmReachedButtom,
   GetErrorMsg,
   GetOwnArticles,
@@ -306,7 +305,6 @@ export default class Account extends Vue implements BlogAutoLoader {
     this.uid = this.user.id;
     this.displayUser = this.user;
     this.inputProps.name.default = this.user.name;
-    console.log(this.displayUser);
   }
   @Watch("tab")
   loadDraft() {

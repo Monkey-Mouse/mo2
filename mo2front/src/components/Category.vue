@@ -98,7 +98,7 @@
                     >Edit</v-btn
                   >
                   <v-btn
-                    color="red"
+                    color="error"
                     v-on:click.prevent
                     v-on:click.stop
                     @click="deleteCate(c)"

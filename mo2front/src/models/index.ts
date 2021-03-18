@@ -46,6 +46,8 @@ export interface BlogUpsert {
 }
 export interface UserSettings {
     avatar?: string;
+    perferDark?: string;
+    themes?: string;
 }
 export interface User {
     id: string;
@@ -65,6 +67,7 @@ export interface InputProp {
     accept?: string;
     options?: Option[];
     iconClick?: (prop: InputProp) => void;
+    onChange?: (c: any) => void;
 }
 export interface Option {
     text: string;
@@ -103,4 +106,7 @@ export interface Comment extends SubComment {
     subs?: SubComment[];
     tempC?: string;
     showSub?: boolean
+}
+export interface Count {
+    count: number;
 }

@@ -4,7 +4,6 @@
       id="appBarElm"
       scroll-target="#scrolling-techniques-6"
       color="primary"
-      dark
       app
     >
       <div class="d-flex align-center">
@@ -29,7 +28,7 @@
       </div>
       <v-spacer />
       <v-btn
-        v-if="this.$route.name !== 'Search Article'"
+        v-if="this.$route.name !== 'Search Article' && !search"
         @click="search = true"
         icon
       >
@@ -37,6 +36,7 @@
       </v-btn>
       <v-expand-transition v-if="this.$route.name !== 'Search Article'">
         <v-text-field
+          color="secondary"
           v-if="search"
           autofocus
           @blur="search = false"
@@ -49,6 +49,14 @@
           @keydown="keyDown"
         ></v-text-field>
       </v-expand-transition>
+      <v-btn
+        v-if="!isUser && !search"
+        color="success"
+        outlined
+        @click="showLogin()"
+      >
+        LOGIN
+      </v-btn>
       <div v-if="$route.path.indexOf('/edit') === 0">
         <v-row>
           <div v-if="autoSaving" class="grey--text ma-2">
@@ -57,11 +65,11 @@
               indeterminate
             ></v-progress-circular>
           </div>
-          <div v-else-if="autoSaving === null" class="red--text ma-2">
-            Auto Save Failed!
+          <div v-else-if="autoSaving === null" class="error--text ma-2">
+            Failed!
           </div>
-          <div v-else class="light-green--text ma-2">Saved!</div>
-          <v-btn class="ml-1" color="green" outlined @click="publishClick"
+          <div v-else class="success--text ma-2">Saved!</div>
+          <v-btn class="ml-1" color="success" outlined @click="publishClick"
             >publish</v-btn
           >
         </v-row>
@@ -92,7 +100,7 @@
         }}</v-list-item-title>
 
         <v-btn icon v-if="!isUser" @click="showLogin()"> 登录 </v-btn>
-        <v-btn icon v-else color="red" @click="logOut"> 登出 </v-btn>
+        <v-btn icon v-else color="error" @click="logOut"> 登出 </v-btn>
       </v-list-item>
 
       <v-divider></v-divider>
@@ -133,7 +141,7 @@
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item>
+        <v-list-item to="/settings">
           <v-list-item-icon>
             <v-icon>mdi-account-cog</v-icon>
           </v-list-item-icon>
@@ -167,6 +175,18 @@
         >switch theme</v-btn
       >
       <v-btn @click="sideNavVisible = !sideNavVisible">show side bar</v-btn> -->
+      <v-snackbar v-model="refresh" timeout="-1">
+        发现新版本，请刷新
+
+        <template v-slot:action="{ attrs }">
+          <v-btn color="accent" text v-bind="attrs" @click="reload">
+            Refresh
+          </v-btn>
+          <v-btn color="pink" text v-bind="attrs" @click="refresh = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
     </v-main>
     <v-footer padless>
       <v-card flat tile class="indigo lighten-1 white--text text-center">
@@ -194,11 +214,16 @@ import {
   GetUserInfoAsync,
   Logout,
   ReachedBottom,
+  SetApp,
+  SetTheme,
+  SetThemeColors,
+  ShowRefresh,
   UserRole,
 } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
 import { Watch } from "vue-property-decorator";
 import "vue2-timeago/dist/vue2-timeago.css";
+import { VuetifyThemeVariant } from "vuetify/types/services/theme";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 
@@ -216,6 +241,7 @@ export default class App extends Vue {
   userload = false;
   search = false;
   searchString = "";
+  refresh = false;
   keyDown(event: KeyboardEvent) {
     // Number 13 is the "Enter" key on the keyboard
     if (event.key === "Enter") {
@@ -227,6 +253,10 @@ export default class App extends Vue {
         .push("/search?q=" + this.searchString)
         .then(() => (this.searchString = ""));
     }
+  }
+  reload() {
+    this.refresh = false;
+    window.location.reload();
   }
   get userdata() {
     return this.user;
@@ -261,6 +291,26 @@ export default class App extends Vue {
   userChange() {
     this.items[2].show = this.isUser;
     this.items[1].show = this.isUser;
+    try {
+      if (this.user.settings && this.user.settings.perferDark) {
+        SetTheme(JSON.parse(this.user.settings.perferDark) as boolean, this);
+        if (this.user.settings.themes) {
+          const theme = JSON.parse(this.user.settings.themes) as {
+            light: VuetifyThemeVariant;
+            dark: VuetifyThemeVariant;
+          };
+          if (!theme) {
+            return;
+          }
+          SetThemeColors(this, theme);
+          SetTheme(
+            JSON.parse(this.user.settings.perferDark) as boolean,
+            this,
+            theme
+          );
+        }
+      }
+    } catch (error) {}
   }
   get initials(): string {
     return GetInitials(this.user.name);
@@ -279,6 +329,7 @@ export default class App extends Vue {
     (this.$refs["view"] as any).publish();
   }
   created() {
+    SetApp(this);
     document.title = "Mo2";
     GetUserInfoAsync().then((u) => {
       this.user = u;
@@ -290,6 +341,15 @@ export default class App extends Vue {
       this.$vuetify.theme.dark = JSON.parse(
         localStorage.getItem("darkTheme")
       ) as boolean;
+    } catch (err) {}
+    try {
+      const themes = JSON.parse(localStorage.getItem("themes")) as {
+        light: VuetifyThemeVariant;
+        dark: VuetifyThemeVariant;
+      };
+      if (themes) {
+        SetThemeColors(this, themes);
+      }
     } catch (err) {}
     window.addEventListener("resize", () => {
       this.onResize();

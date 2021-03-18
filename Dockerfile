@@ -1,6 +1,7 @@
 FROM node:12.18 AS front
 WORKDIR /home/mo2front
 COPY ./mo2front .
+RUN npm cache clean --force
 RUN npm install
 RUN npm run build
 

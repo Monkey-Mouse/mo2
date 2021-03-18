@@ -82,7 +82,7 @@
                   @click="login"
                   >登录</v-btn
                 >
-                <v-btn @click="close" color="red">取消</v-btn>
+                <v-btn @click="close" color="error">取消</v-btn>
               </v-card-actions>
             </v-tab-item>
             <v-tab-item :key="2">
@@ -138,23 +138,23 @@
                   outlined
                   text
                   @click="login"
-                  >确认并登录</v-btn
+                  >确认</v-btn
                 >
-                <v-btn
+                <!-- <v-btn
                   v-if="emailSent"
                   :disabled="this.$v.$anyError"
                   outlined
                   text
                   @click="backToMain"
                   >先继续浏览</v-btn
-                >
+                > -->
                 <v-btn :disabled="regDisable" outlined text @click="register">{{
                   emailSent
                     ? "重新发送" + (seconds > 0 ? `${seconds}` : "")
                     : "注册"
                 }}</v-btn>
 
-                <v-btn v-if="!emailSent" @click="close" color="red">取消</v-btn>
+                <v-btn @click="close" color="error">取消</v-btn>
               </v-card-actions>
             </v-tab-item>
           </v-tabs-items>

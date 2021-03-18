@@ -311,7 +311,8 @@ export default class EditArticle extends Vue {
       .then(() => {
         this.$emit("update:autoSaving", false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error(err);
         this.$emit("update:autoSaving", null);
       });
   }

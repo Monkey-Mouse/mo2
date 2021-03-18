@@ -9,7 +9,7 @@
             contenteditable="true"
             class="display-1 text-h3 pt-10 font-weight-thin ml-4 mr-4 mb-0 borderless"
           >
-            {{ this.$route.query["q"] }}
+            {{ search }}
           </h1>
         </v-col>
       </v-row>
@@ -44,6 +44,7 @@ export default class Search extends Vue implements BlogAutoLoader {
   blogs: BlogBrief[] = [];
   loading = true;
   firstloading = true;
+  search = "";
   page = 0;
   pagesize = 5;
   nomore = false;
@@ -54,10 +55,10 @@ export default class Search extends Vue implements BlogAutoLoader {
       // Cancel the default action, if needed
       event.preventDefault();
 
+      const text = (this.$refs.s as HTMLElement).textContent.trim();
+      if (text === (this.$route.query["q"] as string)) return;
       // Trigger the button element with a click
-      this.$router
-        .replace("search?q=" + (this.$refs.s as HTMLElement).textContent)
-        .catch();
+      this.$router.replace("search?q=" + text).catch(() => {});
       if (!this.loading) {
         this.init();
       }
@@ -67,15 +68,17 @@ export default class Search extends Vue implements BlogAutoLoader {
 
       setTimeout(() => {
         if (j === this.i && !this.loading) {
-          this.$router
-            .replace("search?q=" + (this.$refs.s as HTMLElement).textContent)
-            .catch();
+          const text = (this.$refs.s as HTMLElement).textContent.trim();
+          console.log(this.$route.query["q"], text);
+          if (text === (this.$route.query["q"] as string)) return;
+          this.$router.replace("search?q=" + text).catch(() => {});
           this.init();
         }
       }, 500);
     }
   }
   created() {
+    this.search = (this.$route.query["q"] as string).trim();
     this.init();
   }
   init() {

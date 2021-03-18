@@ -1,6 +1,8 @@
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment, SubComment } from '@/models/index'
+import Vue from '*.vue';
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment, SubComment, Count } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
+import { VuetifyThemeVariant } from 'vuetify/types/services/theme';
 import router from '../router'
 
 export function randomProperty(obj: any) {
@@ -102,7 +104,7 @@ export const GetArticles = async (query: { page: number; pageSize: number; draft
     return (await axios.get<BlogBrief[]>('/api/blogs/query' + ParseQuery(query))).data
 }
 export async function UpsertBlog(query: { draft: boolean }, blog: BlogUpsert) {
-    if (blog.categories.length === 0) {
+    if (!blog.categories || blog.categories.length === 0) {
         blog.categories = []
     }
     return (await axios.post<Blog>('/api/blogs/publish' + ParseQuery(query), blog)).data
@@ -211,9 +213,75 @@ export async function GetCates(id: string) {
 export async function GetComments(id: string, query: { page: number; pagesize: number }) {
     return (await axios.get<Comment[]>('/api/comment/' + id + ParseQuery(query))).data ?? []
 }
+export async function GetCommentNum(id: string) {
+    return (await axios.get<Count>('/api/commentcount/' + id)).data
+}
 export async function UpsertComment(c: Comment) {
     return (await axios.post<Comment>('/api/comment', c)).data
 }
 export async function UpsertSubComment(id: string, c: SubComment) {
     return (await axios.post<SubComment>('/api/comment/' + id, c)).data
+}
+var app: { refresh: boolean, showLogin: () => void };
+export function SetApp(params: { refresh: boolean, showLogin: () => void }) {
+    app = params;
+}
+export function ShowLogin() {
+    app.showLogin()
+}
+export function ShowRefresh() {
+    app.refresh = true;
+}
+
+export function GetTheme() {
+    return JSON.parse(
+        localStorage.getItem("darkTheme")
+    ) as boolean;
+}
+export function SetTheme(dark: boolean, that: Vue, themes?: { light: VuetifyThemeVariant, dark: VuetifyThemeVariant }, user?: User) {
+    that.$vuetify.theme.dark = dark;
+    localStorage.setItem("darkTheme", String(that.$vuetify.theme.dark));
+    if (themes) {
+        localStorage.setItem("themes", JSON.stringify(themes));
+    }
+    if (user && user.roles && user.roles.indexOf(UserRole) > -1) {
+        if (!user.settings) {
+            user.settings = {};
+        }
+        user.settings.perferDark = localStorage.getItem("darkTheme");
+        user.settings.themes = localStorage.getItem("themes");
+        UpdateUserInfo(user);
+    }
+}
+export function SetThemeColors(that: Vue, themes?: { light: VuetifyThemeVariant, dark: VuetifyThemeVariant }) {
+    for (const k in themes.dark) {
+        that.$vuetify.theme.themes.dark[k] = themes.dark[k]
+    }
+    for (const k in themes.light) {
+        that.$vuetify.theme.themes.light[k] = themes.light[k]
+    }
+}
+
+export class LazyExecutor {
+    private i = 0;
+    private f: () => void;
+    private delay = 0;
+    constructor(f?: () => void, delay: number = 200) {
+        this.f = f;
+        this.delay = delay;
+    }
+    /**
+     * Execute
+     */
+    public Execute(f?: () => void,) {
+        this.i++;
+        const num = this.i;
+        setTimeout(() => {
+            if (num === this.i) {
+                if (f) {
+                    f()
+                } else this.f();
+            }
+        }, 200);
+    }
 }

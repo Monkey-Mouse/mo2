@@ -22,6 +22,13 @@ func init() {
 	}, model.IndexModels...))
 }
 
+// Ge3tCommentNum 获取该文章下的一级评论数量
+func GetCommentNum(articleID primitive.ObjectID) int64 {
+	num, _ := commentCol.CountDocuments(context.TODO(),
+		bson.M{"article": articleID})
+	return num
+}
+
 // GetComments get comments
 func GetComments(articleID primitive.ObjectID, page int64, pagesize int64) (cs []model.Comment) {
 	cursor, err := commentCol.Find(
