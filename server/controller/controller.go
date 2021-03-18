@@ -37,7 +37,7 @@ const (
 func SetupHandlers(c *Controller) {
 	api := middleware.H.Group("/api")
 	{
-		api.GetWithRL("account/verify", c.VerifyEmail, 3)
+		api.GetWithRL("accounts/verify", c.VerifyEmail, 3)
 		api.GetWithRL("/logs", c.Log, 10)
 		admin := api.Group("/admin", model.GeneralAdmin)
 		{
