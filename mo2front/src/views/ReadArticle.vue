@@ -66,7 +66,10 @@
           />
           <div style="padding-bottom: 1rem"></div>
           <v-row v-if="!draft">
-            <v-col class="offset-lg-11 offset-10"
+            <v-col class="offset-lg-10 offset-9"
+              ><v-icon @click="share">mdi-share</v-icon></v-col
+            >
+            <v-col class=""
               ><v-icon @click="loadComment">mdi-message-reply-outline</v-icon
               >{{ commentNum }}</v-col
             >
@@ -249,6 +252,7 @@ import {
   GetUserData,
   GetUserDatas,
   globaldic,
+  ShareToQQ,
   UpsertComment,
   UpsertSubComment,
   UserRole,
@@ -299,6 +303,14 @@ export default class ReadArticle extends Vue {
   }
   get deleteContent() {
     return '你确定要删除"' + this.title + '"吗？';
+  }
+  share() {
+    ShareToQQ({
+      title: this.blog.title,
+      pic: this.blog.cover,
+      summary: this.blog.description,
+      desc: this.blog.description,
+    });
   }
   created() {
     if (this.$route.query["draft"]) {

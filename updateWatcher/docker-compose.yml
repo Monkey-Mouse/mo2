@@ -46,7 +46,7 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - LETSENCRYPT=true
-      - LE_EMAIL=chronos@mo2.com
+      - LE_EMAIL=chronos@motwo.cn
       - LE_FQDN=www.motwo.cn
       #- SSL_CERT=le-crt.pem
       #- SSL_KEY=le-key.pem
