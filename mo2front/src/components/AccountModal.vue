@@ -42,11 +42,11 @@
                 <v-row>
                   <v-col cols="12">
                     <v-text-field
-                      label="Email"
-                      v-model="email"
-                      :rules="validateEmail()"
+                      label="Email or UserName"
+                      v-model="emailOrName"
+                      :rules="validateNameOrEmail()"
                     >
-                      <v-icon slot="append" color="gray"> mdi-email </v-icon>
+                      <v-icon slot="append" color="gray"> mdi-account </v-icon>
                     </v-text-field>
                   </v-col>
                 </v-row>
@@ -77,7 +77,7 @@
                   outlined
                   text
                   :disabled="
-                    this.$v.password.$anyError || this.$v.email.$anyError
+                    this.$v.password.$anyError || this.$v.emailOrName.$anyError
                   "
                   @click="login"
                   >登录</v-btn
@@ -185,6 +185,7 @@ export default class AccountModal extends Vue {
   enable!: boolean;
   @Prop()
   user!: User;
+  emailOrName = "";
   regerror: string = "";
   loginerr = "";
   processing = false;
@@ -206,6 +207,9 @@ export default class AccountModal extends Vue {
       email: email,
     },
     name: {
+      required: required,
+    },
+    emailOrName: {
       required: required,
     },
   };
@@ -236,11 +240,14 @@ export default class AccountModal extends Vue {
     this.$emit("update:enable", false);
   }
   login() {
+    if (this.tabkey === 1) {
+      this.emailOrName = this.email;
+    }
     this.$v.$touch();
-    if (this.$v.password.$anyError || this.$v.email.$anyError) return;
+    if (this.$v.password.$anyError || this.$v.emailOrName.$anyError) return;
     this.processing = true;
     LoginAsync({
-      userNameOrEmail: this.email,
+      userNameOrEmail: this.emailOrName,
       password: this.password,
     })
       .then((u) => {
@@ -256,6 +263,11 @@ export default class AccountModal extends Vue {
         }
         this.loginerr = GetErrorMsg(err);
       });
+  }
+  validateNameOrEmail() {
+    this.$v.emailOrName.$touch();
+
+    return [() => this.$v.emailOrName.required || "登录信息不可为空"];
   }
   validateName() {
     this.$v.name.$touch();
