@@ -236,6 +236,7 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 	if !filter.IsDraft || !mErr.IsError() {
 		blogs := database.FindBlogsByUserId(id, filter)
 		ctx.JSON(http.StatusOK, blogs)
+		return
 	}
 	ctx.Status(http.StatusNoContent)
 }
@@ -267,7 +268,7 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 	}
 	var mErr mo2errors.Mo2Errors
 	if isDraft {
-		if mErr = JudgeAuthorize(ctx, &model.Blog{AuthorID: id}); mErr.IsError() {
+		if mErr = JudgeAuthorize(ctx, &blog); mErr.IsError() {
 			if mErr.ErrorCode == mo2errors.Mo2NoLogin {
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
 				return
@@ -276,6 +277,7 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 	}
 	if !isDraft || !mErr.IsError() {
 		ctx.JSON(http.StatusOK, blog)
+		return
 	}
 	ctx.Status(http.StatusNoContent)
 }
