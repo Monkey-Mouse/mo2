@@ -77,7 +77,7 @@ func (c *Controller) DeleteCategory(ctx *gin.Context) {
 
 // FindAllCategories godoc
 // @Summary find categories
-// @Description 若id为空，返回所有categories；若id不为空，返回该id的category
+// @Description 若id为空，返回所有categories(debug mode)；若id不为空，返回该id的category
 // @Tags category
 // @Produce  json
 // @Param id query string false "string ObjectID" ""
@@ -86,7 +86,7 @@ func (c *Controller) DeleteCategory(ctx *gin.Context) {
 func (c *Controller) FindAllCategories(ctx *gin.Context) {
 	idStr := ctx.Query("id")
 	var cats []model.Directory
-	if len(idStr) == 0 {
+	if len(idStr) == 0 && !mo2utils.IsEnvRelease() {
 		cats = database.FindAllCategories()
 	} else {
 		id, err := primitive.ObjectIDFromHex(idStr)

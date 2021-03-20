@@ -320,7 +320,7 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 // @Tags accounts
 // @Accept  json
 // @Produce  json
-// @Param userIDs path array true "user IDs list"
+// @Param id query array true "user IDs list"
 // @Success 200 {object} []dto.UserInfoBrief
 // @Router /api/accounts/listBrief [get]
 func (c *Controller) ListAccountsInfo(ctx *gin.Context) {
