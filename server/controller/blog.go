@@ -219,8 +219,7 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
 		return
 	}
-	idStr := ctx.Query("id")
-	id, err := primitive.ObjectIDFromHex(idStr)
+	id, err := primitive.ObjectIDFromHex(ctx.Query("id"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
