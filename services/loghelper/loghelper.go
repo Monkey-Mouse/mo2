@@ -10,14 +10,17 @@ import (
 	"google.golang.org/grpc"
 )
 
-var client logservice.LogServiceClient
-
-func init() {
-	conn, err := grpc.Dial(":"+os.Getenv("LOG_PORT"), grpc.WithInsecure())
+func (l *LogClient) Init(portEnv string) {
+	conn, err := grpc.Dial(":"+os.Getenv(portEnv), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("grpc.Dial err: %v", err)
 	}
-	client = logservice.NewLogServiceClient(conn)
+	l.client = logservice.NewLogServiceClient(conn)
+}
+
+// LogClient as name
+type LogClient struct {
+	client logservice.LogServiceClient
 }
 
 type Log struct {
@@ -29,8 +32,8 @@ type Log struct {
 	OperationTargetOwner primitive.ObjectID
 }
 
-func LogInfo(log Log) error {
-	_, err := client.Log(context.TODO(), &logservice.LogModel{
+func (l *LogClient) LogInfo(log Log) error {
+	_, err := l.client.Log(context.TODO(), &logservice.LogModel{
 		Operator:             log.Operator[:],
 		Operation:            log.Operation,
 		OperationTarget:      log.OperationTarget[:],

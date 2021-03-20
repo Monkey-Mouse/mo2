@@ -16,6 +16,8 @@ func TestLogInfo(t *testing.T) {
 		t.Skipf("Skip for ci")
 		return
 	}
+	l := LogClient{}
+	l.Init("LOG_PORT")
 	id1 := primitive.NewObjectID()
 	id2 := primitive.NewObjectID()
 	id3 := primitive.NewObjectID()
@@ -37,7 +39,7 @@ func TestLogInfo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := LogInfo(tt.args.log); (err != nil) != tt.wantErr {
+			if err := l.LogInfo(tt.args.log); (err != nil) != tt.wantErr {
 				t.Errorf("LogInfo() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
