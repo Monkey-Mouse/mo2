@@ -17,7 +17,7 @@ func TestLogInfo(t *testing.T) {
 		return
 	}
 	l := LogClient{}
-	l.Init("LOG_PORT")
+	l.Init("TEST_TARGET")
 	id1 := primitive.NewObjectID()
 	id2 := primitive.NewObjectID()
 	id3 := primitive.NewObjectID()

@@ -18,7 +18,7 @@ import (
 var notifyLogClient = loghelper.LogClient{}
 
 func init() {
-	notifyLogClient.Init("COMMENT_LOG_PORT")
+	notifyLogClient.Init("COMMENT_LOG")
 }
 
 // GetComment get comments

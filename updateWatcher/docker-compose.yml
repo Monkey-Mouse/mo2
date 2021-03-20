@@ -22,12 +22,12 @@ services:
     depends_on:
       - "mongodb"
       - "redis"
-      - "mo2commentlog"
+      - "mo2notificationlog"
     volumes:
       - "./secrets:/app/secrets"
       - "./bleve:/app/.bleve"
     environment:
-      - COMMENT_LOG_PORT=9990
+      - COMMENT_LOG=mo2notificationlog:9990
 
   mo2notificationlog:
     image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2log:latest
