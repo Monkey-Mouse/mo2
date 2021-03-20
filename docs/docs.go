@@ -243,8 +243,8 @@ var doc = `{
                     {
                         "type": "array",
                         "description": "user IDs list",
-                        "name": "userIDs",
-                        "in": "path",
+                        "name": "id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -434,7 +434,7 @@ var doc = `{
         },
         "/api/blogs/category": {
             "get": {
-                "description": "若id为空，返回所有categories；若id不为空，返回该id的category",
+                "description": "若id为空，返回所有categories(debug mode)；若id不为空，返回该id的category",
                 "produces": [
                     "application/json"
                 ],
@@ -1168,6 +1168,48 @@ var doc = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/model.Directory"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/directories/{collection}": {
+            "get": {
+                "description": "from a list of directory ids [usage]:/api/directories/{collection}?id=60223d4042d6febff9f276f0\u0026id=60236866d2a68483adaccc38",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "directory"
+                ],
+                "summary": "List directories brief info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "category/...",
+                        "name": "collection",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "description": "directory IDs list",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Directory"
+                            }
                         }
                     }
                 }

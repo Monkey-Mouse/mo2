@@ -14,7 +14,7 @@ import (
 	"sync"
 )
 
-var catCol = GetCollection("category")
+var catCol = GetCollection(CategoryCol)
 
 func init() {
 	createCategoryIndexes(catCol)
