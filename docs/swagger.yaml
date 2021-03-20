@@ -384,8 +384,8 @@ paths:
       description: from a list of user ids [usage]:/api/accounts/listBrief?id=60223d4042d6febff9f276f0&id=60236866d2a68483adaccc38
       parameters:
       - description: user IDs list
-        in: path
-        name: userIDs
+        in: query
+        name: id
         required: true
         type: array
       produces:
@@ -592,7 +592,7 @@ paths:
       - blogs
   /api/blogs/category:
     get:
-      description: 若id为空，返回所有categories；若id不为空，返回该id的category
+      description: 若id为空，返回所有categories(debug mode)；若id不为空，返回该id的category
       parameters:
       - description: string ObjectID
         in: query
@@ -974,6 +974,34 @@ paths:
       summary: count comments
       tags:
       - comments
+  /api/directories/{collection}:
+    get:
+      consumes:
+      - application/json
+      description: from a list of directory ids [usage]:/api/directories/{collection}?id=60223d4042d6febff9f276f0&id=60236866d2a68483adaccc38
+      parameters:
+      - description: category/...
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: directory IDs list
+        in: query
+        name: id
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Directory'
+            type: array
+      summary: List directories brief info
+      tags:
+      - directory
   /api/directories/category:
     delete:
       consumes:

@@ -14,7 +14,7 @@ type Directory struct {
 	ParentID primitive.ObjectID   `json:"parent_id,omitempty" example:"xxxxxxxxxxxxxx==" bson:"parent_id,omitempty"`
 	Name     string               `json:"name,omitempty" example:"records" bson:"name,omitempty"`
 	Info     DirectoryInfo        `json:"info,omitempty" bson:"info,omitempty"`
-	OwnerIDs []primitive.ObjectID `json:"owner_ids,omitempty"  bson:"owner_ids,omitempty"`
+	OwnerIDs []primitive.ObjectID `json:"owner_ids"  bson:"owner_ids,omitempty"`
 }
 
 // UpdateParent 以父目录更新当前目录
