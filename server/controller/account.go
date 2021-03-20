@@ -1,14 +1,11 @@
 package controller
 
 import (
-	dto "mo2/dto"
+	"mo2/dto"
 	"mo2/mo2utils"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"github.com/gin-gonic/gin"
-
-	//"github.com/swaggo/swag/example/celler/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"mo2/database"
 	"mo2/server/controller/badresponse"
@@ -298,7 +295,7 @@ func (c *Controller) LogoutAccount(ctx *gin.Context) {
 func (c *Controller) ShowAccount(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	var us []dto.UserInfo
-	if idStr == "undefined" {
+	if idStr == "undefined" && !mo2utils.IsEnvRelease() {
 		us = database.FindAllAccountsInfo()
 	} else {
 		id, err := primitive.ObjectIDFromHex(idStr)
@@ -329,7 +326,7 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 func (c *Controller) ListAccountsInfo(ctx *gin.Context) {
 	userIDstrs, exist := ctx.GetQueryArray("id")
 	var bs []dto.UserInfoBrief
-	if !exist {
+	if !exist && !mo2utils.IsEnvRelease() {
 		bs = database.ListAllAccountsBrief()
 	} else {
 		bs = database.ListAccountsBrief(userIDstrs)
