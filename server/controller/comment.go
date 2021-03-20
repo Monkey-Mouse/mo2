@@ -1,15 +1,25 @@
 package controller
 
 import (
+	"fmt"
 	"mo2/database"
 	"mo2/mo2utils"
 	"mo2/server/controller/badresponse"
 	"mo2/server/model"
+	"mo2/services/loghelper"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var notifyLogClient = loghelper.LogClient{}
+
+func init() {
+	notifyLogClient.Init("COMMENT_LOG_PORT")
+}
 
 // GetComment get comments
 // @Summary get comments
@@ -56,8 +66,19 @@ func (c *Controller) PostComment(ctx *gin.Context) {
 		return
 	}
 	u, _ := mo2utils.GetUserInfo(ctx)
-	cmt.Aurhor = u.ID
+	cmt.Author = u.ID
 	database.UpsertComment(&cmt)
+	b := model.Blog{}
+	database.BlogCol.FindOne(ctx,
+		bson.M{"_id": cmt.Article},
+		options.FindOne().SetProjection(bson.D{{"author_id", 1}, {"title", 1}})).Decode(&b)
+	notifyLogClient.LogInfo(
+		loghelper.Log{
+			Operator:             u.ID,
+			Operation:            loghelper.COMMENT,
+			OperationTarget:      cmt.Article,
+			OperationTargetOwner: b.AuthorID,
+			ExtraMessage:         fmt.Sprintf(`评论了你的文章<a href="/article/%s">%s</a>：%s`, b.ID.Hex(), b.Title, cmt.Content)})
 	ctx.JSON(200, &cmt)
 }
 

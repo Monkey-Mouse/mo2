@@ -5,6 +5,7 @@ services:
     restart: always
     volumes:
       - "./mongo-volume:/data/db"
+
   redis:
     image: "bitnami/redis"
     restart: always
@@ -12,6 +13,7 @@ services:
       # ALLOW_EMPTY_PASSWORD is recommended only for development.
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+
   mo2:
     image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2:latest
     restart: always
@@ -20,9 +22,24 @@ services:
     depends_on:
       - "mongodb"
       - "redis"
+      - "mo2commentlog"
     volumes:
       - "./secrets:/app/secrets"
       - "./bleve:/app/.bleve"
+    environment:
+      - COMMENT_LOG_PORT=9990
+
+  mo2notificationlog:
+    image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2log:latest
+    restart: always
+    depends_on:
+      - "mongodb"
+    environment:
+      - MO2_MONGO_URL=mongodb://mongodb:27017
+      - MO2_DATABASE=mo2
+      - LOG_COL=notificationLog
+      - LOG_PORT=9990
+
   nginx:
     build: .
     hostname: nginx

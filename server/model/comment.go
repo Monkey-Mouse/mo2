@@ -8,7 +8,7 @@ type Comment struct {
 	Content    string             `json:"content,omitempty" example:"a comment" bson:"content,omitempty"`
 	EntityInfo Entity             `json:"entity_info,omitempty" bson:"entity_info,omitempty"`
 	Praise     Praiseable         `json:"praise,omitempty" bson:"praise,omitempty"`
-	Aurhor     primitive.ObjectID `json:"aurhor,omitempty" bson:"aurhor,omitempty"`
+	Author     primitive.ObjectID `json:"aurhor,omitempty" bson:"aurhor,omitempty"`
 	Article    primitive.ObjectID `json:"article,omitempty" bson:"article,omitempty"`
 	Subs       []Subcomment       `json:"subs" bson:"subs"`
 }

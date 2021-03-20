@@ -1316,6 +1316,54 @@ var doc = `{
                 }
             }
         },
+        "/api/notification": {
+            "get": {
+                "description": "get notifications",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "get notifications",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "int 0",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 5",
+                        "name": "pagesize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/notification/num": {
+            "get": {
+                "description": "get notification num",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "get notification num",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/relation/blogs/{type}/{ID}": {
             "get": {
                 "description": "根据type返回不同结果：[category] 所有category包含的blog",

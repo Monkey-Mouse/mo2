@@ -3,10 +3,10 @@ module mo2
 go 1.15
 
 require (
-	github.com/Monkey-Mouse/mo2log v0.0.2
+	github.com/Monkey-Mouse/mo2log v0.0.3-0.20210320092703-fc104d6da1fb
 	github.com/RoaringBitmap/roaring v0.5.5 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/aws/aws-sdk-go v1.38.0 // indirect
+	github.com/aws/aws-sdk-go v1.38.1 // indirect
 	github.com/blevesearch/bleve v1.0.14
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/pprof v1.3.0
@@ -39,6 +39,7 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210319071255-635bc2c9138d // indirect
 	golang.org/x/tools v0.1.0 // indirect
+	google.golang.org/genproto v0.0.0-20210319143718-93e7006c17a6 // indirect
 	google.golang.org/grpc v1.36.0
 	gopkg.in/yaml.v2 v2.4.0
 )
