@@ -20,9 +20,9 @@ func (e *Mo2Errors) SetErrorTip(s string) {
 }
 
 // Init init with code and tip
-func (e *Mo2Errors) Init(c int, s string) {
+func (e *Mo2Errors) Init(c int, format string, a ...interface{}) {
 	e.ErrorCode = c
-	e.ErrorTip = s
+	e.ErrorTip = fmt.Sprintf(format, a...)
 }
 
 // InitError init with error
