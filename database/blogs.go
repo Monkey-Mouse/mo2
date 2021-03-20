@@ -25,12 +25,15 @@ const (
 	DurationBeforeBlogDelete = time.Hour * 24 * 30
 )
 
-var blogCol *mongo.Collection = GetCollection("blog")
-var draftCol *mongo.Collection = GetCollection("draft")
+// BlogCol blog col
+var BlogCol *mongo.Collection = GetCollection("blog")
+
+// DraftCol draft col
+var DraftCol *mongo.Collection = GetCollection("draft")
 
 func init() {
-	createBlogIndexes(blogCol)
-	createBlogIndexes(draftCol)
+	createBlogIndexes(BlogCol)
+	createBlogIndexes(DraftCol)
 }
 
 func createBlogIndexes(col *mongo.Collection) {
@@ -40,9 +43,9 @@ func createBlogIndexes(col *mongo.Collection) {
 	}, model.IndexModels...))
 }
 func chooseCol(isDraft bool) (col *mongo.Collection) {
-	col = draftCol
+	col = DraftCol
 	if !isDraft {
-		col = blogCol
+		col = BlogCol
 	}
 	return
 }

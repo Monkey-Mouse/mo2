@@ -39,6 +39,12 @@ func SetupHandlers(c *Controller) {
 	{
 		api.GetWithRL("accounts/verify", c.VerifyEmail, 3)
 		api.GetWithRL("/logs", c.Log, 10)
+
+		noti := api.Group("notification", model.OrdinaryUser)
+		{
+			noti.Get("num", c.GetNotificationNum)
+			noti.Get("", c.GetNotifications)
+		}
 		admin := api.Group("/admin", model.GeneralAdmin)
 		{
 			admin.Post("indexblogs", c.IndexAllBlogs)
@@ -103,7 +109,6 @@ func SetupHandlers(c *Controller) {
 			comment.Get(":id", c.GetComment)
 			comment.Post("", c.PostComment, model.OrdinaryUser)
 			comment.Post(":id", c.PostSubComment, model.OrdinaryUser)
-
 		}
 		api.Get("commentcount/:id", c.GetCommentNum)
 	}

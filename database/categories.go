@@ -3,15 +3,16 @@ package database
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"mo2/dto"
 	"mo2/mo2utils/mo2errors"
 	"mo2/server/model"
 	"sync"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var catCol = GetCollection(CategoryCol)
@@ -159,13 +160,13 @@ func UpdateSubCategories(catID primitive.ObjectID, parentID primitive.ObjectID) 
 
 // RemoveCategoriesInAllBlogs 删除所有blog中的category存在id
 func RemoveCategoriesInAllBlogs(catIDs ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
-	resBlog, err := blogCol.UpdateMany(context.TODO(), bson.M{"categories": bson.M{"$in": catIDs}}, bson.M{"$pullAll": bson.M{"categories": catIDs}})
+	resBlog, err := BlogCol.UpdateMany(context.TODO(), bson.M{"categories": bson.M{"$in": catIDs}}, bson.M{"$pullAll": bson.M{"categories": catIDs}})
 	if err != nil {
 		mErr.InitError(err)
 		log.Println(err)
 		return
 	}
-	resDraft, err := draftCol.UpdateMany(context.TODO(), bson.M{"categories": bson.M{"$in": catIDs}}, bson.M{"$pullAll": bson.M{"categories": catIDs}})
+	resDraft, err := DraftCol.UpdateMany(context.TODO(), bson.M{"categories": bson.M{"$in": catIDs}}, bson.M{"$pullAll": bson.M{"categories": catIDs}})
 	if err != nil {
 		mErr.InitError(err)
 		log.Println(err)
@@ -287,24 +288,24 @@ func RelateSubCategories2Category(s2e dto.RelateEntitySet2Entity) {
 
 // RelateCategory2Blog 在blog及draft的categories中添加category的id
 func RelateCategory2Blog(e2e dto.RelateEntity2Entity) {
-	blogCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": e2e.RelatedID}})
-	draftCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": e2e.RelatedID}})
+	BlogCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": e2e.RelatedID}})
+	DraftCol.UpdateOne(context.TODO(), bson.M{"_id": e2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": e2e.RelatedID}})
 }
 
 // RelateCategory2Blog 在blog及draft的categories中添加categories的id
 func RelateCategories2Blog(s2e dto.RelateEntitySet2Entity) {
-	blogCol.UpdateOne(context.TODO(), bson.M{"_id": s2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": bson.M{"$each": s2e.RelatedIDs}}})
-	draftCol.UpdateOne(context.TODO(), bson.M{"_id": s2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": bson.M{"$each": s2e.RelatedIDs}}})
+	BlogCol.UpdateOne(context.TODO(), bson.M{"_id": s2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": bson.M{"$each": s2e.RelatedIDs}}})
+	DraftCol.UpdateOne(context.TODO(), bson.M{"_id": s2e.RelateToID}, bson.M{"$addToSet": bson.M{"categories": bson.M{"$each": s2e.RelatedIDs}}})
 }
 
 // RelateCategories2Blogs 在blogs及drafts的categories中添加categories的id
 // Todo find nice way to make of use
 func RelateCategories2Blogs(s2s dto.RelateEntitySet2EntitySet) (result []model.Blog) {
 	// 将所有满足条件的blog/draft进行更新
-	blogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelateToIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelatedIDs}}}})
-	draftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelateToIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelatedIDs}}}})
+	BlogCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelateToIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelatedIDs}}}})
+	DraftCol.UpdateMany(context.TODO(), bson.D{{"_id", bson.D{{"$in", s2s.RelateToIDs}}}}, bson.D{{"$addToSet", bson.M{"categories": bson.M{"$each": s2s.RelatedIDs}}}})
 	// todo delete useless result
-	cursor, _ := blogCol.Find(context.TODO(), bson.D{{"_id", bson.M{"_id": bson.M{"$in": s2s.RelateToIDs}}}}, options.Find().SetProjection(bson.M{"content": 0}))
+	cursor, _ := BlogCol.Find(context.TODO(), bson.D{{"_id", bson.M{"_id": bson.M{"$in": s2s.RelateToIDs}}}}, options.Find().SetProjection(bson.M{"content": 0}))
 	cursor.All(context.TODO(), &result)
 	return
 }

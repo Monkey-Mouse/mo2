@@ -2,13 +2,14 @@ package database
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"mo2/server/model"
 	"testing"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func upsertRecycleItem4Test(num int) (ids []primitive.ObjectID) {
@@ -96,10 +97,10 @@ func TestDeleteExpireItems(t *testing.T) {
 					switch tt.item.Handler {
 					case model.HandlerBlog:
 						var res model.Blog
-						err = blogCol.FindOne(context.TODO(), bson.M{"_id": tt.item.ItemID}).Decode(&res)
+						err = BlogCol.FindOne(context.TODO(), bson.M{"_id": tt.item.ItemID}).Decode(&res)
 					case model.HandlerDraft:
 						var res model.Blog
-						err = draftCol.FindOne(context.TODO(), bson.M{"_id": tt.item.ItemID}).Decode(&res)
+						err = DraftCol.FindOne(context.TODO(), bson.M{"_id": tt.item.ItemID}).Decode(&res)
 					default:
 						log.Println("invalid handler")
 					}

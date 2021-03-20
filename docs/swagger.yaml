@@ -1092,6 +1092,37 @@ paths:
       summary: get user info
       tags:
       - logs
+  /api/notification:
+    get:
+      description: get notifications
+      parameters:
+      - description: int 0
+        in: query
+        name: page
+        type: integer
+      - description: int 5
+        in: query
+        name: pagesize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: get notifications
+      tags:
+      - notification
+  /api/notification/num:
+    get:
+      description: get notification num
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: get notification num
+      tags:
+      - notification
   /api/relation/blogs/{type}/{ID}:
     get:
       consumes:
