@@ -63,7 +63,7 @@ import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 import { TimeAgo } from "vue2-timeago";
 import { Dictionary } from "node_modules/vue-router/types/router";
 import Avatar from "../components/UserAvatar.vue";
-import Nothing from "./NothingHere.vue";
+import Nothing from "../components/NothingHere.vue";
 @Component({
   components: {
     TimeAgo,
