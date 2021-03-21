@@ -288,3 +288,6 @@ export class LazyExecutor {
 export function ShareToQQ(param: { title: string, pic: string, summary: string, desc: string }) {
     window.open(`https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=${encodeURIComponent(document.location.toString())}&sharesource=qzone&title=${param.title}&pics=${param.pic}&summary=${param.summary}`, "_blank")
 }
+export async function GetNotificationNums() {
+    return (await axios.get<{ num: number }>("/api/notification/num")).data
+}
