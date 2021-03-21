@@ -250,7 +250,7 @@ export default class BlogTimeLineList extends Vue {
     });
   }
   rateChange(blog: BlogBrief) {
-    // to be implemented
+    // TODO to be implemented
   }
   gotoArticle(id: string) {
     this.$router.push(

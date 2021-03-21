@@ -49,13 +49,10 @@ export interface UserSettings {
     perferDark?: string;
     themes?: string;
 }
-export interface User {
-    id: string;
-    name: string;
+export interface User extends UserListData {
     email: string;
     roles?: string[];
     entityInfo?: EntityInfo;
-    settings?: UserSettings;
 }
 export interface InputProp {
     errorMsg: { [name: string]: string };
@@ -109,4 +106,13 @@ export interface Comment extends SubComment {
 }
 export interface Count {
     count: number;
+}
+export interface Notification {
+    OperatorID: string;
+    ExtraMessage: string;
+    CreateTime: string;
+    Processed: boolean;
+}
+export interface DisplayNotification extends Notification {
+    user?: User;
 }

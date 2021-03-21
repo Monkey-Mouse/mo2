@@ -98,14 +98,33 @@
           offset-x="15"
           offset-y="10"
         >
-          <avatar :size="40" :user="user" />
+          <div
+            :class="notificationNum !== 0 ? 'clickable' : ''"
+            @click="
+              () => {
+                if (notificationNum !== 0) {
+                  $router.push('/notifications');
+                  notificationNum = 0;
+                }
+              }
+            "
+          >
+            <avatar :size="40" :user="user" />
+          </div>
         </v-badge>
 
         <v-list-item-title class="ml-7">{{
           isUser ? user.name : "未登录"
         }}</v-list-item-title>
 
-        <v-btn icon v-if="isUser" @click="$router.push('/notifications')">
+        <v-btn
+          icon
+          v-if="isUser"
+          @click="
+            $router.push('/notifications');
+            notificationNum = 0;
+          "
+        >
           <v-icon>mdi-email</v-icon>
         </v-btn>
         <v-btn icon v-if="!isUser" @click="showLogin()"> 登录 </v-btn>
