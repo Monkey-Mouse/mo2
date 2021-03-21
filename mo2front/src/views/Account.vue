@@ -67,7 +67,7 @@
       <v-tabs-items v-model="tab">
         <v-tab-item :value="'tab-1'">
           <v-card flat>
-            <blog-time-line-list v-if="!firstloading" :blogs="blogs" />
+            <blog-time-line-list v-if="!firstloading" :blogs="datalist" />
             <blog-skeleton v-if="loading" :num="pagesize" />
           </v-card>
         </v-tab-item>
@@ -75,7 +75,7 @@
           <v-card flat>
             <blog-time-line-list
               v-if="!draftProps.firstloading"
-              :blogs="draftProps.blogs"
+              :blogs="draftProps.datalist"
               :draft="true"
             />
             <blog-skeleton v-if="draftProps.loading" :num="pagesize" />
@@ -96,7 +96,7 @@ import { BlankUser, BlogBrief, User, InputProp } from "@/models";
 import {
   AddMore,
   addQuery,
-  BlogAutoLoader,
+  AutoLoader,
   ElmReachedButtom,
   GetErrorMsg,
   GetOwnArticles,
@@ -125,12 +125,12 @@ import Category from "../components/Category.vue";
     Category,
   },
 })
-export default class Account extends Vue implements BlogAutoLoader {
+export default class Account extends Vue implements AutoLoader<BlogBrief> {
   @Prop()
   user!: User;
   displayUser: User = BlankUser;
   uid!: string;
-  blogs: BlogBrief[] = [];
+  datalist: BlogBrief[] = [];
   loading = true;
   firstloading = true;
   page = 0;
@@ -145,13 +145,13 @@ export default class Account extends Vue implements BlogAutoLoader {
   avatarProcessing = false;
   avErr = "";
 
-  draftProps: BlogAutoLoader = {
+  draftProps: AutoLoader<BlogBrief> = {
     loading: true,
     firstloading: true,
     page: 0,
     pagesize: 5,
     nomore: false,
-    blogs: [],
+    datalist: [],
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     ReachedButtom: () => {},
   };

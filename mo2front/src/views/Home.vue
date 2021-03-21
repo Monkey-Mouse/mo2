@@ -16,7 +16,7 @@
       </v-row>
     </v-parallax>
     <v-container>
-      <blog-time-line-list v-if="!firstloading" :blogs="blogs" />
+      <blog-time-line-list v-if="!firstloading" :blogs="datalist" />
       <blog-skeleton v-if="loading" :num="pagesize" />
     </v-container>
   </div>
@@ -24,12 +24,7 @@
 
 <script lang="ts">
 import { BlogBrief } from "@/models";
-import {
-  GetArticles,
-  BlogAutoLoader,
-  AddMore,
-  ElmReachedButtom,
-} from "../utils";
+import { GetArticles, AutoLoader, AddMore, ElmReachedButtom } from "../utils";
 import Vue from "vue";
 import Component from "vue-class-component";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
@@ -40,8 +35,8 @@ import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
     BlogSkeleton,
   },
 })
-export default class Home extends Vue implements BlogAutoLoader {
-  blogs: BlogBrief[] = [];
+export default class Home extends Vue implements AutoLoader<BlogBrief> {
+  datalist: BlogBrief[] = [];
   loading = true;
   firstloading = true;
   page = 0;

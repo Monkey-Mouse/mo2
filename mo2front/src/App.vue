@@ -91,14 +91,42 @@
       v-model="drawerProp"
     >
       <v-list-item class="px-2" :style="`height: ${appBarHeight}px`">
-        <v-list-item-avatar>
-          <avatar :size="40" :user="user" />
-        </v-list-item-avatar>
+        <v-badge
+          :value="notificationNum !== 0"
+          color="red"
+          :content="notificationNum"
+          offset-x="15"
+          offset-y="10"
+        >
+          <div
+            :class="notificationNum !== 0 ? 'clickable' : ''"
+            @click="
+              () => {
+                if (notificationNum !== 0) {
+                  $router.push('/notifications');
+                  notificationNum = 0;
+                }
+              }
+            "
+          >
+            <avatar :size="40" :user="user" />
+          </div>
+        </v-badge>
 
-        <v-list-item-title>{{
+        <v-list-item-title class="ml-7">{{
           isUser ? user.name : "未登录"
         }}</v-list-item-title>
 
+        <v-btn
+          icon
+          v-if="isUser"
+          @click="
+            $router.push('/notifications');
+            notificationNum = 0;
+          "
+        >
+          <v-icon>mdi-email</v-icon>
+        </v-btn>
         <v-btn icon v-if="!isUser" @click="showLogin()"> 登录 </v-btn>
         <v-btn icon v-else color="error" @click="logOut"> 登出 </v-btn>
       </v-list-item>
@@ -211,6 +239,7 @@ import Component from "vue-class-component";
 import { BlankUser, User } from "./models";
 import {
   GetInitials,
+  GetNotificationNums,
   GetUserInfoAsync,
   Logout,
   ReachedBottom,
@@ -268,6 +297,7 @@ export default class App extends Vue {
   }
 
   enable = false;
+  notificationNum = 0;
   items = [
     { title: "Home", icon: "mdi-home-city", href: "/", show: true },
     {
@@ -292,6 +322,11 @@ export default class App extends Vue {
     this.items[2].show = this.isUser;
     this.items[1].show = this.isUser;
     try {
+      if (this.isUser) {
+        GetNotificationNums().then((d) => {
+          this.notificationNum = d.num;
+        });
+      }
       if (this.user.settings && this.user.settings.perferDark) {
         SetTheme(JSON.parse(this.user.settings.perferDark) as boolean, this);
         if (this.user.settings.themes) {

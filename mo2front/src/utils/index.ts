@@ -1,5 +1,5 @@
 import Vue from '*.vue';
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment, SubComment, Count } from '@/models/index'
+import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment, SubComment, Count, Notification } from '@/models/index'
 import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 import { VuetifyThemeVariant } from 'vuetify/types/services/theme';
@@ -126,8 +126,8 @@ export const GetUserArticles = async (query: { page: number; pageSize: number; d
 export function ReachedBottom(): boolean {
     return (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight;
 }
-export interface BlogAutoLoader {
-    blogs: BlogBrief[];
+export interface AutoLoader<T> {
+    datalist: T[];
     loading: boolean;
     firstloading: boolean;
     page: number;
@@ -135,10 +135,10 @@ export interface BlogAutoLoader {
     nomore: boolean;
     ReachedButtom: () => void;
 }
-export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { page: number; pageSize: number }) => Promise<BlogBrief[]>) {
+export function ElmReachedButtom<T>(elm: AutoLoader<T>, getMore: (query: { page: number; pageSize: number }) => Promise<T[]>) {
     if (elm.loading === false && !elm.nomore) {
         elm.loading = true;
-        getArticles({
+        getMore({
             page: elm.page++,
             pageSize: elm.pagesize,
         }).then((val) => {
@@ -150,7 +150,7 @@ export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { pag
         });
     }
 }
-export function AddMore(elm: BlogAutoLoader, val: BlogBrief[]) {
+export function AddMore<T>(elm: AutoLoader<T>, val: T[]) {
     if (!val || val.length < elm.pagesize) {
         elm.nomore = true;
     }
@@ -160,7 +160,7 @@ export function AddMore(elm: BlogAutoLoader, val: BlogBrief[]) {
     }
     for (let index = 0; index < val.length; index++) {
         const element = val[index];
-        elm.blogs.push(element);
+        elm.datalist.push(element);
     }
     elm.loading = false;
 }
@@ -287,4 +287,10 @@ export class LazyExecutor {
 }
 export function ShareToQQ(param: { title: string, pic: string, summary: string, desc: string }) {
     window.open(`https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=${encodeURIComponent(document.location.toString())}&sharesource=qzone&title=${param.title}&pics=${param.pic}&summary=${param.summary}`, "_blank")
+}
+export async function GetNotificationNums() {
+    return (await axios.get<{ num: number }>("/api/notification/num")).data
+}
+export async function GetNotifications(query: { page: number, pagesize: number }) {
+    return (await axios.get<Notification[]>("/api/notification" + ParseQuery(query))).data
 }

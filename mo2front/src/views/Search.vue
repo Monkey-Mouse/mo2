@@ -16,7 +16,7 @@
       <v-row
         ><v-col cols="12" lg="10" offset-lg="1"><v-divider /></v-col
       ></v-row>
-      <blog-time-line-list v-if="!firstloading" :blogs="blogs" />
+      <blog-time-line-list v-if="!firstloading" :blogs="datalist" />
       <blog-skeleton v-if="loading" :num="pagesize" />
     </v-container>
   </div>
@@ -24,12 +24,7 @@
 
 <script lang="ts">
 import { BlogBrief } from "@/models";
-import {
-  GetArticles,
-  BlogAutoLoader,
-  AddMore,
-  ElmReachedButtom,
-} from "../utils";
+import { GetArticles, AutoLoader, AddMore, ElmReachedButtom } from "../utils";
 import Vue from "vue";
 import Component from "vue-class-component";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
@@ -40,8 +35,8 @@ import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
     BlogSkeleton,
   },
 })
-export default class Search extends Vue implements BlogAutoLoader {
-  blogs: BlogBrief[] = [];
+export default class Search extends Vue implements AutoLoader<BlogBrief> {
+  datalist: BlogBrief[] = [];
   loading = true;
   firstloading = true;
   search = "";
@@ -83,7 +78,7 @@ export default class Search extends Vue implements BlogAutoLoader {
   }
   init() {
     this.page = 0;
-    this.blogs = [];
+    this.datalist = [];
     this.firstloading = true;
     this.loading = true;
     this.nomore = false;
