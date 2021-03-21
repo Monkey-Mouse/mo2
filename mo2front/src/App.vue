@@ -31,6 +31,7 @@
         v-if="this.$route.name !== 'Search Article' && !search"
         @click="search = true"
         icon
+        color="secondary"
       >
         <v-icon>mdi-magnify</v-icon>
       </v-btn>
@@ -426,6 +427,12 @@ export default class App extends Vue {
   }
   changeTheme() {
     localStorage.setItem("darkTheme", String(this.$vuetify.theme.dark));
+    SetTheme(
+      this.$vuetify.theme.dark,
+      this,
+      this.$vuetify.theme.themes,
+      this.user
+    );
   }
   appBarHeight = 64;
 }
