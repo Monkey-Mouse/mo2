@@ -1,13 +1,14 @@
 package controller
 
 import (
-	"mo2/database"
-	"mo2/mo2utils"
-	"mo2/mo2utils/mo2errors"
-	"mo2/server/controller/badresponse"
-	"mo2/server/model"
 	"net/http"
 	"strconv"
+
+	"github.com/Monkey-Mouse/mo2/database"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
+	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
+	"github.com/Monkey-Mouse/mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 

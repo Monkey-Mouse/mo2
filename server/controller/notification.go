@@ -2,10 +2,11 @@ package controller
 
 import (
 	"fmt"
-	"mo2/mo2utils"
-	"mo2/server/controller/badresponse"
-	"mo2/services/loghelper"
 	"net/http"
+
+	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
+	"github.com/Monkey-Mouse/mo2/services/loghelper"
 
 	"github.com/Monkey-Mouse/mo2log/logmodel"
 	"github.com/Monkey-Mouse/mo2log/service/logservice"

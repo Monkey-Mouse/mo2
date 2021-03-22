@@ -1,4 +1,4 @@
-module mo2
+module github.com/Monkey-Mouse/mo2
 
 go 1.15
 

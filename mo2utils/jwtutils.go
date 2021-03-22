@@ -5,10 +5,11 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"mo2/dto"
 	"os"
 	"path"
 	"time"
+
+	"github.com/Monkey-Mouse/mo2/dto"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -32,7 +33,7 @@ func init() {
 }
 func initKey() (err error) {
 	os.Mkdir("./secrets", 0755)
-	path := path.Join("./secrets", "mo2.secret")
+	path := path.Join("./secrets", "github.com/Monkey-Mouse/mo2.secret")
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 

@@ -3,13 +3,14 @@ package emailservice
 import (
 	"crypto/tls"
 	"fmt"
-	"mo2/mo2utils/mo2errors"
 	"net/http"
 	"net/smtp"
 	"os"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
 
 	"github.com/modern-go/concurrent"
 	"github.com/willf/bloom"

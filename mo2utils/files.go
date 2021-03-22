@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"mo2/mo2img"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/Monkey-Mouse/mo2/mo2img"
 
 	"github.com/qiniu/go-sdk/v7/storage"
 )

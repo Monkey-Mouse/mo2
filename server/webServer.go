@@ -1,10 +1,10 @@
 package server
 
 import (
-	_ "mo2/docs"
-	"mo2/mo2utils"
-	"mo2/server/controller"
-	"mo2/server/middleware"
+	_ "github.com/Monkey-Mouse/mo2/docs"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/server/controller"
+	"github.com/Monkey-Mouse/mo2/server/middleware"
 
 	"github.com/gin-contrib/pprof"
 

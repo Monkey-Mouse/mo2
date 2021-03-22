@@ -2,12 +2,13 @@ package controller
 
 import (
 	"fmt"
-	"mo2/database"
-	"mo2/mo2utils"
-	"mo2/server/controller/badresponse"
-	"mo2/server/model"
-	"mo2/services/loghelper"
 	"net/http"
+
+	"github.com/Monkey-Mouse/mo2/database"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
+	"github.com/Monkey-Mouse/mo2/server/model"
+	"github.com/Monkey-Mouse/mo2/services/loghelper"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
