@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"mo2/dto"
-	"mo2/mo2utils"
-	"mo2/mo2utils/mo2errors"
-	"mo2/server/model"
+
+	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
+	"github.com/Monkey-Mouse/mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -1,11 +1,12 @@
 package controller
 
 import (
+	"net/http"
+
+	"github.com/Monkey-Mouse/mo2/database"
+	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"mo2/database"
-	"mo2/server/controller/badresponse"
-	"net/http"
 )
 
 // ListAccountsInfo godoc

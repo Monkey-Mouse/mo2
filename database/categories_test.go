@@ -2,14 +2,15 @@ package database
 
 import (
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"log"
-	"mo2/dto"
-	"mo2/mo2utils/mo2errors"
-	"mo2/server/model"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
+	"github.com/Monkey-Mouse/mo2/server/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // InsertBlogs4Test 插入n个blog/draft，并返回它们的id列表

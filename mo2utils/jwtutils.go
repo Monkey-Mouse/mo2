@@ -5,10 +5,11 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"mo2/dto"
 	"os"
 	"path"
 	"time"
+
+	"github.com/Monkey-Mouse/mo2/dto"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )

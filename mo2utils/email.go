@@ -2,8 +2,9 @@ package mo2utils
 
 import (
 	"fmt"
-	"mo2/mo2utils/mo2errors"
-	emailservice "mo2/services/emailService"
+
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
+	emailservice "github.com/Monkey-Mouse/mo2/services/emailService"
 )
 
 // VerifyEmailMessage build email body for verify email

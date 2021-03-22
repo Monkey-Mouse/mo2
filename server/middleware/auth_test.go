@@ -3,13 +3,14 @@ package middleware
 import (
 	"fmt"
 	"math/rand"
-	"mo2/mo2utils"
 	"net/http"
 	"net/http/httptest"
 	"path"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/Monkey-Mouse/mo2/mo2utils"
 
 	"github.com/gin-gonic/gin"
 )

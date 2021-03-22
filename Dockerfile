@@ -14,6 +14,7 @@ ENV GOPROXY=https://goproxy.cn,direct
 COPY . .
 RUN go get -d -v ./...
 RUN go install -v ./...
+COPY . /go/bin
 
 
 

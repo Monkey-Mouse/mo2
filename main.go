@@ -1,12 +1,12 @@
 package main
 
 import (
+	"github.com/Monkey-Mouse/mo2/database"
+	"github.com/Monkey-Mouse/mo2/docs"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/server"
+	"github.com/Monkey-Mouse/mo2/services/mo2ticker"
 	"log"
-	"mo2/database"
-	"mo2/docs"
-	"mo2/mo2utils"
-	"mo2/server"
-	"mo2/services/mo2ticker"
 	"time"
 )
 

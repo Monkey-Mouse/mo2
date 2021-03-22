@@ -2,9 +2,10 @@ package loghelper
 
 import (
 	"context"
-	"mo2/database"
 	"os"
 	"testing"
+
+	"github.com/Monkey-Mouse/mo2/database"
 
 	"github.com/Monkey-Mouse/mo2log/logmodel"
 	"go.mongodb.org/mongo-driver/bson"

@@ -1,8 +1,8 @@
 package mo2utils
 
 import (
-	"mo2/server/model"
-	"mo2/services/mo2search"
+	"github.com/Monkey-Mouse/mo2/server/model"
+	"github.com/Monkey-Mouse/mo2/services/mo2search"
 
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/search"

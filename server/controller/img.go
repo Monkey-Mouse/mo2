@@ -2,11 +2,12 @@ package controller
 
 import (
 	"fmt"
-	"mo2/dto"
-	"mo2/mo2img"
-	"mo2/mo2utils"
 	"net/http"
 	"time"
+
+	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2img"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
 
 	"github.com/gin-gonic/gin"
 )
