@@ -15,7 +15,7 @@ func Test_initKey(t *testing.T) {
 		t.Skipf("Skip for ci")
 		return
 	}
-	_ = os.Remove("github.com/Monkey-Mouse/mo2.secret")
+	_ = os.Remove("mo2.secret")
 	tests := []struct {
 		name    string
 		wantErr bool
@@ -33,7 +33,7 @@ func Test_initKey(t *testing.T) {
 				t.Errorf("initKey() error = %v, wantErr %v", err, tt.wantErr)
 				if i == 1 && !reflect.DeepEqual(key, prev) {
 					t.Errorf("key should not change!")
-					_ = os.Remove("github.com/Monkey-Mouse/mo2.secret")
+					_ = os.Remove("mo2.secret")
 				} else if i == 2 && reflect.DeepEqual(key, prev) {
 					t.Errorf("key should change!")
 				}

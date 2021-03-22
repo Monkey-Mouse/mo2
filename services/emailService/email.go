@@ -143,42 +143,69 @@ func startWorker(emailChan <-chan *Mo2Email) {
 		conn, err := tls.Dial("tcp", addr, tlsconfig)
 		if err != nil {
 			fmt.Println(err)
+			continue
 		}
 		c, err := smtp.NewClient(conn, smtpHost)
 		if err != nil {
 			fmt.Println(err)
+			continue
 		}
 
 		// Auth
 		if err = c.Auth(auth); err != nil {
 			fmt.Println(err)
+			continue
 		}
 
 		// To && From
 		if err = c.Mail(from); err != nil {
 			fmt.Println(err)
+			continue
 		}
 
 		for _, v := range email.Receivers {
 			if err = c.Rcpt(v); err != nil {
 				fmt.Println(err)
+				continue
 			}
 		}
 
 		// Data
 		w, err := c.Data()
-		w.Write(fromH)
-		w.Write(toH)
-		w.Write(subjectH)
-		w.Write(mimeH)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		_, err = w.Write(fromH)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		_, err = w.Write(toH)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		_, err = w.Write(subjectH)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		_, err = w.Write(mimeH)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
 		_, err = w.Write(body)
 		if err != nil {
 			fmt.Println(err)
+			continue
 		}
 
 		err = w.Close()
 		if err != nil {
 			fmt.Println(err)
+			continue
 		}
 		c.Quit()
 	}

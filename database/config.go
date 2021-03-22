@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var dbName = "github.com/Monkey-Mouse/mo2"
+var dbName = "mo2"
 
 func connectMongoDB() {
 	// 设置客户端连接配置
