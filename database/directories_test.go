@@ -1,11 +1,12 @@
 package database
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"mo2/server/model"
 	"reflect"
 	"testing"
+
+	"github.com/Monkey-Mouse/mo2/server/model"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func TestChooseCol(t *testing.T) {

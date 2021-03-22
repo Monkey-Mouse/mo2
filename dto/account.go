@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"mo2/server/model"
+	"github.com/Monkey-Mouse/mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

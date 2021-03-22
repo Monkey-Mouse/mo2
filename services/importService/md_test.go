@@ -2,9 +2,10 @@ package importService
 
 import (
 	"io/ioutil"
-	"mo2/mo2utils"
 	"strings"
 	"time"
+
+	"github.com/Monkey-Mouse/mo2/mo2utils"
 )
 
 func ExampleTransform() {

@@ -1,8 +1,8 @@
 package mo2utils
 
 import (
-	"mo2/dto"
-	"mo2/server/model"
+	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/server/model"
 
 	"github.com/gin-gonic/gin"
 )

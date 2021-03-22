@@ -3,12 +3,13 @@ package database
 import (
 	"context"
 	"log"
-	"mo2/dto"
-	"mo2/mo2utils"
-	"mo2/server/model"
 	"time"
 
-	"mo2/mo2utils/mo2errors"
+	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/server/model"
+
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

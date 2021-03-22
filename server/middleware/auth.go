@@ -3,8 +3,6 @@ package middleware
 import (
 	"errors"
 	"log"
-	"mo2/mo2utils/mo2errors"
-	"mo2/server/controller/badresponse"
 	"net/http"
 	"os"
 	"path"
@@ -12,6 +10,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
+	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"

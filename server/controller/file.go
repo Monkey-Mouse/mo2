@@ -2,15 +2,16 @@ package controller
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	_ "mime/multipart" //in godoc comment
-	"mo2/database"
-	"mo2/mo2utils"
-	"mo2/server/controller/badresponse"
-	"mo2/services/importService"
 	"net/http"
 	"time"
+
+	"github.com/Monkey-Mouse/mo2/database"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
+	"github.com/Monkey-Mouse/mo2/services/importService"
+	"github.com/gin-gonic/gin"
 )
 
 // Upload godoc

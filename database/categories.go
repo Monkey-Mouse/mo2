@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"mo2/dto"
-	"mo2/mo2utils/mo2errors"
-	"mo2/server/model"
 	"sync"
+
+	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
+	"github.com/Monkey-Mouse/mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

@@ -1,9 +1,10 @@
 package dto
 
 import (
-	"mo2/server/model"
 	"reflect"
 	"testing"
+
+	"github.com/Monkey-Mouse/mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

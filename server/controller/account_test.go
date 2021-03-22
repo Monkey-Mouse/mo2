@@ -1,12 +1,13 @@
 package controller
 
 import (
-	"mo2/database"
-	"mo2/dto"
-	"mo2/server/model"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/Monkey-Mouse/mo2/database"
+	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"

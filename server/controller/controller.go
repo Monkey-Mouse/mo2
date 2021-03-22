@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"mo2/server/middleware"
-	"mo2/server/model"
+	"github.com/Monkey-Mouse/mo2/server/middleware"
+	"github.com/Monkey-Mouse/mo2/server/model"
 )
 
 // Controller example
