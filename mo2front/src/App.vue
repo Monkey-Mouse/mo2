@@ -217,7 +217,7 @@
         </template>
       </v-snackbar>
     </v-main>
-    <v-footer padless>
+    <v-footer id="footer" padless>
       <v-card flat tile class="indigo lighten-1 white--text text-center">
         <v-divider></v-divider>
 

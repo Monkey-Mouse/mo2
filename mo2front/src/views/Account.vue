@@ -326,7 +326,12 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
   public ReachedButtom() {
     if (this.tab === "tab-1") {
       ElmReachedButtom(this, ({ page, pageSize }) =>
-        GetOwnArticles({ page: page, pageSize: pageSize, draft: false })
+        GetUserArticles({
+          page: page,
+          pageSize: pageSize,
+          draft: false,
+          id: this.uid,
+        })
       );
     } else if (this.tab === "tab-2") {
       ElmReachedButtom(this.draftProps, ({ page, pageSize }) =>
