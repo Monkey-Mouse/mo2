@@ -12,7 +12,7 @@ var accessKey = os.Getenv("qiniuak")
 var secretKey = os.Getenv("qiniusk")
 var mac = qbox.NewMac(accessKey, secretKey)
 
-const bucket = "github.com/Monkey-Mouse/mo2"
+const bucket = "mo2"
 
 // GenerateUploadToken generate qiniu upload token
 func GenerateUploadToken(saveKey string) (token string) {
