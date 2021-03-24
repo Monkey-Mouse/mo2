@@ -41,6 +41,7 @@ func createBlogIndexes(col *mongo.Collection) {
 	col.Indexes().CreateMany(context.TODO(), append([]mongo.IndexModel{
 		{Keys: bson.M{"ket_words": 1}},
 		{Keys: bson.M{"author_id": 1}},
+		{Keys: bson.M{"categories": 1}},
 	}, model.IndexModels...))
 }
 func chooseCol(isDraft bool) (col *mongo.Collection) {
