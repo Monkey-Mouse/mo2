@@ -32,7 +32,7 @@ type GithubUser struct {
 func (c *Controller) GithubOauth(ctx *gin.Context) {
 	code := ctx.Query("code")
 	if code == "" {
-		ctx.Redirect(304, "/oautherr")
+		ctx.Redirect(307, "/oautherr")
 		return
 	}
 	s := fmt.Sprintf(`
@@ -47,13 +47,13 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	req1.Header.Add("Content-Type", "application/json")
 	re, err := http.DefaultClient.Do(req1)
 	if err != nil {
-		ctx.Redirect(304, "/oautherr")
+		ctx.Redirect(307, "/oautherr")
 		return
 	}
 	defer re.Body.Close()
 	data, err := ioutil.ReadAll(re.Body)
 	if err != nil {
-		ctx.Redirect(304, "/oautherr")
+		ctx.Redirect(307, "/oautherr")
 		return
 	}
 	token := struct {
@@ -61,26 +61,26 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	}{}
 	err = json.Unmarshal(data, &token)
 	if err != nil {
-		ctx.Redirect(304, "/oautherr")
+		ctx.Redirect(307, "/oautherr")
 		return
 	}
 	req, _ := http.NewRequest("GET", "https://api.github.com/user", nil)
 	req.Header.Add("Authorization", fmt.Sprintf("token %s", token.AccessToken))
 	re1, err := http.DefaultClient.Do(req)
 	if err != nil {
-		ctx.Redirect(304, "/oautherr")
+		ctx.Redirect(307, "/oautherr")
 		return
 	}
 	defer re1.Body.Close()
 	udata, err := ioutil.ReadAll(re.Body)
 	if err != nil {
-		ctx.Redirect(304, "/oautherr")
+		ctx.Redirect(307, "/oautherr")
 		return
 	}
 	guser := GithubUser{}
 	err = json.Unmarshal(udata, &guser)
 	if err != nil {
-		ctx.Redirect(304, "/oautherr")
+		ctx.Redirect(307, "/oautherr")
 		return
 	}
 	account := model.Account{
@@ -104,5 +104,5 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	jwtToken := mo2utils.GenerateJwtCode(su)
 	//login success: to record the state
 	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
-	ctx.Redirect(304, "/account")
+	ctx.Redirect(307, "/account")
 }

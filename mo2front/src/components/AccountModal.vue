@@ -32,7 +32,7 @@
                 <v-tabs align-with-title v-model="tabkey">
                   <v-tab :key="1">登录</v-tab>
                   <v-tab :key="2">注册</v-tab>
-                  <v-tab :key="2">OAuth</v-tab>
+                  <v-tab :key="3">OAuth</v-tab>
                 </v-tabs>
               </v-card-title>
             </v-col>
@@ -158,7 +158,7 @@
                 <v-btn @click="close" color="error">取消</v-btn>
               </v-card-actions>
             </v-tab-item>
-            <v-tab-item :key="2" style="min-height: 150px">
+            <v-tab-item :key="3" style="min-height: 150px">
               <v-row justify="center">
                 <v-col cols="12" align-self="center" class="text-center"
                   ><v-btn @click="github"
