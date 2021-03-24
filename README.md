@@ -6,7 +6,7 @@
 [![GoReportCard](https://goreportcard.com/badge/github.com/Monkey-Mouse/mo2)](https://goreportcard.com/report/github.com/Monkey-Mouse/mo2)
 [![BCH compliance](https://bettercodehub.com/edge/badge/Monkey-Mouse/mo2?branch=main)](https://bettercodehub.com/)
 [![license](https://badgen.net/github/license/Monkey-Mouse/mo2)](/LICENSE)  
-一个属于所有人的博客网站
+一个属于所有人的博客网站 [www.motwo.cn](https://www.motwo.cn)  
 ![logo](mo2front/public/img/icons/android-chrome-512x512.png)
 
 - [Mo2](#mo2)
