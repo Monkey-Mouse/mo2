@@ -55,7 +55,7 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	data, err := ioutil.ReadAll(re.Body)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
-		fmt.Println(err)
+		fmt.Println(err, s)
 		return
 	}
 	token := struct {
@@ -73,7 +73,7 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	re1, err := http.DefaultClient.Do(req)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
-		fmt.Println(err)
+		fmt.Println(err, "76")
 		return
 	}
 	defer re1.Body.Close()
