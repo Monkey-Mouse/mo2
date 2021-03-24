@@ -22,7 +22,7 @@ import (
 // RunServer start web server
 func RunServer() {
 	gin.DisableConsoleColor()
-	f, _ := os.OpenFile("gin.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, _ := os.OpenFile("logs/gin.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	gin.DefaultWriter = io.MultiWriter(f)
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
