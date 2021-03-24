@@ -48,6 +48,10 @@ export interface UserSettings {
     avatar?: string;
     perferDark?: string;
     themes?: string;
+    bio?: string;
+    github?: string;
+    location?: string;
+    github_id?: string;
 }
 export interface User extends UserListData {
     email: string;

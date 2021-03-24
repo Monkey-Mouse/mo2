@@ -31,20 +31,54 @@
     >
       <v-row align="center" justify="center">
         <v-col class="text-center" cols="12">
-          <b @click="changeAvatar" :class="ownPage ? 'clickable' : ''">
-            <avatar :size="80" :user="displayUser" />
+          <b
+            @click="changeAvatar"
+            :class="ownPage && !githubAccount ? 'clickable' : ''"
+          >
+            <v-badge color="secondary" :value="githubAccount" avatar overlap>
+              <template v-slot:badge>
+                <v-avatar>
+                  <v-icon>mdi-github</v-icon>
+                </v-avatar>
+              </template>
+              <avatar :size="80" :user="displayUser" />
+            </v-badge>
           </b>
           <!-- <v-img class="v-avatar" :src="displayUser.avatar"></v-img> -->
           <h1 class="display-1 font-weight-thin mb-4">
             {{ displayUser.name }}
-            <v-icon v-if="ownPage" @click="edit = true"
+            <v-icon v-if="ownPage && !githubAccount" @click="edit = true"
               >mdi-account-edit</v-icon
             >
           </h1>
           <h4 class="subheading">{{ displayUser.description }}</h4>
-          <h4 class="subtitle-2">
+          <h4 v-if="displayUser.email.indexOf('@') > 0" class="subtitle-2">
             {{ displayUser.email }}<v-icon color="grey"> mdi-email</v-icon>
           </h4>
+          <v-row v-if="displayUser.settings.bio">
+            <v-col lg="8" offset-lg="2">
+              <h4>
+                {{ displayUser.settings.bio }}
+              </h4></v-col
+            >
+          </v-row>
+          <v-row v-if="displayUser.settings.location">
+            <v-col lg="8" offset-lg="2">
+              <h4>
+                {{ displayUser.settings.location
+                }}<v-icon>mdi-map-marker</v-icon>
+              </h4></v-col
+            >
+          </v-row>
+          <v-row v-if="displayUser.settings.github">
+            <v-col lg="8" offset-lg="2">
+              <h4>
+                <a target="_blank" :href="displayUser.settings.github">
+                  {{ displayUser.settings.github }} </a
+                ><v-icon>mdi-github</v-icon>
+              </h4></v-col
+            >
+          </v-row>
         </v-col>
       </v-row>
     </v-parallax>
@@ -178,6 +212,11 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
     }
     this.avatarProcessing = false;
   }
+
+  get githubAccount(): boolean {
+    return this.displayUser.email.indexOf("@") === 0;
+  }
+
   async confirm({ name }: { name: string }) {
     try {
       this.user.name = name;
@@ -231,7 +270,7 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
     this.$emit("update:user", this.user);
   }
   changeAvatar() {
-    if (!this.ownPage) {
+    if (!this.ownPage || this.githubAccount) {
       return;
     }
     (this.$refs.f as HTMLInputElement).click();

@@ -13,7 +13,9 @@
     </template>
     <v-card-title>{{ user.name }}</v-card-title>
     <v-divider />
-    <v-card-subtitle>{{ user.email }}</v-card-subtitle>
+    <v-card-subtitle>{{
+      email ? user.email : "github oauth account"
+    }}</v-card-subtitle>
   </v-tooltip>
 </template>
 
@@ -31,6 +33,9 @@ export default class Avatar extends Vue {
   user!: User;
   @Prop()
   size?: number;
+  get email() {
+    return this.user.email.indexOf("@") > 0;
+  }
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
