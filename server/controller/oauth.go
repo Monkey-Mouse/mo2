@@ -64,11 +64,12 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	err = json.Unmarshal(data, &token)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
-		fmt.Println(err)
+		fmt.Println(err, string(data))
 		return
 	}
 	req, _ := http.NewRequest("GET", "https://api.github.com/user", nil)
 	req.Header.Add("Authorization", fmt.Sprintf("token %s", token.AccessToken))
+	req.Header.Add("Accept", "application/json")
 	re1, err := http.DefaultClient.Do(req)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
@@ -86,7 +87,7 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	err = json.Unmarshal(udata, &guser)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
-		fmt.Println(err)
+		fmt.Println(err, string(udata))
 		return
 	}
 	account := model.Account{
