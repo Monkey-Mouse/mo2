@@ -3,6 +3,7 @@ module github.com/Monkey-Mouse/mo2
 go 1.15
 
 require (
+	github.com/Monkey-Mouse/go-abac v0.0.0-20210324080145-1fbdad0e8f20
 	github.com/Monkey-Mouse/mo2log v0.0.3-0.20210320092703-fc104d6da1fb
 	github.com/RoaringBitmap/roaring v0.5.5 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751

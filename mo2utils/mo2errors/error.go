@@ -25,16 +25,40 @@ func (e *Mo2Errors) Init(c int, format string, a ...interface{}) {
 	e.ErrorTip = fmt.Sprintf(format, a...)
 }
 
+// Init init with code and tip
+func Init(c int, format string, a ...interface{}) Mo2Errors {
+	return Mo2Errors{
+		ErrorCode: c,
+		ErrorTip:  fmt.Sprintf(format, a...),
+	}
+}
+
 // InitError init with error
 func (e *Mo2Errors) InitError(err error) {
 	e.ErrorCode = Mo2Error
 	e.ErrorTip = err.Error()
 }
 
+// InitError init with error
+func InitError(err error) Mo2Errors {
+	return Mo2Errors{
+		ErrorCode: Mo2Error,
+		ErrorTip:  err.Error(),
+	}
+}
+
 // InitNoError init with no error tips
 func (e *Mo2Errors) InitNoError(format string, a ...interface{}) {
 	e.ErrorCode = Mo2NoError
 	e.ErrorTip = fmt.Sprintf(format, a...)
+}
+
+// InitNoError init with no error tips
+func InitNoError(format string, a ...interface{}) Mo2Errors {
+	return Mo2Errors{
+		ErrorCode: Mo2NoError,
+		ErrorTip:  fmt.Sprintf(format, a...),
+	}
 }
 
 // InitCode init with code
