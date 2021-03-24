@@ -18,14 +18,14 @@ type Praiseable struct {
 type Entity struct {
 	CreateTime time.Time `json:"createTime" example:"2020-10-1" bson:"create_time,omitempty"`
 	UpdateTime time.Time `json:"updateTime" example:"2020-10-1" bson:"update_time,omitempty"`
-	IsDeleted  bool      `json:"is_deleted,omitempty" example:"true" bson:"is_deleted"`
+	IsDeleted  bool      `json:"is_deleted,omitempty" example:"true" bson:"isdeleted"`
 }
 
 // IndexModels Index Models to index entity
 var IndexModels = []mongo.IndexModel{
 	{Keys: bson.M{"entity_info.create_time": -1}},
 	{Keys: bson.M{"entity_info.update_time": -1}},
-	{Keys: bson.M{"entity_info.is_deleted": 1}},
+	{Keys: bson.M{"entity_info.isdeleted": 1}},
 }
 
 // InitEntity init new entity
