@@ -48,12 +48,14 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	re, err := http.DefaultClient.Do(req1)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
+		fmt.Println(err)
 		return
 	}
 	defer re.Body.Close()
 	data, err := ioutil.ReadAll(re.Body)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
+		fmt.Println(err)
 		return
 	}
 	token := struct {
@@ -62,6 +64,7 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	err = json.Unmarshal(data, &token)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
+		fmt.Println(err)
 		return
 	}
 	req, _ := http.NewRequest("GET", "https://api.github.com/user", nil)
@@ -69,18 +72,21 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	re1, err := http.DefaultClient.Do(req)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
+		fmt.Println(err)
 		return
 	}
 	defer re1.Body.Close()
 	udata, err := ioutil.ReadAll(re.Body)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
+		fmt.Println(err)
 		return
 	}
 	guser := GithubUser{}
 	err = json.Unmarshal(udata, &guser)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
+		fmt.Println(err)
 		return
 	}
 	account := model.Account{
