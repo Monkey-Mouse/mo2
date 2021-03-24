@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"github.com/Monkey-Mouse/go-abac/abac"
+	"github.com/Monkey-Mouse/mo2/services/accessControl"
 	"net/http"
 	"strconv"
 
@@ -97,6 +99,11 @@ func (c *Controller) DeleteBlog(ctx *gin.Context) {
 	ctx.Status(http.StatusNoContent)
 }
 
+var (
+	MErrNoLogin      = mo2errors.Init(mo2errors.Mo2NoLogin, "权限不足，请先登录")
+	MErrUnauthorized = mo2errors.Init(mo2errors.Mo2Unauthorized, "没有权限修改文章")
+)
+
 // JudgeAuthorize only for user of same ID
 // 只有本人id与blog的authorID一致可以继续
 func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) (mErr mo2errors.Mo2Errors) {
@@ -105,13 +112,12 @@ func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) (mErr mo2errors.Mo2Error
 		if exist {
 			blog.AuthorID = userInfo.ID
 		} else {
-			mErr.Init(mo2errors.Mo2NoLogin, "权限不足，请先登录")
-			return
+
+			return MErrNoLogin
 		}
 	} else {
 		if blog.AuthorID != userInfo.ID {
-			mErr.Init(mo2errors.Mo2Unauthorized, "没有权限修改文章")
-			return
+			return MErrUnauthorized
 		}
 	}
 	mErr.InitCode(mo2errors.Mo2NoError)
@@ -135,22 +141,27 @@ func JudgeAuthorize(ctx *gin.Context, blog *model.Blog) (mErr mo2errors.Mo2Error
 func (c *Controller) ProcessBlog(ctx *gin.Context) {
 	isDraft := parseString2Bool(ctx.DefaultQuery("draft", "true"))
 	var blog model.Blog
+	var pass bool
 	if id, err := primitive.ObjectIDFromHex(ctx.Param("id")); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
 		return
 	} else {
-		if blog = database.FindBlogById(id, isDraft); blog.ID.IsZero() {
-			ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
+		blog = database.FindBlogById(id, isDraft)
+		if info, exist := mo2utils.GetUserInfo(ctx); exist {
+			pass = accessControl.Ctrl.CanAnd(abac.IQueryInfo{
+				Subject:  "account",
+				Action:   abac.ActionUpdate,
+				Resource: "blog",
+				Context:  abac.DefaultContext{"id": id, "filter": model.Filter{IsDraft: isDraft}, "userInfo": info},
+			})
+
+		} else {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(MErrUnauthorized))
 			return
 		}
 	}
-	if mErr := JudgeAuthorize(ctx, &blog); mErr.IsError() {
-		if mErr.ErrorCode == mo2errors.Mo2NoLogin {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
-			return
-		}
-	} else {
-		if mErr = database.ProcessBlog(isDraft, &blog, ctx.Param(database.OperationKey)); mErr.IsError() {
+	if pass {
+		if mErr := database.ProcessBlog(isDraft, &blog, ctx.Param(database.OperationKey)); mErr.IsError() {
 			ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
 		} else {
 			if mErr = database.UpsertBlog(&blog, isDraft); mErr.IsError() {

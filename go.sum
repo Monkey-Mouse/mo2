@@ -3,6 +3,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/DataDog/zstd v1.4.8/go.mod h1:g4AWEaM3yOg3HYfnJ3YIawPnVdXJh9QME85blwSAmyw=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
+github.com/Monkey-Mouse/go-abac v0.0.0-20210324080145-1fbdad0e8f20 h1:MjKH4aGs8DcA2fL/aMc5cSVfsMBCq9Sqao4fs7nj14o=
+github.com/Monkey-Mouse/go-abac v0.0.0-20210324080145-1fbdad0e8f20/go.mod h1:5XazCKWUs0VB5CcreieUr0g+ePYgvggii1yxxtDgotY=
 github.com/Monkey-Mouse/mo2log v0.0.2 h1:IiNXjnkOtNA2S8su92d1LPQZJl09n4I6S6PksYMV33s=
 github.com/Monkey-Mouse/mo2log v0.0.2/go.mod h1:/IRfCFIUpShzhqUQOs8Sg4WwiiguZd94RF8LTqmMjhw=
 github.com/Monkey-Mouse/mo2log v0.0.3-0.20210320092703-fc104d6da1fb h1:n/8g4FDOqZ2k7obXRA+5TmCETKpM2O1LdZMJyR/Tce4=
