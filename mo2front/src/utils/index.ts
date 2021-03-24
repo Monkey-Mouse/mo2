@@ -364,3 +364,6 @@ export async function GetNotificationNums() {
 export async function GetNotifications(query: { page: number, pagesize: number }) {
     return (await axios.get<Notification[]>("/api/notification" + ParseQuery(query))).data
 }
+export function GithubOauth() {
+    window.location.replace("https://github.com/login/oauth/authorize?client_id=c9cb620eaea6bff97e5d")
+}

@@ -32,6 +32,7 @@
                 <v-tabs align-with-title v-model="tabkey">
                   <v-tab :key="1">登录</v-tab>
                   <v-tab :key="2">注册</v-tab>
+                  <v-tab :key="2">OAuth</v-tab>
                 </v-tabs>
               </v-card-title>
             </v-col>
@@ -157,6 +158,15 @@
                 <v-btn @click="close" color="error">取消</v-btn>
               </v-card-actions>
             </v-tab-item>
+            <v-tab-item :key="2" style="min-height: 150px">
+              <v-row justify="center">
+                <v-col cols="12" align-self="center" class="text-center"
+                  ><v-btn @click="github"
+                    ><v-icon>mdi-github</v-icon>使用GitHub账号</v-btn
+                  ></v-col
+                >
+              </v-row>
+            </v-tab-item>
           </v-tabs-items>
         </v-container>
       </v-card>
@@ -166,7 +176,7 @@
 
 <script lang="ts">
 import { User } from "@/models";
-import { GetErrorMsg, LoginAsync, RegisterAsync } from "../utils";
+import { GetErrorMsg, GithubOauth, LoginAsync, RegisterAsync } from "../utils";
 import { AxiosError } from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
@@ -235,6 +245,9 @@ export default class AccountModal extends Vue {
     this.snackbar = false;
     this.tipbar = true;
     this.close();
+  }
+  github() {
+    GithubOauth();
   }
   close() {
     this.$emit("update:enable", false);
