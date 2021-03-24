@@ -64,7 +64,7 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	err = json.Unmarshal(data, &token)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
-		fmt.Println(err, string(data))
+		fmt.Println(err, string(data), "67")
 		return
 	}
 	req, _ := http.NewRequest("GET", "https://api.github.com/user", nil)
@@ -77,17 +77,17 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 		return
 	}
 	defer re1.Body.Close()
-	udata, err := ioutil.ReadAll(re.Body)
+	udata, err := ioutil.ReadAll(re1.Body)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
-		fmt.Println(err)
+		fmt.Println(err, "83")
 		return
 	}
 	guser := GithubUser{}
 	err = json.Unmarshal(udata, &guser)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
-		fmt.Println(err, string(udata))
+		fmt.Println(err, string(udata), "90")
 		return
 	}
 	account := model.Account{

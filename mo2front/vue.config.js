@@ -47,7 +47,7 @@ module.exports = {
   integrity: false,
   // 反向代理
   devServer: {
-    // http2:true,
+    http2: true,
     https: false,
     proxy: {
       '/api': {
