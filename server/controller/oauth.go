@@ -84,14 +84,15 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 		return
 	}
 	guser := GithubUser{}
+	fmt.Println(string(udata))
 	err = json.Unmarshal(udata, &guser)
 	if err != nil {
 		ctx.Redirect(307, "/oautherr")
 		fmt.Println(err, string(udata), "90")
 		return
 	}
+	fmt.Println(guser)
 	account := model.Account{
-		ID:         primitive.NewObjectID(),
 		Roles:      []string{model.OrdinaryUser},
 		UserName:   guser.Login,
 		Email:      "@" + primitive.NewObjectID().Hex(),
@@ -107,6 +108,9 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 		},
 	}
 	database.UpsertAccountWithF(&account, bson.M{"settings.github_id": fmt.Sprint(guser.ID)})
+	if account.ID == primitive.NilObjectID {
+		account, _ = database.FindAccountByName(account.UserName)
+	}
 	var su = dto.Account2SuccessLogin(account)
 	jwtToken := mo2utils.GenerateJwtCode(su)
 	//login success: to record the state

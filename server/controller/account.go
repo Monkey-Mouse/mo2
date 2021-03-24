@@ -48,7 +48,7 @@ func (c *Controller) Log(ctx *gin.Context) {
 	}
 	if dto.Contains(s.Roles, model.OrdinaryUser) {
 		u, ext := database.FindAccountInfo(s.ID)
-		if ext == false {
+		if !ext {
 			ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, badresponse.SetResponseReason("用户不存在"))
 			return
 		}

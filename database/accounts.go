@@ -147,6 +147,9 @@ func UpsertAccountWithF(a *model.Account, filter interface{}) (merr mo2errors.Mo
 			"settings":    a.Settings,
 		},
 	}, options.Update().SetUpsert(true))
+	if result.UpsertedID != nil {
+		a.ID = result.UpsertedID.(primitive.ObjectID)
+	}
 	if err != nil {
 		merr.Init(mo2errors.Mo2Error, err.Error())
 		return
