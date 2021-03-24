@@ -26,6 +26,7 @@ services:
     volumes:
       - "./secrets:/app/secrets"
       - "./bleve:/app/.bleve"
+      - "./logs/gin.log:/app/gin.log"
     environment:
       - COMMENT_LOG=mo2notificationlog:9990
 

@@ -1,6 +1,9 @@
 package server
 
 import (
+	"io"
+	"os"
+
 	_ "github.com/Monkey-Mouse/mo2/docs"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
 	"github.com/Monkey-Mouse/mo2/server/controller"
@@ -20,6 +23,9 @@ import (
 func RunServer() {
 
 	r := gin.Default()
+	gin.DisableConsoleColor()
+	f, _ := os.OpenFile("gin.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	gin.DefaultWriter = io.MultiWriter(f)
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
 	c := controller.NewController()
 	controller.SetupHandlers(c)
