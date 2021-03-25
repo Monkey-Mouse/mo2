@@ -32,6 +32,9 @@ func CreateAccountIndex() (err error) {
 			Keys:    bson.D{{"email", 1}},
 			Options: options.Index().SetUnique(true),
 		},
+		{
+			Keys: bson.D{{"settings.github_id", 1}},
+		},
 	}
 	_, err = GetCollection("accounts").Indexes().CreateMany(context.TODO(), indexModel)
 	return
@@ -106,8 +109,14 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 		} else {
 			return
 		}
+	} else {
+		if insertResult.InsertedID != nil {
+			id, ext := insertResult.InsertedID.(primitive.ObjectID)
+			if ext {
+				account.ID = id
+			}
+		}
 	}
-	account.ID = insertResult.InsertedID.(primitive.ObjectID)
 	return
 }
 
@@ -127,8 +136,12 @@ func FindAccountByName(name string) (a model.Account, exist bool) {
 
 // UpsertAccount
 func UpsertAccount(a *model.Account) (merr mo2errors.Mo2Errors) {
+	merr = UpsertAccountWithF(a, bson.M{"_id": a.ID})
+	return
+}
+func UpsertAccountWithF(a *model.Account, filter interface{}) (merr mo2errors.Mo2Errors) {
 	a.EntityInfo.Update()
-	result, err := accCol.UpdateOne(context.TODO(), bson.M{"_id": a.ID}, bson.M{
+	result, err := accCol.UpdateOne(context.TODO(), filter, bson.M{
 		"$set": bson.M{
 			"username":    a.UserName,
 			"email":       a.Email,
@@ -142,6 +155,12 @@ func UpsertAccount(a *model.Account) (merr mo2errors.Mo2Errors) {
 	if err != nil {
 		merr.Init(mo2errors.Mo2Error, err.Error())
 		return
+	}
+	if result.UpsertedID != nil {
+		id, ext := result.UpsertedID.(primitive.ObjectID)
+		if ext {
+			a.ID = id
+		}
 	}
 	if result.ModifiedCount != 0 {
 		merr.Init(mo2errors.Mo2NoError, "更新完成")

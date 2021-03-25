@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- <v-emoji-picker /> -->
     <MO2Dialog
       :validator="validator"
       :inputProps="inputProps"
@@ -31,20 +32,59 @@
     >
       <v-row align="center" justify="center">
         <v-col class="text-center" cols="12">
-          <b @click="changeAvatar" :class="ownPage ? 'clickable' : ''">
-            <avatar :size="80" :user="displayUser" />
+          <b
+            @click="changeAvatar"
+            :class="ownPage && !githubAccount ? 'clickable' : ''"
+          >
+            <v-badge color="transparent" :value="githubAccount" avatar overlap>
+              <template v-slot:badge>
+                <v-avatar>
+                  <v-icon>mdi-github</v-icon>
+                </v-avatar>
+              </template>
+              <avatar
+                :enableEdit="ownPage"
+                :size="80"
+                :user="displayUser"
+                @setemoji="changeStatus"
+              />
+            </v-badge>
           </b>
           <!-- <v-img class="v-avatar" :src="displayUser.avatar"></v-img> -->
           <h1 class="display-1 font-weight-thin mb-4">
             {{ displayUser.name }}
-            <v-icon v-if="ownPage" @click="edit = true"
+            <v-icon v-if="ownPage && !githubAccount" @click="edit = true"
               >mdi-account-edit</v-icon
             >
           </h1>
           <h4 class="subheading">{{ displayUser.description }}</h4>
-          <h4 class="subtitle-2">
-            {{ displayUser.email }}<v-icon color="grey"> mdi-email</v-icon>
+          <h4 v-if="displayUser.email.indexOf('@') > 0" class="subtitle-2 mb-4">
+            {{ displayUser.email }}<v-icon small> mdi-email</v-icon>
           </h4>
+          <v-row v-if="displayUser.settings.bio">
+            <v-col lg="8" offset-lg="2">
+              <h4>
+                {{ displayUser.settings.bio }}
+              </h4></v-col
+            >
+          </v-row>
+          <v-row v-if="displayUser.settings.location">
+            <v-col lg="8" offset-lg="2">
+              <h4>
+                {{ displayUser.settings.location
+                }}<v-icon>mdi-map-marker</v-icon>
+              </h4></v-col
+            >
+          </v-row>
+          <v-row v-if="displayUser.settings.github">
+            <v-col lg="8" offset-lg="2">
+              <h4>
+                <a target="_blank" :href="displayUser.settings.github">
+                  {{ displayUser.settings.github }} </a
+                ><v-icon>mdi-github</v-icon>
+              </h4></v-col
+            >
+          </v-row>
         </v-col>
       </v-row>
     </v-parallax>
@@ -105,7 +145,7 @@ import {
   UpdateUserInfo,
   UploadImgToQiniu,
 } from "@/utils";
-import { required } from "vuelidate/lib/validators";
+import { required, maxLength, url, helpers } from "vuelidate/lib/validators";
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
@@ -115,6 +155,12 @@ import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 import MO2Dialog from "../components/MO2Dialog.vue";
 import Cropper from "../components/ImageCropper.vue";
 import Category from "../components/Category.vue";
+import { IEmoji } from "node_modules/v-emoji-picker/lib/models/Emoji";
+
+const githubRule = helpers.regex(
+  "github",
+  /^https:\/\/github\.com\/[a-zA-Z]+$/
+);
 @Component({
   components: {
     BlogTimeLineList,
@@ -158,12 +204,23 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
   validator = {
     name: {
       required: required,
+      max: maxLength(10),
+    },
+    bio: {
+      max: maxLength(100),
+    },
+    location: {
+      max: maxLength(20),
+    },
+    github: {
+      github: githubRule,
     },
   };
   inputProps: { [name: string]: InputProp } = {
     name: {
       errorMsg: {
         required: "用户名不可为空",
+        max: "用户名长度不大于10",
       },
       label: "Name",
       default: "",
@@ -171,16 +228,68 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
       col: 12,
       type: "text",
     },
+    bio: {
+      errorMsg: {
+        max: "Bio长度不大于100",
+      },
+      label: "Bio",
+      default: "",
+      col: 12,
+      type: "textarea",
+    },
+    location: {
+      errorMsg: {
+        max: "地址长度不大于20",
+      },
+      label: "Location",
+      default: "",
+      icon: "mdi-map-marker",
+      col: 12,
+      type: "text",
+    },
+    github: {
+      errorMsg: {
+        github: "请输入合法的GitHub地址",
+      },
+      label: "GitHub",
+      default: "",
+      icon: "mdi-github",
+      col: 12,
+      type: "text",
+    },
   };
+  async changeStatus(emoji: IEmoji) {
+    this.user.settings.status = emoji.data;
+    await UpdateUserInfo(this.user);
+    this.updateUser();
+  }
   imgLoad(success) {
     if (success === "error") {
       this.avErr = "图片格式错误！";
     }
     this.avatarProcessing = false;
   }
-  async confirm({ name }: { name: string }) {
+
+  get githubAccount(): boolean {
+    return this.displayUser.email.indexOf("@") === 0;
+  }
+
+  async confirm({
+    name,
+    bio,
+    location,
+    github,
+  }: {
+    name: string;
+    bio: string;
+    location: string;
+    github: string;
+  }) {
     try {
       this.user.name = name;
+      this.user.settings.bio = bio;
+      this.user.settings.location = location;
+      this.user.settings.github = github;
       await UpdateUserInfo(this.user);
       // this.displayUser.name = name;
       this.updateUser();
@@ -231,7 +340,7 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
     this.$emit("update:user", this.user);
   }
   changeAvatar() {
-    if (!this.ownPage) {
+    if (!this.ownPage || this.githubAccount) {
       return;
     }
     (this.$refs.f as HTMLInputElement).click();
@@ -248,12 +357,18 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
     this.initPage();
     this.create = true;
   }
+  updateProps() {
+    this.inputProps["name"].default = this.user.name;
+    this.inputProps["bio"].default = this.user.settings.bio;
+    this.inputProps["location"].default = this.user.settings.location;
+    this.inputProps["github"].default = this.user.settings.github;
+  }
   async initPage() {
     if (this.$route.query["tab"]) {
       this.tab = this.$route.query["tab"] as string;
     }
     this.uid = this.$route.params["id"];
-    this.inputProps["name"].default = this.user.name;
+    this.updateProps();
     if (this.uid === undefined || this.uid === this.user.id) {
       this.uid = this.user.id;
       this.displayUser = this.user;
@@ -304,7 +419,7 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
   userChange() {
     this.uid = this.user.id;
     this.displayUser = this.user;
-    this.inputProps.name.default = this.user.name;
+    this.updateProps();
   }
   @Watch("tab")
   loadDraft() {

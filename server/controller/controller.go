@@ -39,7 +39,10 @@ func SetupHandlers(c *Controller) {
 	{
 		api.GetWithRL("accounts/verify", c.VerifyEmail, 3)
 		api.GetWithRL("/logs", c.Log, 10)
-
+		oau := api.Group("oauth")
+		{
+			oau.Get("github", c.GithubOauth)
+		}
 		noti := api.Group("notification", model.OrdinaryUser)
 		{
 			noti.Get("num", c.GetNotificationNum)
