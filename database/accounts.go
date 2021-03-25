@@ -111,7 +111,12 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 			return
 		}
 	}
-	account.ID = insertResult.InsertedID.(primitive.ObjectID)
+	if insertResult.InsertedID != nil {
+		id, ext := insertResult.InsertedID.(primitive.ObjectID)
+		if ext {
+			account.ID = id
+		}
+	}
 	return
 }
 
