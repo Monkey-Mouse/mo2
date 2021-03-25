@@ -139,7 +139,7 @@ import {
 } from "@/utils";
 import Vue from "vue";
 import Component from "vue-class-component";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 import { required } from "vuelidate/lib/validators";
 import MO2Dialog from "./MO2Dialog.vue";
 import Nothing from "./NothingHere.vue";
@@ -234,6 +234,10 @@ export default class Mo2Category extends Vue {
     this.loadData(c.id);
   }
   created() {
+    this.init();
+  }
+  @Watch("user")
+  init() {
     this.items.push({
       text: "Root",
       id: this.user.id,

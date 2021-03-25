@@ -10,7 +10,11 @@
           >
             <div v-on:click.prevent v-on:click.stop class="unclickable">
               <v-avatar :style="hover && enableEdit ? 'position:absolute' : ''">
-                {{ user.settings.status ? user.settings.status : "😀" }}
+                {{
+                  user.settings && user.settings.status
+                    ? user.settings.status
+                    : "😀"
+                }}
               </v-avatar>
               <v-emoji-picker
                 :style="mobile ? 'margin-left: -120%!important;' : ''"
@@ -99,5 +103,4 @@ export default class Avatar extends Vue {
 
 
 <style>
-
 </style>
