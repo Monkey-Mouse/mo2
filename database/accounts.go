@@ -33,8 +33,7 @@ func CreateAccountIndex() (err error) {
 			Options: options.Index().SetUnique(true),
 		},
 		{
-			Keys:    bson.D{{"settings.github_id", 1}},
-			Options: options.Index().SetUnique(true),
+			Keys: bson.D{{"settings.github_id", 1}},
 		},
 	}
 	_, err = GetCollection("accounts").Indexes().CreateMany(context.TODO(), indexModel)
@@ -110,11 +109,12 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 		} else {
 			return
 		}
-	}
-	if insertResult.InsertedID != nil {
-		id, ext := insertResult.InsertedID.(primitive.ObjectID)
-		if ext {
-			account.ID = id
+	} else {
+		if insertResult.InsertedID != nil {
+			id, ext := insertResult.InsertedID.(primitive.ObjectID)
+			if ext {
+				account.ID = id
+			}
 		}
 	}
 	return
@@ -152,15 +152,15 @@ func UpsertAccountWithF(a *model.Account, filter interface{}) (merr mo2errors.Mo
 			"settings":    a.Settings,
 		},
 	}, options.Update().SetUpsert(true))
+	if err != nil {
+		merr.Init(mo2errors.Mo2Error, err.Error())
+		return
+	}
 	if result.UpsertedID != nil {
 		id, ext := result.UpsertedID.(primitive.ObjectID)
 		if ext {
 			a.ID = id
 		}
-	}
-	if err != nil {
-		merr.Init(mo2errors.Mo2Error, err.Error())
-		return
 	}
 	if result.ModifiedCount != 0 {
 		merr.Init(mo2errors.Mo2NoError, "更新完成")
