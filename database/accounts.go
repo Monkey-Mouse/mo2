@@ -110,6 +110,7 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 		} else {
 			return
 		}
+	} else {
 		if insertResult.InsertedID != nil {
 			id, ext := insertResult.InsertedID.(primitive.ObjectID)
 			if ext {
