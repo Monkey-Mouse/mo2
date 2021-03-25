@@ -43,7 +43,7 @@
                 </v-avatar>
               </template>
               <avatar
-                :enableEdit="true"
+                :enableEdit="ownPage"
                 :size="80"
                 :user="displayUser"
                 @setemoji="changeStatus"

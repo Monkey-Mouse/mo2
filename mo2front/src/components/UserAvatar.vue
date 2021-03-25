@@ -99,10 +99,5 @@ export default class Avatar extends Vue {
 
 
 <style>
-.container-emoji {
-  max-height: 200px !important;
-}
-.unclickable {
-  cursor: none;
-}
+
 </style>
