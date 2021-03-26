@@ -1,6 +1,9 @@
 package pool
 
-import "container/list"
+import (
+	"container/list"
+	"sync"
+)
 
 type Pool struct {
 	pool list.List
@@ -9,7 +12,11 @@ type Pool struct {
 
 type ObjFactory func() interface{}
 
+var lock = sync.Mutex{}
+
 func (p *Pool) Rent() interface{} {
+	lock.Lock()
+	defer lock.Unlock()
 	if p.pool.Len() == 0 {
 		return p.fac()
 	}
@@ -17,6 +24,8 @@ func (p *Pool) Rent() interface{} {
 }
 
 func (p *Pool) Return(e interface{}) {
+	lock.Lock()
+	defer lock.Unlock()
 	p.pool.PushBack(e)
 }
 func (p *Pool) Init(fac ObjFactory) {
