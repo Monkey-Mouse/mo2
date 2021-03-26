@@ -44,7 +44,7 @@ jobs:
           # Where the previous data file is stored
           # external-data-json-path: ./cache/benchmark-data.json
           # Workflow will fail when an alert happens
-          fail-on-alert: true
+          # fail-on-alert: true
           # Upload the updated cache file for the next job by actions/cache
           # GitHub API token to make a commit comment
           # github-token: ${{ secrets.GITHUB_TOKEN }}
