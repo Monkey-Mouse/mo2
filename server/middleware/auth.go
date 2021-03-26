@@ -37,7 +37,7 @@ var strpool *pool.Pool = &pool.Pool{}
 
 func init() {
 	strpool.Init(func() interface{} {
-		return strings.Builder{}
+		return &strings.Builder{}
 	})
 }
 
@@ -113,15 +113,11 @@ func resetBlocker() {
 }
 
 func redisCheckRL(prop string, ip string, limit int) bool {
-	// sb := strpool.Rent().(strings.Builder)
-	// sb.Reset()
-	// sb.WriteString(prop)
-	// sb.WriteString(ip)
-	// defer strpool.Return(sb)
-	sb := strings.Builder{}
+	sb := strpool.Rent().(*strings.Builder)
 	sb.Reset()
 	sb.WriteString(prop)
 	sb.WriteString(ip)
+	defer strpool.Return(sb)
 	// rate limit logic
 	if limit < 0 {
 		return true
@@ -139,11 +135,11 @@ func redisCheckRL(prop string, ip string, limit int) bool {
 }
 
 func checkRL(prop string, ip string, limit int) bool {
-	sb := strings.Builder{}
+	sb := strpool.Rent().(*strings.Builder)
 	sb.Reset()
 	sb.WriteString(prop)
 	sb.WriteString(ip)
-	// defer strpool.Return(sb)
+	defer strpool.Return(sb)
 	// rate limit logic
 	if limit < 0 {
 		return true
@@ -270,7 +266,7 @@ func (h handlerMap) HandlerWithRL(
 	handler gin.HandlerFunc,
 	ratelimit int,
 	roles ...string) {
-	if roles != nil && len(roles) != 0 {
+	if len(roles) != 0 {
 		h.roles = append(h.roles, roles)
 	}
 	key := handlerKey{
