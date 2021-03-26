@@ -27,6 +27,38 @@ func setupTestHandlers() {
 func Test_RedisAuthMiddleware(t *testing.T) {
 	testMiddleware(t, true)
 }
+func benchmark(b *testing.B, useredis bool) {
+	gin.SetMode(gin.ReleaseMode)
+	resetVar()
+	authR := gin.New()
+	req, _ := http.NewRequest("GET", "/apitest/logs", nil)
+	setupTestHandlers()
+	H.RegisterMapedHandlers(authR, func(ctx *gin.Context) (userInfo RoleHolder, err error) {
+		return
+	}, mo2utils.UserInfoKey, &OptionalParams{5, 5, useredis})
+	ch := make(chan bool)
+	b.ResetTimer()
+	for i := 0; i < 100; i++ {
+		go func() {
+			resp := httptest.NewRecorder()
+			authR.ServeHTTP(resp, req)
+			ch <- resp.Code == 200
+		}()
+	}
+	sucNum := 0
+	for i := 0; i < 100; i++ {
+		success := <-ch
+		if success {
+			sucNum++
+		}
+	}
+}
+func Benchmark_Middleware_redis(b *testing.B) {
+	benchmark(b, true)
+}
+func Benchmark_Middleware_memory(b *testing.B) {
+	benchmark(b, false)
+}
 func testMiddleware(t *testing.T, useredis bool) {
 	resetVar()
 	authR := gin.New()
@@ -35,7 +67,7 @@ func testMiddleware(t *testing.T, useredis bool) {
 	H.RegisterMapedHandlers(authR, func(ctx *gin.Context) (userInfo RoleHolder, err error) {
 		return
 	}, mo2utils.UserInfoKey, &OptionalParams{5, 5, useredis})
-	ch := make(chan bool, 0)
+	ch := make(chan bool)
 	t.Run("Test rate limit block", func(t *testing.T) {
 		for i := 0; i < 100; i++ {
 			go func() {
