@@ -142,6 +142,7 @@ import {
   GetOwnArticles,
   GetUserArticles,
   GetUserData,
+  InitLoader,
   UpdateUserInfo,
   UploadImgToQiniu,
 } from "@/utils";
@@ -364,6 +365,8 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
     this.inputProps["github"].default = this.user.settings.github;
   }
   async initPage() {
+    InitLoader(this);
+    InitLoader(this.draftProps);
     if (this.$route.query["tab"]) {
       this.tab = this.$route.query["tab"] as string;
     }
