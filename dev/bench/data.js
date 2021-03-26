@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1616728693060,
+  "lastUpdate": 1616734672454,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -166,6 +166,48 @@ window.BENCHMARK_DATA = {
             "value": 4023,
             "unit": "ns/op",
             "extra": "299275 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "47478961+easilylazy@users.noreply.github.com",
+            "name": "leezeeyee",
+            "username": "easilylazy"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "72d122b24bb54f71e396ebc5f461e24b4743795f",
+          "message": "Merge pull request #228 from Monkey-Mouse/Chronostasys/benchmark-action\n\nChronostasys/benchmark action",
+          "timestamp": "2021-03-26T12:56:10+08:00",
+          "tree_id": "8ef0d0b2d71e6d842d8a08aa9ea887610c9de76d",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/72d122b24bb54f71e396ebc5f461e24b4743795f"
+        },
+        "date": 1616734671530,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 9050562,
+            "unit": "ns/op",
+            "extra": "118 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 470101,
+            "unit": "ns/op",
+            "extra": "2248 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 3113,
+            "unit": "ns/op",
+            "extra": "407941 times\n2 procs"
           }
         ]
       }
