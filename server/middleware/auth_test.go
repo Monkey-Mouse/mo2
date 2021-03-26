@@ -27,7 +27,7 @@ func setupTestHandlers() {
 func Test_RedisAuthMiddleware(t *testing.T) {
 	testMiddleware(t, true)
 }
-func benchmark(b *testing.B, useredis bool) {
+func benchmark(useredis bool) {
 	gin.SetMode(gin.ReleaseMode)
 	resetVar()
 	authR := gin.New()
@@ -37,7 +37,6 @@ func benchmark(b *testing.B, useredis bool) {
 		return
 	}, mo2utils.UserInfoKey, &OptionalParams{5, 5, useredis})
 	ch := make(chan bool)
-	b.ResetTimer()
 	for i := 0; i < 100; i++ {
 		go func() {
 			resp := httptest.NewRecorder()
@@ -54,10 +53,14 @@ func benchmark(b *testing.B, useredis bool) {
 	}
 }
 func Benchmark_Middleware_redis(b *testing.B) {
-	benchmark(b, true)
+	for n := 0; n < b.N; n++ {
+		benchmark(true)
+	}
 }
 func Benchmark_Middleware_memory(b *testing.B) {
-	benchmark(b, false)
+	for n := 0; n < b.N; n++ {
+		benchmark(false)
+	}
 }
 func testMiddleware(t *testing.T, useredis bool) {
 	resetVar()
@@ -216,7 +219,9 @@ func Benchmark_checkRoles(b *testing.B) {
 		rolePolicies: rolePolicy,
 	}
 	b.ResetTimer()
-	checkRoles(arguments.uinfo, arguments.rolePolicies)
+	for n := 0; n < b.N; n++ {
+		checkRoles(arguments.uinfo, arguments.rolePolicies)
+	}
 }
 
 func Test_handlerMap_Get(t *testing.T) {
