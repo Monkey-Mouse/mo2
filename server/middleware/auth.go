@@ -7,11 +7,13 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
 	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
+	"github.com/Monkey-Mouse/mo2/server/middleware/pool"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
@@ -31,6 +33,13 @@ var rdb *redis.Client
 var dicChan chan *concurrent.Map = make(chan *concurrent.Map)
 var lock = sync.Mutex{}
 var errAuth = errors.New("authentication failed")
+var strpool *pool.Pool = &pool.Pool{}
+
+func init() {
+	strpool.Init(func() interface{} {
+		return &strings.Builder{}
+	})
+}
 
 // H handlermap, like gin router
 var H = handlerMap{handlers, "", make([][]string, 0), -1}
@@ -104,11 +113,16 @@ func resetBlocker() {
 }
 
 func redisCheckRL(prop string, ip string, limit int) bool {
+	sb := strpool.Rent().(*strings.Builder)
+	sb.Reset()
+	sb.WriteString(prop)
+	sb.WriteString(ip)
+	defer strpool.Return(sb)
 	// rate limit logic
 	if limit < 0 {
 		return true
 	}
-	key := prop + ip
+	key := sb.String()
 	re, err := rdb.HIncrBy(redisHashSet, key, 1).Result()
 	if err != nil {
 		log.Fatal(err)
@@ -121,11 +135,16 @@ func redisCheckRL(prop string, ip string, limit int) bool {
 }
 
 func checkRL(prop string, ip string, limit int) bool {
+	sb := strpool.Rent().(*strings.Builder)
+	sb.Reset()
+	sb.WriteString(prop)
+	sb.WriteString(ip)
+	defer strpool.Return(sb)
 	// rate limit logic
 	if limit < 0 {
 		return true
 	}
-	key := prop + ip
+	key := sb.String()
 	dic := <-dicChan
 	lock.Lock()
 	v, ext := dic.Load(key)
@@ -247,7 +266,7 @@ func (h handlerMap) HandlerWithRL(
 	handler gin.HandlerFunc,
 	ratelimit int,
 	roles ...string) {
-	if roles != nil && len(roles) != 0 {
+	if len(roles) != 0 {
 		h.roles = append(h.roles, roles)
 	}
 	key := handlerKey{
