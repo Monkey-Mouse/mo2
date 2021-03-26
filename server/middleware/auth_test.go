@@ -359,3 +359,20 @@ func Test_handlerMap_HandlerWithRL(t *testing.T) {
 		})
 	}
 }
+
+func Benchmark_redisCheckRL(t *testing.B) {
+	setupRateLimiter(10, 3600, true)
+	t.ResetTimer()
+	for i := 0; i < t.N; i++ {
+		redisCheckRL("api", "127.0.0.1", 10)
+	}
+}
+
+func Benchmark_checkRL(t *testing.B) {
+	setupRateLimiter(10, 3600, false)
+	go cleaner()
+	t.ResetTimer()
+	for i := 0; i < t.N; i++ {
+		checkRL("api", "127.0.0.1", 10)
+	}
+}

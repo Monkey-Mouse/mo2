@@ -7,7 +7,6 @@ import (
 	"os"
 	"path"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -27,18 +26,19 @@ var unblockEvery int = 3600
 var fromCTX FromCTX
 var blockFilter = bloom.NewWithEstimates(10000, 0.01)
 var userInfoKey string
-var handlers = make(map[handlerKey]handlerProp, 0)
+var handlers = make(map[handlerKey]handlerProp)
 var rdb *redis.Client
-var dicChan chan *concurrent.Map = make(chan *concurrent.Map, 0)
+var dicChan chan *concurrent.Map = make(chan *concurrent.Map)
 var lock = sync.Mutex{}
+var errAuth = errors.New("authentication failed")
 
 // H handlermap, like gin router
 var H = handlerMap{handlers, "", make([][]string, 0), -1}
 
 func resetVar() {
 	blockFilter = bloom.NewWithEstimates(10000, 0.01)
-	handlers = make(map[handlerKey]handlerProp, 0)
-	dicChan = make(chan *concurrent.Map, 0)
+	handlers = make(map[handlerKey]handlerProp)
+	dicChan = make(chan *concurrent.Map)
 	lock = sync.Mutex{}
 	H = handlerMap{handlers, "", make([][]string, 0), -1}
 	rdb = nil
@@ -212,7 +212,7 @@ func checkRoles(uinfo RoleHolder, rolePolicies [][]string) error {
 			}
 		}
 		if failedCheck {
-			return errors.New("Need role: " + strings.Join(v, " or "))
+			return errAuth
 		}
 	}
 	return nil
