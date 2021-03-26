@@ -22,6 +22,9 @@ func (p *Pool) Rent() interface{} {
 	}
 	return p.pool.Remove(p.pool.Back())
 }
+func (p *Pool) Len() int {
+	return p.pool.Len()
+}
 
 func (p *Pool) Return(e interface{}) {
 	lock.Lock()

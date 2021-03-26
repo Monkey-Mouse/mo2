@@ -113,11 +113,15 @@ func resetBlocker() {
 }
 
 func redisCheckRL(prop string, ip string, limit int) bool {
-	sb := strpool.Rent().(strings.Builder)
+	// sb := strpool.Rent().(strings.Builder)
+	// sb.Reset()
+	// sb.WriteString(prop)
+	// sb.WriteString(ip)
+	// defer strpool.Return(sb)
+	sb := strings.Builder{}
 	sb.Reset()
 	sb.WriteString(prop)
 	sb.WriteString(ip)
-	defer strpool.Return(sb)
 	// rate limit logic
 	if limit < 0 {
 		return true
@@ -135,11 +139,11 @@ func redisCheckRL(prop string, ip string, limit int) bool {
 }
 
 func checkRL(prop string, ip string, limit int) bool {
-	sb := strpool.Rent().(strings.Builder)
+	sb := strings.Builder{}
 	sb.Reset()
 	sb.WriteString(prop)
 	sb.WriteString(ip)
-	defer strpool.Return(sb)
+	// defer strpool.Return(sb)
 	// rate limit logic
 	if limit < 0 {
 		return true
