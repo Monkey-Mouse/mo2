@@ -80,7 +80,7 @@
                     >
                       <v-progress-circular
                         indeterminate
-                        color="grey lighten-5"
+                        color="secondary"
                       ></v-progress-circular>
                     </v-row> </template
                 ></v-img>
