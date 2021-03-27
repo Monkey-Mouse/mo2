@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1616770522005,
+  "lastUpdate": 1616810537548,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -412,6 +412,60 @@ window.BENCHMARK_DATA = {
             "value": 1286,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "0b2201747bb7723ad166b1ada6faf7d60bd5195d",
+          "message": "🍻 remove some err new",
+          "timestamp": "2021-03-27T10:00:08+08:00",
+          "tree_id": "2da38a7205169bf313af2dff96f9de295f485c80",
+          "url": "https://github.com/Monkey-Mouse/Mo2/commit/0b2201747bb7723ad166b1ada6faf7d60bd5195d"
+        },
+        "date": 1616810536343,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 9003472,
+            "unit": "ns/op",
+            "extra": "134 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 517502,
+            "unit": "ns/op",
+            "extra": "2634 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1454,
+            "unit": "ns/op",
+            "extra": "888446 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 115853,
+            "unit": "ns/op",
+            "extra": "8896 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1238,
+            "unit": "ns/op",
+            "extra": "970370 times\n2 procs"
           }
         ]
       }
