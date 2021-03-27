@@ -46,6 +46,7 @@ func CreateOrLoadIndex(name string) {
 // Query query
 func Query(index string, query query.Query) *bleve.SearchResult {
 	searchRequest := bleve.NewSearchRequest(query)
+	searchRequest.Highlight = bleve.NewHighlight()
 	searchResult, _ := Indexes[index].Search(searchRequest)
 	return searchResult
 }
