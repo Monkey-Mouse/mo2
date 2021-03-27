@@ -342,9 +342,11 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 	}
 	filter.Ids = ids
 	blogs := database.FindBlogs(filter)
-	for i, v := range blogs {
-		blogs[i].Title = m[v.ID].Fields["Title"].(string)
-		blogs[i].Description = m[v.ID].Fields["Description"].(string)
+	if searchS != "" {
+		for i, v := range blogs {
+			blogs[i].Title = m[v.ID].Fields["Title"].(string)
+			blogs[i].Description = m[v.ID].Fields["Description"].(string)
+		}
 	}
 	ctx.JSON(http.StatusOK, blogs)
 }

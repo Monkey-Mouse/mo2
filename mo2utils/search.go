@@ -37,7 +37,7 @@ func IndexBlogs(blog []model.Blog) {
 }
 
 func QueryBlog(search string) search.DocumentMatchCollection {
-	re := mo2search.Query(blogIndex, bleve.NewQueryStringQuery(search))
+	re := mo2search.Query(blogIndex, bleve.NewMatchQuery(search))
 	return re.Hits
 }
 func DeleteBlogIndex(id string) {
