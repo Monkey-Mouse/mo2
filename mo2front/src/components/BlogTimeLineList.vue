@@ -32,9 +32,8 @@
                         displayColors[i % displayColors.length]
                       }--text`"
                       class="headline"
-                    >
-                      {{ blog.title }}
-                    </div>
+                      v-html="$sanitize(blog.title)"
+                    ></div>
                     <a
                       v-on:click.prevent
                       v-on:click.stop
@@ -130,8 +129,8 @@
                   vertical-align: middle;
                   display: table-cell;
                 "
-                >{{ blog.description }}</span
-              >
+                v-html="$sanitize(blog.description)"
+              ></span>
             </div>
           </v-lazy>
         </template>
