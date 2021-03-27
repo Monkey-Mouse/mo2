@@ -31,6 +31,8 @@ var rdb *redis.Client
 var dicChan chan *concurrent.Map = make(chan *concurrent.Map)
 var lock = sync.Mutex{}
 var errAuth = errors.New("authentication failed")
+var errDdos = mo2errors.New(http.StatusForbidden, "IP Blocked!检测到该ip地址存在潜在的ddos行为")
+var errFrequent = mo2errors.New(http.StatusTooManyRequests, "Too frequent!")
 
 // H handlermap, like gin router
 var H = handlerMap{handlers, "", make([][]string, 0), -1}
@@ -145,7 +147,7 @@ func checkRL(prop string, ip string, limit int) bool {
 
 func checkBlock(ip string) *mo2errors.Mo2Errors {
 	if blockFilter.TestString(ip) {
-		return mo2errors.New(http.StatusForbidden, "IP Blocked!检测到该ip地址存在潜在的ddos行为")
+		return errDdos
 	}
 	return nil
 }
@@ -162,7 +164,7 @@ func checkBlockAndRL(prop string, ip string, limit int) *mo2errors.Mo2Errors {
 		ok = checkRL(prop, ip, limit)
 	}
 	if !ok {
-		return mo2errors.New(http.StatusTooManyRequests, "Too frequent!")
+		return errFrequent
 	}
 	return nil
 }
@@ -247,7 +249,7 @@ func (h handlerMap) HandlerWithRL(
 	handler gin.HandlerFunc,
 	ratelimit int,
 	roles ...string) {
-	if roles != nil && len(roles) != 0 {
+	if len(roles) != 0 {
 		h.roles = append(h.roles, roles)
 	}
 	key := handlerKey{
