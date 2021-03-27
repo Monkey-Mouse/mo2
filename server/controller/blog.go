@@ -1,10 +1,12 @@
 package controller
 
 import (
-	"github.com/Monkey-Mouse/go-abac/abac"
-	"github.com/Monkey-Mouse/mo2/services/accessControl"
 	"net/http"
 	"strconv"
+
+	"github.com/Monkey-Mouse/go-abac/abac"
+	"github.com/Monkey-Mouse/mo2/services/accessControl"
+	"github.com/blevesearch/bleve/search"
 
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
@@ -319,24 +321,31 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason("权限不足，请联系管理员"))
 		return
 	}
-	search := ctx.Query("search")
+	searchS := ctx.Query("search")
 	var ids []primitive.ObjectID
-	if search != "" {
-		hits := mo2utils.QueryBlog(search)
-		len := filter.PageSize
+	var m map[primitive.ObjectID]*search.DocumentMatch
+	if searchS != "" {
+		hits := mo2utils.QueryBlog(searchS)
+		length := filter.PageSize
 		if hits.Len() < filter.PageSize {
-			len = hits.Len()
+			length = hits.Len()
 		}
-		ids = make([]primitive.ObjectID, len)
+		ids = make([]primitive.ObjectID, length)
+		m = make(map[primitive.ObjectID]*search.DocumentMatch, length)
 		for i, v := range hits {
-			if i == len {
+			if i == length {
 				break
 			}
 			ids[i], _ = primitive.ObjectIDFromHex(v.ID)
+			m[ids[i]] = v
 		}
 	}
 	filter.Ids = ids
 	blogs := database.FindBlogs(filter)
+	for i, v := range blogs {
+		blogs[i].Title = m[v.ID].Fields["Title"].(string)
+		blogs[i].Description = m[v.ID].Fields["Description"].(string)
+	}
 	ctx.JSON(http.StatusOK, blogs)
 }
 
