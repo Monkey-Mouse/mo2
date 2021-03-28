@@ -289,7 +289,8 @@ export default class AccountModal extends Vue {
   }
   register() {
     this.$v.$touch();
-    if (this.$v.$anyError) return;
+    if (this.regDisable) return;
+    this.emailOrName = this.name;
     this.processing = true;
     RegisterAsync({
       email: this.email,
