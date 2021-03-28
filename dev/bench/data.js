@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1616838734477,
+  "lastUpdate": 1616921605468,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -736,6 +736,60 @@ window.BENCHMARK_DATA = {
             "value": 1253,
             "unit": "ns/op",
             "extra": "913178 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "568a4859c96815530af438ae9ef8c81317b0ac5d",
+          "message": "🐛 [fix] register button click no action",
+          "timestamp": "2021-03-28T16:51:17+08:00",
+          "tree_id": "01631e3d9ec1e720f0d512b2c1cd1d4ec8beef8b",
+          "url": "https://github.com/Monkey-Mouse/Mo2/commit/568a4859c96815530af438ae9ef8c81317b0ac5d"
+        },
+        "date": 1616921604416,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 14068228,
+            "unit": "ns/op",
+            "extra": "88 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 536463,
+            "unit": "ns/op",
+            "extra": "2744 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 980,
+            "unit": "ns/op",
+            "extra": "1155271 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 145833,
+            "unit": "ns/op",
+            "extra": "7533 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1118,
+            "unit": "ns/op",
+            "extra": "993732 times\n2 procs"
           }
         ]
       }
