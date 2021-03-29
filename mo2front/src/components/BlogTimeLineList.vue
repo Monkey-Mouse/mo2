@@ -48,7 +48,11 @@
                     <div class="subtitle-2">
                       <time-ago
                         :refresh="60"
-                        :datetime="blog.entityInfo.updateTime"
+                        :datetime="
+                          blog.entityInfo
+                            ? blog.entityInfo.updateTime
+                            : blog['entityInfo.updateTime']
+                        "
                         tooltip
                         long
                       ></time-ago>
