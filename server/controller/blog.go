@@ -6,7 +6,6 @@ import (
 
 	"github.com/Monkey-Mouse/go-abac/abac"
 	"github.com/Monkey-Mouse/mo2/services/accessControl"
-	"github.com/blevesearch/bleve/search"
 
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
@@ -322,36 +321,20 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 		return
 	}
 	searchS := ctx.Query("search")
-	var ids []primitive.ObjectID
-	var m map[primitive.ObjectID]*search.DocumentMatch
 	if searchS != "" {
-		hits := mo2utils.QueryBlog(searchS)
-		length := filter.PageSize
-		if hits.Len() < filter.PageSize {
-			length = hits.Len()
-		}
-		ids = make([]primitive.ObjectID, length)
-		m = make(map[primitive.ObjectID]*search.DocumentMatch, length)
+		hits := mo2utils.QueryBlog(searchS, filter.Page, filter.PageSize)
+		var re = make([]map[string]interface{}, hits.Len())
 		for i, v := range hits {
-			if i == length {
-				break
+			re[i] = v.Fields
+			for s, u := range v.Fragments {
+				re[i][s] = u[0]
 			}
-			ids[i], _ = primitive.ObjectIDFromHex(v.ID)
-			m[ids[i]] = v
 		}
+
+		ctx.JSON(http.StatusOK, re)
+		return
 	}
-	filter.Ids = ids
 	blogs := database.FindBlogs(filter)
-	if searchS != "" {
-		for i, v := range blogs {
-			if m[v.ID].Fragments["Title"] != nil {
-				blogs[i].Title = m[v.ID].Fragments["Title"][0]
-			}
-			if m[v.ID].Fragments["Description"] != nil {
-				blogs[i].Description = m[v.ID].Fragments["Description"][0]
-			}
-		}
-	}
 	ctx.JSON(http.StatusOK, blogs)
 }
 
