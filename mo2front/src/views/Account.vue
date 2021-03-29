@@ -360,9 +360,9 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
   }
   updateProps() {
     this.inputProps["name"].default = this.user.name;
-    this.inputProps["bio"].default = this.user.settings.bio;
-    this.inputProps["location"].default = this.user.settings.location;
-    this.inputProps["github"].default = this.user.settings.github;
+    this.inputProps["bio"].default = this.user.settings?.bio;
+    this.inputProps["location"].default = this.user.settings?.location;
+    this.inputProps["github"].default = this.user.settings?.github;
   }
   async initPage() {
     InitLoader(this);
