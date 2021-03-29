@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@types/sanitize-html": "^1.27.1",
-    "@types/vuelidate": "^0.7.13",
+    "@types/vuelidate": "^0.7.14",
     "axios": "^0.21.1",
     "bulma": "^0.9.2",
     "core-js": "^3.9.1",
