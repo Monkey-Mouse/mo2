@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617023484989,
+  "lastUpdate": 1617023608150,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -894,6 +894,56 @@ window.BENCHMARK_DATA = {
             "value": 1341,
             "unit": "ns/op",
             "extra": "880077 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "949ded8bf63381299a18b2d69473a4286afcee54",
+          "message": "[Snyk] Upgrade @types/vuelidate from 0.7.13 to 0.7.14",
+          "timestamp": "2021-03-29T13:09:25Z",
+          "url": "https://github.com/Monkey-Mouse/Mo2/pull/232/commits/949ded8bf63381299a18b2d69473a4286afcee54"
+        },
+        "date": 1617023607507,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10235417,
+            "unit": "ns/op",
+            "extra": "100 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 484715,
+            "unit": "ns/op",
+            "extra": "2913 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1357,
+            "unit": "ns/op",
+            "extra": "1229851 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 110683,
+            "unit": "ns/op",
+            "extra": "10000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1248,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
           }
         ]
       }
