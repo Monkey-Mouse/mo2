@@ -15,7 +15,7 @@ import (
 
 var searchHost = os.Getenv("MO2_SEARCH_HOST")
 var createIndexURL = fmt.Sprintf("http://%s/api/index?name=", searchHost)
-var searchURL = fmt.Sprintf("http://%s/api/search?name=", searchHost)
+var searchURL = fmt.Sprintf("http://%s/api/search?index=", searchHost)
 var indexURL = fmt.Sprintf("http://%s/api/%s?id=%s", searchHost, "%s", "%s")
 var deleteURL = fmt.Sprintf("http://%s/api/%s?id=%s", searchHost, "%s", "%s")
 

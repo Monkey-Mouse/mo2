@@ -323,11 +323,11 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 	searchS := ctx.Query("search")
 	if searchS != "" {
 		hits := mo2utils.QueryBlog(searchS, filter.Page, filter.PageSize)
-		var re map[string]interface{}
-		for _, v := range hits {
-			re = v.Fields
+		var re = make([]map[string]interface{}, hits.Len())
+		for i, v := range hits {
+			re[i] = v.Fields
 			for s, u := range v.Fragments {
-				re[s] = u[0]
+				re[i][s] = u[0]
 			}
 		}
 
