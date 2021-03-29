@@ -26,7 +26,6 @@ services:
       - "mo2search"
     volumes:
       - "./secrets:/app/secrets"
-      - "./bleve:/app/.bleve"
       - "./logs:/app/logs"
     environment:
       - COMMENT_LOG=mo2notificationlog:9990

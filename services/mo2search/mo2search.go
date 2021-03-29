@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/search/query"
@@ -15,10 +14,10 @@ import (
 )
 
 var searchHost = os.Getenv("MO2_SEARCH_HOST")
-var createIndexURL = path.Join(searchHost, "api/index?name=")
-var searchURL = path.Join(searchHost, "api/search?name=")
-var indexURL = path.Join(searchHost, "api/%s?id=%s")
-var deleteURL = path.Join(searchHost, "api/%s?id=%s")
+var createIndexURL = fmt.Sprintf("http://%s/api/index?name=", searchHost)
+var searchURL = fmt.Sprintf("http://%s/api/search?name=", searchHost)
+var indexURL = fmt.Sprintf("http://%s/api/%s?id=%s", searchHost, "%s", "%s")
+var deleteURL = fmt.Sprintf("http://%s/api/%s?id=%s", searchHost, "%s", "%s")
 
 // CreateOrLoadIndex as name
 func CreateOrLoadIndex(name string) {
