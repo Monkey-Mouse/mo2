@@ -6,6 +6,14 @@
     cursor: default;
 }
 
+.ellipsis-1 {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+}
+
 /* latin-ext */
 @font-face {
     font-family: 'Lato';
