@@ -54,6 +54,7 @@ export interface UserSettings {
     github_id?: string;
     status?: string;
     home_img?: string;
+    home_theme_dark?: "true" | 'false';
 }
 export interface User extends UserListData {
     email: string;
@@ -69,6 +70,7 @@ export interface InputProp {
     default: any;
     accept?: string;
     options?: Option[];
+    message?: string;
     iconClick?: (prop: InputProp) => void;
     onChange?: (c: any) => void;
 }
