@@ -27,7 +27,7 @@
     />
     <v-parallax
       dark
-      src="https://cdn.mo2.leezeeyee.com/material.jpg"
+      src="https://cdn.mo2.leezeeyee.com/material.jpg~pngslim"
       height="400"
     >
       <v-row align="center" justify="center">
