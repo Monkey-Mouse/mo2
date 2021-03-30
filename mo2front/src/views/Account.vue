@@ -25,11 +25,7 @@
       accept="image/*"
       style="display: none"
     />
-    <v-parallax
-      dark
-      src="https://cdn.mo2.leezeeyee.com/material.jpg~pngslim"
-      height="400"
-    >
+    <v-parallax dark :src="mainImg" height="400">
       <v-row align="center" justify="center">
         <v-col class="text-center" cols="12">
           <b
@@ -258,6 +254,15 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
       col: 12,
       type: "text",
     },
+    home_img: {
+      errorMsg: {},
+      label: "Home Img",
+      default: [],
+      icon: "mdi-image",
+      col: 12,
+      type: "file",
+      accept: "image/*",
+    },
   };
   async changeStatus(emoji: IEmoji) {
     this.user.settings.status = emoji.data;
@@ -271,6 +276,13 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
     this.avatarProcessing = false;
   }
 
+  get mainImg() {
+    return (
+      (this.displayUser.settings?.home_img ??
+        "https://cdn.mo2.leezeeyee.com/material.jpg") + "~parallax"
+    );
+  }
+
   get githubAccount(): boolean {
     return this.displayUser.email.indexOf("@") === 0;
   }
@@ -280,17 +292,22 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
     bio,
     location,
     github,
+    home_img,
   }: {
     name: string;
     bio: string;
     location: string;
     github: string;
+    home_img: File;
   }) {
     try {
       this.user.name = name;
       this.user.settings.bio = bio;
       this.user.settings.location = location;
       this.user.settings.github = github;
+      await UploadImgToQiniu([home_img], (src) => {
+        this.user.settings.home_img = src.src;
+      });
       await UpdateUserInfo(this.user);
       // this.displayUser.name = name;
       this.updateUser();
@@ -363,6 +380,11 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
     this.inputProps["bio"].default = this.user.settings?.bio;
     this.inputProps["location"].default = this.user.settings?.location;
     this.inputProps["github"].default = this.user.settings?.github;
+    this.inputProps["home_img"].default = [
+      // TODO: vuetify file only accept File array, not url array
+      // this.user.settings?.home_img ??
+      //   "https://cdn.mo2.leezeeyee.com/material.jpg",
+    ];
   }
   async initPage() {
     InitLoader(this);

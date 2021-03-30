@@ -52,7 +52,8 @@ export interface UserSettings {
     github?: string;
     location?: string;
     github_id?: string;
-    status?: string
+    status?: string;
+    home_img?: string;
 }
 export interface User extends UserListData {
     email: string;
