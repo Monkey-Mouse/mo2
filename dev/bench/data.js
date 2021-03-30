@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617034359140,
+  "lastUpdate": 1617068453660,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -998,6 +998,60 @@ window.BENCHMARK_DATA = {
             "value": 1285,
             "unit": "ns/op",
             "extra": "895801 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "ca6e8888065f8c56848afec027ef1bb784cdef77",
+          "message": "minimoze img size",
+          "timestamp": "2021-03-30T09:38:49+08:00",
+          "tree_id": "bfb76ba0b658a3f559e4631774ced6ba348acdf5",
+          "url": "https://github.com/Monkey-Mouse/Mo2/commit/ca6e8888065f8c56848afec027ef1bb784cdef77"
+        },
+        "date": 1617068452564,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 9110515,
+            "unit": "ns/op",
+            "extra": "112 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 512731,
+            "unit": "ns/op",
+            "extra": "2662 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1499,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 125943,
+            "unit": "ns/op",
+            "extra": "10000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1257,
+            "unit": "ns/op",
+            "extra": "937119 times\n2 procs"
           }
         ]
       }
