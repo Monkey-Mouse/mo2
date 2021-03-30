@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617068453660,
+  "lastUpdate": 1617072210978,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -1052,6 +1052,60 @@ window.BENCHMARK_DATA = {
             "value": 1257,
             "unit": "ns/op",
             "extra": "937119 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "e1fe04c3e1d333e323c3db1224ad5795794bddc7",
+          "message": "disable nginx gzip",
+          "timestamp": "2021-03-30T10:41:26+08:00",
+          "tree_id": "57027b307e09599e53ca5eaa6c2072c3b7ed4d2e",
+          "url": "https://github.com/Monkey-Mouse/Mo2/commit/e1fe04c3e1d333e323c3db1224ad5795794bddc7"
+        },
+        "date": 1617072210000,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 11633681,
+            "unit": "ns/op",
+            "extra": "100 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 516540,
+            "unit": "ns/op",
+            "extra": "2511 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1463,
+            "unit": "ns/op",
+            "extra": "839851 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 123228,
+            "unit": "ns/op",
+            "extra": "9856 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1331,
+            "unit": "ns/op",
+            "extra": "945751 times\n2 procs"
           }
         ]
       }
