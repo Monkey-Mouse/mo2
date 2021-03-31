@@ -14,19 +14,17 @@ import (
 )
 
 type AllowOwn struct {
-	userInfo dto.LoginUserInfo
-	id       primitive.ObjectID `json:"id"`
-	filter   model.Filter
+	UserInfo dto.LoginUserInfo
+	ID       primitive.ObjectID `json:"ID"`
+	Filter   model.Filter
 }
 
 func (r *AllowOwn) ProcessContext(ctx abac.ContextType) {
-	r.userInfo = ctx.Value("userInfo").(dto.LoginUserInfo)
-	r.id = ctx.Value("id").(primitive.ObjectID)
-	r.filter = ctx.Value("filter").(model.Filter)
+	*r = ctx.Value("allowOwn").(AllowOwn)
 }
 func (r *AllowOwn) JudgeRule() (bool, error) {
-	blog := database.FindBlogById(r.id, r.filter.IsDraft)
-	if blog.AuthorID == r.userInfo.ID {
+	blog := database.FindBlogById(r.ID, r.Filter.IsDraft)
+	if blog.AuthorID == r.UserInfo.ID {
 		return true, nil
 	} else {
 		return false, nil
@@ -37,7 +35,7 @@ const accessManagerStr = "accessManager"
 
 var AccessManagerCol = database.GetCollection(accessManagerStr)
 
-type accessFilter struct {
+type AccessFilter struct {
 	VisitorID primitive.ObjectID `json:"visitor_id" bson:"visitor_id"`
 	ManagerID primitive.ObjectID `json:"manager_id" bson:"manager_id"`
 	RoleList  []string           `json:"role_list,omitempty" example:"'admin':xxxxx 'write':xxxxx" bson:"role_map,omitempty"`
@@ -45,7 +43,7 @@ type accessFilter struct {
 
 // JudgeRule
 // 判断id是否在manager的某个role(s)之内，逻辑“与”，必须满足列表内的所有role
-func (a *accessFilter) JudgeRule() (bool, error) {
+func (a *AccessFilter) JudgeRule() (bool, error) {
 	var res model.AccessManager
 	opt := options.FindOne().SetProjection(bson.M{"_id": 1})
 	for _, role := range a.RoleList {
@@ -60,6 +58,6 @@ func (a *accessFilter) JudgeRule() (bool, error) {
 	}
 	return true, nil
 }
-func (a accessFilter) ProcessContext(ctx abac.ContextType) {
-	a = ctx.Value("accessManager").(accessFilter)
+func (a *AccessFilter) ProcessContext(ctx abac.ContextType) {
+	*a = ctx.Value("accessManager").(AccessFilter)
 }

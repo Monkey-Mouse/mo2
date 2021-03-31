@@ -222,5 +222,6 @@ type RuleType interface {
 
 
 
-
+### 群组中文章
+需要将群组的id加入到blog的ownerID中
 

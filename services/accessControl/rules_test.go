@@ -56,7 +56,7 @@ func Test_accessFilter_JudgeRule(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			a := &accessFilter{
+			a := &AccessFilter{
 				VisitorID: tt.fields.VisitorID,
 				ManagerID: tt.fields.ManagerID,
 				RoleList:  tt.fields.RoleList,
