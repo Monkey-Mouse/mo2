@@ -2,6 +2,22 @@
     max-height: 200px !important;
 }
 
+.account-parallax__content__dark {
+    color: black !important;
+
+    .v-icon {
+        color: black !important;
+    }
+}
+
+.account-parallax__content__light {
+    color: white !important;
+
+    .v-icon {
+        color: white !important;
+    }
+}
+
 .unclickable {
     cursor: default;
 }
@@ -13,6 +29,8 @@
     overflow: hidden !important;
     padding-bottom: 0 !important;
 }
+
+
 
 /* latin-ext */
 @font-face {
