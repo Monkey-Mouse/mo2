@@ -27,6 +27,9 @@ func insertGroup(t *testing.T, id primitive.ObjectID, ownerID primitive.ObjectID
 func deleteGroup(t *testing.T, id primitive.ObjectID) *http.Request {
 	return delete(t, "/api/group/"+id.Hex(), nil, nil)
 }
+func findGroup(t *testing.T, id primitive.ObjectID) *http.Request {
+	return get(t, "/api/group/"+id.Hex(), nil)
+}
 func TestController_UpdateGroup(t *testing.T) {
 	groupID := primitive.NewObjectID()
 
@@ -154,6 +157,60 @@ func TestController_DeleteGroup(t *testing.T) {
 		tests{name: "Test group not exist", req: req3, wantCode: 400, wantStr: badresponse.NoAccessReason},
 		tests{name: "Test no group id", req: req4, wantCode: 400, wantStr: badresponse.BadRequestReason},
 		tests{name: "Test success", req: req5, wantCode: 202},
+	)
+	defer database.DeleteGroupByOwnerID(id)
+	defer database.DeleteGroupByOwnerID(id3)
+
+}
+
+func TestController_FindGroup(t *testing.T) {
+	groupID := primitive.NewObjectID()
+	groupID2 := primitive.NewObjectID()
+	groupID3 := primitive.NewObjectID()
+
+	defer database.DeleteGroupByID(groupID)
+	defer database.DeleteGroupByID(groupID2)
+	defer database.DeleteGroupByID(groupID3)
+
+	id := primitive.NewObjectID()
+	id3 := primitive.NewObjectID()
+	database.UpsertAccount(&model.Account{
+		ID:       id,
+		UserName: id.Hex(),
+		Email:    id.Hex(),
+		Roles:    []string{}})
+	defer database.DeleteAccount(id)
+	database.UpsertGroup(model.Group{
+		ID:            groupID,
+		OwnerID:       id,
+		AccessManager: model.AccessManager{},
+	})
+	database.UpsertGroup(model.Group{
+		ID:            groupID2,
+		OwnerID:       id,
+		AccessManager: model.AccessManager{},
+	})
+	database.UpsertGroup(model.Group{
+		ID:            groupID3,
+		OwnerID:       id,
+		AccessManager: model.AccessManager{},
+	})
+
+	req1 := findGroup(t, groupID)
+	req2 := findGroup(t, groupID2)
+	req3 := findGroup(t, primitive.NewObjectID())
+	req4 := findGroup(t, primitive.ObjectID{})
+	req5 := findGroup(t, groupID)
+	addCookieWithID(req2, id3)
+	addCookieWithID(req3, id3)
+	addCookieWithID(req4, id3)
+	addCookieWithID(req5, id)
+	testHTTP(t,
+		tests{name: "Test auth", req: req1, wantCode: 200},
+		tests{name: "Test find other's group ", req: req2, wantCode: 200},
+		tests{name: "Test group not exist", req: req3, wantCode: 400, wantStr: "object not found"},
+		tests{name: "Test no group id", req: req4, wantCode: 400, wantStr: badresponse.BadRequestReason},
+		tests{name: "Test success", req: req5, wantCode: 200},
 	)
 	defer database.DeleteGroupByOwnerID(id)
 	defer database.DeleteGroupByOwnerID(id3)
