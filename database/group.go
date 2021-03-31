@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 )
 
 const groupStr = "group"
@@ -45,4 +46,14 @@ func DeleteGroupByID(id primitive.ObjectID) mo2errors.Mo2Errors {
 		return mo2errors.InitError(err)
 	}
 	return mo2errors.InitNoError("delete success")
+}
+
+// DeleteGroupByOwnerID  delete groups by owner id
+func DeleteGroupByOwnerID(id primitive.ObjectID) mo2errors.Mo2Errors {
+	if res, err := GroupCol.DeleteMany(context.TODO(), bson.M{"owner_id": id}); err != nil {
+		return mo2errors.InitError(err)
+	} else {
+		log.Println(res)
+		return mo2errors.InitNoError("delete success ", res)
+	}
 }

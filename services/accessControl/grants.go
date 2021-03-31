@@ -15,6 +15,7 @@ func init() {
 			"read:own":        abac.RulesType{},
 		},
 		"group": {
+			abac.ActionCreate: []abac.RuleType{},
 			abac.ActionUpdate: []abac.RuleType{&AllowOwn{}, &AccessFilter{}},
 		},
 	}})
