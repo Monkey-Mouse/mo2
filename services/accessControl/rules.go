@@ -59,5 +59,5 @@ func (a *AccessFilter) JudgeRule() (bool, error) {
 	return true, nil
 }
 func (a *AccessFilter) ProcessContext(ctx abac.ContextType) {
-	*a = ctx.Value("accessManager").(AccessFilter)
+	*a = ctx.Value("accessFilter").(AccessFilter)
 }
