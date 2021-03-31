@@ -195,6 +195,30 @@ type RecycleItem struct {
 }
 ```
 
+## [group]()
+群组功能允许：
+- 创建群组
+- 邀请成员
+- 管理成员权限
+- 创建群组共享文章
+
+想法是这样的，把群组视为一个权限过滤器。那么文章的authorId设置为群组的id，也就是权限过滤器的id
+
+（突然感觉这个想法不错，可以抽象出一个权限过滤器的类，这样需要有处理权限功能的事务都可复用）   
+但这个权限管理器与设计的abac的关系是怎么样的呢？是否能够完全交给abac实现？
+> aha,accessFilter 可以实现RuleType的接口
+
+``` go
+type RuleType interface {
+	JudgeRule() (bool, error)
+	ProcessContext(ctx ContextType)
+}
+```
+那么判断一个用户有权访问某项资源为：
+- 判断用户的id是否是authorID
+- 判断用户是否通过资源的权限过滤器
+
+权限管理器可以注册不同用户的在该资源中的身份：admin/read/write
 
 
 
