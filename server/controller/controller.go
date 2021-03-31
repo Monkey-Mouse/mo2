@@ -116,7 +116,7 @@ func SetupHandlers(c *Controller) {
 		api.Get("commentcount/:id", c.GetCommentNum)
 		group := api.Group("/group", model.Anonymous, model.OrdinaryUser)
 		{
-			group.Post("", c.UpsertGroup)
+			group.Put("", c.UpsertGroup)
 		}
 	}
 }

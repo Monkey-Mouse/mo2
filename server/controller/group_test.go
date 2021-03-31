@@ -9,7 +9,7 @@ import (
 )
 
 func upsertGroup(t *testing.T, id primitive.ObjectID, ownerID primitive.ObjectID) *http.Request {
-	return post(t, "/api/group", nil, model.Group{
+	return put(t, "/api/group", nil, model.Group{
 		ID:            id,
 		OwnerID:       ownerID,
 		AccessManager: model.AccessManager{RoleMap: map[string][]primitive.ObjectID{"admin": {ownerID}}},

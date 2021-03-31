@@ -28,7 +28,7 @@ const (
 // @Success 204
 // @Failure 400 {object} badresponse.ResponseError
 // @Failure 401 {object} badresponse.ResponseError
-// @Router /api/group [post]
+// @Router /api/group [put]
 func (c *Controller) UpsertGroup(ctx *gin.Context) {
 	var group model.Group
 	if err := ctx.ShouldBindJSON(&group); err != nil {
