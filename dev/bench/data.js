@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617080547479,
+  "lastUpdate": 1617152111484,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -1160,6 +1160,56 @@ window.BENCHMARK_DATA = {
             "value": 1318,
             "unit": "ns/op",
             "extra": "953191 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "5116531a4942156e18ddcbc8d4bd44c2dc1e0234",
+          "message": "[Snyk] Upgrade vuetify from 2.4.5 to 2.4.6",
+          "timestamp": "2021-03-30T05:00:24Z",
+          "url": "https://github.com/Monkey-Mouse/Mo2/pull/233/commits/5116531a4942156e18ddcbc8d4bd44c2dc1e0234"
+        },
+        "date": 1617152110847,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10463992,
+            "unit": "ns/op",
+            "extra": "108 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 524673,
+            "unit": "ns/op",
+            "extra": "2528 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1511,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 144834,
+            "unit": "ns/op",
+            "extra": "7912 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1180,
+            "unit": "ns/op",
+            "extra": "979039 times\n2 procs"
           }
         ]
       }
