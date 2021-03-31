@@ -118,6 +118,7 @@ func SetupHandlers(c *Controller) {
 		{
 			group.Put("", c.UpdateGroup)
 			group.Post("", c.InsertGroup)
+			group.Delete(":id", c.DeleteGroup)
 
 		}
 	}

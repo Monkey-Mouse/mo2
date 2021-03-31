@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/Monkey-Mouse/mo2/database"
+	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
 	"github.com/Monkey-Mouse/mo2/server/model"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
@@ -23,6 +24,9 @@ func insertGroup(t *testing.T, id primitive.ObjectID, ownerID primitive.ObjectID
 		AccessManager: model.AccessManager{RoleMap: map[string][]primitive.ObjectID{"admin": {ownerID}}},
 	})
 }
+func deleteGroup(t *testing.T, id primitive.ObjectID) *http.Request {
+	return delete(t, "/api/group/"+id.Hex(), nil, nil)
+}
 func TestController_UpdateGroup(t *testing.T) {
 	groupID := primitive.NewObjectID()
 
@@ -36,6 +40,8 @@ func TestController_UpdateGroup(t *testing.T) {
 		Email:    id.Hex(),
 		Roles:    []string{}})
 	defer database.DeleteAccount(id)
+	defer database.DeleteGroupByOwnerID(id)
+	defer database.DeleteGroupByOwnerID(id3)
 	database.UpsertGroup(model.Group{
 		ID:            groupID,
 		OwnerID:       id,
@@ -52,7 +58,6 @@ func TestController_UpdateGroup(t *testing.T) {
 	testHTTP(t,
 		tests{name: "Test auth", req: req1, wantCode: 403},
 		tests{name: "Test update another group", req: req2, wantCode: 400},
-		tests{name: "Test json no bind", req: req2, wantCode: 400},
 		tests{name: "Test no user", req: req3, wantCode: 400},
 		tests{name: "Test success", req: req4, wantCode: 201, wantStr: "admin"},
 	)
@@ -94,6 +99,47 @@ func TestController_InsertGroup(t *testing.T) {
 		tests{name: "Test no account id", req: req3, wantCode: 201, wantStr: id3.Hex()},
 		tests{name: "Test no group id", req: req4, wantCode: 201, wantStr: id3.Hex()},
 		tests{name: "Test success", req: req5, wantCode: 201, wantStr: id.Hex()},
+	)
+	defer database.DeleteGroupByID(groupID)
+	defer database.DeleteGroupByOwnerID(id)
+	defer database.DeleteGroupByOwnerID(id3)
+
+}
+
+func TestController_DeleteGroup(t *testing.T) {
+	groupID := primitive.NewObjectID()
+
+	defer database.DeleteGroupByID(groupID)
+
+	id := primitive.NewObjectID()
+	id3 := primitive.NewObjectID()
+	database.UpsertAccount(&model.Account{
+		ID:       id,
+		UserName: id.Hex(),
+		Email:    id.Hex(),
+		Roles:    []string{}})
+	defer database.DeleteAccount(id)
+	database.UpsertGroup(model.Group{
+		ID:            groupID,
+		OwnerID:       id,
+		AccessManager: model.AccessManager{},
+	})
+
+	req1 := deleteGroup(t, groupID)
+	req2 := deleteGroup(t, groupID)
+	req3 := deleteGroup(t, primitive.NewObjectID())
+	req4 := deleteGroup(t, primitive.ObjectID{})
+	req5 := deleteGroup(t, groupID)
+	addCookieWithID(req2, id3)
+	addCookieWithID(req3, id3)
+	addCookieWithID(req4, id3)
+	addCookieWithID(req5, id)
+	testHTTP(t,
+		tests{name: "Test auth", req: req1, wantCode: 403},
+		tests{name: "Test delete other's group ", req: req2, wantCode: 400, wantStr: badresponse.NoAccessReason},
+		tests{name: "Test group not exist", req: req3, wantCode: 400, wantStr: badresponse.NoAccessReason},
+		tests{name: "Test no group id", req: req4, wantCode: 400, wantStr: badresponse.BadRequestReason},
+		tests{name: "Test success", req: req5, wantCode: 202},
 	)
 	defer database.DeleteGroupByID(groupID)
 	defer database.DeleteGroupByOwnerID(id)
