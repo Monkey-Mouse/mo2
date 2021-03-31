@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617153312540,
+  "lastUpdate": 1617155756600,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -1260,6 +1260,60 @@ window.BENCHMARK_DATA = {
             "value": 1200,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "47478961+easilylazy@users.noreply.github.com",
+            "name": "leezeeyee",
+            "username": "easilylazy"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "41fe20f59564daefdcce10b17a8fa9240c64d70e",
+          "message": "Merge pull request #234 from Monkey-Mouse/Chronostasys/account-page-img-customization\n\n💯 account page img customization",
+          "timestamp": "2021-03-31T09:53:57+08:00",
+          "tree_id": "372396090ceee7133a1773fe29b789f189390b59",
+          "url": "https://github.com/Monkey-Mouse/Mo2/commit/41fe20f59564daefdcce10b17a8fa9240c64d70e"
+        },
+        "date": 1617155754334,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 9264905,
+            "unit": "ns/op",
+            "extra": "120 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 522344,
+            "unit": "ns/op",
+            "extra": "2779 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1444,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 123868,
+            "unit": "ns/op",
+            "extra": "9223 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1303,
+            "unit": "ns/op",
+            "extra": "942034 times\n2 procs"
           }
         ]
       }
