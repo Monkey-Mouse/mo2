@@ -5,6 +5,7 @@ import (
 	"github.com/Monkey-Mouse/go-abac/abac"
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
 	"github.com/Monkey-Mouse/mo2/server/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,25 +14,52 @@ import (
 	"strings"
 )
 
+const (
+	RuleAllowOwn     = "allowOwn"
+	RuleAccessFilter = "accessFilter"
+)
+
 type AllowOwn struct {
 	UserInfo dto.LoginUserInfo
-	ID       primitive.ObjectID `json:"ID"`
+	ID       primitive.ObjectID `json:"id"`
 	Filter   model.Filter
+	Resource string
 }
 
 func (r *AllowOwn) ProcessContext(ctx abac.ContextType) {
-	*r = ctx.Value("allowOwn").(AllowOwn)
-}
-func (r *AllowOwn) JudgeRule() (bool, error) {
-	blog := database.FindBlogById(r.ID, r.Filter.IsDraft)
-	if blog.AuthorID == r.UserInfo.ID {
-		return true, nil
-	} else {
-		return false, nil
+	if val := ctx.Value(RuleAllowOwn); val != nil {
+		*r = val.(AllowOwn)
 	}
 }
+func (r *AllowOwn) JudgeRule() (bool, error) {
+	if r.UserInfo.ID.IsZero() {
+		return false, mo2errors.Init(mo2errors.Mo2NoLogin, "not login")
+	}
+	switch r.Resource {
+	case ResourceBlog:
+		{
+			blog := database.FindBlogById(r.ID, r.Filter.IsDraft)
+			if blog.AuthorID == r.UserInfo.ID {
+				return true, nil
+			} else {
+				return false, nil
+			}
+		}
+	case ResourceGroup:
+		if group, mErr := database.FindGroup(r.ID); mErr.IsError() {
+			return false, mErr
+		} else {
+			if group.OwnerID == r.UserInfo.ID {
+				return true, nil
+			} else {
+				return false, nil
+			}
+		}
+	default:
+		return false, mo2errors.Init(mo2errors.Mo2NoExist, "source not available")
+	}
 
-const accessManagerStr = "accessManager"
+}
 
 type AccessFilter struct {
 	VisitorID primitive.ObjectID `json:"visitor_id" bson:"visitor_id"`
@@ -57,5 +85,7 @@ func (a *AccessFilter) JudgeRule() (bool, error) {
 	return true, nil
 }
 func (a *AccessFilter) ProcessContext(ctx abac.ContextType) {
-	*a = ctx.Value("accessFilter").(AccessFilter)
+	if val := ctx.Value(RuleAccessFilter); val != nil {
+		*a = val.(AccessFilter)
+	}
 }
