@@ -148,12 +148,15 @@ func (c *Controller) ProcessBlog(ctx *gin.Context) {
 	} else {
 		blog = database.FindBlogById(id, isDraft)
 		if info, exist := mo2utils.GetUserInfo(ctx); exist {
-			pass = accessControl.Ctrl.CanAnd(abac.IQueryInfo{
+			pass, err = accessControl.Ctrl.CanAnd(abac.IQueryInfo{
 				Subject:  "account",
 				Action:   abac.ActionUpdate,
 				Resource: "blog",
 				Context:  abac.DefaultContext{"id": id, "filter": model.Filter{IsDraft: isDraft}, "userInfo": info},
 			})
+			if err != nil {
+				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(err))
+			}
 
 		} else {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(MErrUnauthorized))
