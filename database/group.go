@@ -17,8 +17,8 @@ var GroupCol = GetCollection(groupStr)
 // UpsertGroup upsert group
 func UpsertGroup(group model.Group) mo2errors.Mo2Errors {
 	if _, err := GroupCol.UpdateOne(context.TODO(), bson.M{"_id": group.ID}, bson.M{"$set": bson.M{
-		"owner_id":          group.OwnerID,
-		"access_manager_id": group.AccessManagerID,
+		"owner_id":       group.OwnerID,
+		"access_manager": group.AccessManager,
 	}}, options.Update().SetUpsert(true)); err != nil {
 		return mo2errors.InitError(err)
 	}

@@ -22,27 +22,23 @@ func TestBlog(t *testing.T) {
 	roleMap := make(map[string][]primitive.ObjectID)
 	roleMap["admin"] = []primitive.ObjectID{visitorID}
 	manager := model.AccessManager{
-		ID:         primitive.NewObjectID(),
 		EntityInfo: model.InitEntity(),
 		RoleMap:    roleMap,
 	}
-	if mErr := database.UpsertManager(manager); mErr.IsError() {
-		t.Error(mErr)
-	}
-	defer database.DeleteManagerByID(manager.ID)
-	blog.AuthorID = manager.ID
+
 	if mErr := database.UpsertBlog(&blog, isDraft); mErr.IsError() {
 		t.Error(mErr)
 	}
 	defer database.DeleteBlogs(isDraft, blog.ID)
 	group := model.Group{
-		ID:              primitive.NewObjectID(),
-		OwnerID:         visitorID,
-		AccessManagerID: manager.ID,
+		ID:            primitive.NewObjectID(),
+		OwnerID:       visitorID,
+		AccessManager: manager,
 	}
 	if mErr := database.UpsertGroup(group); mErr.IsError() {
 		t.Error(mErr)
 	}
+	blog.AuthorID = group.ID
 	defer database.DeleteGroupByID(group.ID)
 	if pass, err := Ctrl.CanOr(abac.IQueryInfo{
 		Subject:  "account",
@@ -51,7 +47,7 @@ func TestBlog(t *testing.T) {
 		Context: abac.DefaultContext{"allowOwn": AllowOwn{ID: blog.ID, Filter: model.Filter{IsDraft: isDraft}, UserInfo: dto.LoginUserInfo{ID: visitorID}},
 			"accessFilter": AccessFilter{
 				VisitorID: visitorID,
-				ManagerID: manager.ID,
+				GroupID:   group.ID,
 				RoleList:  nil,
 			}},
 	}); err != nil {

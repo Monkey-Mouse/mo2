@@ -225,3 +225,5 @@ type RuleType interface {
 ### 群组中文章
 需要将群组的id加入到blog的ownerID中
 
+是否有必要把一个群组的分离？不若直接把filter作为群组的部分，减少查询次数
+

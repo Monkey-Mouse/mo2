@@ -7,7 +7,6 @@ import (
 const accessManagerStr = "AccessManager"
 
 type AccessManager struct {
-	ID         primitive.ObjectID              `json:"id" bson:"_id"`
 	EntityInfo Entity                          `json:"entityInfo,omitempty" bson:"entity_info,omitempty"`
 	RoleMap    map[string][]primitive.ObjectID `json:"role_map,omitempty" example:"'admin':xxxxx 'write':xxxxx" bson:"role_map,omitempty"`
 }

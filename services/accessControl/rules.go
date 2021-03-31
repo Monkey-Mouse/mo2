@@ -33,11 +33,9 @@ func (r *AllowOwn) JudgeRule() (bool, error) {
 
 const accessManagerStr = "accessManager"
 
-var AccessManagerCol = database.GetCollection(accessManagerStr)
-
 type AccessFilter struct {
 	VisitorID primitive.ObjectID `json:"visitor_id" bson:"visitor_id"`
-	ManagerID primitive.ObjectID `json:"manager_id" bson:"manager_id"`
+	GroupID   primitive.ObjectID `json:"group_id" bson:"group_id"`
 	RoleList  []string           `json:"role_list,omitempty" example:"'admin':xxxxx 'write':xxxxx" bson:"role_map,omitempty"`
 }
 
@@ -47,8 +45,8 @@ func (a *AccessFilter) JudgeRule() (bool, error) {
 	var res model.AccessManager
 	opt := options.FindOne().SetProjection(bson.M{"_id": 1})
 	for _, role := range a.RoleList {
-		key := strings.Join([]string{"role_map", role}, ".")
-		err := AccessManagerCol.FindOne(context.TODO(), bson.M{"$and": []bson.M{{"_id": a.ManagerID}, {key: bson.M{"$eq": a.VisitorID}}}}, opt).Decode(&res)
+		key := strings.Join([]string{"access_manager", "role_map", role}, ".")
+		err := database.GroupCol.FindOne(context.TODO(), bson.M{"$and": []bson.M{{"_id": a.GroupID}, {key: bson.M{"$eq": a.VisitorID}}}}, opt).Decode(&res)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
 				return false, nil
