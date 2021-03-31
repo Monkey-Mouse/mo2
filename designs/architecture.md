@@ -13,6 +13,7 @@ Mo2总体为微服务架构，生产环境使用docker-compose组合多个容器
     [mo2 main] <:--:> http2 [redis]
     [mo2 audit log] <:--:> http2 [mongodb clusters]
     [mo2 audit log] <:--:> grpc [mo2 main]
+    [mo2 main] <:--:> http2 [mo2 search]
 ]
 ```
 
