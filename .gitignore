@@ -21,3 +21,4 @@ dist
 *.secret
 .bleve/*
 .bleve
+.VSCodeCounter/
