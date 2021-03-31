@@ -205,6 +205,13 @@ export interface AutoLoader<T> {
     nomore: boolean;
     ReachedButtom: () => void;
 }
+export function InitLoader<T>(loader: AutoLoader<T>) {
+    loader.datalist = [];
+    loader.page = 0;
+    loader.firstloading = true;
+    loader.nomore = false;
+    loader.loading = true;
+}
 export function ElmReachedButtom<T>(elm: AutoLoader<T>, getMore: (query: { page: number; pageSize: number }) => Promise<T[]>) {
     if (elm.loading === false && !elm.nomore) {
         elm.loading = true;

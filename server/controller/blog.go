@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"github.com/Monkey-Mouse/go-abac/abac"
-	"github.com/Monkey-Mouse/mo2/services/accessControl"
 	"net/http"
 	"strconv"
+
+	"github.com/Monkey-Mouse/go-abac/abac"
+	"github.com/Monkey-Mouse/mo2/services/accessControl"
 
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
@@ -322,23 +323,20 @@ func (c *Controller) QueryBlogs(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason("权限不足，请联系管理员"))
 		return
 	}
-	search := ctx.Query("search")
-	var ids []primitive.ObjectID
-	if search != "" {
-		hits := mo2utils.QueryBlog(search)
-		len := filter.PageSize
-		if hits.Len() < filter.PageSize {
-			len = hits.Len()
-		}
-		ids = make([]primitive.ObjectID, len)
+	searchS := ctx.Query("search")
+	if searchS != "" {
+		hits := mo2utils.QueryBlog(searchS, filter.Page, filter.PageSize)
+		var re = make([]map[string]interface{}, hits.Len())
 		for i, v := range hits {
-			if i == len {
-				break
+			re[i] = v.Fields
+			for s, u := range v.Fragments {
+				re[i][s] = u[0]
 			}
-			ids[i], _ = primitive.ObjectIDFromHex(v.ID)
 		}
+
+		ctx.JSON(http.StatusOK, re)
+		return
 	}
-	filter.Ids = ids
 	blogs := database.FindBlogs(filter)
 	ctx.JSON(http.StatusOK, blogs)
 }

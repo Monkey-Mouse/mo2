@@ -9,8 +9,17 @@
             v-slot="{ hover }"
           >
             <div v-on:click.prevent v-on:click.stop class="unclickable">
-              <v-avatar :style="hover && enableEdit ? 'position:absolute' : ''">
-                {{ user.settings.status ? user.settings.status : "😀" }}
+              <v-avatar
+                :style="
+                  (hover && enableEdit ? 'position:absolute;' : '') +
+                  (size > 75 ? `font-size: ${size / 5}px;` : '')
+                "
+              >
+                {{
+                  user.settings && user.settings.status
+                    ? user.settings.status
+                    : "😀"
+                }}
               </v-avatar>
               <v-emoji-picker
                 :style="mobile ? 'margin-left: -120%!important;' : ''"
@@ -32,6 +41,14 @@
               user.settings.avatar !== ''
             "
             :src="user.settings.avatar + '~thumb'"
+          >
+            <template v-slot:placeholder>
+              <v-row class="fill-height ma-0" align="center" justify="center">
+                <v-progress-circular
+                  indeterminate
+                  color="secondary"
+                ></v-progress-circular>
+              </v-row> </template
           ></v-img>
           <span v-else class="white--text headline">{{ initials }}</span>
         </v-avatar>
@@ -98,11 +115,3 @@ export default class Avatar extends Vue {
 </script>
 
 
-<style>
-.container-emoji {
-  max-height: 200px !important;
-}
-.unclickable {
-  cursor: none;
-}
-</style>

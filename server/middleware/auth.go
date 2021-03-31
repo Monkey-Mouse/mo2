@@ -7,7 +7,6 @@ import (
 	"os"
 	"path"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -27,18 +26,21 @@ var unblockEvery int = 3600
 var fromCTX FromCTX
 var blockFilter = bloom.NewWithEstimates(10000, 0.01)
 var userInfoKey string
-var handlers = make(map[handlerKey]handlerProp, 0)
+var handlers = make(map[handlerKey]handlerProp)
 var rdb *redis.Client
-var dicChan chan *concurrent.Map = make(chan *concurrent.Map, 0)
+var dicChan chan *concurrent.Map = make(chan *concurrent.Map)
 var lock = sync.Mutex{}
+var errAuth = errors.New("authentication failed")
+var errDdos = mo2errors.New(http.StatusForbidden, "IP Blocked!检测到该ip地址存在潜在的ddos行为")
+var errFrequent = mo2errors.New(http.StatusTooManyRequests, "Too frequent!")
 
 // H handlermap, like gin router
 var H = handlerMap{handlers, "", make([][]string, 0), -1}
 
 func resetVar() {
 	blockFilter = bloom.NewWithEstimates(10000, 0.01)
-	handlers = make(map[handlerKey]handlerProp, 0)
-	dicChan = make(chan *concurrent.Map, 0)
+	handlers = make(map[handlerKey]handlerProp)
+	dicChan = make(chan *concurrent.Map)
 	lock = sync.Mutex{}
 	H = handlerMap{handlers, "", make([][]string, 0), -1}
 	rdb = nil
@@ -145,7 +147,7 @@ func checkRL(prop string, ip string, limit int) bool {
 
 func checkBlock(ip string) *mo2errors.Mo2Errors {
 	if blockFilter.TestString(ip) {
-		return mo2errors.New(http.StatusForbidden, "IP Blocked!检测到该ip地址存在潜在的ddos行为")
+		return errDdos
 	}
 	return nil
 }
@@ -162,7 +164,7 @@ func checkBlockAndRL(prop string, ip string, limit int) *mo2errors.Mo2Errors {
 		ok = checkRL(prop, ip, limit)
 	}
 	if !ok {
-		return mo2errors.New(http.StatusTooManyRequests, "Too frequent!")
+		return errFrequent
 	}
 	return nil
 }
@@ -212,7 +214,7 @@ func checkRoles(uinfo RoleHolder, rolePolicies [][]string) error {
 			}
 		}
 		if failedCheck {
-			return errors.New("Need role: " + strings.Join(v, " or "))
+			return errAuth
 		}
 	}
 	return nil
@@ -247,7 +249,7 @@ func (h handlerMap) HandlerWithRL(
 	handler gin.HandlerFunc,
 	ratelimit int,
 	roles ...string) {
-	if roles != nil && len(roles) != 0 {
+	if len(roles) != 0 {
 		h.roles = append(h.roles, roles)
 	}
 	key := handlerKey{

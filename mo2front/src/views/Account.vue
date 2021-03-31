@@ -25,12 +25,12 @@
       accept="image/*"
       style="display: none"
     />
-    <v-parallax
-      dark
-      src="https://cdn.mo2.leezeeyee.com/material.jpg"
-      height="400"
-    >
-      <v-row align="center" justify="center">
+    <v-parallax dark :src="mainImg" height="400">
+      <v-row
+        :class="`account-parallax__content__${parallaxContentTheme}`"
+        align="center"
+        justify="center"
+      >
         <v-col class="text-center" cols="12">
           <b
             @click="changeAvatar"
@@ -43,7 +43,7 @@
                 </v-avatar>
               </template>
               <avatar
-                :enableEdit="true"
+                :enableEdit="ownPage"
                 :size="80"
                 :user="displayUser"
                 @setemoji="changeStatus"
@@ -59,7 +59,7 @@
           </h1>
           <h4 class="subheading">{{ displayUser.description }}</h4>
           <h4 v-if="displayUser.email.indexOf('@') > 0" class="subtitle-2 mb-4">
-            {{ displayUser.email }}<v-icon small> mdi-email</v-icon>
+            {{ displayUser.email }}&nbsp;<v-icon small> mdi-email</v-icon>
           </h4>
           <v-row v-if="displayUser.settings.bio">
             <v-col lg="8" offset-lg="2">
@@ -72,7 +72,7 @@
             <v-col lg="8" offset-lg="2">
               <h4>
                 {{ displayUser.settings.location
-                }}<v-icon>mdi-map-marker</v-icon>
+                }}<v-icon small>mdi-map-marker</v-icon>
               </h4></v-col
             >
           </v-row>
@@ -81,7 +81,7 @@
               <h4>
                 <a target="_blank" :href="displayUser.settings.github">
                   {{ displayUser.settings.github }} </a
-                ><v-icon>mdi-github</v-icon>
+                ><v-icon small>mdi-github</v-icon>
               </h4></v-col
             >
           </v-row>
@@ -142,6 +142,7 @@ import {
   GetOwnArticles,
   GetUserArticles,
   GetUserData,
+  InitLoader,
   UpdateUserInfo,
   UploadImgToQiniu,
 } from "@/utils";
@@ -190,6 +191,7 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
   showCropper = false;
   avatarProcessing = false;
   avErr = "";
+  blob: File = null;
 
   draftProps: AutoLoader<BlogBrief> = {
     loading: true,
@@ -257,6 +259,24 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
       col: 12,
       type: "text",
     },
+    home_img: {
+      errorMsg: {},
+      label: "Home Img",
+      default: null,
+      icon: "mdi-image",
+      col: 12,
+      type: "file",
+      accept: "image/*",
+    },
+    theme: {
+      errorMsg: {},
+      label: "Dark Font",
+      default: false,
+      icon: "mdi-theme-light-dark",
+      col: 12,
+      type: "switch",
+      message: "设置主页字体颜色",
+    },
   };
   async changeStatus(emoji: IEmoji) {
     this.user.settings.status = emoji.data;
@@ -269,6 +289,15 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
     }
     this.avatarProcessing = false;
   }
+  get parallaxContentTheme() {
+    return this.user.settings?.home_theme_dark === "true" ? "dark" : "light";
+  }
+  get mainImg() {
+    return (
+      (this.displayUser.settings?.home_img ??
+        "https://cdn.mo2.leezeeyee.com/material.jpg") + "~parallax"
+    );
+  }
 
   get githubAccount(): boolean {
     return this.displayUser.email.indexOf("@") === 0;
@@ -279,23 +308,37 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
     bio,
     location,
     github,
+    home_img,
+    theme,
   }: {
     name: string;
     bio: string;
     location: string;
     github: string;
+    home_img: File | [];
+    theme: boolean;
   }) {
     try {
       this.user.name = name;
       this.user.settings.bio = bio;
       this.user.settings.location = location;
       this.user.settings.github = github;
+      this.user.settings.home_theme_dark = theme ? "true" : "false";
+      const img = home_img as File;
+      if (home_img && !(home_img as []).length && this.blob !== home_img) {
+        console.log(img);
+        await UploadImgToQiniu([img], (src) => {
+          this.user.settings.home_img = src.src;
+          this.blob = img;
+        });
+      }
       await UpdateUserInfo(this.user);
       // this.displayUser.name = name;
       this.updateUser();
       // this.initPage();
       return { err: "", pass: true };
     } catch (error) {
+      console.log(error);
       return { err: GetErrorMsg(error), pass: false };
     }
   }
@@ -359,11 +402,20 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
   }
   updateProps() {
     this.inputProps["name"].default = this.user.name;
-    this.inputProps["bio"].default = this.user.settings.bio;
-    this.inputProps["location"].default = this.user.settings.location;
-    this.inputProps["github"].default = this.user.settings.github;
+    this.inputProps["bio"].default = this.user.settings?.bio;
+    this.inputProps["location"].default = this.user.settings?.location;
+    this.inputProps["github"].default = this.user.settings?.github;
+    this.inputProps["theme"].default =
+      this.user.settings?.home_theme_dark === "true";
+    // this.inputProps["home_img"].default = [
+    //   // TODO: vuetify file only accept File array, not url array
+    //   // this.user.settings?.home_img ??
+    //   //   "https://cdn.mo2.leezeeyee.com/material.jpg",
+    // ];
   }
   async initPage() {
+    InitLoader(this);
+    InitLoader(this.draftProps);
     if (this.$route.query["tab"]) {
       this.tab = this.$route.query["tab"] as string;
     }

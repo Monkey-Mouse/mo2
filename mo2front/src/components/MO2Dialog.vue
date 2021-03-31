@@ -1,43 +1,39 @@
 <template>
-  <v-dialog :value="show" @click:outside="close" max-width="600px">
+  <v-dialog scrollable :value="show" @click:outside="close" max-width="600px">
     <v-card
       @input="confirmerr = ''"
       :disabled="processing"
       :loading="processing"
     >
-      <v-container>
-        <v-row>
-          <v-col cols="12">
-            <v-card-title> {{ title }} </v-card-title>
-          </v-col>
-        </v-row>
-        <v-card-text>
-          <input-list
-            :anyError.sync="anyError"
-            ref="inputs"
-            :validator="validator"
-            :inputProps="inputProps"
-            :uploadImgs="uploadImgs"
-          />
-          <v-row v-if="confirmerr !== ''">
-            <v-alert dense outlined type="error" class="col-12">{{
-              confirmerr
-            }}</v-alert></v-row
-          >
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            :disabled="anyError"
-            color="success"
-            outlined
-            text
-            @click="confirmClick"
-            >{{ confirmText }}</v-btn
-          >
-          <v-btn @click="close" color="error">取消</v-btn>
-        </v-card-actions>
-      </v-container>
+      <v-card-title> {{ title }} </v-card-title>
+      <v-divider />
+      <v-card-text style="max-height: 300px">
+        <input-list
+          :anyError.sync="anyError"
+          ref="inputs"
+          :validator="validator"
+          :inputProps="inputProps"
+          :uploadImgs="uploadImgs"
+        />
+        <v-row v-if="confirmerr !== ''">
+          <v-alert dense outlined type="error" class="col-12">{{
+            confirmerr
+          }}</v-alert></v-row
+        >
+      </v-card-text>
+      <v-divider />
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+          :disabled="anyError"
+          color="success"
+          outlined
+          text
+          @click="confirmClick"
+          >{{ confirmText }}</v-btn
+        >
+        <v-btn @click="close" color="error">取消</v-btn>
+      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>

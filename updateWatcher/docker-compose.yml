@@ -23,9 +23,9 @@ services:
       - "mongodb"
       - "redis"
       - "mo2notificationlog"
+      - "mo2search"
     volumes:
       - "./secrets:/app/secrets"
-      - "./bleve:/app/.bleve"
       - "./logs:/app/logs"
     environment:
       - COMMENT_LOG=mo2notificationlog:9990
@@ -40,6 +40,12 @@ services:
       - MO2_DATABASE=mo2
       - LOG_COL=notificationLog
       - LOG_PORT=9990
+
+  mo2search:
+    image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2search:latest
+    restart: always
+    volumes:
+      - "./bleve:/app/.bleve"
 
   nginx:
     build: .

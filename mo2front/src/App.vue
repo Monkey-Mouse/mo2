@@ -36,7 +36,7 @@
         <v-icon>mdi-magnify</v-icon>
       </v-btn>
       <v-expand-transition v-if="this.$route.name !== 'Search Article'">
-        <v-text-field
+        <v-autocomplete
           color="secondary"
           v-if="search"
           autofocus
@@ -45,10 +45,46 @@
           style="max-width: 300px"
           label="Search"
           clearable
-          v-model="searchString"
+          :search-input.sync="searchString"
           hide-details="auto"
           @keydown="keyDown"
-        ></v-text-field>
+          :items="prompts"
+          no-filter
+          item-text="title"
+          item-value="id"
+        >
+          <template v-slot:item="{ item }">
+            <v-card
+              v-on:click.prevent
+              v-on:click.stop
+              class="ma-3"
+              style="max-width: 300px; width: 100%"
+              @click="
+                $router.push('/article/' + item.id);
+                searchString = '';
+                search = false;
+              "
+            >
+              <div class="d-flex flex-no-wrap justify-space-between">
+                <div>
+                  <v-card-title
+                    class="headline"
+                    v-html="item.title"
+                  ></v-card-title>
+
+                  <v-card-subtitle
+                    class="ellipsis-1"
+                    v-html="item.description"
+                  ></v-card-subtitle>
+                </div>
+
+                <v-avatar class="ma-3" size="64" tile>
+                  <v-img :src="item.cover"></v-img>
+                </v-avatar>
+              </div>
+            </v-card>
+          </template>
+        </v-autocomplete>
       </v-expand-transition>
       <v-btn
         v-if="!isUser && !search"
@@ -237,11 +273,13 @@ import Vue from "vue";
 import AccountModal from "./components/AccountModal.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
-import { BlankUser, User } from "./models";
+import { BlankUser, BlogBrief, User } from "./models";
 import {
+  GetArticles,
   GetInitials,
   GetNotificationNums,
   GetUserInfoAsync,
+  LazyExecutor,
   Logout,
   ReachedBottom,
   SetApp,
@@ -272,6 +310,8 @@ export default class App extends Vue {
   search = false;
   searchString = "";
   refresh = false;
+  prompts: BlogBrief[] = [];
+  searchLoader: LazyExecutor = new LazyExecutor(null, 200);
   keyDown(event: KeyboardEvent) {
     // Number 13 is the "Enter" key on the keyboard
     if (event.key === "Enter") {
@@ -282,7 +322,17 @@ export default class App extends Vue {
       this.$router
         .push("/search?q=" + this.searchString)
         .then(() => (this.searchString = ""));
-    }
+    } else
+      this.searchLoader.Execute(() =>
+        GetArticles({
+          page: 0,
+          pageSize: 5,
+          draft: false,
+          search: this.searchString,
+        }).then((bs) => {
+          this.prompts = bs;
+        })
+      );
   }
   reload() {
     this.refresh = false;

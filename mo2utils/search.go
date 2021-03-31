@@ -24,26 +24,32 @@ type blogI struct {
 
 // IndexBlog index the blog
 func IndexBlog(blog *model.Blog) {
-	mo2search.Indexes[blogIndex].Index(blog.ID.Hex(), blogI{blog.Title, blog.Description, blog.KeyWords})
+	mo2search.Index(blogIndex, blog.ID.Hex(), blog)
 }
 
 // IndexBlogs index multiple blogs
 func IndexBlogs(blog []model.Blog) {
-	batch := mo2search.Indexes[blogIndex].NewBatch()
 	for _, v := range blog {
-		batch.Index(v.ID.Hex(), blogI{v.Title, v.Description, v.KeyWords})
+		IndexBlog(&v)
 	}
-	mo2search.Indexes[blogIndex].Batch(batch)
 }
 
-func QueryBlog(search string) search.DocumentMatchCollection {
-	re := mo2search.Query(blogIndex, bleve.NewQueryStringQuery(search))
+func QueryBlog(search string, page int, pagesize int) search.DocumentMatchCollection {
+	queryT := bleve.NewMatchQuery(search)
+	queryT.SetField("title")
+	queryT.SetBoost(5)
+	queryD := bleve.NewMatchQuery(search)
+	queryD.SetField("description")
+	queryD.SetBoost(1)
+
+	query := bleve.NewDisjunctionQuery(queryT, queryD)
+	re := mo2search.Query(blogIndex, query, page, pagesize, []string{"*"})
 	return re.Hits
 }
 func DeleteBlogIndex(id string) {
-	mo2search.Indexes[blogIndex].Delete(id)
+	mo2search.Delete(blogIndex, id)
 }
 func QueryPrefix(term string) search.DocumentMatchCollection {
-	re := mo2search.Query(blogIndex, bleve.NewPrefixQuery(term))
+	re := mo2search.Query(blogIndex, bleve.NewPrefixQuery(term), 0, 10, nil)
 	return re.Hits
 }

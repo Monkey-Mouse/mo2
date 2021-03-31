@@ -33,8 +33,7 @@ func CreateAccountIndex() (err error) {
 			Options: options.Index().SetUnique(true),
 		},
 		{
-			Keys:    bson.D{{"settings.github_id", 1}},
-			Options: options.Index().SetUnique(true),
+			Keys: bson.D{{"settings.github_id", 1}},
 		},
 	}
 	_, err = GetCollection("accounts").Indexes().CreateMany(context.TODO(), indexModel)

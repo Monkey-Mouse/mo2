@@ -17,6 +17,10 @@
   - [从源码编译](#从源码编译)
     - [先决条件](#先决条件)
     - [编译服务器](#编译服务器)
+      - [0.设置环境变量](#0设置环境变量)
+      - [1.准备数据库服务](#1准备数据库服务)
+      - [2.准备其它微服务](#2准备其它微服务)
+      - [运行主服务](#运行主服务)
     - [编译前端](#编译前端)
 
 ## Why
@@ -41,7 +45,9 @@
 如果你只是想运行或部署Mo2项目而不对他的源码感兴趣，使用docker无疑是你最好的选择。  
 - 首先，你需要安装[docker](https://docs.docker.com/engine/install/)以及[docker-compose](https://docs.docker.com/compose/install/)  
 - 然后，你需要下载我们[updateWatcher](updateWatcher)文件夹下的所有文件，维持它们的相对位置
-- 最后，在此目录打开命令行，执行命令`docker-compose up`即可，此时将可以通过http://localhost:5001/swagger/index.html 访问后端控制台
+- 在此目录打开命令行，执行命令`docker-compose build`
+- 打开目录下的var.env.example文件，修改配置为你的配置，然后另存为var.env文件
+- 最后，执行命令`docker-compose --env-file ./var.env up -d`即可，此时将可以通过http://localhost:5001/swagger/index.html 访问后端控制台
 
 > **注意** 这样运行后端有部分功能不能使用。包括：
 > - image upload相关功能
@@ -58,6 +64,23 @@
 - 5.x-6.x的redis
 
 ### 编译服务器
+Mo2是微服务架构。它的架构图如下：  
+![arch](designs/imgs/architecture.png)  
+因此，如果想从源码运行Mo2需要先准备好所有依赖的微服务  
+#### 0.设置环境变量
+想要正确运行Mo2徐娅提前配置一些环境变量。如果缺少环境变量可能导致后端部分功能不可用或者无法启动。  
+- MO2_MONGO_URL，mongodb地址，配置见1.
+- REDIS_UR，redis地址，配置见1.
+- qiniuak=xxx设置七牛的access key，缺少将无法使用图片上传相关功能
+- qiniusk=xxx设置七牛的secret key，缺少将无法使用图片上传相关功能
+- emailAddr=xxx Email地址
+- emailPass=xxx Email smtp密码
+- MO2_SEARCH_HOST=xxx Mo2搜索服务地址，缺少将无法使用搜索功能
+- COMMENT_LOG=mo2notificationlog:9990 评论相关log功能的地址，缺少将导致评论相关功能不可用
+- MO2_DATABASE=xxx 指定Mo2使用的数据库名称
+- LOG_COL=notificationLog 指定log服务的Collection
+- LOG_PORT=9990 指定log服务的端口
+#### 1.准备数据库服务
 首先，我们需要确保你的mongodb已经在运行。  
 然后，我们需要把你的mongodb地址导出到环境变量中，
 如果您的mongodb是默认配置的话，你可以使用以下命令：  
@@ -80,6 +103,20 @@ windows powershell:
 ```powershell
 $env:REDIS_URL=localhost:6379
 ```
+#### 2.准备其它微服务
+2.1 Mo2 Search  
+Mo2的搜索服务。首先，拉取仓库  
+```bash
+git clone git@github.com:Monkey-Mouse/mo2search.git
+```
+然后，编译它，运行。  
+2.2 Mo2 Log
+Mo2的log服务。首先，拉取仓库  
+```bash
+git clone git@github.com:Monkey-Mouse/mo2log.git
+```
+然后，编译它，运行。 
+#### 运行主服务
 然后，使用同一个终端，在项目根目录：
 ```bash
 go run main.go

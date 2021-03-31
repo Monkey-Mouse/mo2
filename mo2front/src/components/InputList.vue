@@ -44,6 +44,7 @@
           :label="value.label"
           v-model="model[key]"
           @change="value.onChange"
+          :messages="value.message"
         >
           <v-icon
             class="clickable"
