@@ -19,6 +19,13 @@ const (
 	RuleAccessFilter = "accessFilter"
 )
 
+const (
+	RoleOwner  = "owner"
+	RoleAdmin  = "admin"
+	RoleMember = "member"
+	RoleReader = "reader"
+)
+
 type AllowOwn struct {
 	UserInfo dto.LoginUserInfo
 	ID       primitive.ObjectID `json:"id"`
@@ -64,25 +71,36 @@ func (r *AllowOwn) JudgeRule() (bool, error) {
 type AccessFilter struct {
 	VisitorID primitive.ObjectID `json:"visitor_id" bson:"visitor_id"`
 	GroupID   primitive.ObjectID `json:"group_id" bson:"group_id"`
-	RoleList  []string           `json:"role_list,omitempty" example:"'admin':xxxxx 'write':xxxxx" bson:"role_map,omitempty"`
+	RoleList  [][]string         `json:"role_list,omitempty" example:"'admin':xxxxx 'write':xxxxx" bson:"role_map,omitempty"`
 }
 
 // JudgeRule
-// 判断id是否在manager的某个role(s)之内，逻辑“与”，必须满足列表内的所有role
+// 判断id是否在manager的某个role(s)之内，
+// 第一层，逻辑“或”，满足其中一个role的组合即可
+// 第二层，逻辑“与”，必须满足列表内的所有role
 func (a *AccessFilter) JudgeRule() (bool, error) {
 	var res model.AccessManager
 	opt := options.FindOne().SetProjection(bson.M{"_id": 1})
-	for _, role := range a.RoleList {
-		key := strings.Join([]string{"access_manager", "role_map", role}, ".")
-		err := database.GroupCol.FindOne(context.TODO(), bson.M{"$and": []bson.M{{"_id": a.GroupID}, {key: bson.M{"$eq": a.VisitorID}}}}, opt).Decode(&res)
-		if err != nil {
-			if err == mongo.ErrNoDocuments {
-				return false, nil
+
+	for _, allowRoles := range a.RoleList {
+		pass := true
+		for _, role := range allowRoles {
+			key := strings.Join([]string{"access_manager", "role_map", role}, ".")
+			err := database.GroupCol.FindOne(context.TODO(), bson.M{"$and": []bson.M{{"_id": a.GroupID}, {key: bson.M{"$eq": a.VisitorID}}}}, opt).Decode(&res)
+			if err != nil {
+				if err == mongo.ErrNoDocuments {
+					pass = false
+				} else {
+					return false, err
+				}
+
 			}
-			return false, err
+		}
+		if pass {
+			return true, nil
 		}
 	}
-	return true, nil
+	return false, nil
 }
 func (a *AccessFilter) ProcessContext(ctx abac.ContextType) {
 	if val := ctx.Value(RuleAccessFilter); val != nil {

@@ -96,7 +96,7 @@ func (c *Controller) UpdateGroup(ctx *gin.Context) {
 			}, accessControl.RuleAccessFilter: accessControl.AccessFilter{
 				VisitorID: userInfo.ID,
 				GroupID:   group.ID,
-				RoleList:  []string{"admin"},
+				RoleList:  [][]string{{accessControl.RoleAdmin}},
 			}},
 		}); err != nil {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
@@ -148,7 +148,59 @@ func (c *Controller) DeleteGroup(ctx *gin.Context) {
 			}, accessControl.RuleAccessFilter: accessControl.AccessFilter{
 				VisitorID: userInfo.ID,
 				GroupID:   id,
-				RoleList:  []string{"admin"},
+				RoleList:  [][]string{{accessControl.RoleAdmin}},
+			}},
+		}); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))
+			return
+		} else if !pass {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason(badresponse.NoAccessReason))
+			return
+		} else if pass {
+			if mErr := database.DeleteGroupByID(id); mErr.IsError() {
+				ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(mErr))
+				return
+			} else {
+				ctx.AbortWithStatus(http.StatusAccepted)
+				return
+			}
+		}
+	} else {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseReason(badresponse.UnauthorizeReason))
+		return
+	}
+}
+
+// GetGroup godoc
+// @Summary get group
+// @Description delete by id in path
+// @Tags group
+// @Accept  json
+// @Produce  json
+// @Param id path primitive.ObjectID true "group id to delete"
+// @Success 202
+// @Failure 400 {object} badresponse.ResponseError
+// @Failure 401 {object} badresponse.ResponseError
+// @Router /api/group/{id} [get]
+func (c *Controller) GetGroup(ctx *gin.Context) {
+	id, err := primitive.ObjectIDFromHex(ctx.Param("id"))
+	if id.IsZero() || err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason(badresponse.BadRequestReason))
+		return
+	}
+	if userInfo, exist := mo2utils.GetUserInfo(ctx); exist {
+		if pass, err := accessControl.Ctrl.CanOr(abac.IQueryInfo{
+			Subject:  accountStr,
+			Action:   abac.ActionUpdate,
+			Resource: accessControl.ResourceGroup,
+			Context: abac.DefaultContext{accessControl.RuleAllowOwn: accessControl.AllowOwn{
+				UserInfo: userInfo,
+				ID:       id,
+				Resource: accessControl.ResourceGroup,
+			}, accessControl.RuleAccessFilter: accessControl.AccessFilter{
+				VisitorID: userInfo.ID,
+				GroupID:   id,
+				RoleList:  [][]string{{accessControl.RoleReader}},
 			}},
 		}); err != nil {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseError(err))

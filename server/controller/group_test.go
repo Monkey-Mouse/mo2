@@ -108,8 +108,12 @@ func TestController_InsertGroup(t *testing.T) {
 
 func TestController_DeleteGroup(t *testing.T) {
 	groupID := primitive.NewObjectID()
+	groupID2 := primitive.NewObjectID()
+	groupID3 := primitive.NewObjectID()
 
 	defer database.DeleteGroupByID(groupID)
+	defer database.DeleteGroupByID(groupID2)
+	defer database.DeleteGroupByID(groupID3)
 
 	id := primitive.NewObjectID()
 	id3 := primitive.NewObjectID()
@@ -124,9 +128,19 @@ func TestController_DeleteGroup(t *testing.T) {
 		OwnerID:       id,
 		AccessManager: model.AccessManager{},
 	})
+	database.UpsertGroup(model.Group{
+		ID:            groupID2,
+		OwnerID:       id,
+		AccessManager: model.AccessManager{},
+	})
+	database.UpsertGroup(model.Group{
+		ID:            groupID3,
+		OwnerID:       id,
+		AccessManager: model.AccessManager{},
+	})
 
 	req1 := deleteGroup(t, groupID)
-	req2 := deleteGroup(t, groupID)
+	req2 := deleteGroup(t, groupID2)
 	req3 := deleteGroup(t, primitive.NewObjectID())
 	req4 := deleteGroup(t, primitive.ObjectID{})
 	req5 := deleteGroup(t, groupID)
@@ -141,7 +155,6 @@ func TestController_DeleteGroup(t *testing.T) {
 		tests{name: "Test no group id", req: req4, wantCode: 400, wantStr: badresponse.BadRequestReason},
 		tests{name: "Test success", req: req5, wantCode: 202},
 	)
-	defer database.DeleteGroupByID(groupID)
 	defer database.DeleteGroupByOwnerID(id)
 	defer database.DeleteGroupByOwnerID(id3)
 

@@ -33,7 +33,7 @@ func Test_accessFilter_JudgeRule(t *testing.T) {
 	type fields struct {
 		VisitorID primitive.ObjectID
 		ManagerID primitive.ObjectID
-		RoleList  []string
+		RoleList  [][]string
 	}
 	groupID := InsertGroup4Test()
 	adminID := primitive.NewObjectID()
@@ -56,7 +56,7 @@ func Test_accessFilter_JudgeRule(t *testing.T) {
 		wantErr bool
 	}{
 
-		{"foo", fields{VisitorID: adminID, ManagerID: groupID, RoleList: []string{"admin"}}, true, false},
+		{"foo", fields{VisitorID: adminID, ManagerID: groupID, RoleList: [][]string{{"admin"}}}, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

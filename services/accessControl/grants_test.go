@@ -13,11 +13,6 @@ func TestBlog(t *testing.T) {
 	isDraft := true
 	var blog model.Blog
 	// visitor not agree with authorID, but in the group with rights to access
-	//managerID:=InsertManager4Test()
-	//manager,mErr:=database.FindManager(managerID)
-	//if mErr.IsError(){
-	//	t.Error(mErr)
-	//}
 	visitorID := primitive.NewObjectID()
 	roleMap := make(map[string][]primitive.ObjectID)
 	roleMap["admin"] = []primitive.ObjectID{visitorID}
@@ -48,7 +43,7 @@ func TestBlog(t *testing.T) {
 			"accessFilter": AccessFilter{
 				VisitorID: visitorID,
 				GroupID:   group.ID,
-				RoleList:  nil,
+				RoleList:  [][]string{{RoleAdmin}},
 			}},
 	}); err != nil {
 		t.Error(err)
