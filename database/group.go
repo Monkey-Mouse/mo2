@@ -54,6 +54,6 @@ func DeleteGroupByOwnerID(id primitive.ObjectID) mo2errors.Mo2Errors {
 		return mo2errors.InitError(err)
 	} else {
 		log.Println(res)
-		return mo2errors.InitNoError("delete success ", res)
+		return mo2errors.InitNoError("delete success %v", res)
 	}
 }
