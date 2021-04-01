@@ -114,5 +114,16 @@ func SetupHandlers(c *Controller) {
 			comment.Post(":id", c.PostSubComment, model.OrdinaryUser)
 		}
 		api.Get("commentcount/:id", c.GetCommentNum)
+		group := api.Group("/group")
+		{
+			user := group.Group("", model.OrdinaryUser)
+			{
+				user.Put("", c.UpdateGroup)
+				user.Post("", c.InsertGroup)
+				user.Delete(":id", c.DeleteGroup)
+			}
+			group.Get(":id", c.FindGroup)
+
+		}
 	}
 }
