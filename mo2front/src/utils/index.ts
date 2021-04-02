@@ -374,3 +374,39 @@ export async function GetNotifications(query: { page: number, pagesize: number }
 export function GithubOauth() {
     window.location.replace("https://github.com/login/oauth/authorize?client_id=c9cb620eaea6bff97e5d")
 }
+export function GenerateTOC() {
+    var toc = "";
+    var level = 0;
+    var i = 0;
+
+    document.getElementById("contents").innerHTML =
+        document.getElementById("contents").innerHTML.replace(
+            /<h([\d])>([^<]+)<\/h([\d])>/gi,
+            function (str, openLevel, titleText, closeLevel) {
+                if (openLevel != closeLevel) {
+                    return str;
+                }
+                openLevel -= 1;
+                if (openLevel > level) {
+                    toc += (new Array(openLevel - level + 1)).join("<ul>");
+                } else if (openLevel < level) {
+                    toc += (new Array(level - openLevel + 1)).join("</ul>");
+                }
+
+                level = parseInt(openLevel);
+
+                var anchor = titleText.replace(/ /g, "_") + Date.now() + i++;
+                toc += "<li><a href=\"#" + anchor + "\">" + titleText
+                    + "</a></li>";
+
+                return "<h" + (openLevel + 1) + ` id="${anchor}">`
+                    + titleText + "</h" + closeLevel + ">";
+            }
+        );
+
+    if (level) {
+        toc += (new Array(level + 1)).join("</ul>");
+    }
+
+    document.getElementById("toc").innerHTML += toc;
+};

@@ -1,5 +1,12 @@
 <template>
   <v-container>
+    <aside style="position: fixed" class="mt-16">
+      <div v-show="sy && !$vuetify.breakpoint.mobile">
+        <a @click="scrollToTop" style="text-decoration: none">{{ title }}</a
+        ><v-divider />
+        <div id="toc"></div>
+      </div>
+    </aside>
     <v-row justify="center">
       <v-col cols="12" lg="7" class="mo2editor">
         <v-skeleton-loader
@@ -9,7 +16,7 @@
         ></v-skeleton-loader>
         <div v-if="!loading">
           <div class="mo2title text-break">
-            <h1>{{ title }}</h1>
+            <h1 id="title">{{ title }}</h1>
           </div>
           <v-row v-if="authorLoad" class="mb-6">
             <avatar :size="40" :user="author"></avatar>
@@ -54,6 +61,7 @@
         />
         <v-row justify="center" class="mb-5">• • •</v-row> -->
           <div
+            id="contents"
             v-html="$sanitize(html)"
             class="mo2content mt-10"
             spellcheck="false"
@@ -245,6 +253,7 @@ import Component from "vue-class-component";
 import Editor from "../components/MO2Editor.vue";
 import {
   DeleteArticle,
+  GenerateTOC,
   GetArticle,
   GetCommentNum,
   GetComments,
@@ -263,6 +272,7 @@ import Avatar from "@/components/UserAvatar.vue";
 import { Prop } from "vue-property-decorator";
 import { TimeAgo } from "vue2-timeago";
 import DeleteConfirm from "@/components/DeleteConfirm.vue";
+import vuetify from "@/plugins/vuetify";
 @Component({
   components: {
     Editor,
@@ -298,11 +308,15 @@ export default class ReadArticle extends Vue {
   commentLoadingMore = true;
   nomore = false;
   commentNum = 0;
+  sy = false;
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
   get deleteContent() {
     return '你确定要删除"' + this.title + '"吗？';
+  }
+  scrollToTop() {
+    window.scrollTo(0, 0);
   }
   share() {
     ShareToQQ({
@@ -313,6 +327,9 @@ export default class ReadArticle extends Vue {
     });
   }
   created() {
+    window.addEventListener("scroll", () => {
+      this.sy = window.scrollY > 5;
+    });
     if (this.$route.query["draft"]) {
       this.draft = (this.$route.query["draft"] as string) === "true";
     }
@@ -330,6 +347,7 @@ export default class ReadArticle extends Vue {
           this.commentNum = c.count;
         });
         setTimeout(() => {
+          GenerateTOC();
           // first, find all the code blocks
           document.querySelectorAll("code").forEach((block) => {
             // then highlight each
