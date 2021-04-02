@@ -1,11 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar
-      id="appBarElm"
-      scroll-target="#scrolling-techniques-6"
-      color="primary"
-      app
-    >
+    <v-app-bar id="appBarElm" hide-on-scroll color="primary" app>
       <div class="d-flex align-center">
         <v-img
           @click="$router.push('/')"
