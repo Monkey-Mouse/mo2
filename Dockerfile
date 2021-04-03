@@ -19,7 +19,7 @@ COPY . /go/bin
 
 
 #final stage
-FROM ubuntu:latest
+FROM ubuntu:20.10
 RUN apt-get update
 RUN apt-get install ca-certificates -y
 COPY --from=front /home/dist /app/dist
