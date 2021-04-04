@@ -1,13 +1,14 @@
 package main
 
 import (
+	"log"
+	"time"
+
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/docs"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
 	"github.com/Monkey-Mouse/mo2/server"
 	"github.com/Monkey-Mouse/mo2/services/mo2ticker"
-	"log"
-	"time"
 )
 
 // @title Mo2
@@ -31,11 +32,11 @@ func main() {
 
 func init() {
 	if mo2utils.IsEnvRelease() {
-		docs.SwaggerInfo.Version = "v0.2 alpha"
+		docs.SwaggerInfo.Version = "v0.2"
 		docs.SwaggerInfo.Schemes = []string{"https"}
 		docs.SwaggerInfo.Host = "www.motwo.cn"
 	}
-	mo2utils.UploadCDN()
+	go mo2utils.UploadCDN()
 	mo2ticker.ExecuteFunc(24*time.Hour, func() {
 		if mErr := database.DeleteExpireItems(); mErr.IsError() {
 			log.Println(mErr)
