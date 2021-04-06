@@ -7,6 +7,7 @@ import router from '../router'
 import { UpdateUserInfo } from './api';
 export * from './api'
 export * from './autoloader'
+export * from './lazy-executor'
 
 export function randomProperty(obj: any) {
     const keys = Object.keys(obj);
@@ -100,29 +101,7 @@ export function SetThemeColors(that: Vue, themes?: { light: VuetifyThemeVariant,
     }
 }
 
-export class LazyExecutor {
-    private i = 0;
-    private f: () => void;
-    private delay = 0;
-    constructor(f?: () => void, delay: number = 200) {
-        this.f = f;
-        this.delay = delay;
-    }
-    /**
-     * Execute
-     */
-    public Execute(f?: () => void,) {
-        this.i++;
-        const num = this.i;
-        setTimeout(() => {
-            if (num === this.i) {
-                if (f) {
-                    f()
-                } else this.f();
-            }
-        }, 200);
-    }
-}
+
 export function ShareToQQ(param: { title: string, pic: string, summary: string, desc: string }) {
     window.open(`https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=${encodeURIComponent(document.location.toString())}&sharesource=qzone&title=${param.title}&pics=${param.pic}&summary=${param.summary}`, "_blank")
 }
@@ -154,7 +133,7 @@ export function GenerateTOC() {
                 toc += "<li><a href=\"#" + anchor + "\">" + titleText
                     + "</a></li>";
 
-                return "<h" + (openLevel + 1) + ` id="${anchor}">`
+                return "<h" + (openLevel + 1) + ` id="${anchor}" class="anchor">`
                     + titleText + "</h" + closeLevel + ">";
             }
         );
