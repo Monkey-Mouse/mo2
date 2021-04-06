@@ -7,7 +7,7 @@ RUN npm run build
 
 
 #build stage
-FROM golang:1.15 AS builder
+FROM golang:1.16 AS builder
 RUN apt-get install git
 WORKDIR /go/src/app
 ENV GOPROXY=https://goproxy.cn,direct
