@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617672515584,
+  "lastUpdate": 1617674038664,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -1938,6 +1938,56 @@ window.BENCHMARK_DATA = {
             "value": 1175,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "5dc01f3e553f6e047939a28f1aab59fcf82f190b",
+          "message": "fix temporary bug of recycle blog",
+          "timestamp": "2021-04-06T01:26:42Z",
+          "url": "https://github.com/Monkey-Mouse/Mo2/pull/247/commits/5dc01f3e553f6e047939a28f1aab59fcf82f190b"
+        },
+        "date": 1617674038110,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10295898,
+            "unit": "ns/op",
+            "extra": "106 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 546705,
+            "unit": "ns/op",
+            "extra": "2534 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1322,
+            "unit": "ns/op",
+            "extra": "846418 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 146357,
+            "unit": "ns/op",
+            "extra": "8074 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1344,
+            "unit": "ns/op",
+            "extra": "927976 times\n2 procs"
           }
         ]
       }
