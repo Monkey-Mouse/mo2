@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-parallax
-      src="https://cdn.mo2.leezeeyee.com/material.jpg~pngslim"
+      src="https://cdn.mo2.leezeeyee.com/material.jpg~parallax"
       height="200"
     >
       <v-row align="center" justify="center">
