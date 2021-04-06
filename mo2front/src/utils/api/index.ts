@@ -128,3 +128,6 @@ export async function GetNotificationNums() {
 export async function GetNotifications(query: { page: number, pagesize: number }) {
     return (await axios.get<Notification[]>("/api/notification" + ParseQuery(query))).data
 }
+export async function RecycleBlog(id: string, query: { draft: boolean }) {
+    axios.put('/api/blogs/recycle/' + id + ParseQuery(query))
+}
