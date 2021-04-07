@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617781614681,
+  "lastUpdate": 1617830258332,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -2494,6 +2494,56 @@ window.BENCHMARK_DATA = {
           {
             "name": "Benchmark_checkRL",
             "value": 1311,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "a28ad28791a2ede68a14396f6e6e2b4f3155de4b",
+          "message": "[Snyk] Security upgrade ubuntu from latest to rolling",
+          "timestamp": "2021-04-07T02:45:33Z",
+          "url": "https://github.com/Monkey-Mouse/Mo2/pull/255/commits/a28ad28791a2ede68a14396f6e6e2b4f3155de4b"
+        },
+        "date": 1617830257681,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10358096,
+            "unit": "ns/op",
+            "extra": "110 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 542639,
+            "unit": "ns/op",
+            "extra": "2353 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1121,
+            "unit": "ns/op",
+            "extra": "1206594 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 145816,
+            "unit": "ns/op",
+            "extra": "8922 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1128,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
           }
