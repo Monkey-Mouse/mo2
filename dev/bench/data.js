@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617763638622,
+  "lastUpdate": 1617781614681,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -2446,6 +2446,56 @@ window.BENCHMARK_DATA = {
             "value": 1329,
             "unit": "ns/op",
             "extra": "845714 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "1e0dc0f907983f27afbe48cc499ce765fc939aac",
+          "message": "🎨 [Proposal]将update watcher目录下的内容移动到新项目",
+          "timestamp": "2021-04-07T02:45:33Z",
+          "url": "https://github.com/Monkey-Mouse/Mo2/pull/253/commits/1e0dc0f907983f27afbe48cc499ce765fc939aac"
+        },
+        "date": 1617781614042,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 12930868,
+            "unit": "ns/op",
+            "extra": "100 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 566709,
+            "unit": "ns/op",
+            "extra": "2650 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1506,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 163681,
+            "unit": "ns/op",
+            "extra": "7974 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1311,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
           }
         ]
       }
