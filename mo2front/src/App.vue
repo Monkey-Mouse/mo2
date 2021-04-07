@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar id="appBarElm" hide-on-scroll color="primary" app>
+    <v-app-bar id="appBarElm" color="primary" app>
       <div class="d-flex align-center">
         <v-img
           @click="$router.push('/')"
@@ -11,15 +11,6 @@
           transition="scale-transition"
           width="100"
         />
-        <!-- <div class="text-h4">MO2</div> -->
-        <!-- <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        /> -->
       </div>
       <v-spacer />
       <v-btn
@@ -114,6 +105,13 @@
           }
         "
       ></v-app-bar-nav-icon>
+      <v-progress-linear
+        :active="pos !== 0"
+        :value="pos"
+        absolute
+        bottom
+        color="black white"
+      ></v-progress-linear>
     </v-app-bar>
     <v-navigation-drawer
       right
@@ -281,6 +279,7 @@ import {
   SetTheme,
   SetThemeColors,
   ShowRefresh,
+  SlowExecutor,
   UserRole,
 } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
@@ -307,6 +306,8 @@ export default class App extends Vue {
   refresh = false;
   prompts: BlogBrief[] = [];
   searchLoader: LazyExecutor = new LazyExecutor(null, 200);
+  pos = 0;
+
   keyDown(event: KeyboardEvent) {
     // Number 13 is the "Enter" key on the keyboard
     if (event.key === "Enter") {
@@ -341,7 +342,6 @@ export default class App extends Vue {
     this.items[1].show = this.isUser;
     this.items[2].show = this.isUser;
   }
-
   enable = false;
   notificationNum = 0;
   items = [
@@ -391,7 +391,9 @@ export default class App extends Vue {
           );
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
   }
   get initials(): string {
     return GetInitials(this.user.name);
@@ -410,8 +412,18 @@ export default class App extends Vue {
     (this.$refs["view"] as any).publish();
   }
   created() {
+    window.addEventListener("scroll", () => {
+      const h = document.documentElement,
+        b = document.body,
+        st = "scrollTop",
+        sh = "scrollHeight";
+      this.pos = ((h[st] || b[st]) / ((h[sh] || b[sh]) - h.clientHeight)) * 100;
+    });
     SetApp(this);
     document.title = "Mo2";
+    this.$router.afterEach(() => {
+      this.pos = 0;
+    });
     GetUserInfoAsync().then((u) => {
       this.user = u;
       this.userload = true;
@@ -422,7 +434,9 @@ export default class App extends Vue {
       this.$vuetify.theme.dark = JSON.parse(
         localStorage.getItem("darkTheme")
       ) as boolean;
-    } catch (err) {}
+    } catch (err) {
+      console.error(err);
+    }
     try {
       const themes = JSON.parse(localStorage.getItem("themes")) as {
         light: VuetifyThemeVariant;
@@ -431,7 +445,9 @@ export default class App extends Vue {
       if (themes) {
         SetThemeColors(this, themes);
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error(err);
+    }
     window.addEventListener("resize", () => {
       this.onResize();
       // setTimeout(() => {
@@ -442,7 +458,9 @@ export default class App extends Vue {
       if (ReachedBottom()) {
         try {
           (this.$refs["view"] as any).ReachedButtom();
-        } catch (error) {}
+        } catch (error) {
+          console.error(error);
+        }
       }
     });
   }
@@ -488,5 +506,9 @@ export default class App extends Vue {
 <style>
 .clickable {
   cursor: pointer;
+}
+.anchor {
+  padding-top: 70px !important;
+  margin-top: -70px !important;
 }
 </style>

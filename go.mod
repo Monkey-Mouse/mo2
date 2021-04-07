@@ -3,11 +3,12 @@ module github.com/Monkey-Mouse/mo2
 go 1.16
 
 require (
+	github.com/DataDog/zstd v1.4.8 // indirect
 	github.com/Monkey-Mouse/go-abac v0.0.0-20210325070221-9ac98bef4f09
-	github.com/Monkey-Mouse/mo2log v0.0.3-0.20210320092703-fc104d6da1fb
+	github.com/Monkey-Mouse/mo2log v0.0.3-0.20210407012516-345020380858
 	github.com/RoaringBitmap/roaring v0.5.5 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/aws/aws-sdk-go v1.38.12 // indirect
+	github.com/aws/aws-sdk-go v1.38.14 // indirect
 	github.com/blevesearch/bleve v1.0.14
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/pprof v1.3.0
@@ -31,6 +32,8 @@ require (
 	github.com/tinylib/msgp v1.1.5 // indirect
 	github.com/willf/bitset v1.1.11 // indirect
 	github.com/willf/bloom v2.0.3+incompatible
+	github.com/xdg/scram v0.0.0-20180814205039-7eeb5667e42c // indirect
+	github.com/xdg/stringprep v0.0.0-20180714160509-73f8eece6fdc // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	github.com/yuin/goldmark v1.3.3
 	github.com/yuin/goldmark-meta v1.0.0
@@ -39,7 +42,6 @@ require (
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57 // indirect
-	google.golang.org/genproto v0.0.0-20210402141018-6c239bbf2bb1 // indirect
 	google.golang.org/grpc v1.36.1
 	gopkg.in/yaml.v2 v2.4.0
 )

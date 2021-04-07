@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <aside style="position: fixed" class="mt-16">
-      <div v-show="sy && !$vuetify.breakpoint.mobile">
+      <div v-show="!$vuetify.breakpoint.mobile" style="max-width: 200px">
         <a @click="scrollToTop" style="text-decoration: none">{{ title }}</a
         ><v-divider />
         <div id="toc"></div>
@@ -308,7 +308,6 @@ export default class ReadArticle extends Vue {
   commentLoadingMore = true;
   nomore = false;
   commentNum = 0;
-  sy = false;
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
@@ -327,9 +326,6 @@ export default class ReadArticle extends Vue {
     });
   }
   created() {
-    window.addEventListener("scroll", () => {
-      this.sy = window.scrollY > 5;
-    });
     if (this.$route.query["draft"]) {
       this.draft = (this.$route.query["draft"] as string) === "true";
     }

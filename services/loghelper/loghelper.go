@@ -15,8 +15,8 @@ import (
 
 const COMMENT = 1
 
-func (l *LogClient) Init(portEnv string) {
-	conn, err := grpc.Dial(os.Getenv(portEnv), grpc.WithInsecure())
+func (l *LogClient) Init(targetEnv string) {
+	conn, err := grpc.Dial(os.Getenv(targetEnv), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("grpc.Dial err: %v", err)
 	}
