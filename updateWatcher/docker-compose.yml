@@ -24,13 +24,26 @@ services:
       - "redis"
       - "mo2notificationlog"
       - "mo2search"
+      - "mo2imgLog"
     volumes:
       - "./secrets:/app/secrets"
       - "./logs:/app/logs"
     environment:
       - COMMENT_LOG=mo2notificationlog:9990
+      - IMG_LOG=mo2imglog:9990
 
   mo2notificationlog:
+    image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2log:latest
+    restart: always
+    depends_on:
+      - "mongodb"
+    environment:
+      - MO2_MONGO_URL=mongodb://mongodb:27017
+      - MO2_DATABASE=mo2
+      - LOG_COL=notificationLog
+      - LOG_PORT=9990
+
+  mo2imglog:
     image: registry.cn-hangzhou.aliyuncs.com/mo2/mo2log:latest
     restart: always
     depends_on:

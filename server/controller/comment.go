@@ -16,7 +16,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var notifyLogClient = loghelper.LogClient{}
+var notifyLogClient = &loghelper.LogClient{}
 
 func init() {
 	notifyLogClient.Init("COMMENT_LOG")
