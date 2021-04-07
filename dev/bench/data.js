@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617760882281,
+  "lastUpdate": 1617761215014,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -2186,6 +2186,56 @@ window.BENCHMARK_DATA = {
           {
             "name": "Benchmark_checkRL",
             "value": 1188,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "3af0b7661f3c4fc45648a02fbc00755b05b303f5",
+          "message": "✨ [feat] Limit user daily upload size ",
+          "timestamp": "2021-04-06T01:26:42Z",
+          "url": "https://github.com/Monkey-Mouse/Mo2/pull/249/commits/3af0b7661f3c4fc45648a02fbc00755b05b303f5"
+        },
+        "date": 1617761214124,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7764461,
+            "unit": "ns/op",
+            "extra": "146 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 456877,
+            "unit": "ns/op",
+            "extra": "3045 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 847.7,
+            "unit": "ns/op",
+            "extra": "1364102 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 95641,
+            "unit": "ns/op",
+            "extra": "14024 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1097,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
           }
