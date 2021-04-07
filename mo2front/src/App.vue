@@ -245,6 +245,15 @@
           </v-btn>
         </template>
       </v-snackbar>
+      <v-snackbar v-model="prompt" :timeout="ptimeout">
+        {{ pmsg }}
+
+        <template v-slot:action="{ attrs }">
+          <v-btn color="pink" text v-bind="attrs" @click="prompt = false">
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
     </v-main>
     <v-footer id="footer" padless>
       <v-card flat tile class="indigo lighten-1 white--text text-center">
@@ -307,6 +316,15 @@ export default class App extends Vue {
   prompts: BlogBrief[] = [];
   searchLoader: LazyExecutor = new LazyExecutor(null, 200);
   pos = 0;
+
+  prompt = false;
+  pmsg = "";
+  ptimeout = 5000;
+  Prompt(msg: string, timeout: number) {
+    this.pmsg = msg;
+    this.ptimeout = timeout;
+    this.prompt = true;
+  }
 
   keyDown(event: KeyboardEvent) {
     // Number 13 is the "Enter" key on the keyboard

@@ -13,6 +13,7 @@ import {
 } from "@/models";
 import axios from "axios";
 import * as qiniu from 'qiniu-js';
+import { GetErrorMsg } from "..";
 
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
@@ -41,29 +42,6 @@ export async function GetUserDatas(uids: string[]): Promise<UserListData[]> {
 }
 export async function GetUploadToken(fname: string) {
     return (await axios.get<ImgToken>('/api/img/' + fname)).data
-}
-export const UploadImgToQiniu = async (
-    blobs: File[],
-    callback: (imgprop: { src: string }) => void
-) => {
-    const promises: Promise<void>[] = []
-    for (let index = 0; index < blobs.length; index++) {
-        const element = blobs[index];
-        const promise = new Promise<void>((resolve, reject) => {
-            GetUploadToken(element.name).then(val => {
-                let ob = qiniu.upload(element, val.file_key, val.token);
-                ob.subscribe(null, (err) => {
-                    reject(err)
-                }, res => {
-                    callback({ src: '//cdn.mo2.leezeeyee.com/' + res.key })
-                    resolve();
-                })
-            })
-        })
-        promises.push(promise)
-    }
-    await Promise.all(promises)
-
 }
 
 export function ParseQuery(query: { [key: string]: any }) {

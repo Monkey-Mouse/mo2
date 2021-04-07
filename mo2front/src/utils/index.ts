@@ -4,7 +4,7 @@ import axios, { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 import { VuetifyThemeVariant } from 'vuetify/types/services/theme';
 import router from '../router'
-import { UpdateUserInfo } from './api';
+import { GetUploadToken, UpdateUserInfo } from './api';
 export * from './api'
 export * from './autoloader'
 export * from './lazy-executor'
@@ -60,18 +60,48 @@ export async function addQuery(that: Vue, key: string, val: string | string[]) {
     query[key] = val;
     that.$router.replace({ query: query }).catch(() => { });
 }
-
-var app: { refresh: boolean, showLogin: () => void };
-export function SetApp(params: { refresh: boolean, showLogin: () => void }) {
+interface App { refresh: boolean, showLogin: () => void, Prompt(msg: string, timeout: number): void }
+var app: App;
+export function SetApp(params: App) {
     app = params;
 }
 export function ShowLogin() {
     app.showLogin()
 }
+export function Prompt(msg: string, timeout: number) {
+    app.Prompt(msg, timeout)
+}
 export function ShowRefresh() {
     app.refresh = true;
 }
+export const UploadImgToQiniu = async (
+    blobs: File[],
+    callback: (imgprop: { src: string }) => void
+) => {
+    const promises: Promise<void>[] = []
+    for (let index = 0; index < blobs.length; index++) {
+        const element = blobs[index];
+        const promise = new Promise<void>((resolve, reject) => {
+            GetUploadToken(element.name).then(val => {
+                let ob = qiniu.upload(element, val.file_key, val.token);
+                ob.subscribe(null, (err) => {
+                    reject(err)
+                }, res => {
+                    callback({ src: '//cdn.mo2.leezeeyee.com/' + res.key })
+                    resolve();
+                })
+            }).catch(err => reject(err))
+        })
+        promises.push(promise)
+    }
 
+    try {
+        await Promise.all(promises)
+    } catch (error) {
+        Prompt(GetErrorMsg(error), 5000);
+    }
+
+}
 export function GetTheme() {
     return JSON.parse(
         localStorage.getItem("darkTheme")
