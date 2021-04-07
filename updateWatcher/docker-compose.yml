@@ -24,7 +24,7 @@ services:
       - "redis"
       - "mo2notificationlog"
       - "mo2search"
-      - "mo2imgLog"
+      - "mo2imglog"
     volumes:
       - "./secrets:/app/secrets"
       - "./logs:/app/logs"
