@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/Monkey-Mouse/mo2/mo2utils/adapter"
 	"github.com/Monkey-Mouse/mo2/server/middleware"
 	"github.com/Monkey-Mouse/mo2/server/model"
 )
@@ -54,7 +55,7 @@ func SetupHandlers(c *Controller) {
 		}
 		uploads := api.Group("", model.OrdinaryUser)
 		{
-			uploads.Get("/img/:filename", c.GenUploadToken)
+			uploads.Get("/img/:filename", adapter.ResponseAdapter(c.GenUploadToken))
 			uploads.Post("/file", c.Upload)
 		}
 		relation := api.Group("relation", model.OrdinaryUser, model.Anonymous)

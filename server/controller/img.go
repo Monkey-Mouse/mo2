@@ -1,14 +1,13 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/Monkey-Mouse/mo2/dto"
 	"github.com/Monkey-Mouse/mo2/mo2img"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
-	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
 	"github.com/Monkey-Mouse/mo2/services/loghelper"
 	"github.com/Monkey-Mouse/mo2log/service/logservice"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -31,16 +30,14 @@ func init() {
 // @Param filename path string true "file name"
 // @Success 200 {object} dto.ImgUploadToken
 // @Router /api/img/{filename} [get]
-func (c *Controller) GenUploadToken(ctx *gin.Context) {
+func (c *Controller) GenUploadToken(ctx *gin.Context) (status int, json interface{}, err error) {
 	user, _ := mo2utils.GetUserInfo(ctx)
 	n, err := imgLogClient.Client.Count(ctx, &logservice.UserID{UserId: user.ID[:]})
 	if err != nil {
-		ctx.AbortWithStatusJSON(500, badresponse.SetResponseReason("Internal micro service error"))
-		return
+		return 500, nil, errors.New("Internal micro service error")
 	}
 	if n.Num >= 50 {
-		ctx.AbortWithStatusJSON(429, badresponse.SetResponseReason("上传次数于24h内达到上限50，暂时无法上传文件"))
-		return
+		return 429, nil, errors.New("上传次数于24h内达到上限50，暂时无法上传文件")
 	}
 	fileKey := ctx.Param("filename")
 	savekey := fmt.Sprintf("%s/%v%v", user.ID.Hex(), time.Now().UnixNano(), fileKey)
@@ -52,6 +49,5 @@ func (c *Controller) GenUploadToken(ctx *gin.Context) {
 		OperationTargetOwner: primitive.NilObjectID,
 		ExtraMessage:         "",
 	})
-	ctx.JSON(http.StatusOK, dto.ImgUploadToken{Token: token, FileKey: savekey})
-
+	return 200, dto.ImgUploadToken{Token: token, FileKey: savekey}, nil
 }
