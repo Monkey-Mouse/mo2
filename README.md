@@ -42,23 +42,11 @@
 运行项目有两种方法，第一种是使用docker，第二种是从源码进行编译。  
 
 ### 使用docker
-如果你只是想运行或部署Mo2项目而不对他的源码感兴趣，使用docker无疑是你最好的选择。  
-- 首先，你需要安装[docker](https://docs.docker.com/engine/install/)以及[docker-compose](https://docs.docker.com/compose/install/)  
-- 然后，你需要下载我们[updateWatcher](updateWatcher)文件夹下的所有文件，维持它们的相对位置
-- 在此目录打开命令行，执行命令`docker-compose build`
-- 打开目录下的var.env.example文件，修改配置为你的配置，然后另存为var.env文件
-- 最后，执行命令`docker-compose --env-file ./var.env up -d`即可，此时将可以通过http://localhost:5001/swagger/index.html 访问后端控制台
-
-> **注意** 这样运行后端有部分功能不能使用。包括：
-> - image upload相关功能
-> - email发送相关功能
-> 
-> 使用这些功能需要预先设定特殊的环境变量
-
+参见[mo2-compose项目](https://github.com/Monkey-Mouse/mo2-compose)  
 
 ## 从源码编译
 ### 先决条件
-- go 1.15
+- go 1.16
 - 尽可能新的 npm 包管理工具
 - 尽可能新的 mongodb
 - 5.x-6.x的redis
