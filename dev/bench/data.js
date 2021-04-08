@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617830258332,
+  "lastUpdate": 1617843109790,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -2546,6 +2546,60 @@ window.BENCHMARK_DATA = {
             "value": 1128,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49905799+Chronostasys@users.noreply.github.com",
+            "name": "Boxiu Lee",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4c3bbb19b2f920aee0c1394524034811df8d7ff6",
+          "message": "Merge pull request #253 from Monkey-Mouse/Chronostasys/issue251\n\n🎨 [Proposal]将update watcher目录下的内容移动到新项目",
+          "timestamp": "2021-04-08T08:49:49+08:00",
+          "tree_id": "015a7bb05708c009363c677fc4ae58e5e1420196",
+          "url": "https://github.com/Monkey-Mouse/Mo2/commit/4c3bbb19b2f920aee0c1394524034811df8d7ff6"
+        },
+        "date": 1617843108887,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 13198579,
+            "unit": "ns/op",
+            "extra": "100 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 572304,
+            "unit": "ns/op",
+            "extra": "2550 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1048,
+            "unit": "ns/op",
+            "extra": "1013187 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 160263,
+            "unit": "ns/op",
+            "extra": "7396 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1229,
+            "unit": "ns/op",
+            "extra": "944080 times\n2 procs"
           }
         ]
       }
