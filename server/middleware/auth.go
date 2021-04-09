@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -113,7 +112,7 @@ func redisCheckRL(prop string, ip string, limit int) bool {
 	key := prop + ip
 	re, err := rdb.HIncrBy(redisHashSet, key, 1).Result()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	if re > int64(limit) {
 		blockFilter.AddString(ip)

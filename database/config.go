@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,13 +19,13 @@ func connectMongoDB() {
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	globalClient = client
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	// 检查连接
 	err = client.Ping(context.TODO(), nil)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	fmt.Println("Connected to MongoDB!")
 
@@ -36,7 +35,7 @@ func disconnectMongoDB() {
 	err := globalClient.Disconnect(context.TODO())
 
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	fmt.Println("Connection to MongoDB closed.")
 }

@@ -82,7 +82,7 @@ func EnsureEmailUnique(email string) (unique bool, e mo2errors.Mo2Errors) {
 func InitAccount(newAccount model.AddAccount, token string) (account model.Account, err error) {
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(newAccount.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 		return
 	}
 	//var account model.Account
@@ -125,7 +125,7 @@ func FindAccountByName(name string) (a model.Account, exist bool) {
 	exist = false
 	if err := accCol.FindOne(context.TODO(), bson.D{{"username", name}}).Decode(&a); err != nil {
 		if err != mongo.ErrNoDocuments {
-			log.Fatal(err)
+			panic(err)
 		}
 	}
 	if a.IsValid() {
@@ -258,7 +258,7 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 			}
 		} else {
 			err = errors.New("未知错误：数据异常")
-			// log.Fatal(err)
+			// panic(err)
 			return
 		}
 
@@ -283,7 +283,7 @@ func FindAccount(id primitive.ObjectID) (a model.Account, exist bool) {
 	exist = false
 	if err := accCol.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
 		if err != mongo.ErrNoDocuments {
-			log.Fatal(err)
+			panic(err)
 		}
 	}
 	if a.IsValid() {
@@ -305,10 +305,10 @@ func FindAllAccountsInfo() (us []dto.UserInfo) {
 func FindAllAccounts() (as []model.Account) {
 	results, err := accCol.Find(context.TODO(), bson.D{{}})
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	if err = results.All(context.TODO(), &as); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return
 }

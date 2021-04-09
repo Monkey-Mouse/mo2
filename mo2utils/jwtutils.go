@@ -3,7 +3,6 @@ package mo2utils
 import (
 	"errors"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"path"
@@ -81,7 +80,7 @@ func GenerateJwtCode(info dto.LoginUserInfo) string {
 	// Sign and get the complete encoded token as a string using the secret
 	tokenString, err := token.SignedString(key)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return tokenString
 }
@@ -102,7 +101,7 @@ func GenerateJwtToken(info string) string {
 	// Sign and get the complete encoded token as a string using the secret
 	tokenString, err := token.SignedString(key)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return tokenString
 }
