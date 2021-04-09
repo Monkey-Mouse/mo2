@@ -55,7 +55,7 @@ func SetupHandlers(c *Controller) {
 		}
 		uploads := api.Group("", model.OrdinaryUser)
 		{
-			uploads.GET("/img/:filename", adapter.ResponseAdapter(c.GenUploadToken))
+			uploads.GET("/img/:filename", adapter.ReAdapter(c.GenUploadToken))
 			uploads.POST("/file", c.Upload)
 		}
 		relation := api.Group("relation", model.OrdinaryUser, model.Anonymous)
@@ -66,7 +66,11 @@ func SetupHandlers(c *Controller) {
 			relation.GET("category/:type/:ID", c.FindCategoriesByType)
 			relation.GET("blogs/:type/:ID", c.FindBlogsByType)
 		}
-
+		like := api.Group("like", model.OrdinaryUser, model.Anonymous)
+		{
+			like.POST(":type", adapter.ReAdapterWithUinfo(c.Like))
+			like.GET("num/:type/:id", adapter.ReAdapter(c.LikeNum))
+		}
 		directories := api.Group("directories", model.OrdinaryUser, model.Anonymous)
 		{
 			user := directories.Group("", model.OrdinaryUser)
