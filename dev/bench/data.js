@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617955514865,
+  "lastUpdate": 1617955836269,
   "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
   "entries": {
     "Benchmark": [
@@ -2906,6 +2906,60 @@ window.BENCHMARK_DATA = {
           {
             "name": "Benchmark_checkRL",
             "value": 1158,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49905799+Chronostasys@users.noreply.github.com",
+            "name": "Boxiu Lee",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b6e2f3a9fe32fc99af328f534da5ca4981b42fc6",
+          "message": "Merge pull request #260 from Monkey-Mouse/Chronostasys/issue259\n\n[Fix] #259",
+          "timestamp": "2021-04-09T16:08:52+08:00",
+          "tree_id": "2ace378779429a725d66d66268d034dbb07f4fc3",
+          "url": "https://github.com/Monkey-Mouse/Mo2/commit/b6e2f3a9fe32fc99af328f534da5ca4981b42fc6"
+        },
+        "date": 1617955835299,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 8611320,
+            "unit": "ns/op",
+            "extra": "138 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 499616,
+            "unit": "ns/op",
+            "extra": "2773 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1036,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 100308,
+            "unit": "ns/op",
+            "extra": "12276 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1149,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
           }
