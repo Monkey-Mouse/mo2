@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617959456696,
+  "lastUpdate": 1617960388394,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -3124,6 +3124,56 @@ window.BENCHMARK_DATA = {
             "value": 1399,
             "unit": "ns/op",
             "extra": "913990 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "b980816a42f226a7119df901fbaaba61e9e1fdcd",
+          "message": "🎉 [enhancement] better middleware api",
+          "timestamp": "2021-04-09T09:09:07Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/262/commits/b980816a42f226a7119df901fbaaba61e9e1fdcd"
+        },
+        "date": 1617960386149,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 8458854,
+            "unit": "ns/op",
+            "extra": "134 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 481133,
+            "unit": "ns/op",
+            "extra": "2654 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1431,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 116328,
+            "unit": "ns/op",
+            "extra": "10000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1352,
+            "unit": "ns/op",
+            "extra": "977235 times\n2 procs"
           }
         ]
       }
