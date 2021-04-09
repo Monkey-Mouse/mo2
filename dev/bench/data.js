@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617960388394,
+  "lastUpdate": 1617960766071,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -3174,6 +3174,60 @@ window.BENCHMARK_DATA = {
             "value": 1352,
             "unit": "ns/op",
             "extra": "977235 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49905799+Chronostasys@users.noreply.github.com",
+            "name": "Boxiu Lee",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "d27425bfa35979ca0ed1525dfc59c2476787e75e",
+          "message": "Merge pull request #262 from Monkey-Mouse/Chronostasys/issue261\n\n🎉 [enhancement] better middleware api",
+          "timestamp": "2021-04-09T17:31:02+08:00",
+          "tree_id": "bc743d4719a0408dca0c7fbb22b747f6d2a8b690",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/d27425bfa35979ca0ed1525dfc59c2476787e75e"
+        },
+        "date": 1617960765456,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 9986048,
+            "unit": "ns/op",
+            "extra": "112 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 516430,
+            "unit": "ns/op",
+            "extra": "2228 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1338,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 148741,
+            "unit": "ns/op",
+            "extra": "8869 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1306,
+            "unit": "ns/op",
+            "extra": "881762 times\n2 procs"
           }
         ]
       }
