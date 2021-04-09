@@ -47,9 +47,11 @@ func resetVar() {
 
 // OptionalParams config rate limiter
 type OptionalParams struct {
-	LimitEvery   int
-	Unblockevery int
-	UseRedis     bool
+	LimitEvery     int
+	Unblockevery   int
+	UseRedis       bool
+	GetUserFromCTX FromCTX
+	UserKey        string
 }
 
 // setupRateLimiter setup ddos banner
@@ -183,22 +185,24 @@ func AuthMiddleware(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatusJSON(err.ErrorCode, err.ErrorTip)
 	}
-	uinfo, jwterr := fromCTX(c)
-	c.Set(userInfoKey, uinfo)
-	// role auth logic
-	if prop.needRoles == nil || len(prop.needRoles) == 0 {
-		c.Next()
-		return
-	}
-	if jwterr != nil {
-		badresponse.SetErrResponse(c, http.StatusForbidden,
-			"Unauthorized!")
-		return
-	}
-	if err := checkRoles(uinfo, prop.needRoles); err != nil {
-		badresponse.SetErrResponse(c, http.StatusForbidden,
-			err.Error())
-		return
+	if fromCTX != nil {
+		uinfo, jwterr := fromCTX(c)
+		c.Set(userInfoKey, uinfo)
+		// role auth logic
+		if prop.needRoles == nil || len(prop.needRoles) == 0 {
+			c.Next()
+			return
+		}
+		if jwterr != nil {
+			badresponse.SetErrResponse(c, http.StatusForbidden,
+				"Unauthorized!")
+			return
+		}
+		if err := checkRoles(uinfo, prop.needRoles); err != nil {
+			badresponse.SetErrResponse(c, http.StatusForbidden,
+				err.Error())
+			return
+		}
 	}
 	c.Next()
 }
@@ -381,14 +385,15 @@ func (h handlerMap) PUT(relativPath string, handler gin.HandlerFunc, roles ...st
 // 使用这个方法请不要手动注册中间件
 func (h handlerMap) RegisterMapedHandlers(
 	r *gin.Engine,
-	getUserFromCTX FromCTX,
-	userKey string,
 	optional *OptionalParams) {
 	if optional != nil {
-		setupRateLimiter(optional.LimitEvery, optional.Unblockevery, optional.UseRedis)
+		fromCTX = optional.GetUserFromCTX
+		userInfoKey = optional.UserKey
+		if optional.LimitEvery > 0 && optional.Unblockevery > 0 {
+			setupRateLimiter(optional.LimitEvery, optional.Unblockevery, optional.UseRedis)
+		}
+
 	}
-	fromCTX = getUserFromCTX
-	userInfoKey = userKey
 	r.Use(AuthMiddleware)
 
 	for k, v := range h.innerMap {

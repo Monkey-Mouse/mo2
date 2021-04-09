@@ -10,8 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Monkey-Mouse/mo2/mo2utils"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,9 +31,7 @@ func benchmark(useredis bool) {
 	authR := gin.New()
 	req, _ := http.NewRequest("GET", "/apitest/logs", nil)
 	setupTestHandlers()
-	H.RegisterMapedHandlers(authR, func(ctx *gin.Context) (userInfo RoleHolder, err error) {
-		return
-	}, mo2utils.UserInfoKey, &OptionalParams{5, 5, useredis})
+	H.RegisterMapedHandlers(authR, &OptionalParams{LimitEvery: 5, Unblockevery: 5, UseRedis: useredis})
 	ch := make(chan bool)
 	for i := 0; i < 100; i++ {
 		go func() {
@@ -67,9 +63,7 @@ func testMiddleware(t *testing.T, useredis bool) {
 	authR := gin.New()
 	req, _ := http.NewRequest("GET", "/apitest/logs", nil)
 	setupTestHandlers()
-	H.RegisterMapedHandlers(authR, func(ctx *gin.Context) (userInfo RoleHolder, err error) {
-		return
-	}, mo2utils.UserInfoKey, &OptionalParams{5, 5, useredis})
+	H.RegisterMapedHandlers(authR, &OptionalParams{LimitEvery: 5, Unblockevery: 5, UseRedis: useredis})
 	ch := make(chan bool)
 	t.Run("Test rate limit block", func(t *testing.T) {
 		for i := 0; i < 100; i++ {

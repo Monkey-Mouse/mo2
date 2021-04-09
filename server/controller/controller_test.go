@@ -27,14 +27,18 @@ func TestMain(m *testing.M) {
 	r = gin.Default()
 	c = NewController()
 	SetupHandlers(c)
-	middleware.H.RegisterMapedHandlers(r, func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {
-		str, err := ctx.Cookie("jwtToken")
-		if err != nil {
+	params := &middleware.OptionalParams{
+		GetUserFromCTX: func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {
+			str, err := ctx.Cookie("jwtToken")
+			if err != nil {
+				return
+			}
+			userInfo, err = mo2utils.ParseJwt(str)
 			return
-		}
-		userInfo, err = mo2utils.ParseJwt(str)
-		return
-	}, mo2utils.UserInfoKey, nil)
+		},
+		UserKey: mo2utils.UserInfoKey,
+	}
+	middleware.H.RegisterMapedHandlers(r, params)
 	// Run tests
 	exitVal := m.Run()
 

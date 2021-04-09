@@ -30,14 +30,22 @@ func RunServer() {
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
 	c := controller.NewController()
 	controller.SetupHandlers(c)
-	middleware.H.RegisterMapedHandlers(r, func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {
+	fromCTX := func(ctx *gin.Context) (userInfo middleware.RoleHolder, err error) {
 		str, err := ctx.Cookie("jwtToken")
 		if err != nil {
 			return
 		}
 		userInfo, err = mo2utils.ParseJwt(str)
 		return
-	}, mo2utils.UserInfoKey, &middleware.OptionalParams{LimitEvery: 10, Unblockevery: 3600, UseRedis: true})
+	}
+	middleware.H.RegisterMapedHandlers(r,
+		&middleware.OptionalParams{
+			LimitEvery:     10,
+			Unblockevery:   3600,
+			UseRedis:       true,
+			GetUserFromCTX: fromCTX,
+			UserKey:        mo2utils.UserInfoKey,
+		})
 	pprof.Register(r)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.NoRoute(func(c *gin.Context) {
