@@ -1,6 +1,6 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617955836269,
-  "repoUrl": "https://github.com/Monkey-Mouse/Mo2",
+  "lastUpdate": 1617956742640,
+  "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
       {
@@ -2962,6 +2962,60 @@ window.BENCHMARK_DATA = {
             "value": 1149,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "f9d40c5a54dc246e70ee9a924bebfd20b867847e",
+          "message": "🎨 [chore] rename auth middleware apis",
+          "timestamp": "2021-04-09T16:23:36+08:00",
+          "tree_id": "b243d33627236e4042f57bb757b2d5e4383cc5cc",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/f9d40c5a54dc246e70ee9a924bebfd20b867847e"
+        },
+        "date": 1617956738465,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10290039,
+            "unit": "ns/op",
+            "extra": "112 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 545377,
+            "unit": "ns/op",
+            "extra": "2095 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 998.6,
+            "unit": "ns/op",
+            "extra": "1237042 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 151567,
+            "unit": "ns/op",
+            "extra": "7983 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1276,
+            "unit": "ns/op",
+            "extra": "972580 times\n2 procs"
           }
         ]
       }
