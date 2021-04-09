@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1617956742640,
+  "lastUpdate": 1617958562065,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -3016,6 +3016,60 @@ window.BENCHMARK_DATA = {
             "value": 1276,
             "unit": "ns/op",
             "extra": "972580 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "f3d3104a15dc0d2ccc05f0f4b13713e113779eb0",
+          "message": "🐛 fix: remove chinese character in file name",
+          "timestamp": "2021-04-09T16:53:50+08:00",
+          "tree_id": "c3fa4a02d52dc949e9ffca32be1a43a6512954fd",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/f3d3104a15dc0d2ccc05f0f4b13713e113779eb0"
+        },
+        "date": 1617958561148,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 8805773,
+            "unit": "ns/op",
+            "extra": "129 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 521142,
+            "unit": "ns/op",
+            "extra": "2565 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1445,
+            "unit": "ns/op",
+            "extra": "1116729 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 118701,
+            "unit": "ns/op",
+            "extra": "8708 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1284,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
           }
         ]
       }
