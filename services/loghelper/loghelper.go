@@ -2,6 +2,7 @@ package loghelper
 
 import (
 	"context"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -52,13 +53,40 @@ type Log struct {
 }
 
 func (l *LogClient) LogInfo(log Log) error {
-	_, err := l.Client.Log(context.TODO(), &logservice.LogModel{
+	log.LogLevel = logservice.LogModel_INFO
+	err := l.LogMsg(context.TODO(), log)
+	return err
+}
+func (l *LogClient) LogMsg(ctx context.Context, log Log) error {
+	_, err := l.Client.Log(ctx, &logservice.LogModel{
 		Operator:             log.Operator[:],
 		Operation:            log.Operation,
 		OperationTarget:      log.OperationTarget[:],
 		OperationTargetOwner: log.OperationTargetOwner[:],
-		LogLevel:             logservice.LogModel_INFO,
+		LogLevel:             log.LogLevel,
 		ExtraMessage:         log.ExtraMessage,
 	})
 	return err
+}
+
+type errLogger struct {
+	c *LogClient
+}
+
+func BuildWriter(target string) io.Writer {
+	l := &LogClient{}
+	l.Init(target)
+	return &errLogger{l}
+}
+func (l *errLogger) Write(p []byte) (n int, err error) {
+	var nilId [12]byte
+	err = l.c.LogMsg(context.TODO(), Log{
+		Operator:             nilId,
+		OperationTarget:      nilId,
+		OperationTargetOwner: nilId,
+		Operation:            -1,
+		ExtraMessage:         string(p),
+		LogLevel:             logservice.LogModel_FATAL,
+	})
+	return
 }
