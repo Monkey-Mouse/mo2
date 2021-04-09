@@ -3,7 +3,6 @@ package loghelper
 import (
 	"context"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -19,7 +18,7 @@ const COMMENT = 1
 func (l *LogClient) Init(targetEnv string) {
 	conn, err := grpc.Dial(os.Getenv(targetEnv), grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("grpc.Dial err: %v", err)
+		panic(err)
 	}
 	l.Client = logservice.NewLogServiceClient(conn)
 }

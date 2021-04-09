@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"strings"
@@ -28,7 +27,7 @@ func processAllFiles(curPath string, rootPath string, uploadRootPath string, pro
 
 	files, err := ioutil.ReadDir(curPath)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	for _, f := range files {
 		srcNewPath := path.Join(curPath, f.Name())

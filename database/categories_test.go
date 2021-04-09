@@ -252,7 +252,7 @@ func ExampleRelateSubCategories2Category() {
 	}()
 	RelateSubCategories2Category(dto.RelateEntitySet2Entity{RelatedIDs: ids, RelateToID: parentID})
 	if res, mErr := FindSubCategories(parentID); mErr.IsError() {
-		log.Fatal(mErr)
+		panic(mErr)
 	} else {
 		fmt.Println("after relate: ", len(res))
 	}

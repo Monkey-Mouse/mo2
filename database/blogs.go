@@ -165,7 +165,7 @@ func FindBlogsByUserId(id primitive.ObjectID, filter model.Filter) (b []model.Bl
 	cursor, err := col.Find(context.TODO(), bson.M{"author_id": id, "entity_info.isdeleted": filter.IsDeleted}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return
 }
@@ -178,7 +178,7 @@ func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
 		if err == mongo.ErrNoDocuments {
 			return
 		}
-		log.Fatal(err)
+		panic(err)
 	}
 	return
 }
@@ -197,7 +197,7 @@ func FindBlogs(filter model.Filter) (b []model.Blog) {
 	cursor, err := col.Find(context.TODO(), f, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return
 }

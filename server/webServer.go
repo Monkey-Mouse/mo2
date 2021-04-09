@@ -8,7 +8,6 @@ import (
 	"github.com/Monkey-Mouse/mo2/mo2utils"
 	"github.com/Monkey-Mouse/mo2/server/controller"
 	"github.com/Monkey-Mouse/mo2/server/middleware"
-	"github.com/Monkey-Mouse/mo2/services/loghelper"
 
 	"github.com/gin-contrib/pprof"
 
@@ -25,9 +24,8 @@ func RunServer() {
 	gin.DisableConsoleColor()
 	f, _ := os.OpenFile("logs/gin.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	errf, _ := os.OpenFile("logs/err.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	errW := loghelper.BuildWriter(os.Getenv("ERROR_LOGGER"))
 	gin.DefaultWriter = io.MultiWriter(f)
-	gin.DefaultErrorWriter = io.MultiWriter(errf, errW)
+	gin.DefaultErrorWriter = io.MultiWriter(errf)
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
 	c := controller.NewController()

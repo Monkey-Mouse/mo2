@@ -2,12 +2,13 @@ package accessControl
 
 import (
 	"context"
+	"log"
+	"testing"
+
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/server/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
-	"testing"
 )
 
 // InsertGroup4Test 插入n个category，并返回它们的id列表
@@ -24,7 +25,7 @@ func InsertGroup4Test() (id primitive.ObjectID) {
 		AccessManager: manager,
 	})
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	id = res.InsertedID.(primitive.ObjectID)
 	return

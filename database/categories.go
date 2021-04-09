@@ -249,7 +249,7 @@ func FindCategoryById(id primitive.ObjectID) (c model.Directory) {
 		if err == mongo.ErrNoDocuments {
 			return
 		}
-		log.Fatal(err)
+		panic(err)
 	}
 	return
 }
@@ -258,11 +258,11 @@ func FindCategoryById(id primitive.ObjectID) (c model.Directory) {
 func FindAllCategories() (cs []model.Directory) {
 	results, err := catCol.Find(context.TODO(), bson.D{{}})
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	err = results.All(context.TODO(), &cs)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return
 }

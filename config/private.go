@@ -1,9 +1,9 @@
 package config
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log"
+
+	"gopkg.in/yaml.v2"
 )
 
 func SaveConfig(filename string) {
@@ -13,7 +13,7 @@ func SaveConfig(filename string) {
 	}
 	bytes, err := yaml.Marshal(config)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	ioutil.WriteFile(filename, bytes, 0644)
 }

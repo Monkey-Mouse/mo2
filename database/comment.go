@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"log"
 
 	"github.com/Monkey-Mouse/mo2/server/model"
 
@@ -37,7 +36,7 @@ func GetComments(articleID primitive.ObjectID, page int64, pagesize int64) (cs [
 		bson.M{"article": articleID},
 		getPaginationOption(page, pagesize).SetSort(bson.M{"entity_info.update_time": -1}))
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	cursor.All(context.TODO(), &cs)
 	return
@@ -57,7 +56,7 @@ func UpsertComment(c *model.Comment) {
 	c.EntityInfo.Create()
 	re, err := commentCol.InsertOne(context.TODO(), c)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	c.ID = re.InsertedID.(primitive.ObjectID)
 }
@@ -79,6 +78,6 @@ func UpsertSubComment(id primitive.ObjectID, c *model.Subcomment) {
 		bson.M{"_id": id},
 		bson.M{"$push": bson.M{"subs": c}})
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
