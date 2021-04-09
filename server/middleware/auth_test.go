@@ -239,7 +239,7 @@ func Test_handlerMap_Get(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.h.Get(tt.args.relativPath, tt.args.handler, tt.args.roles...)
+			tt.h.GET(tt.args.relativPath, tt.args.handler, tt.args.roles...)
 			_, ok := H.innerMap[handlerKey{tt.args.relativPath, http.MethodGet}]
 			if !ok {
 				t.Errorf("get test failed! failed to find handler after registered!")

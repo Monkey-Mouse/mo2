@@ -337,8 +337,8 @@ func (h handlerMap) Handle(
 	)
 }
 
-// Get 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
-func (h handlerMap) Get(relativPath string, handler gin.HandlerFunc, roles ...string) {
+// GET 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
+func (h handlerMap) GET(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(
 		http.MethodGet,
 		relativPath,
@@ -347,8 +347,8 @@ func (h handlerMap) Get(relativPath string, handler gin.HandlerFunc, roles ...st
 	)
 }
 
-// Post 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
-func (h handlerMap) Post(relativPath string, handler gin.HandlerFunc, roles ...string) {
+// POST 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
+func (h handlerMap) POST(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(
 		http.MethodPost,
 		relativPath,
@@ -357,8 +357,8 @@ func (h handlerMap) Post(relativPath string, handler gin.HandlerFunc, roles ...s
 	)
 }
 
-// Delete 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
-func (h handlerMap) Delete(relativPath string, handler gin.HandlerFunc, roles ...string) {
+// DELETE 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
+func (h handlerMap) DELETE(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(
 		http.MethodDelete,
 		relativPath,
@@ -367,8 +367,8 @@ func (h handlerMap) Delete(relativPath string, handler gin.HandlerFunc, roles ..
 	)
 }
 
-// Put 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
-func (h handlerMap) Put(relativPath string, handler gin.HandlerFunc, roles ...string) {
+// PUT 方法接收的role条件以或逻辑连接，连接之后的逻辑与父亲的group里的逻辑以与逻辑链接
+func (h handlerMap) PUT(relativPath string, handler gin.HandlerFunc, roles ...string) {
 	h.Handle(
 		http.MethodPut,
 		relativPath,

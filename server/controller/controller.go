@@ -46,84 +46,84 @@ func SetupHandlers(c *Controller) {
 		}
 		noti := api.Group("notification", model.OrdinaryUser)
 		{
-			noti.Get("num", c.GetNotificationNum)
-			noti.Get("", c.GetNotifications)
+			noti.GET("num", c.GetNotificationNum)
+			noti.GET("", c.GetNotifications)
 		}
 		admin := api.Group("/admin", model.GeneralAdmin)
 		{
-			admin.Post("indexblogs", c.IndexAllBlogs)
+			admin.POST("indexblogs", c.IndexAllBlogs)
 		}
 		uploads := api.Group("", model.OrdinaryUser)
 		{
-			uploads.Get("/img/:filename", adapter.ResponseAdapter(c.GenUploadToken))
-			uploads.Post("/file", c.Upload)
+			uploads.GET("/img/:filename", adapter.ResponseAdapter(c.GenUploadToken))
+			uploads.POST("/file", c.Upload)
 		}
 		relation := api.Group("relation", model.OrdinaryUser, model.Anonymous)
 		{
 
-			relation.Post("categories/:type", c.RelateCategories2Entity, model.GeneralAdmin)
-			relation.Post("category/:type", c.RelateCategory2Entity, model.GeneralAdmin)
-			relation.Get("category/:type/:ID", c.FindCategoriesByType)
-			relation.Get("blogs/:type/:ID", c.FindBlogsByType)
+			relation.POST("categories/:type", c.RelateCategories2Entity, model.GeneralAdmin)
+			relation.POST("category/:type", c.RelateCategory2Entity, model.GeneralAdmin)
+			relation.GET("category/:type/:ID", c.FindCategoriesByType)
+			relation.GET("blogs/:type/:ID", c.FindBlogsByType)
 		}
 
 		directories := api.Group("directories", model.OrdinaryUser, model.Anonymous)
 		{
 			user := directories.Group("", model.OrdinaryUser)
 			{
-				user.Delete("category", c.DeleteCategory)
+				user.DELETE("category", c.DeleteCategory)
 			}
-			directories.Get(":collection", c.ListDirectoriesInfo)
+			directories.GET(":collection", c.ListDirectoriesInfo)
 		}
 
 		blogs := api.Group("blogs", model.Anonymous, model.OrdinaryUser)
 		{
-			blogs.Get("query", c.QueryBlogs)
+			blogs.GET("query", c.QueryBlogs)
 
 			user := blogs.Group("", model.OrdinaryUser)
 			{
-				user.Post("category", c.UpsertCategory)
-				user.Get("category", c.FindAllCategories)
+				user.POST("category", c.UpsertCategory)
+				user.GET("category", c.FindAllCategories)
 
-				user.Post("publish", c.UpsertBlog)
-				user.Delete(":id", c.DeleteBlog)
-				user.Put(":operation/:id", c.ProcessBlog)
+				user.POST("publish", c.UpsertBlog)
+				user.DELETE(":id", c.DeleteBlog)
+				user.PUT(":operation/:id", c.ProcessBlog)
 			}
 
 			find := blogs.Group("/find")
 			{
-				find.Get("own", c.FindBlogsByUser, model.OrdinaryUser)
-				find.Get("userId", c.FindBlogsByUserId)
-				find.Get("id", c.FindBlogById)
+				find.GET("own", c.FindBlogsByUser, model.OrdinaryUser)
+				find.GET("userId", c.FindBlogsByUserId)
+				find.GET("id", c.FindBlogById)
 			}
 		}
 		accounts := api.Group("/accounts", model.Anonymous, model.OrdinaryUser)
 		{
-			accounts.Post("", c.AddAccount)
-			accounts.Delete("", c.DeleteAccount, model.OrdinaryUser)
-			accounts.Put("", c.UpdateAccount, model.OrdinaryUser)
-			accounts.Post("role", c.AddAccountRole, model.GeneralAdmin, model.OrdinaryUser)
-			accounts.Post("login", c.LoginAccount)
-			accounts.Post("logout", c.LogoutAccount)
-			accounts.Get("detail/:id", c.ShowAccount)
-			accounts.Get("listBrief", c.ListAccountsInfo)
+			accounts.POST("", c.AddAccount)
+			accounts.DELETE("", c.DeleteAccount, model.OrdinaryUser)
+			accounts.PUT("", c.UpdateAccount, model.OrdinaryUser)
+			accounts.POST("role", c.AddAccountRole, model.GeneralAdmin, model.OrdinaryUser)
+			accounts.POST("login", c.LoginAccount)
+			accounts.POST("logout", c.LogoutAccount)
+			accounts.GET("detail/:id", c.ShowAccount)
+			accounts.GET("listBrief", c.ListAccountsInfo)
 		}
 		comment := api.Group("/comment", model.Anonymous, model.OrdinaryUser)
 		{
-			comment.Get(":id", c.GetComment)
-			comment.Post("", c.PostComment, model.OrdinaryUser)
-			comment.Post(":id", c.PostSubComment, model.OrdinaryUser)
+			comment.GET(":id", c.GetComment)
+			comment.POST("", c.PostComment, model.OrdinaryUser)
+			comment.POST(":id", c.PostSubComment, model.OrdinaryUser)
 		}
-		api.Get("commentcount/:id", c.GetCommentNum)
+		api.GET("commentcount/:id", c.GetCommentNum)
 		group := api.Group("/group")
 		{
 			user := group.Group("", model.OrdinaryUser)
 			{
-				user.Put("", c.UpdateGroup)
-				user.Post("", c.InsertGroup)
-				user.Delete(":id", c.DeleteGroup)
+				user.PUT("", c.UpdateGroup)
+				user.POST("", c.InsertGroup)
+				user.DELETE(":id", c.DeleteGroup)
 			}
-			group.Get(":id", c.FindGroup)
+			group.GET(":id", c.FindGroup)
 
 		}
 	}
