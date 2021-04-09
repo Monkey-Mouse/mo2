@@ -15,6 +15,7 @@ import (
 
 const COMMENT = 1
 
+// Init log client
 func (l *LogClient) Init(targetEnv string) {
 	conn, err := grpc.Dial(os.Getenv(targetEnv), grpc.WithInsecure())
 	if err != nil {
@@ -28,6 +29,7 @@ type LogClient struct {
 	Client logservice.LogServiceClient
 }
 
+// ProtoToLog log proto to log model
 func ProtoToLog(log *logservice.LogModel) *logmodel.LogModel {
 	return &logmodel.LogModel{
 		Operation:              log.Operation,
@@ -42,6 +44,7 @@ func ProtoToLog(log *logservice.LogModel) *logmodel.LogModel {
 	}
 }
 
+// Log log struct
 type Log struct {
 	Operator             primitive.ObjectID
 	Operation            int32
@@ -51,11 +54,14 @@ type Log struct {
 	OperationTargetOwner primitive.ObjectID
 }
 
+// LogInfo log at info level
 func (l *LogClient) LogInfo(log Log) error {
 	log.LogLevel = logservice.LogModel_INFO
 	err := l.LogMsg(context.TODO(), log)
 	return err
 }
+
+// LogMsg log a message
 func (l *LogClient) LogMsg(ctx context.Context, log Log) error {
 	_, err := l.Client.Log(ctx, &logservice.LogModel{
 		Operator:             log.Operator[:],
@@ -72,17 +78,20 @@ type errLogger struct {
 	c *LogClient
 }
 
+// BuildWriter Create an io.Writer write logs to log service
 func BuildWriter(target string) io.Writer {
 	l := &LogClient{}
 	l.Init(target)
 	return &errLogger{l}
 }
+
+// Write write log
 func (l *errLogger) Write(p []byte) (n int, err error) {
-	var nilId [12]byte
+	var nilID [12]byte
 	err = l.c.LogMsg(context.TODO(), Log{
-		Operator:             nilId,
-		OperationTarget:      nilId,
-		OperationTargetOwner: nilId,
+		Operator:             nilID,
+		OperationTarget:      nilID,
+		OperationTargetOwner: nilID,
 		Operation:            -1,
 		ExtraMessage:         string(p),
 		LogLevel:             logservice.LogModel_FATAL,
