@@ -13,18 +13,24 @@
               <v-col cols="3">
                 <time-ago
                   :refresh="60"
-                  :datetime="v.CreateTime"
+                  :datetime="v.create_time"
                   tooltip
                   long
                 ></time-ago>
               </v-col>
               <v-col>
-                <a @click="$router.push(`/account/${v.OperatorID}`)">{{
-                  v.user.name
-                }}</a
-                ><span v-html="$sanitize(v.ExtraMessage)"></span>
+                <a
+                  v-if="v.user !== undefined"
+                  @click="$router.push(`/account/${v.operator_id}`)"
+                  >{{ v.user.name }}</a
+                ><span v-html="$sanitize(v.extra_message)"></span>
                 <br />
-                <avatar class="mt-10" :size="40" :user="v.user" />
+                <avatar
+                  v-if="v.user !== undefined"
+                  class="mt-10"
+                  :size="40"
+                  :user="v.user"
+                />
               </v-col>
             </v-row>
           </v-timeline-item>
@@ -95,12 +101,13 @@ export default class Notifications
       GetNotifications({ page: page, pagesize: pagesize })
         .then((data) => {
           const dd = data as DisplayNotification[];
-          const ids = data.map((v) => v.OperatorID);
+          const ids = data.map((v) => v.operator_id);
+          console.log(ids);
           GetUserDatas(ids)
             .then((d) => {
               const dic: Dictionary<User> = {};
               d.map((v) => (dic[v.id] = v as User));
-              dd.forEach((v) => (v.user = dic[v.OperatorID]));
+              dd.forEach((v) => (v.user = dic[v.operator_id]));
               resolve(dd);
             })
             .catch((err) => reject(err));
