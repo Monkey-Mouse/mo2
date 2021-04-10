@@ -361,7 +361,11 @@ export default class ReadArticle extends Vue {
     this.init();
   }
   init() {
-    document.getElementById("toc").innerHTML = "";
+    const toc = document.getElementById("toc");
+    if (toc) {
+      toc.innerHTML = "";
+    }
+
     this.loading = true;
     if (this.$route.query["draft"]) {
       this.draft = (this.$route.query["draft"] as string) === "true";
