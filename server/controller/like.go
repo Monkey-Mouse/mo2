@@ -17,6 +17,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var (
+	likedResp       = gin.H{"liked": true}
+	notLikedResp    = gin.H{"liked": false}
+	errWrongType    = errors.New("wrong type")
+	okResp          = gin.H{"status": "ok"}
+	errMicroService = errors.New("internal microservice error")
+	errBadidFormat  = errors.New("bad id format")
+)
+
 func (c *Controller) Liked(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
 	hex := ctx.Param("id")
 	t := ctx.Param("type")
@@ -34,14 +43,12 @@ func (c *Controller) Liked(ctx *gin.Context, u dto.LoginUserInfo) (status int, b
 			},
 		)
 	default:
-		err = errors.New("wrong type")
-		status = http.StatusUnprocessableEntity
-		return
+		return 422, nil, errWrongType
 	}
 	if err != nil {
-		return 200, gin.H{"liked": false}, nil
+		return 200, notLikedResp, nil
 	}
-	return 200, gin.H{"liked": true}, nil
+	return 200, likedResp, nil
 }
 
 func (c *Controller) Like(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
@@ -88,18 +95,16 @@ func (c *Controller) Like(ctx *gin.Context, u dto.LoginUserInfo) (status int, bo
 			)
 		}
 	default:
-		err = errors.New("wrong type")
-		status = http.StatusUnprocessableEntity
-		return
+		return 422, nil, errWrongType
 	}
-	body = gin.H{"status": "ok"}
+	body = okResp
 	return
 }
 func (c *Controller) LikeNum(ctx *gin.Context) (status int, body interface{}, err error) {
 	t := ctx.Param("type")
 	id, err := primitive.ObjectIDFromHex(ctx.Param("id"))
 	if err != nil {
-		return http.StatusUnprocessableEntity, nil, errors.New("bad id format")
+		return http.StatusUnprocessableEntity, nil, errBadidFormat
 	}
 	num := 0
 	switch t {
@@ -112,13 +117,11 @@ func (c *Controller) LikeNum(ctx *gin.Context) (status int, body interface{}, er
 			},
 		)
 		if err != nil {
-			return 500, nil, errors.New("internal microservice error")
+			return 500, nil, errMicroService
 		}
 		num = int(numP.Num)
 	default:
-		err = errors.New("wrong type")
-		status = http.StatusUnprocessableEntity
-		return
+		return 422, nil, errWrongType
 	}
 	body = gin.H{"num": num}
 	return
