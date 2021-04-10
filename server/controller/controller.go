@@ -68,8 +68,9 @@ func SetupHandlers(c *Controller) {
 		}
 		like := api.Group("like", model.OrdinaryUser, model.Anonymous)
 		{
-			like.POST(":type", adapter.ReAdapterWithUinfo(c.Like))
-			like.GET("num/:type/:id", adapter.ReAdapter(c.LikeNum))
+			like.PostWithRL(":type", adapter.ReAdapterWithUinfo(c.Like), 5, model.OrdinaryUser)
+			like.GetWithRL("num/:type/:id", adapter.ReAdapter(c.LikeNum), 5)
+			like.GetWithRL("ext/:type/:id", adapter.ReAdapterWithUinfo(c.Liked), 5, model.OrdinaryUser)
 		}
 		directories := api.Group("directories", model.OrdinaryUser, model.Anonymous)
 		{

@@ -17,6 +17,33 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func (c *Controller) Liked(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
+	hex := ctx.Param("id")
+	t := ctx.Param("type")
+	id, err := primitive.ObjectIDFromHex(hex)
+	if err != nil {
+		return http.StatusUnprocessableEntity, nil, err
+	}
+	switch t {
+	case "blog":
+		_, err = notifyLogClient.Client.Exist(ctx,
+			&logservice.ExtRequest{
+				Operator:        u.ID[:],
+				Operation:       loghelper.LIKE_BLOG,
+				OperationTarget: id[:],
+			},
+		)
+	default:
+		err = errors.New("wrong type")
+		status = http.StatusUnprocessableEntity
+		return
+	}
+	if err != nil {
+		return 200, gin.H{"liked": false}, nil
+	}
+	return 200, gin.H{"liked": true}, nil
+}
+
 func (c *Controller) Like(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
 	t := ctx.Param("type")
 	var data struct {
