@@ -326,7 +326,6 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
       this.user.settings.home_theme_dark = theme ? "true" : "false";
       const img = home_img as File;
       if (home_img && !(home_img as []).length && this.blob !== home_img) {
-        console.log(img);
         await UploadImgToQiniu([img], (src) => {
           this.user.settings.home_img = src.src;
           this.blob = img;

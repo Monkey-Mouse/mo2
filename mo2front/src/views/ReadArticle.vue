@@ -267,6 +267,7 @@ import {
   GetUserData,
   GetUserDatas,
   globaldic,
+  InitLoader,
   IsBlogLiked,
   Prompt,
   ShareToQQ,
@@ -279,7 +280,7 @@ import {
 import hljs from "highlight.js";
 import { Blog, User, Comment, UserListData } from "@/models";
 import Avatar from "@/components/UserAvatar.vue";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 import { TimeAgo } from "vue2-timeago";
 import DeleteConfirm from "@/components/DeleteConfirm.vue";
 import vuetify from "@/plugins/vuetify";
@@ -350,7 +351,18 @@ export default class ReadArticle extends Vue {
       desc: this.blog.description,
     });
   }
+  @Watch("$route")
+  articleChange() {
+    if (this.$route.params["id"] !== this.blog.id) {
+      this.init();
+    }
+  }
   created() {
+    this.init();
+  }
+  init() {
+    document.getElementById("toc").innerHTML = "";
+    this.loading = true;
     if (this.$route.query["draft"]) {
       this.draft = (this.$route.query["draft"] as string) === "true";
     }

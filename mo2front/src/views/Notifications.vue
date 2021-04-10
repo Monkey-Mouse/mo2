@@ -102,7 +102,6 @@ export default class Notifications
         .then((data) => {
           const dd = data as DisplayNotification[];
           const ids = data.map((v) => v.operator_id);
-          console.log(ids);
           GetUserDatas(ids)
             .then((d) => {
               const dic: Dictionary<User> = {};
