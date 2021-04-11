@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1618055700414,
+  "lastUpdate": 1618134920985,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -3632,6 +3632,60 @@ window.BENCHMARK_DATA = {
             "value": 1185,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "47478961+easilylazy@users.noreply.github.com",
+            "name": "leezeeyee",
+            "username": "easilylazy"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "cbb00784d08312712b66049c7963e9dc984be1a1",
+          "message": "Merge pull request #263 from Monkey-Mouse/Chronostasys/issue154\n\n✨ [feat] add blog like backend api",
+          "timestamp": "2021-04-11T17:53:22+08:00",
+          "tree_id": "3292bde085e2d54a64deb1b90890bf29c5ec2980",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/cbb00784d08312712b66049c7963e9dc984be1a1"
+        },
+        "date": 1618134920069,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 9370794,
+            "unit": "ns/op",
+            "extra": "112 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 506405,
+            "unit": "ns/op",
+            "extra": "2746 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1437,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 127359,
+            "unit": "ns/op",
+            "extra": "8588 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1321,
+            "unit": "ns/op",
+            "extra": "909044 times\n2 procs"
           }
         ]
       }
