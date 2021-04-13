@@ -204,7 +204,6 @@ export function GenerateTOC() {
                         return;
                     }
                     prev = i;
-                    console.log(i);
                     if (prevNode) {
                         prevNode.className = '';
                     }
