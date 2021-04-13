@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1618279604410,
+  "lastUpdate": 1618304680974,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -3740,6 +3740,56 @@ window.BENCHMARK_DATA = {
             "value": 1338,
             "unit": "ns/op",
             "extra": "885361 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "a36fdc29986ccc9bbaddbc238fc7215a060bcc90",
+          "message": "[Snyk] Security upgrade ubuntu from latest to groovy-20210325",
+          "timestamp": "2021-04-13T02:04:55Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/267/commits/a36fdc29986ccc9bbaddbc238fc7215a060bcc90"
+        },
+        "date": 1618304680400,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10852050,
+            "unit": "ns/op",
+            "extra": "104 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 559795,
+            "unit": "ns/op",
+            "extra": "2366 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1528,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 168890,
+            "unit": "ns/op",
+            "extra": "7455 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1409,
+            "unit": "ns/op",
+            "extra": "922783 times\n2 procs"
           }
         ]
       }
