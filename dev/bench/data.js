@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1618134920985,
+  "lastUpdate": 1618279604410,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -3686,6 +3686,60 @@ window.BENCHMARK_DATA = {
             "value": 1321,
             "unit": "ns/op",
             "extra": "909044 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "4d4ba5c4faf7ceb05e2b48d7c41154c1ed480cb3",
+          "message": "Merge branch 'main' of github.com:Monkey-Mouse/mo2",
+          "timestamp": "2021-04-13T10:04:43+08:00",
+          "tree_id": "afe39f2d549f14f26dce54ccfb5d8e5f5e96d86b",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/4d4ba5c4faf7ceb05e2b48d7c41154c1ed480cb3"
+        },
+        "date": 1618279603420,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 8481044,
+            "unit": "ns/op",
+            "extra": "132 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 494612,
+            "unit": "ns/op",
+            "extra": "2702 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1432,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 118079,
+            "unit": "ns/op",
+            "extra": "9259 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1338,
+            "unit": "ns/op",
+            "extra": "885361 times\n2 procs"
           }
         ]
       }
