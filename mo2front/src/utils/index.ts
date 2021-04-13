@@ -8,6 +8,25 @@ import { GetUploadToken, UpdateUserInfo } from './api';
 export * from './api'
 export * from './autoloader'
 export * from './lazy-executor'
+export function ElementInViewport(el: HTMLElement) {
+    var top = el.offsetTop;
+    var left = el.offsetLeft;
+    var width = el.offsetWidth;
+    var height = el.offsetHeight;
+
+    while (el.offsetParent) {
+        el = el.offsetParent as HTMLElement;
+        top += el.offsetTop;
+        left += el.offsetLeft;
+    }
+
+    return (
+        top < (window.pageYOffset + window.innerHeight) &&
+        left < (window.pageXOffset + window.innerWidth) &&
+        (top + height) > window.pageYOffset &&
+        (left + width) > window.pageXOffset
+    );
+}
 
 export function randomProperty(obj: any) {
     const keys = Object.keys(obj);
@@ -163,7 +182,7 @@ export function GenerateTOC() {
                 toc += "<li><a href=\"#" + anchor + "\">" + titleText
                     + "</a></li>";
 
-                return "<h" + (openLevel + 1) + ` id="${anchor}" class="anchor">`
+                return "<h" + (openLevel + 1) + ` id="${anchor}" class="anchor h">`
                     + titleText + "</h" + closeLevel + ">";
             }
         );
@@ -171,6 +190,30 @@ export function GenerateTOC() {
     if (level) {
         toc += (new Array(level + 1)).join("</ul>");
     }
+    const tocE = document.getElementById("toc");
+    tocE.innerHTML += toc;
+    let prevNode: Element = null;
+    let prev: Element = null;
+    setTimeout(() => {
+        const hs = document.getElementsByClassName('h')
+        window.addEventListener('scroll', () => {
+            for (const i of hs) {
+                if (ElementInViewport(i as HTMLElement)) {
+                    if (prev === i) {
+                        return;
+                    }
+                    prev = i;
+                    console.log(i);
+                    if (prevNode) {
+                        prevNode.className = '';
+                    }
 
-    document.getElementById("toc").innerHTML += toc;
+                    const node = tocE.querySelector('a[href="#' + i.id + '"]').parentElement
+                    node.classList.add('active')
+                    prevNode = node;
+                    break;
+                }
+            }
+        })
+    }, 100);
 };

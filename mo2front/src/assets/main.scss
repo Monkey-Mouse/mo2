@@ -1,3 +1,30 @@
+#toc {
+    min-width: 150px;
+
+    ul {
+        padding-left: 6px;
+    }
+
+    li {
+        list-style: none;
+        border-left: 2px solid #e5e5e5;
+    }
+
+    li.active {
+        border-left: 2px solid rgb(102, 181, 226);
+
+        background-color: rgb(184, 222, 245);
+    }
+
+    a {
+        width: 100%;
+        color: unset;
+        margin-left: 5px;
+        text-decoration: none;
+    }
+
+}
+
 .container-emoji {
     max-height: 200px !important;
 }
