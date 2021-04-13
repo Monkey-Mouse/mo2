@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"net/http"
+
 	"github.com/Monkey-Mouse/go-abac/abac"
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
@@ -9,7 +11,6 @@ import (
 	"github.com/Monkey-Mouse/mo2/services/accessControl"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"net/http"
 )
 
 const (
@@ -185,7 +186,7 @@ func (c *Controller) DeleteGroup(ctx *gin.Context) {
 // @Router /api/group/{id} [get]
 func (c *Controller) FindGroup(ctx *gin.Context) {
 	id, err := primitive.ObjectIDFromHex(ctx.Param("id"))
-	if id.IsZero() || err != nil {
+	if err != nil || id.IsZero() {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason(badresponse.BadRequestReason))
 		return
 	}
