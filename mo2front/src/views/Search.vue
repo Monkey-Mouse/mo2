@@ -64,7 +64,6 @@ export default class Search extends Vue implements AutoLoader<BlogBrief> {
       setTimeout(() => {
         if (j === this.i && !this.loading) {
           const text = (this.$refs.s as HTMLElement).textContent.trim();
-          console.log(this.$route.query["q"], text);
           if (text === (this.$route.query["q"] as string)) return;
           this.$router.replace("search?q=" + text).catch(() => {});
           this.init();

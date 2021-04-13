@@ -74,15 +74,20 @@
           />
           <div style="padding-bottom: 1rem"></div>
           <v-row v-if="!draft">
-            <v-col class="offset-lg-10 offset-9"
-              ><v-icon @click="share">mdi-share</v-icon></v-col
+            <v-col class="offset-lg-9 offset-8"
+              ><v-icon @click="toggleLike">{{
+                liked ? "mdi-thumb-up" : "mdi-thumb-up-outline"
+              }}</v-icon
+              >{{ praiseNum }}</v-col
             >
+            <v-col><v-icon @click="share">mdi-share</v-icon></v-col>
             <v-col class=""
               ><v-icon @click="loadComment">mdi-message-reply-outline</v-icon
               >{{ commentNum }}</v-col
             >
           </v-row>
 
+          <!-- 评论 -->
           <div style="padding-bottom: 5rem"></div>
           <v-navigation-drawer
             v-model="comment"
@@ -255,13 +260,19 @@ import {
   DeleteArticle,
   GenerateTOC,
   GetArticle,
+  GetBlogLikeNum,
   GetCommentNum,
   GetComments,
   GetErrorMsg,
   GetUserData,
   GetUserDatas,
   globaldic,
+  InitLoader,
+  IsBlogLiked,
+  Prompt,
   ShareToQQ,
+  ShowLogin,
+  ToggleLikeBlog,
   UpsertComment,
   UpsertSubComment,
   UserRole,
@@ -269,7 +280,7 @@ import {
 import hljs from "highlight.js";
 import { Blog, User, Comment, UserListData } from "@/models";
 import Avatar from "@/components/UserAvatar.vue";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 import { TimeAgo } from "vue2-timeago";
 import DeleteConfirm from "@/components/DeleteConfirm.vue";
 import vuetify from "@/plugins/vuetify";
@@ -308,6 +319,8 @@ export default class ReadArticle extends Vue {
   commentLoadingMore = true;
   nomore = false;
   commentNum = 0;
+  praiseNum = 0;
+  liked = false;
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
@@ -317,6 +330,19 @@ export default class ReadArticle extends Vue {
   scrollToTop() {
     window.scrollTo(0, 0);
   }
+  toggleLike() {
+    if (this.isUser) {
+      ToggleLikeBlog(this.blog.id).then(() => {
+        if (this.liked) {
+          this.praiseNum--;
+        } else this.praiseNum++;
+        this.liked = !this.liked;
+      });
+    } else {
+      Prompt("请先登录！", 5000);
+      ShowLogin();
+    }
+  }
   share() {
     ShareToQQ({
       title: this.blog.title,
@@ -325,7 +351,22 @@ export default class ReadArticle extends Vue {
       desc: this.blog.description,
     });
   }
+  @Watch("$route")
+  articleChange() {
+    if (this.$route.params["id"] !== this.blog.id) {
+      this.init();
+    }
+  }
   created() {
+    this.init();
+  }
+  init() {
+    const toc = document.getElementById("toc");
+    if (toc) {
+      toc.innerHTML = "";
+    }
+
+    this.loading = true;
     if (this.$route.query["draft"]) {
       this.draft = (this.$route.query["draft"] as string) === "true";
     }
@@ -341,6 +382,12 @@ export default class ReadArticle extends Vue {
         });
         GetCommentNum(this.blog.id).then((c) => {
           this.commentNum = c.count;
+        });
+        GetBlogLikeNum(this.blog.id).then((num) => {
+          this.praiseNum = num.num;
+        });
+        IsBlogLiked(this.blog.id).then((l) => {
+          this.liked = l.liked;
         });
         setTimeout(() => {
           GenerateTOC();

@@ -4,10 +4,10 @@ go 1.16
 
 require (
 	github.com/Monkey-Mouse/go-abac v0.0.0-20210325070221-9ac98bef4f09
-	github.com/Monkey-Mouse/mo2log v0.0.3-0.20210407012516-345020380858
+	github.com/Monkey-Mouse/mo2log v0.0.3-0.20210409155342-f06e35c43372
 	github.com/RoaringBitmap/roaring v0.5.5 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
-	github.com/aws/aws-sdk-go v1.38.14 // indirect
+	github.com/aws/aws-sdk-go v1.38.16 // indirect
 	github.com/blevesearch/bleve v1.0.14
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/pprof v1.3.0
@@ -35,6 +35,6 @@ require (
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/sys v0.0.0-20210403161142-5e06dd20ab57 // indirect
-	google.golang.org/grpc v1.36.1
+	google.golang.org/grpc v1.37.0
 	gopkg.in/yaml.v2 v2.4.0
 )

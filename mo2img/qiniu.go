@@ -31,7 +31,7 @@ func GenerateOverwriteToken(saveKey string, overwriteKey string) (token string) 
 	var putPolicy = storage.PutPolicy{
 		Scope:        fmt.Sprintf("%s:%s", bucket, overwriteKey),
 		Expires:      7200,
-		FsizeLimit:   1024 * 1024 * 5,
+		FsizeLimit:   1024 * 1024 * 20,
 		SaveKey:      saveKey,
 		ForceSaveKey: true,
 	}

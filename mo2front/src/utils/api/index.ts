@@ -14,6 +14,7 @@ import {
 import axios from "axios";
 import * as qiniu from 'qiniu-js';
 import { GetErrorMsg } from "..";
+export * from './like'
 
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;

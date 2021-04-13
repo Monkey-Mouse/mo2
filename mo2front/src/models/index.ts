@@ -116,10 +116,10 @@ export interface Count {
     count: number;
 }
 export interface Notification {
-    OperatorID: string;
-    ExtraMessage: string;
-    CreateTime: string;
-    Processed: boolean;
+    operator_id: string;
+    extra_message: string;
+    create_time: string;
+    processed: boolean;
 }
 export interface DisplayNotification extends Notification {
     user?: User;

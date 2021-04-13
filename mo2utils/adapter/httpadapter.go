@@ -1,6 +1,8 @@
 package adapter
 
 import (
+	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
 	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
 	"github.com/gin-gonic/gin"
 )
@@ -8,16 +10,31 @@ import (
 // RequestHandler used with ResponseAdapter
 type RequestHandler func(ctx *gin.Context) (status int, json interface{}, err error)
 
-// ResponseAdapter for gin handler
-func ResponseAdapter(handler RequestHandler) gin.HandlerFunc {
+// UserRequestHandler used with ReAdapterWithUinfo
+type UserRequestHandler func(ctx *gin.Context, uinfo dto.LoginUserInfo) (status int, json interface{}, err error)
+
+// ReAdapter for gin handler
+func ReAdapter(handler RequestHandler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		s, j, err := handler(ctx)
 		processResult(ctx, s, j, err)
 	}
 }
 
+// ResponseAdapter for gin handler
+func ReAdapterWithUinfo(handler UserRequestHandler) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		uinfo, _ := mo2utils.GetUserInfo(ctx)
+		s, j, err := handler(ctx, uinfo)
+		processResult(ctx, s, j, err)
+	}
+}
+
 func processResult(ctx *gin.Context, status int, json interface{}, err error) {
 	if err != nil {
+		if status == 0 {
+			status = 200
+		}
 		ctx.AbortWithStatusJSON(status, badresponse.SetResponseError(err))
 		return
 	}

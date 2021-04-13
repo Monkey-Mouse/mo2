@@ -13,7 +13,10 @@ import (
 	"google.golang.org/grpc"
 )
 
-const COMMENT = 1
+const (
+	COMMENT   = 1
+	LIKE_BLOG = 2
+)
 
 // Init log client
 func (l *LogClient) Init(targetEnv string) {
@@ -21,12 +24,12 @@ func (l *LogClient) Init(targetEnv string) {
 	if err != nil {
 		panic(err)
 	}
-	l.Client = logservice.NewLogServiceClient(conn)
+	l.Client = logservice.BuildLogClient(conn)
 }
 
 // LogClient as name
 type LogClient struct {
-	Client logservice.LogServiceClient
+	Client logservice.LogClient
 }
 
 // ProtoToLog log proto to log model
