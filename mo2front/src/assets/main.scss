@@ -3,6 +3,17 @@
 
     ul {
         padding-left: 6px;
+
+        ul {
+            max-height: 0px;
+            overflow: hidden;
+            transition: max-height 0.5s;
+        }
+
+        ul.active {
+            max-height: 1000px;
+            transition: max-height 1.0s;
+        }
     }
 
     li {

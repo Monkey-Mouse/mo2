@@ -194,6 +194,7 @@ export function GenerateTOC() {
     tocE.innerHTML += toc;
     let prevNode: Element = null;
     let prev: Element = null;
+    let ul: Element = null;
     setTimeout(() => {
         const hs = document.getElementsByClassName('h')
         window.addEventListener('scroll', () => {
@@ -210,7 +211,12 @@ export function GenerateTOC() {
 
                     const node = tocE.querySelector('a[href="#' + i.id + '"]').parentElement
                     node.classList.add('active')
+                    if (ul && ul !== node.parentElement) {
+                        ul.className = '';
+                    }
                     prevNode = node;
+                    ul = node.parentElement;
+                    ul.className = 'active';
                     break;
                 }
             }
