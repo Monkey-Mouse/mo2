@@ -1,260 +1,262 @@
 <template>
-  <v-container>
-    <aside style="position: fixed" class="mt-16">
-      <div
-        class="has-icons-right"
-        v-show="!$vuetify.breakpoint.mobile"
-        style="max-width: 200px"
-      >
+  <div>
+    <aside style="position: fixed; width: 20%" class="mt-16 ml-4">
+      <div class="has-icons-right" v-show="!$vuetify.breakpoint.mobile">
         <!-- <a @click="scrollToTop" style="text-decoration: none">{{ title }}</a
         ><v-icon style="float: right">mdi-format-list-bulleted</v-icon
         ><v-divider /> -->
         <div id="toc"></div>
       </div>
     </aside>
-    <v-row id="mo2blog" justify="center">
-      <v-col cols="12" lg="7" class="mo2editor">
-        <v-skeleton-loader
-          v-if="loading"
-          v-bind="attrs"
-          type="heading, list-item-avatar, paragraph@9"
-        ></v-skeleton-loader>
-        <div v-if="!loading">
-          <div id="titleContainer" class="mo2title text-break has-icons-right">
-            <h1 id="title">{{ title }}</h1>
-          </div>
-          <v-row v-if="authorLoad" class="mb-6">
-            <avatar :size="40" :user="author"></avatar>
-            <a
-              @click="$router.push('/account/' + author.id)"
-              class="text--lighten-2 ml-2 mt-2"
-              >{{ author.name }}</a
+    <v-container>
+      <v-row id="mo2blog" justify="center">
+        <v-col cols="12" lg="7" class="mo2editor">
+          <v-skeleton-loader
+            v-if="loading"
+            v-bind="attrs"
+            type="heading, list-item-avatar, paragraph@9"
+          ></v-skeleton-loader>
+          <div v-if="!loading">
+            <div
+              id="titleContainer"
+              class="mo2title text-break has-icons-right"
             >
-            <span class="ml-2 grey--text mt-2">{{
-              blog.entityInfo.createTime.substr(0, 10)
-            }}</span>
-            <v-spacer />
-            <v-tooltip v-if="draft" bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn plain small v-bind="attrs" v-on="on">
-                  <v-icon>mdi-eye-check</v-icon>
-                </v-btn>
-              </template>
-              <span>This is a draft</span>
-            </v-tooltip>
-            <v-btn @click="edit" v-if="user.id === blog.authorId" plain small>
-              <v-icon>mdi-file-document-edit</v-icon>
-            </v-btn>
-            <v-btn
-              @click="deleteArticle"
-              v-if="user.id === blog.authorId"
-              plain
-              small
-            >
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </v-row>
-          <v-row v-else class="mb-6">
-            <v-skeleton-loader
-              class="col"
-              type="list-item-avatar"
-            ></v-skeleton-loader>
-          </v-row>
-          <!-- <img
+              <h1 id="title">{{ title }}</h1>
+            </div>
+            <v-row v-if="authorLoad" class="mb-6">
+              <avatar :size="40" :user="author"></avatar>
+              <a
+                @click="$router.push('/account/' + author.id)"
+                class="text--lighten-2 ml-2 mt-2"
+                >{{ author.name }}</a
+              >
+              <span class="ml-2 grey--text mt-2">{{
+                blog.entityInfo.createTime.substr(0, 10)
+              }}</span>
+              <v-spacer />
+              <v-tooltip v-if="draft" bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn plain small v-bind="attrs" v-on="on">
+                    <v-icon>mdi-eye-check</v-icon>
+                  </v-btn>
+                </template>
+                <span>This is a draft</span>
+              </v-tooltip>
+              <v-btn @click="edit" v-if="user.id === blog.authorId" plain small>
+                <v-icon>mdi-file-document-edit</v-icon>
+              </v-btn>
+              <v-btn
+                @click="deleteArticle"
+                v-if="user.id === blog.authorId"
+                plain
+                small
+              >
+                <v-icon>mdi-delete</v-icon>
+              </v-btn>
+            </v-row>
+            <v-row v-else class="mb-6">
+              <v-skeleton-loader
+                class="col"
+                type="list-item-avatar"
+              ></v-skeleton-loader>
+            </v-row>
+            <!-- <img
           class="ma-5"
           src="https://th.bing.com/th/id/OIP.dnWfZl6P-0Pl47j7PhZodQHaHJ?w=187&h=180&c=7&o=5&dpr=2&pid=1.7"
         />
         <v-row justify="center" class="mb-5">• • •</v-row> -->
-          <div
-            id="contents"
-            v-html="$sanitize(html)"
-            class="mo2content mt-10"
-            spellcheck="false"
-          ></div>
-          <delete-confirm
-            :title="'确认删除'"
-            :content="deleteContent"
-            :show.sync="showDelete"
-            @confirm="confirmDelete"
-          />
-          <div style="padding-bottom: 1rem"></div>
-          <v-row v-if="!draft">
-            <v-col class="offset-lg-9 offset-8"
-              ><v-icon @click="toggleLike">{{
-                liked ? "mdi-thumb-up" : "mdi-thumb-up-outline"
-              }}</v-icon
-              >{{ praiseNum }}</v-col
-            >
-            <v-col><v-icon @click="share">mdi-share</v-icon></v-col>
-            <v-col class=""
-              ><v-icon @click="loadComment">mdi-message-reply-outline</v-icon
-              >{{ commentNum }}</v-col
-            >
-          </v-row>
+            <div
+              id="contents"
+              v-html="$sanitize(html)"
+              class="mo2content mt-10"
+              spellcheck="false"
+            ></div>
+            <delete-confirm
+              :title="'确认删除'"
+              :content="deleteContent"
+              :show.sync="showDelete"
+              @confirm="confirmDelete"
+            />
+            <div style="padding-bottom: 1rem"></div>
+            <v-row v-if="!draft">
+              <v-col class="offset-lg-9 offset-8"
+                ><v-icon @click="toggleLike">{{
+                  liked ? "mdi-thumb-up" : "mdi-thumb-up-outline"
+                }}</v-icon
+                >{{ praiseNum }}</v-col
+              >
+              <v-col><v-icon @click="share">mdi-share</v-icon></v-col>
+              <v-col class=""
+                ><v-icon @click="loadComment">mdi-message-reply-outline</v-icon
+                >{{ commentNum }}</v-col
+              >
+            </v-row>
 
-          <!-- 评论 -->
-          <div style="padding-bottom: 5rem"></div>
-          <v-navigation-drawer
-            v-model="comment"
-            width="30%"
-            height="100%"
-            style="max-height: 100%"
-            bottom
-            fixed
-            temporary
-          >
-            <template v-slot:prepend>
-              <v-list-item two-line class="ml-16">
-                <v-list-item-content>
-                  <v-icon x-large>mdi-message-reply-outline</v-icon>
-                </v-list-item-content>
-
-                <v-list-item-content>
-                  <v-list-item-title>Comments</v-list-item-title>
-                  <!-- <v-list-item-subtitle>Logged In</v-list-item-subtitle> -->
-                </v-list-item-content>
-                <v-list-item-content>
-                  <v-icon
-                    v-if="$vuetify.breakpoint.mobile"
-                    @click="comment = false"
-                    x-large
-                    >mdi-chevron-triple-down</v-icon
-                  >
-                  <!-- <v-list-item-subtitle>Logged In</v-list-item-subtitle> -->
-                </v-list-item-content>
-              </v-list-item>
-              <v-divider></v-divider>
-              <v-list-item v-if="isUser" class="ma-4"
-                ><v-textarea
-                  :loading="commentPosting"
-                  auto-grow
-                  placeholder="Write what you think about"
-                  flat
-                  reverse
-                  rows="1"
-                  v-model="commentmsg"
-                  @click="writeCommentShow = true"
-                >
-                </v-textarea>
-                <v-expand-transition>
-                  <div v-if="writeCommentShow">
-                    <v-icon @click="postComment">mdi-send</v-icon>
-                  </div>
-                </v-expand-transition>
-              </v-list-item>
-            </template>
-            <v-skeleton-loader v-if="commentLoading" type="card@3" />
-            <v-list v-else v-for="(c, i) in cs" :key="i" nav dense>
-              <div>
-                <v-list-item two-line>
-                  <v-list-item-avatar class="clickable">
-                    <avatar :size="30" :user="c.authorProfile"></avatar>
-                  </v-list-item-avatar>
+            <!-- 评论 -->
+            <div style="padding-bottom: 5rem"></div>
+            <v-navigation-drawer
+              v-model="comment"
+              width="30%"
+              height="100%"
+              style="max-height: 100%"
+              bottom
+              fixed
+              temporary
+            >
+              <template v-slot:prepend>
+                <v-list-item two-line class="ml-16">
+                  <v-list-item-content>
+                    <v-icon x-large>mdi-message-reply-outline</v-icon>
+                  </v-list-item-content>
 
                   <v-list-item-content>
-                    <v-list-item-title>{{
-                      c.authorProfile.name
-                    }}</v-list-item-title>
-                    <time-ago
-                      :refresh="60"
-                      :datetime="c.entity_info.updateTime"
-                      tooltip
-                      long
-                    ></time-ago>
+                    <v-list-item-title>Comments</v-list-item-title>
+                    <!-- <v-list-item-subtitle>Logged In</v-list-item-subtitle> -->
+                  </v-list-item-content>
+                  <v-list-item-content>
+                    <v-icon
+                      v-if="$vuetify.breakpoint.mobile"
+                      @click="comment = false"
+                      x-large
+                      >mdi-chevron-triple-down</v-icon
+                    >
+                    <!-- <v-list-item-subtitle>Logged In</v-list-item-subtitle> -->
                   </v-list-item-content>
                 </v-list-item>
-                <v-list-item>
-                  <v-list-item-content>{{ c.content }} </v-list-item-content>
-                </v-list-item>
-                <v-list-item>
-                  <v-spacer />
-                  <v-icon @click="loadSub(c)">mdi-message-reply-outline</v-icon
-                  >{{ c.subs.length }}
-                  <v-list-item-action
-                    ><v-icon @click="c.edit = !c.edit"
-                      >mdi-reply</v-icon
-                    ></v-list-item-action
+                <v-divider></v-divider>
+                <v-list-item v-if="isUser" class="ma-4"
+                  ><v-textarea
+                    :loading="commentPosting"
+                    auto-grow
+                    placeholder="Write what you think about"
+                    flat
+                    reverse
+                    rows="1"
+                    v-model="commentmsg"
+                    @click="writeCommentShow = true"
                   >
-                </v-list-item>
-                <v-expand-transition>
-                  <v-list-item v-if="c.edit" class="ma-4"
-                    ><v-textarea
-                      :loading="commentPosting"
-                      auto-grow
-                      placeholder="Write what you think about"
-                      flat
-                      reverse
-                      rows="1"
-                      v-model="c.tempC"
-                    >
-                    </v-textarea>
-                    <div>
-                      <v-icon @click="postSubComment(c)">mdi-send</v-icon>
+                  </v-textarea>
+                  <v-expand-transition>
+                    <div v-if="writeCommentShow">
+                      <v-icon @click="postComment">mdi-send</v-icon>
                     </div>
-                  </v-list-item>
-                </v-expand-transition>
-                <v-divider />
-                <div v-if="c.showSub">
-                  <v-list
-                    class="ml-16"
-                    v-for="(s, i) in c.subs"
-                    :key="i"
-                    nav
-                    dense
-                  >
-                    <div>
-                      <v-list-item two-line>
-                        <v-list-item-avatar class="clickable">
-                          <avatar :size="30" :user="s.authorProfile"></avatar>
-                        </v-list-item-avatar>
+                  </v-expand-transition>
+                </v-list-item>
+              </template>
+              <v-skeleton-loader v-if="commentLoading" type="card@3" />
+              <v-list v-else v-for="(c, i) in cs" :key="i" nav dense>
+                <div>
+                  <v-list-item two-line>
+                    <v-list-item-avatar class="clickable">
+                      <avatar :size="30" :user="c.authorProfile"></avatar>
+                    </v-list-item-avatar>
 
-                        <v-list-item-content>
-                          <v-list-item-title>{{
-                            s.authorProfile.name
-                          }}</v-list-item-title>
-                          <time-ago
-                            :refresh="60"
-                            :datetime="s.entity_info.updateTime"
-                            tooltip
-                            long
-                          ></time-ago>
-                        </v-list-item-content>
-                      </v-list-item>
-                      <v-list-item>
-                        <v-list-item-content
-                          >{{ s.content }}
-                        </v-list-item-content>
-                      </v-list-item>
-                    </div>
-                    <v-divider />
-                  </v-list>
+                    <v-list-item-content>
+                      <v-list-item-title>{{
+                        c.authorProfile.name
+                      }}</v-list-item-title>
+                      <time-ago
+                        :refresh="60"
+                        :datetime="c.entity_info.updateTime"
+                        tooltip
+                        long
+                      ></time-ago>
+                    </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-list-item-content>{{ c.content }} </v-list-item-content>
+                  </v-list-item>
+                  <v-list-item>
+                    <v-spacer />
+                    <v-icon @click="loadSub(c)"
+                      >mdi-message-reply-outline</v-icon
+                    >{{ c.subs.length }}
+                    <v-list-item-action
+                      ><v-icon @click="c.edit = !c.edit"
+                        >mdi-reply</v-icon
+                      ></v-list-item-action
+                    >
+                  </v-list-item>
+                  <v-expand-transition>
+                    <v-list-item v-if="c.edit" class="ma-4"
+                      ><v-textarea
+                        :loading="commentPosting"
+                        auto-grow
+                        placeholder="Write what you think about"
+                        flat
+                        reverse
+                        rows="1"
+                        v-model="c.tempC"
+                      >
+                      </v-textarea>
+                      <div>
+                        <v-icon @click="postSubComment(c)">mdi-send</v-icon>
+                      </div>
+                    </v-list-item>
+                  </v-expand-transition>
+                  <v-divider />
+                  <div v-if="c.showSub">
+                    <v-list
+                      class="ml-16"
+                      v-for="(s, i) in c.subs"
+                      :key="i"
+                      nav
+                      dense
+                    >
+                      <div>
+                        <v-list-item two-line>
+                          <v-list-item-avatar class="clickable">
+                            <avatar :size="30" :user="s.authorProfile"></avatar>
+                          </v-list-item-avatar>
+
+                          <v-list-item-content>
+                            <v-list-item-title>{{
+                              s.authorProfile.name
+                            }}</v-list-item-title>
+                            <time-ago
+                              :refresh="60"
+                              :datetime="s.entity_info.updateTime"
+                              tooltip
+                              long
+                            ></time-ago>
+                          </v-list-item-content>
+                        </v-list-item>
+                        <v-list-item>
+                          <v-list-item-content
+                            >{{ s.content }}
+                          </v-list-item-content>
+                        </v-list-item>
+                      </div>
+                      <v-divider />
+                    </v-list>
+                  </div>
                 </div>
-              </div>
-            </v-list>
-            <v-skeleton-loader v-if="commentLoadingMore" type="card@3" />
-            <v-list v-if="!nomore">
-              <v-row justify="center" class="text-center">
-                <v-btn
-                  @click="loadMoreComments"
-                  class="ma-5"
-                  fab
-                  dark
-                  color="primary"
-                >
-                  <v-icon dark> mdi-plus </v-icon>
-                </v-btn></v-row
-              ></v-list
-            >
-            <v-list v-if="nomore && commentNum === 0">
-              <v-list-item>
-                <h1 class="ml-7">暂时没有评论</h1>
-              </v-list-item>
-            </v-list>
-          </v-navigation-drawer>
-        </div>
-      </v-col>
-    </v-row>
-  </v-container>
+              </v-list>
+              <v-skeleton-loader v-if="commentLoadingMore" type="card@3" />
+              <v-list v-if="!nomore">
+                <v-row justify="center" class="text-center">
+                  <v-btn
+                    @click="loadMoreComments"
+                    class="ma-5"
+                    fab
+                    dark
+                    color="primary"
+                  >
+                    <v-icon dark> mdi-plus </v-icon>
+                  </v-btn></v-row
+                ></v-list
+              >
+              <v-list v-if="nomore && commentNum === 0">
+                <v-list-item>
+                  <h1 class="ml-7">暂时没有评论</h1>
+                </v-list-item>
+              </v-list>
+            </v-navigation-drawer>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script lang="ts">

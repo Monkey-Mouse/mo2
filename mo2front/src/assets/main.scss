@@ -1,11 +1,5 @@
-/* Style the header: fixed position (always stay at the top) */
-.header {
-    position: fixed;
-    top: 0;
-    z-index: 1;
-    width: 100%;
-    background-color: #f1f1f1;
-}
+@import './sass/variables.scss';
+
 
 /* The progress container (grey background) */
 .progress-container {
@@ -21,7 +15,7 @@
 /* The progress bar (scroll indicator) */
 .progress-bar {
     height: 4px;
-    background: #303130;
+    background: var(--v-accent-base);
     position: absolute;
     width: 0%;
 }
@@ -30,22 +24,17 @@
     .progress-container {
         background: #000;
     }
-
-    .progress-bar {
-        background: rgb(214, 230, 240);
-    }
-
-    #toc {
-        li.active {
-            background-color: rgb(71, 76, 80);
-        }
-    }
 }
 
 // Table of content styles
 #toc {
     font-family: cursive;
     min-width: 150px;
+
+    div {
+        display: inline-block;
+        width: 85%;
+    }
 
     li.active+ul {
         max-height: 1000px;
@@ -69,9 +58,9 @@
     }
 
     li.active {
-        border-left: 2px solid rgb(102, 181, 226);
+        border-left: 2px solid var(--v-accent-base);
 
-        background-color: rgb(184, 222, 245);
+        background-color: var(--v-accent-lighten2);
 
         b {
             transform: rotate(-90deg);

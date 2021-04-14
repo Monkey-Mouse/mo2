@@ -163,7 +163,6 @@ export function GenerateTOC() {
     var i = 0;
     let first = true;
     const processFunc = function (str, openLevel, attrs, titleText, closeLevel) {
-        console.log(openLevel)
         if (openLevel != closeLevel) {
             return str;
         }
@@ -172,7 +171,7 @@ export function GenerateTOC() {
             if (!first) {
                 toc = toc.slice(0, toc.length - 9) + `
                 <b
-                    style="float: right;"
+                    style="float: right;display:inline-block"
                     class="v-icon notranslate v-icon--link mdi mdi-chevron-left"
                     onclick="this.parentElement.parentElement.className==='active'?this.parentElement.parentElement.className='':this.parentElement.parentElement.className='active';event.preventDefault()"
                 >
@@ -187,7 +186,7 @@ export function GenerateTOC() {
         level = parseInt(openLevel);
 
         var anchor = titleText.replace(/ /g, "_") + Date.now() + i++;
-        toc += "<li><a href=\"#" + anchor + "\">" + `${titleText}`
+        toc += "<li><a href=\"#" + anchor + "\">" + `<div>${titleText}</div>`
             + "</a></li>";
 
         return "<h" + (openLevel) + attrs + ` id="${anchor}" class="anchor h">`

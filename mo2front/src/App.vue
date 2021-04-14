@@ -465,7 +465,11 @@ export default class App extends Vue {
       // }, 500);
     });
     window.addEventListener("scroll", () => {
-      if (ReachedBottom()) {
+      if (
+        ReachedBottom() &&
+        (this.$refs["view"] as any) &&
+        (this.$refs["view"] as any).ReachedButtom
+      ) {
         try {
           (this.$refs["view"] as any).ReachedButtom();
         } catch (error) {
