@@ -42,7 +42,9 @@
     }
 }
 
+// Table of content styles
 #toc {
+    font-family: cursive;
     min-width: 150px;
 
     li.active+ul {
@@ -56,13 +58,9 @@
         ul {
             max-height: 0px;
             overflow: hidden;
-            transition: max-height 0.5s;
+            transition: all 0.2s;
         }
 
-        ul.active {
-            max-height: 1000px;
-            transition: max-height 1.0s;
-        }
     }
 
     li {
@@ -74,15 +72,19 @@
         border-left: 2px solid rgb(102, 181, 226);
 
         background-color: rgb(184, 222, 245);
+
+        b {
+            transform: rotate(-90deg);
+        }
     }
 
     a {
         display: block;
         width: 100%;
-        color: unset;
         margin-left: 5px;
         text-decoration: none;
     }
+
 
 }
 
@@ -343,7 +345,11 @@ code {
     }
 
     h3 {
-        font-size: 26px;
+        font-size: 30px;
+    }
+
+    h3 {
+        font-size: 25px;
     }
 
 

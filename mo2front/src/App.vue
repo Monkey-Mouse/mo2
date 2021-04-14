@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar id="appBarElm" color="primary" class="header" app>
+    <v-app-bar id="appBarElm" color="primary" app>
       <div class="d-flex align-center">
         <v-img
           @click="$router.push('/')"

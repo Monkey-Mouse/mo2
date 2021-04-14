@@ -1,13 +1,18 @@
 <template>
   <v-container>
     <aside style="position: fixed" class="mt-16">
-      <div v-show="!$vuetify.breakpoint.mobile" style="max-width: 200px">
-        <a @click="scrollToTop" style="text-decoration: none">{{ title }}</a
-        ><v-divider />
+      <div
+        class="has-icons-right"
+        v-show="!$vuetify.breakpoint.mobile"
+        style="max-width: 200px"
+      >
+        <!-- <a @click="scrollToTop" style="text-decoration: none">{{ title }}</a
+        ><v-icon style="float: right">mdi-format-list-bulleted</v-icon
+        ><v-divider /> -->
         <div id="toc"></div>
       </div>
     </aside>
-    <v-row justify="center">
+    <v-row id="mo2blog" justify="center">
       <v-col cols="12" lg="7" class="mo2editor">
         <v-skeleton-loader
           v-if="loading"
@@ -15,7 +20,7 @@
           type="heading, list-item-avatar, paragraph@9"
         ></v-skeleton-loader>
         <div v-if="!loading">
-          <div class="mo2title text-break">
+          <div id="titleContainer" class="mo2title text-break has-icons-right">
             <h1 id="title">{{ title }}</h1>
           </div>
           <v-row v-if="authorLoad" class="mb-6">
@@ -386,9 +391,11 @@ export default class ReadArticle extends Vue {
         GetBlogLikeNum(this.blog.id).then((num) => {
           this.praiseNum = num.num;
         });
-        IsBlogLiked(this.blog.id).then((l) => {
-          this.liked = l.liked;
-        });
+        if (this.isUser) {
+          IsBlogLiked(this.blog.id).then((l) => {
+            this.liked = l.liked;
+          });
+        }
         setTimeout(() => {
           GenerateTOC();
           // first, find all the code blocks
