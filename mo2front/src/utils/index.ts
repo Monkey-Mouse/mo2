@@ -8,6 +8,25 @@ import { GetUploadToken, UpdateUserInfo } from './api';
 export * from './api'
 export * from './autoloader'
 export * from './lazy-executor'
+export function ElementInViewport(el: HTMLElement) {
+    var top = el.offsetTop;
+    var left = el.offsetLeft;
+    var width = el.offsetWidth;
+    var height = el.offsetHeight;
+
+    while (el.offsetParent) {
+        el = el.offsetParent as HTMLElement;
+        top += el.offsetTop;
+        left += el.offsetLeft;
+    }
+
+    return (
+        top < (window.pageYOffset + window.innerHeight) &&
+        left < (window.pageXOffset + window.innerWidth) &&
+        (top + height) > window.pageYOffset &&
+        (left + width) > window.pageXOffset
+    );
+}
 
 export function randomProperty(obj: any) {
     const keys = Object.keys(obj);
@@ -142,35 +161,90 @@ export function GenerateTOC() {
     var toc = "";
     var level = 0;
     var i = 0;
+    let first = true;
+    const processFunc = function (str, openLevel, attrs, titleText, closeLevel) {
+        console.log(openLevel)
+        if (openLevel != closeLevel) {
+            return str;
+        }
+        // openLevel -= 1;
+        if (openLevel > level) {
+            if (!first) {
+                toc = toc.slice(0, toc.length - 9) + `
+                <b
+                    style="float: right;"
+                    class="v-icon notranslate v-icon--link mdi mdi-chevron-left"
+                    onclick="this.parentElement.parentElement.className==='active'?this.parentElement.parentElement.className='':this.parentElement.parentElement.className='active';event.preventDefault()"
+                >
+                </b>` + toc.slice(toc.length - 9)
+            } else first = false;
 
+            toc += (new Array(openLevel - level + 1)).join("<ul>");
+        } else if (openLevel < level) {
+            toc += (new Array(level - openLevel + 1)).join("</ul>");
+        }
+
+        level = parseInt(openLevel);
+
+        var anchor = titleText.replace(/ /g, "_") + Date.now() + i++;
+        toc += "<li><a href=\"#" + anchor + "\">" + `${titleText}`
+            + "</a></li>";
+
+        return "<h" + (openLevel) + attrs + ` id="${anchor}" class="anchor h">`
+            + titleText + "</h" + closeLevel + ">";
+    }
+    document.getElementById("titleContainer").innerHTML =
+        document.getElementById("titleContainer").innerHTML.replace(
+            /<h([\d])([^>]*)>([^<]+)<\/h([\d])>/gi,
+            processFunc
+        );
     document.getElementById("contents").innerHTML =
         document.getElementById("contents").innerHTML.replace(
-            /<h([\d])>([^<]+)<\/h([\d])>/gi,
-            function (str, openLevel, titleText, closeLevel) {
-                if (openLevel != closeLevel) {
-                    return str;
-                }
-                openLevel -= 1;
-                if (openLevel > level) {
-                    toc += (new Array(openLevel - level + 1)).join("<ul>");
-                } else if (openLevel < level) {
-                    toc += (new Array(level - openLevel + 1)).join("</ul>");
-                }
-
-                level = parseInt(openLevel);
-
-                var anchor = titleText.replace(/ /g, "_") + Date.now() + i++;
-                toc += "<li><a href=\"#" + anchor + "\">" + titleText
-                    + "</a></li>";
-
-                return "<h" + (openLevel + 1) + ` id="${anchor}" class="anchor">`
-                    + titleText + "</h" + closeLevel + ">";
-            }
+            /<h([\d])([^>]*)>([^<]+)<\/h([\d])>/gi,
+            processFunc
         );
 
     if (level) {
         toc += (new Array(level + 1)).join("</ul>");
     }
+    const tocE = document.getElementById("toc");
+    tocE.innerHTML += toc;
+    let prevNode: Element = null;
+    let prev: Element = null;
+    setTimeout(() => {
+        const hs = document.getElementsByClassName('h')
+        window.addEventListener('scroll', () => {
+            for (const i of hs) {
+                if (ElementInViewport(i as HTMLElement)) {
+                    if (prev === i) {
+                        return;
+                    }
+                    prev = i;
+                    if (prevNode) {
+                        prevNode.className = '';
+                    }
+                    const ae = tocE.querySelector('a[href="#' + i.id + '"]')
+                    if (!ae) {
+                        return;
+                    }
+                    const node = ae.parentElement
+                    node.classList.add('active')
+                    if (node.previousElementSibling && node.previousElementSibling.previousElementSibling) {
+                        node.previousElementSibling.className = '';
+                        node.previousElementSibling.previousElementSibling.className = '';
+                    }
+                    prevNode = node;
+                    let n = node;
+                    while (n.parentElement && n.parentElement.tagName === 'UL') {
+                        n = n.parentElement;
+                        if (n.previousElementSibling) {
 
-    document.getElementById("toc").innerHTML += toc;
+                            n.previousElementSibling.className = 'active';
+                        }
+                    }
+                    break;
+                }
+            }
+        })
+    }, 100);
 };

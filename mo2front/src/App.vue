@@ -105,13 +105,16 @@
           }
         "
       ></v-app-bar-nav-icon>
-      <v-progress-linear
-        :active="pos !== 0"
-        :value="pos"
+      <!-- <v-progress-linear
+        :active="true"
+        :value="10"
         absolute
         bottom
         color="black white"
-      ></v-progress-linear>
+      ></v-progress-linear> -->
+      <div class="progress-container">
+        <div class="progress-bar" id="myBar"></div>
+      </div>
     </v-app-bar>
     <v-navigation-drawer
       right
@@ -315,7 +318,6 @@ export default class App extends Vue {
   refresh = false;
   prompts: BlogBrief[] = [];
   searchLoader: LazyExecutor = new LazyExecutor(null, 200);
-  pos = 0;
 
   prompt = false;
   pmsg = "";
@@ -430,18 +432,8 @@ export default class App extends Vue {
     (this.$refs["view"] as any).publish();
   }
   created() {
-    window.addEventListener("scroll", () => {
-      const h = document.documentElement,
-        b = document.body,
-        st = "scrollTop",
-        sh = "scrollHeight";
-      this.pos = ((h[st] || b[st]) / ((h[sh] || b[sh]) - h.clientHeight)) * 100;
-    });
     SetApp(this);
     document.title = "Mo2";
-    this.$router.afterEach(() => {
-      this.pos = 0;
-    });
     GetUserInfoAsync().then((u) => {
       this.user = u;
       this.userload = true;
@@ -501,6 +493,22 @@ export default class App extends Vue {
   }
   mounted() {
     this.onResize();
+    const bar = document.getElementById("myBar");
+    window.addEventListener("scroll", () => {
+      const winScroll =
+        document.body.scrollTop || document.documentElement.scrollTop;
+      const height =
+        document.documentElement.scrollHeight -
+        document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      if (scrolled < 1) {
+        bar.parentElement.style.display = "none";
+        return;
+      } else {
+        bar.parentElement.style.display = "block";
+      }
+      bar.style.width = scrolled + "%";
+    });
   }
   showLogin() {
     this.drawer = false;

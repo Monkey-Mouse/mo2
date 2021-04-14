@@ -154,14 +154,6 @@
           >
             <button
               class="menubar__button"
-              :class="{ 'is-active': isActive.heading({ level: 1 }) }"
-              @click="commands.heading({ level: 1 })"
-            >
-              <v-icon>mdi-format-header-1</v-icon>
-            </button>
-
-            <button
-              class="menubar__button"
               :class="{ 'is-active': isActive.heading({ level: 2 }) }"
               @click="commands.heading({ level: 2 })"
             >
@@ -174,6 +166,14 @@
               @click="commands.heading({ level: 3 })"
             >
               <v-icon>mdi-format-header-3</v-icon>
+            </button>
+
+            <button
+              class="menubar__button"
+              :class="{ 'is-active': isActive.heading({ level: 4 }) }"
+              @click="commands.heading({ level: 4 })"
+            >
+              <v-icon>mdi-format-header-4</v-icon>
             </button>
 
             <button
@@ -498,7 +498,7 @@ export default class MO2Editor extends Vue {
       new Blockquote(),
       new CodeBlock(),
       new HardBreak(),
-      new Heading({ levels: [1, 2, 3] }),
+      new Heading({ levels: [2, 3, 4] }),
       new BulletList(),
       new OrderedList(),
       new ListItem(),

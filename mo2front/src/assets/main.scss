@@ -1,3 +1,94 @@
+/* Style the header: fixed position (always stay at the top) */
+.header {
+    position: fixed;
+    top: 0;
+    z-index: 1;
+    width: 100%;
+    background-color: #f1f1f1;
+}
+
+/* The progress container (grey background) */
+.progress-container {
+    display: none;
+    width: 100%;
+    background: #ccc;
+    position: absolute;
+    bottom: 0px;
+    height: 4px;
+    left: 0px;
+}
+
+/* The progress bar (scroll indicator) */
+.progress-bar {
+    height: 4px;
+    background: #303130;
+    position: absolute;
+    width: 0%;
+}
+
+.theme--dark {
+    .progress-container {
+        background: #000;
+    }
+
+    .progress-bar {
+        background: rgb(214, 230, 240);
+    }
+
+    #toc {
+        li.active {
+            background-color: rgb(71, 76, 80);
+        }
+    }
+}
+
+// Table of content styles
+#toc {
+    font-family: cursive;
+    min-width: 150px;
+
+    li.active+ul {
+        max-height: 1000px;
+        transition: max-height 1.0s;
+    }
+
+    ul {
+        padding-left: 6px;
+
+        ul {
+            max-height: 0px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+    }
+
+    li {
+        list-style: none;
+        border-left: 2px solid #e5e5e5;
+    }
+
+    li.active {
+        border-left: 2px solid rgb(102, 181, 226);
+
+        background-color: rgb(184, 222, 245);
+
+        b {
+            transform: rotate(-90deg);
+        }
+    }
+
+    a {
+        display: inline-block;
+        width: 100%;
+        color: unset;
+        margin-left: 5px;
+        text-decoration: none;
+    }
+
+
+}
+
 .container-emoji {
     max-height: 200px !important;
 }
@@ -255,7 +346,11 @@ code {
     }
 
     h3 {
-        font-size: 26px;
+        font-size: 30px;
+    }
+
+    h3 {
+        font-size: 25px;
     }
 
 
