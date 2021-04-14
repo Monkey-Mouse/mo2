@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1618372417143,
+  "lastUpdate": 1618380101972,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -3990,6 +3990,60 @@ window.BENCHMARK_DATA = {
             "value": 1378,
             "unit": "ns/op",
             "extra": "888598 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "47478961+easilylazy@users.noreply.github.com",
+            "name": "leezeeyee",
+            "username": "easilylazy"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "75a3ad604c069936d1930fdf1f6646ad40cea2a9",
+          "message": "Merge pull request #268 from Monkey-Mouse/Chronostasys/issue266\n\nfix #266",
+          "timestamp": "2021-04-14T14:00:02+08:00",
+          "tree_id": "22caec2dc4198a6fced96c0e2746dfc8c1dfe6b9",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/75a3ad604c069936d1930fdf1f6646ad40cea2a9"
+        },
+        "date": 1618380101396,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7603259,
+            "unit": "ns/op",
+            "extra": "146 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 416847,
+            "unit": "ns/op",
+            "extra": "3024 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1205,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 93843,
+            "unit": "ns/op",
+            "extra": "13434 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1076,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
           }
         ]
       }
