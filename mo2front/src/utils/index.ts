@@ -187,7 +187,7 @@ export function GenerateTOC() {
         level = parseInt(openLevel);
 
         var anchor = titleText.replace(/ /g, "_") + Date.now() + i++;
-        toc += "<li><a href=\"#" + anchor + "\">" + titleText
+        toc += "<li><a href=\"#" + anchor + "\">" + `${titleText}`
             + "</a></li>";
 
         return "<h" + (openLevel) + attrs + ` id="${anchor}" class="anchor h">`
