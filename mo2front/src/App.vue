@@ -439,6 +439,7 @@ export default class App extends Vue {
       this.userload = true;
       this.items[1].show = this.isUser;
       this.items[2].show = this.isUser;
+      (window as any).loading_screen.finish();
     });
     try {
       this.$vuetify.theme.dark = JSON.parse(
