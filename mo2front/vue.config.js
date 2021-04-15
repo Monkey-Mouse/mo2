@@ -19,7 +19,17 @@ module.exports = {
     },
     workboxOptions: {
       skipWaiting: true,
-      navigateFallback: 'index.html'
+      runtimeCaching: [{
+        urlPattern: new RegExp('^https://www.motwo.cn/api/'),
+        handler: 'networkFirst',
+        options: {
+          networkTimeoutSeconds: 20,
+          cacheName: 'api-cache',
+          cacheableResponse: {
+            statuses: [0, 299],
+          },
+        },
+      }]
     }
   },
   transpileDependencies: [
