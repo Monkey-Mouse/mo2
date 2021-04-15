@@ -23,11 +23,8 @@ module.exports = {
         urlPattern: new RegExp('^https://www.motwo.cn/api/'),
         handler: 'networkFirst',
         options: {
-          networkTimeoutSeconds: 20,
+          networkTimeoutSeconds: 1,
           cacheName: 'api-cache',
-          cacheableResponse: {
-            statuses: [0, 299],
-          },
         },
       }]
     }
