@@ -18,7 +18,8 @@ module.exports = {
       display: "standalone",
     },
     workboxOptions: {
-      skipWaiting: true
+      skipWaiting: true,
+      navigateFallback: 'index.html'
     }
   },
   transpileDependencies: [
