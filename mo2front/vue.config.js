@@ -20,13 +20,14 @@ module.exports = {
     workboxOptions: {
       skipWaiting: true,
       runtimeCaching: [{
-        urlPattern: new RegExp('^https://www.motwo.cn/api/'),
+        urlPattern: new RegExp('^https://www.motwo.cn'),
         handler: 'networkFirst',
         options: {
           networkTimeoutSeconds: 1,
-          cacheName: 'api-cache',
+          cacheName: 'request-cache',
         },
-      }]
+      }],
+
     }
   },
   transpileDependencies: [
