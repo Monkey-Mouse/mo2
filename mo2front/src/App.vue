@@ -182,6 +182,15 @@
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item v-if="showInstall" @click="install">
+          <v-list-item-icon>
+            <v-icon>mdi-download-circle</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>Install</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
       <template v-slot:append>
         <v-list-item>
@@ -270,6 +279,7 @@
         >冀ICP备20007570号-2</a
       >
     </v-footer>
+    <pwa-install></pwa-install>
   </v-app>
 </template>
 
@@ -296,6 +306,7 @@ import Avatar from "./components/UserAvatar.vue";
 import { Watch } from "vue-property-decorator";
 import "vue2-timeago/dist/vue2-timeago.css";
 import { VuetifyThemeVariant } from "vuetify/types/services/theme";
+import "@pwabuilder/pwainstall";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 
@@ -320,6 +331,14 @@ export default class App extends Vue {
   prompt = false;
   pmsg = "";
   ptimeout = 5000;
+  showInstall = false;
+  get installComponent(): any {
+    return document?.querySelector("pwa-install");
+  }
+  install() {
+    this.installComponent.manifestpath = "/manifest.json";
+    this.installComponent.openPrompt();
+  }
   Prompt(msg: string, timeout: number) {
     this.pmsg = msg;
     this.ptimeout = timeout;
@@ -512,6 +531,11 @@ export default class App extends Vue {
       }
       bar.style.width = scrolled + "%";
     });
+    setTimeout(() => {
+      if (!localStorage.getItem("install")) this.install();
+      localStorage.setItem("install", "prompted");
+      this.showInstall = !this.installComponent.getInstalledStatus();
+    }, 2000);
   }
   showLogin() {
     this.drawer = false;

@@ -5,17 +5,74 @@ module.exports = {
   // },
   pwa: {
     iconPaths: {
-      favicon32: 'img/icons/favicon-32x32.png',
-      favicon16: 'img/icons/favicon-16x16.png',
-      appleTouchIcon: 'img/icons/tile150x150.png',
-      maskIcon: 'img/icons/tile150x150.png',
-      msTileImage: 'img/icons/tile150x150.png',
+      favicon32: 'https://cdn.mo2.leezeeyee.com/dist/img/icons/favicon-32x32.png',
+      favicon16: 'https://cdn.mo2.leezeeyee.com/dist/img/icons/favicon-16x16.png',
+      appleTouchIcon: 'https://cdn.mo2.leezeeyee.com/dist/img/icons/tile150x150.png',
+      maskIcon: 'https://cdn.mo2.leezeeyee.com/dist/img/icons/tile150x150.png',
+      msTileImage: 'https://cdn.mo2.leezeeyee.com/dist/img/icons/tile150x150.png',
     },
     manifestOptions: {
       name: "Mo2",
       short_name: "Mo2",
       start_url: "https://www.motwo.cn",
       display: "standalone",
+      description: "超好用又好看的博客软件。速度快，应用小。安装它只需要不到一秒钟的时间。",
+      features: [
+        "Cross Platform",
+        "Fast",
+        "Small",
+        "Mordern Rich Text Editor"
+      ],
+      "icons": [{
+        "src": "https://cdn.mo2.leezeeyee.com/dist/img/icons/android-chrome-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }, {
+        "src": "https://cdn.mo2.leezeeyee.com/dist/img/icons/android-chrome-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }, {
+        "src": "https://cdn.mo2.leezeeyee.com/dist/img/icons/android-chrome-maskable-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "maskable"
+      }, {
+        "src": "https://cdn.mo2.leezeeyee.com/dist/img/icons/android-chrome-maskable-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }],
+      screenshots: [{
+          src: "https://cdn.mo2.leezeeyee.com/mobile.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn.mo2.leezeeyee.com/home.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn.mo2.leezeeyee.com/home-dark.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn.mo2.leezeeyee.com/customize.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn.mo2.leezeeyee.com/editor.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn.mo2.leezeeyee.com/user-home.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+      ],
     },
     workboxOptions: {
       skipWaiting: true,

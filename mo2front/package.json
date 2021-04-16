@@ -9,6 +9,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@pwabuilder/pwainstall": "^1.6.7",
     "@types/sanitize-html": "^1.27.1",
     "@types/vuelidate": "^0.7.13",
     "axios": "^0.21.1",
