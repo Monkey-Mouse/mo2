@@ -27,6 +27,12 @@ module.exports = {
           networkTimeoutSeconds: 1,
           cacheName: 'api-cache',
         },
+      }, {
+        urlPattern: new RegExp(".*\\.(jpg|png|tif|ico|txt|css)$"),
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'static-cache',
+        },
       }],
 
     }
