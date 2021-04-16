@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1618549794773,
+  "lastUpdate": 1618550710680,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -4914,6 +4914,60 @@ window.BENCHMARK_DATA = {
             "value": 1014,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "9941001d33f4f0fd4c8121dcfa252ff241a972dc",
+          "message": "✅ [enhance]add static asset cache",
+          "timestamp": "2021-04-16T13:23:08+08:00",
+          "tree_id": "35116182ea0b29c0532abbaeb66a463123a77a08",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/9941001d33f4f0fd4c8121dcfa252ff241a972dc"
+        },
+        "date": 1618550709592,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 9661768,
+            "unit": "ns/op",
+            "extra": "116 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 492548,
+            "unit": "ns/op",
+            "extra": "2740 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1427,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 146823,
+            "unit": "ns/op",
+            "extra": "7879 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1207,
+            "unit": "ns/op",
+            "extra": "960962 times\n2 procs"
           }
         ]
       }
