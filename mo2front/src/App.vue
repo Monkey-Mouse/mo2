@@ -290,8 +290,6 @@ import {
   SetApp,
   SetTheme,
   SetThemeColors,
-  ShowRefresh,
-  SlowExecutor,
   UserRole,
 } from "./utils";
 import Avatar from "./components/UserAvatar.vue";

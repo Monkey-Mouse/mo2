@@ -21,7 +21,7 @@ module.exports = {
       skipWaiting: true,
       runtimeCaching: [{
         urlPattern: new RegExp('^https://www.motwo.cn'),
-        handler: 'networkFirst',
+        handler: 'NetworkFirst',
         options: {
           networkTimeoutSeconds: 1,
           cacheName: 'request-cache',
@@ -89,6 +89,7 @@ module.exports = {
     optimization: {
       splitChunks: {
         minSize: 10000,
+        maxSize: 249856,
       }
     }
   }

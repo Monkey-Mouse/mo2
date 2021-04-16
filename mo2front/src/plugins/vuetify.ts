@@ -1,12 +1,7 @@
 import Vue from 'vue';
-import { colors } from 'vuetify/lib';
-import Vuetify from 'vuetify/lib/framework';
+import Vuetify from 'vuetify/lib'
 
-Vue.use(Vuetify, {
-    options: {
-        customProperties: true
-    }
-});
+Vue.use(Vuetify);
 export default new Vuetify({
     theme: {
         options: {
