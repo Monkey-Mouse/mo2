@@ -19,12 +19,13 @@ module.exports = {
     },
     workboxOptions: {
       skipWaiting: true,
+      navigateFallback: 'https://cdn.mo2.leezeeyee.com/dist/index.html',
       runtimeCaching: [{
-        urlPattern: new RegExp('^https://www.motwo.cn'),
+        urlPattern: new RegExp('^https://www.motwo.cn/api/'),
         handler: 'NetworkFirst',
         options: {
           networkTimeoutSeconds: 1,
-          cacheName: 'request-cache',
+          cacheName: 'api-cache',
         },
       }],
 
