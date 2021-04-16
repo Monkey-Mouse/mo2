@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1618539241924,
+  "lastUpdate": 1618541441967,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -4752,6 +4752,60 @@ window.BENCHMARK_DATA = {
             "value": 1314,
             "unit": "ns/op",
             "extra": "876052 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "c716efdb99c4b14b22946ba8fb163bd78768a3f0",
+          "message": "👌  [enhance] lower font size",
+          "timestamp": "2021-04-16T10:48:41+08:00",
+          "tree_id": "18d1a77b9f50fdb671d93532f15d542eea0b0f02",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/c716efdb99c4b14b22946ba8fb163bd78768a3f0"
+        },
+        "date": 1618541441285,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 8487038,
+            "unit": "ns/op",
+            "extra": "127 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 473471,
+            "unit": "ns/op",
+            "extra": "2870 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1398,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 117542,
+            "unit": "ns/op",
+            "extra": "9352 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1312,
+            "unit": "ns/op",
+            "extra": "901683 times\n2 procs"
           }
         ]
       }
