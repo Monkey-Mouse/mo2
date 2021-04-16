@@ -18,7 +18,16 @@ module.exports = {
       display: "standalone",
     },
     workboxOptions: {
-      skipWaiting: true
+      skipWaiting: true,
+      runtimeCaching: [{
+        urlPattern: new RegExp('^https://www.motwo.cn'),
+        handler: 'networkFirst',
+        options: {
+          networkTimeoutSeconds: 1,
+          cacheName: 'request-cache',
+        },
+      }],
+
     }
   },
   transpileDependencies: [

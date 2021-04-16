@@ -1,7 +1,18 @@
 /* eslint-disable no-console */
 
+import axios from 'axios';
 import { register } from 'register-service-worker'
-import { ShowRefresh } from './utils'
+import { Prompt, ShowRefresh } from './utils'
+
+let offlinePrompt = false;
+
+axios.interceptors.request.use((c) => {
+  if (!offlinePrompt && !navigator.onLine) {
+    Prompt('Oops, seems you are offline. We are now trying to serve you cached contents.', 50000);
+    offlinePrompt = true;
+  }
+  return c;
+})
 
 if (process.env.NODE_ENV === 'production') {
   register(`https://www.motwo.cn/service-worker.js`, {
