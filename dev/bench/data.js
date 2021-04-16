@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1618542985576,
+  "lastUpdate": 1618549794773,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -4860,6 +4860,60 @@ window.BENCHMARK_DATA = {
             "value": 1222,
             "unit": "ns/op",
             "extra": "954351 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "275fe4fb91b5cc6b5306dccb242eccca5ac90bab",
+          "message": "✨ [enhance] add navigation fallback",
+          "timestamp": "2021-04-16T13:08:08+08:00",
+          "tree_id": "3635701a4822f7e616cbc3b7620a432e8a0e8405",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/275fe4fb91b5cc6b5306dccb242eccca5ac90bab"
+        },
+        "date": 1618549794232,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 6751776,
+            "unit": "ns/op",
+            "extra": "153 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 390233,
+            "unit": "ns/op",
+            "extra": "3350 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1083,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 82828,
+            "unit": "ns/op",
+            "extra": "14660 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1014,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
           }
         ]
       }
