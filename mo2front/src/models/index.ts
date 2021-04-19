@@ -1,9 +1,9 @@
 export interface BlogBrief {
     id: string;
     title: string;
-    cover: string;
-    rate: number;
-    description: string;
+    cover?: string;
+    rate?: number;
+    description?: string;
     entityInfo: EntityInfo;
     authorId: string;
 }
@@ -31,9 +31,18 @@ export interface DisplayBlogBrief extends BlogBrief {
 export interface Blog extends BlogBrief {
     content: string;
 }
+export const BlankBlog: Blog = {
+    title: "",
+    content: "",
+    id: "",
+    cover: '',
+    entityInfo: {},
+    authorId: ''
+}
 export interface EntityInfo {
     createTime?: string;
     updateTime?: string;
+    is_deleted?: boolean;
 }
 export interface BlogUpsert {
     id?: string;

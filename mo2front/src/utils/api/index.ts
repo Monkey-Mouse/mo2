@@ -71,7 +71,7 @@ export function UpSertBlogSync(query: { draft: boolean }, blog: BlogUpsert) {
 export async function GetArticle(query: { id: string; draft: boolean }) {
     return (await axios.get<Blog>('/api/blogs/find/id' + ParseQuery(query))).data
 }
-export const GetOwnArticles = async (query: { page: number; pageSize: number; draft: boolean }) => {
+export const GetOwnArticles = async (query: { page: number; pageSize: number; draft: boolean, deleted?: boolean }) => {
     return (await axios.get<BlogBrief[]>('/api/blogs/find/own' + ParseQuery(query))).data
 }
 
@@ -130,4 +130,7 @@ export async function GetNotifications(query: { page: number, pagesize: number }
 }
 export async function RecycleBlog(id: string, query: { draft: boolean }) {
     axios.put('/api/blogs/recycle/' + id + ParseQuery(query))
+}
+export async function RestoreBlog(id: string, query: { draft: boolean }) {
+    axios.put('/api/blogs/restore/' + id + ParseQuery(query))
 }

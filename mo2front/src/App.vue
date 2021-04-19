@@ -395,6 +395,12 @@ export default class App extends Vue {
       href: "/edit",
       show: this.isUser,
     },
+    {
+      title: "Recycle Bin",
+      icon: "mdi-delete",
+      href: "/recycle",
+      show: this.isUser,
+    },
     { title: "About", icon: "mdi-alpha-a-circle", href: "/about", show: true },
   ];
   get isUser() {
@@ -402,6 +408,7 @@ export default class App extends Vue {
   }
   @Watch("user")
   userChange() {
+    this.items[3].show = this.isUser;
     this.items[2].show = this.isUser;
     this.items[1].show = this.isUser;
     try {
@@ -439,8 +446,6 @@ export default class App extends Vue {
     Logout().then(() => {
       GetUserInfoAsync().then((u) => {
         this.user = u;
-        this.items[1].show = this.isUser;
-        this.items[2].show = this.isUser;
         this.snackbar = true;
       });
     });
@@ -454,8 +459,6 @@ export default class App extends Vue {
     GetUserInfoAsync().then((u) => {
       this.user = u;
       this.userload = true;
-      this.items[1].show = this.isUser;
-      this.items[2].show = this.isUser;
       (window as any).loading_screen.finish();
     });
     try {

@@ -5,7 +5,7 @@
 .progress-container {
     display: none;
     width: 100%;
-    background: #ccc;
+    background: var(--v-accent-base);
     position: absolute;
     bottom: 0px;
     height: 4px;
@@ -15,15 +15,9 @@
 /* The progress bar (scroll indicator) */
 .progress-bar {
     height: 4px;
-    background: var(--v-accent-base);
+    background: var(--v-secondary-base);
     position: absolute;
     width: 0%;
-}
-
-.theme--dark {
-    .progress-container {
-        background: #000;
-    }
 }
 
 // Table of content styles
