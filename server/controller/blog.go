@@ -153,10 +153,11 @@ func (c *Controller) ProcessBlog(ctx *gin.Context) {
 				Subject:  "account",
 				Action:   abac.ActionUpdate,
 				Resource: "blog",
-				Context:  abac.DefaultContext{"allowOwn": accessControl.AllowOwn{ID: id, Filter: model.Filter{IsDraft: isDraft}, UserInfo: info}},
+				Context:  abac.DefaultContext{"allowOwn": accessControl.AllowOwn{ID: id, Filter: model.Filter{IsDraft: isDraft}, UserInfo: info, Resource: "blog"}},
 			})
 			if err != nil {
 				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(err))
+				return
 			}
 
 		} else {
@@ -167,11 +168,14 @@ func (c *Controller) ProcessBlog(ctx *gin.Context) {
 	if pass {
 		if mErr := database.ProcessBlog(isDraft, &blog, ctx.Param(database.OperationKey)); mErr.IsError() {
 			ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
+			return
 		} else {
 			if mErr = database.UpsertBlog(&blog, isDraft); mErr.IsError() {
 				ctx.AbortWithStatusJSON(http.StatusConflict, badresponse.SetResponseError(mErr))
+				return
 			} else {
 				ctx.Status(http.StatusAccepted)
+				return
 			}
 		}
 		return
