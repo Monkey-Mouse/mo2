@@ -42,17 +42,44 @@
                 </template>
                 <span>This is a draft</span>
               </v-tooltip>
-              <v-btn @click="edit" v-if="user.id === blog.authorId" plain small>
-                <v-icon>mdi-file-document-edit</v-icon>
-              </v-btn>
-              <v-btn
-                @click="deleteArticle"
-                v-if="user.id === blog.authorId"
-                plain
-                small
-              >
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
+              <div v-if="user.id === blog.authorId">
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn plain small v-bind="attrs" v-on="on" @click="edit">
+                      <v-icon>mdi-file-document-edit</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Edit</span>
+                </v-tooltip>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      @click="deleteArticle"
+                      plain
+                      small
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Delete</span>
+                </v-tooltip>
+                <v-tooltip v-if="blog.entityInfo.is_deleted" bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      @click="restoreArticle"
+                      plain
+                      small
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      <v-icon>mdi-delete-restore</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Restore</span>
+                </v-tooltip>
+              </div>
             </v-row>
             <v-row v-else class="mb-6">
               <v-skeleton-loader
@@ -277,6 +304,8 @@ import {
   InitLoader,
   IsBlogLiked,
   Prompt,
+  RecycleBlog,
+  RestoreBlog,
   ShareToQQ,
   ShowLogin,
   ToggleLikeBlog,
@@ -285,7 +314,7 @@ import {
   UserRole,
 } from "@/utils";
 import hljs from "highlight.js";
-import { Blog, User, Comment, UserListData } from "@/models";
+import { Blog, User, Comment, UserListData, BlankBlog } from "@/models";
 import Avatar from "@/components/UserAvatar.vue";
 import { Prop, Watch } from "vue-property-decorator";
 import { TimeAgo } from "vue2-timeago";
@@ -311,7 +340,7 @@ export default class ReadArticle extends Vue {
     elevation: 0,
   };
   loading = true;
-  blog: Blog;
+  blog: Blog = BlankBlog;
   author: User;
   authorLoad = false;
   showDelete = false;
@@ -332,7 +361,26 @@ export default class ReadArticle extends Vue {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
   get deleteContent() {
-    return '你确定要删除"' + this.title + '"吗？';
+    return (
+      "你确定要删除" +
+      (this.draft ? "草稿" : "") +
+      '"' +
+      this.title +
+      '"吗？' +
+      (this.blog.entityInfo.is_deleted || this.draft
+        ? "此文章将被彻底删除，这个操作不能被撤销"
+        : "删除后此文章将保存在垃圾箱里24小时")
+    );
+  }
+  restoreArticle() {
+    RestoreBlog(this.blog.id, { draft: this.draft })
+      .then(() => {
+        this.blog.entityInfo.is_deleted = false;
+        Prompt("成功恢复文章！", 10000);
+      })
+      .catch((err) => {
+        Prompt(GetErrorMsg(err), 10000);
+      });
   }
   scrollToTop() {
     window.scrollTo(0, 0);
@@ -488,12 +536,16 @@ export default class ReadArticle extends Vue {
     this.showDelete = true;
   }
   confirmDelete() {
-    DeleteArticle(this.blog.id, { draft: this.draft })
+    let delFunc = RecycleBlog;
+    if (this.blog.entityInfo.is_deleted || this.draft) {
+      delFunc = DeleteArticle;
+    }
+    delFunc(this.blog.id, { draft: this.draft })
       .then(() => {
-        this.$router.back();
+        Prompt("成功删除文章！", 10000);
       })
       .catch((err) => {
-        alert(GetErrorMsg(err));
+        Prompt(GetErrorMsg(err), 10000);
       });
   }
 }
