@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1618844554978,
+  "lastUpdate": 1618923932820,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -5228,6 +5228,60 @@ window.BENCHMARK_DATA = {
           {
             "name": "Benchmark_checkRL",
             "value": 1302,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49905799+Chronostasys@users.noreply.github.com",
+            "name": "Boxiu Lee",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "704f1c2c1d1e4e8e1f91d978b6e557f923eb7570",
+          "message": "Merge pull request #232 from Monkey-Mouse/snyk-upgrade-a00f0ad6a06d2f2151d2c1b4492208f8\n\n[Snyk] Upgrade @types/vuelidate from 0.7.13 to 0.7.14",
+          "timestamp": "2021-04-20T21:03:49+08:00",
+          "tree_id": "d5190dffbf869328145d53391cc1e43f341f4a67",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/704f1c2c1d1e4e8e1f91d978b6e557f923eb7570"
+        },
+        "date": 1618923931794,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10039233,
+            "unit": "ns/op",
+            "extra": "100 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 424688,
+            "unit": "ns/op",
+            "extra": "2876 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1205,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 97307,
+            "unit": "ns/op",
+            "extra": "12190 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1170,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
           }
