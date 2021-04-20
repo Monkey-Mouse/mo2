@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1618923932820,
+  "lastUpdate": 1618923965586,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -5284,6 +5284,60 @@ window.BENCHMARK_DATA = {
             "value": 1170,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49905799+Chronostasys@users.noreply.github.com",
+            "name": "Boxiu Lee",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "3722b1458c3690a390e153aebaa8717a34dbb280",
+          "message": "Merge pull request #233 from Monkey-Mouse/snyk-upgrade-8790ffc6723bbb9dcb63ef16aa38e959\n\n[Snyk] Upgrade vuetify from 2.4.5 to 2.4.6",
+          "timestamp": "2021-04-20T21:04:09+08:00",
+          "tree_id": "19653b470c5a55ccd4b9d55bbe1b0cb2bb4ab678",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/3722b1458c3690a390e153aebaa8717a34dbb280"
+        },
+        "date": 1618923963158,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 8338658,
+            "unit": "ns/op",
+            "extra": "133 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 486658,
+            "unit": "ns/op",
+            "extra": "2782 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1440,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 120211,
+            "unit": "ns/op",
+            "extra": "8896 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1316,
+            "unit": "ns/op",
+            "extra": "908245 times\n2 procs"
           }
         ]
       }
