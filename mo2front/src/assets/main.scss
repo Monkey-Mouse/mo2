@@ -956,9 +956,26 @@ $color-grey: #dddddd;
     width: 100%;
 }
 
-*.is-empty:nth-child(1)::before,
-*.is-empty:nth-child(2)::before {
-    content: attr(data-empty-text);
+*.is-empty:nth-child(1)::before {
+    content: "Write sth here";
+    float: left;
+    color: #aaa;
+    pointer-events: none;
+    height: 0;
+    font-style: italic;
+}
+
+h1.is-empty:nth-child(1)::before {
+    content: "Title";
+    float: left;
+    color: #aaa;
+    pointer-events: none;
+    height: 0;
+    font-style: italic;
+}
+
+h1.is-empty:nth-child(1)+p.is-empty::before {
+    content: "Write sth here";
     float: left;
     color: #aaa;
     pointer-events: none;

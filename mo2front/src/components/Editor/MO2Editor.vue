@@ -132,7 +132,18 @@ import {
   BubbleMenu,
   VueNodeViewRenderer,
 } from "@tiptap/vue-2";
-import { defaultExtensions } from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import Paragraph from "@tiptap/extension-paragraph";
+import Text from "@tiptap/extension-text";
+import BlockQuote from "@tiptap/extension-blockquote";
+import Italic from "@tiptap/extension-italic";
+import Bold from "@tiptap/extension-bold";
+import Strike from "@tiptap/extension-strike";
+import Heading from "@tiptap/extension-heading";
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
+import ListItem from "@tiptap/extension-list-item";
+import Doc from "@tiptap/extension-document";
 import { Prop, Watch } from "vue-property-decorator";
 import { timeout } from "@/utils";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -165,16 +176,34 @@ export default class MO2Editor extends Vue {
   editor: Editor = null;
   initEditor(content: string) {
     console.log("init");
+    if (this.editor) {
+      this.editor.commands.setContent(content ?? "<h1></h1>");
+      return;
+    }
+    if (!content || content.length === 0) {
+      content = "<h1></h1><p></p>";
+    }
     this.editor = new Editor({
       extensions: [
-        ...defaultExtensions(),
+        Paragraph,
+        Text,
+        Doc,
+        Italic,
+        Bold,
+        BulletList,
+        OrderedList,
+        Strike,
+        BlockQuote,
+        ListItem,
+        Placeholder.configure({ showOnlyCurrent: false }),
+        Heading.configure({ levels: [1, 2, 3, 4] }),
         CodeBlockLowlight.extend({
           addNodeView() {
-            return VueNodeViewRenderer(CodeBlockComponent);
+            return VueNodeViewRenderer(CodeBlockComponent as any);
           },
         }).configure({ lowlight }),
       ],
-      content: content ?? "",
+      content: content ?? "<h1></h1>",
       onUpdate() {
         (that as MO2Editor).update = true;
       },
