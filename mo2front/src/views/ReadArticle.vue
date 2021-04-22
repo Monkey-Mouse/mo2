@@ -23,64 +23,66 @@
             >
               <h1 id="title">{{ title }}</h1>
             </div>
-            <v-row v-if="authorLoad" class="mb-6">
-              <avatar :size="40" :user="author"></avatar>
-              <a
-                @click="$router.push('/account/' + author.id)"
-                class="text--lighten-2 ml-2 mt-2"
-                >{{ author.name }}</a
-              >
-              <span class="ml-2 grey--text mt-2">{{
-                blog.entityInfo.createTime.substr(0, 10)
-              }}</span>
-              <v-spacer />
-              <v-tooltip v-if="draft" bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn plain small v-bind="attrs" v-on="on">
-                    <v-icon>mdi-eye-check</v-icon>
-                  </v-btn>
-                </template>
-                <span>This is a draft</span>
-              </v-tooltip>
-              <div v-if="user.id === blog.authorId">
-                <v-tooltip bottom>
+            <v-container v-if="authorLoad">
+              <v-row>
+                <avatar :size="40" :user="author"></avatar>
+                <a
+                  @click="$router.push('/account/' + author.id)"
+                  class="text--lighten-2 ml-2 mt-2"
+                  >{{ author.name }}</a
+                >
+                <span class="ml-2 grey--text mt-2">{{
+                  blog.entityInfo.createTime.substr(0, 10)
+                }}</span>
+                <v-spacer />
+                <v-tooltip v-if="draft" bottom>
                   <template v-slot:activator="{ on, attrs }">
-                    <v-btn plain small v-bind="attrs" v-on="on" @click="edit">
-                      <v-icon>mdi-file-document-edit</v-icon>
+                    <v-btn plain small v-bind="attrs" v-on="on">
+                      <v-icon>mdi-eye-check</v-icon>
                     </v-btn>
                   </template>
-                  <span>Edit</span>
+                  <span>This is a draft</span>
                 </v-tooltip>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      @click="deleteArticle"
-                      plain
-                      small
-                      v-bind="attrs"
-                      v-on="on"
-                    >
-                      <v-icon>mdi-delete</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Delete</span>
-                </v-tooltip>
-                <v-tooltip v-if="blog.entityInfo.is_deleted" bottom>
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                      @click="restoreArticle"
-                      plain
-                      small
-                      v-bind="attrs"
-                      v-on="on"
-                    >
-                      <v-icon>mdi-delete-restore</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Restore</span>
-                </v-tooltip>
-              </div>
-            </v-row>
+                <div v-if="user.id === blog.authorId">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn plain small v-bind="attrs" v-on="on" @click="edit">
+                        <v-icon>mdi-file-document-edit</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Edit</span>
+                  </v-tooltip>
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        @click="deleteArticle"
+                        plain
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon>mdi-delete</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Delete</span>
+                  </v-tooltip>
+                  <v-tooltip v-if="blog.entityInfo.is_deleted" bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        @click="restoreArticle"
+                        plain
+                        small
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        <v-icon>mdi-delete-restore</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Restore</span>
+                  </v-tooltip>
+                </div>
+              </v-row>
+            </v-container>
             <v-row v-else class="mb-6">
               <v-skeleton-loader
                 class="col"
@@ -289,7 +291,7 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import Editor from "../components/MO2Editor.vue";
+import Editor from "../components/Editor/MO2Editor.vue";
 import {
   DeleteArticle,
   GenerateTOC,

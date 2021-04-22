@@ -52,52 +52,65 @@
           color="amber"
         ></v-progress-circular>
         <bubble-menu v-if="editor" :editor="editor">
-          <v-btn-toggle>
+          <v-btn-toggle dense :value="[]">
             <v-btn
               @click="editor.chain().focus().toggleBold().run()"
-              :class="{ 'is-active': editor.isActive('bold') }"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive('bold'),
+              }"
             >
               bold
             </v-btn>
             <v-btn
               @click="editor.chain().focus().toggleItalic().run()"
-              :class="{ 'is-active': editor.isActive('italic') }"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive('italic'),
+              }"
             >
               italic
             </v-btn>
             <v-btn
               @click="editor.chain().focus().toggleStrike().run()"
-              :class="{ 'is-active': editor.isActive('strike') }"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive('strike'),
+              }"
             >
               strike
             </v-btn>
           </v-btn-toggle>
         </bubble-menu>
         <floating-menu v-if="editor" :editor="editor">
-          <v-btn-toggle :value="[]">
+          <v-btn-toggle dense :value="[]">
             <v-btn
               small
-              plain
               @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
-              :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive('heading', {
+                  level: 1,
+                }),
+              }"
             >
-              h1
+              <v-icon>mdi-format-header-1</v-icon>
             </v-btn>
             <v-btn
               small
-              plain
               @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
-              :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive('heading', {
+                  level: 2,
+                }),
+              }"
             >
-              h2
+              <v-icon>mdi-format-header-2</v-icon>
             </v-btn>
             <v-btn
               small
-              plain
               @click="editor.chain().focus().toggleBulletList().run()"
-              :class="{ 'is-active': editor.isActive('bulletList') }"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive('bulletList'),
+              }"
             >
-              bullet list
+              <v-icon>mdi-format-list-bulleted</v-icon>
             </v-btn>
           </v-btn-toggle>
         </floating-menu>
@@ -144,7 +157,7 @@ export default class MO2Editor extends Vue {
     console.log("init");
     this.editor = new Editor({
       extensions: defaultExtensions(),
-      content: content ?? "<h1>hi</h1>",
+      content: content ?? "",
       onUpdate() {
         (that as MO2Editor).update = true;
       },
@@ -215,8 +228,3 @@ export default class MO2Editor extends Vue {
   }
 }
 </script>
-<style scoped>
-.is-active {
-  background-color: red !important;
-}
-</style>

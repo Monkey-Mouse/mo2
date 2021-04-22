@@ -47,7 +47,7 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import Editor from "../components/MO2Editor.vue";
+import Editor from "../components/Editor/MO2Editor.vue";
 import MO2Dialog from "../components/MO2Dialog.vue";
 import {
   GetArticle,
