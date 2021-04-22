@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619052991140,
+  "lastUpdate": 1619052994035,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -5538,6 +5538,56 @@ window.BENCHMARK_DATA = {
             "value": 1313,
             "unit": "ns/op",
             "extra": "927434 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "dcec0c664be5acdd7bd0a8e0e3f783c35360385e",
+          "message": "[Snyk] Upgrade core-js from 3.9.1 to 3.10.0",
+          "timestamp": "2021-04-20T13:04:12Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/278/commits/dcec0c664be5acdd7bd0a8e0e3f783c35360385e"
+        },
+        "date": 1619052993025,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 9487599,
+            "unit": "ns/op",
+            "extra": "128 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 512410,
+            "unit": "ns/op",
+            "extra": "2366 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1523,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 126110,
+            "unit": "ns/op",
+            "extra": "8667 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1424,
+            "unit": "ns/op",
+            "extra": "867214 times\n2 procs"
           }
         ]
       }
