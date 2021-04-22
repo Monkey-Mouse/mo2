@@ -59,7 +59,7 @@
                 'v-item--active v-btn--active': editor.isActive('bold'),
               }"
             >
-              bold
+              <v-icon>mdi-format-bold</v-icon>
             </v-btn>
             <v-btn
               @click="editor.chain().focus().toggleItalic().run()"
@@ -67,7 +67,7 @@
                 'v-item--active v-btn--active': editor.isActive('italic'),
               }"
             >
-              italic
+              <v-icon>mdi-format-italic</v-icon>
             </v-btn>
             <v-btn
               @click="editor.chain().focus().toggleStrike().run()"
@@ -75,7 +75,7 @@
                 'v-item--active v-btn--active': editor.isActive('strike'),
               }"
             >
-              strike
+              <v-icon>mdi-format-strikethrough</v-icon>
             </v-btn>
           </v-btn-toggle>
         </bubble-menu>
@@ -125,10 +125,20 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import { Editor, EditorContent, FloatingMenu, BubbleMenu } from "@tiptap/vue-2";
+import {
+  Editor,
+  EditorContent,
+  FloatingMenu,
+  BubbleMenu,
+  VueNodeViewRenderer,
+} from "@tiptap/vue-2";
 import { defaultExtensions } from "@tiptap/starter-kit";
 import { Prop, Watch } from "vue-property-decorator";
 import { timeout } from "@/utils";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import CodeBlockComponent from "./Lowlight/CodeBlockComponent.vue";
+// load all highlight.js languages
+import lowlight from "lowlight";
 
 let that: MO2Editor | any = {};
 @Component({
@@ -156,7 +166,14 @@ export default class MO2Editor extends Vue {
   initEditor(content: string) {
     console.log("init");
     this.editor = new Editor({
-      extensions: defaultExtensions(),
+      extensions: [
+        ...defaultExtensions(),
+        CodeBlockLowlight.extend({
+          addNodeView() {
+            return VueNodeViewRenderer(CodeBlockComponent);
+          },
+        }).configure({ lowlight }),
+      ],
       content: content ?? "",
       onUpdate() {
         (that as MO2Editor).update = true;

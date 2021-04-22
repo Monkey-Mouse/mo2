@@ -967,6 +967,9 @@ $color-grey: #dddddd;
 }
 
 pre {
+    white-space: pre !important;
+    overflow-x: auto;
+
     &::before {
         content: attr(data-language);
         text-transform: uppercase;
@@ -977,6 +980,7 @@ pre {
     }
 
     code {
+        white-space: inherit !important;
 
         .hljs-comment,
         .hljs-quote {
