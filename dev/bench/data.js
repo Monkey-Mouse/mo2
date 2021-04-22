@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619099698523,
+  "lastUpdate": 1619103064460,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -5638,6 +5638,60 @@ window.BENCHMARK_DATA = {
             "value": 1250,
             "unit": "ns/op",
             "extra": "957219 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "47478961+easilylazy@users.noreply.github.com",
+            "name": "leezeeyee",
+            "username": "easilylazy"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "4244627a9b34d63b6a4336d1b929887d6cff7ecc",
+          "message": "Merge pull request #280 from Monkey-Mouse/Chronostasys/issue274\n\nupdate tiptap to v2",
+          "timestamp": "2021-04-22T22:49:04+08:00",
+          "tree_id": "f73ecaf56068a9221eebde4cfa5fb36f43528cb8",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/4244627a9b34d63b6a4336d1b929887d6cff7ecc"
+        },
+        "date": 1619103063404,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10082408,
+            "unit": "ns/op",
+            "extra": "108 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 542318,
+            "unit": "ns/op",
+            "extra": "2458 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1490,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 163595,
+            "unit": "ns/op",
+            "extra": "7154 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1316,
+            "unit": "ns/op",
+            "extra": "967035 times\n2 procs"
           }
         ]
       }
