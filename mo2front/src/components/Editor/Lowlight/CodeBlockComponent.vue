@@ -45,7 +45,11 @@ export default {
   computed: {
     selectedLanguage: {
       get() {
-        const language = this.node.attrs.language.split(" ")[0];
+        let language = this.node.attrs.language;
+        if (language != null) {
+          language = language.split(" ")[0];
+        }
+
         if (first) {
           this.updateAttributes({ language });
           first = false;
@@ -70,6 +74,7 @@ export default {
     right: 0.5rem;
     padding: 0;
     margin: 0;
+    width: 100px;
   }
 }
 </style>

@@ -9,41 +9,66 @@
     />
     <v-row justify="center">
       <v-col cols="12" lg="7" class="mo2editor">
-        <!-- <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
-          <div class="menubar" style="z-index: 9999">
-            <div class="toolbar row">
-              <span v-if="isActive.table()">
-                <button class="menubar__button" @click="commands.deleteTable">
-                  <v-icon>mdi-table-large-remove</v-icon>
-                </button>
-                <button
-                  class="menubar__button"
-                  @click="commands.addColumnBefore"
-                >
-                  <v-icon>mdi-table-column-plus-before</v-icon>
-                </button>
-                <button
-                  class="menubar__button"
-                  @click="commands.addColumnAfter"
-                >
-                  <v-icon>mdi-table-column-plus-after</v-icon>
-                </button>
-                <button class="menubar__button" @click="commands.deleteColumn">
-                  <v-icon>mdi-table-column-remove</v-icon>
-                </button>
-                <button class="menubar__button" @click="commands.addRowBefore">
-                  <v-icon>mdi-table-row-plus-before</v-icon>
-                </button>
-                <button class="menubar__button" @click="commands.addRowAfter">
-                  <v-icon>mdi-table-row-plus-after</v-icon>
-                </button>
-                <button class="menubar__button" @click="commands.deleteRow">
-                  <v-icon>mdi-table-row-remove</v-icon>
-                </button>
-              </span>
-            </div>
+        <div v-if="editor" class="menubar mt-4" style="z-index: 9999">
+          <div class="toolbar row">
+            <span v-if="editor.isActive('table')">
+              <button
+                class="menubar__button"
+                @click="editor.chain().focus().deleteTable().run()"
+              >
+                <v-icon>mdi-table-large-remove</v-icon>
+              </button>
+              <button
+                class="menubar__button"
+                @click="editor.chain().focus().addColumnBefore().run()"
+              >
+                <v-icon>mdi-table-column-plus-before</v-icon>
+              </button>
+              <button
+                class="menubar__button"
+                @click="editor.chain().focus().addColumnAfter().run()"
+              >
+                <v-icon>mdi-table-column-plus-after</v-icon>
+              </button>
+              <button
+                class="menubar__button"
+                @click="editor.chain().focus().deleteColumn().run()"
+              >
+                <v-icon>mdi-table-column-remove</v-icon>
+              </button>
+              <button
+                class="menubar__button"
+                @click="editor.chain().focus().addRowBefore().run()"
+              >
+                <v-icon>mdi-table-row-plus-before</v-icon>
+              </button>
+              <button
+                class="menubar__button"
+                @click="editor.chain().focus().addRowAfter().run()"
+              >
+                <v-icon>mdi-table-row-plus-after</v-icon>
+              </button>
+              <button
+                class="menubar__button"
+                @click="editor.chain().focus().deleteRow().run()"
+              >
+                <v-icon>mdi-table-row-remove</v-icon>
+              </button>
+              <button
+                class="menubar__button"
+                @click="editor.chain().focus().splitCell().run()"
+              >
+                <v-icon>mdi-table-split-cell</v-icon>
+              </button>
+              <button
+                class="menubar__button"
+                @click="editor.chain().focus().mergeCells().run()"
+              >
+                <v-icon>mdi-table-merge-cells</v-icon>
+              </button>
+            </span>
           </div>
-        </editor-menu-bar> -->
+        </div>
         <v-progress-circular
           v-if="isuploading"
           class="offset-10 offset-lg-7"
@@ -70,6 +95,14 @@
               <v-icon>mdi-format-italic</v-icon>
             </v-btn>
             <v-btn
+              @click="editor.chain().focus().toggleCode().run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive('code'),
+              }"
+            >
+              <v-icon>mdi-code-tags</v-icon>
+            </v-btn>
+            <v-btn
               @click="editor.chain().focus().toggleStrike().run()"
               :class="{
                 'v-item--active v-btn--active': editor.isActive('strike'),
@@ -84,33 +117,44 @@
             <v-btn
               small
               @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
-              :class="{
-                'v-item--active v-btn--active': editor.isActive('heading', {
-                  level: 1,
-                }),
-              }"
             >
               <v-icon>mdi-format-header-1</v-icon>
             </v-btn>
             <v-btn
               small
               @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
-              :class="{
-                'v-item--active v-btn--active': editor.isActive('heading', {
-                  level: 2,
-                }),
-              }"
             >
               <v-icon>mdi-format-header-2</v-icon>
             </v-btn>
             <v-btn
               small
+              @click="
+                editor
+                  .chain()
+                  .focus()
+                  .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+                  .run()
+              "
+            >
+              <v-icon>mdi-table-plus</v-icon>
+            </v-btn>
+            <v-btn
+              small
               @click="editor.chain().focus().toggleBulletList().run()"
-              :class="{
-                'v-item--active v-btn--active': editor.isActive('bulletList'),
-              }"
             >
               <v-icon>mdi-format-list-bulleted</v-icon>
+            </v-btn>
+            <v-btn
+              small
+              @click="editor.chain().focus().toggleOrderedList().run()"
+            >
+              <v-icon>mdi-format-list-numbered</v-icon>
+            </v-btn>
+            <v-btn
+              small
+              @click="editor.chain().focus().toggleCodeBlock().run()"
+            >
+              <v-icon>mdi-code-json</v-icon>
             </v-btn>
           </v-btn-toggle>
         </floating-menu>
@@ -144,6 +188,15 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
 import Doc from "@tiptap/extension-document";
+import Code from "@tiptap/extension-code";
+import History from "@tiptap/extension-history";
+import Gapcursor from "@tiptap/extension-gapcursor";
+import Table from "@tiptap/extension-table";
+import TableRow from "@tiptap/extension-table-row";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import Typography from "@tiptap/extension-typography";
+import CharacterCount from "@tiptap/extension-character-count";
 import { Prop, Watch } from "vue-property-decorator";
 import { timeout } from "@/utils";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -195,6 +248,17 @@ export default class MO2Editor extends Vue {
         Strike,
         BlockQuote,
         ListItem,
+        Code,
+        Gapcursor,
+        History,
+        Typography,
+        CharacterCount,
+        Table.configure({
+          resizable: true,
+        }),
+        TableRow,
+        TableHeader,
+        TableCell,
         Placeholder.configure({ showOnlyCurrent: false }),
         Heading.configure({ levels: [1, 2, 3, 4] }),
         CodeBlockLowlight.extend({
