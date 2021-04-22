@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619052961683,
+  "lastUpdate": 1619052968887,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -5388,6 +5388,56 @@ window.BENCHMARK_DATA = {
             "value": 1283,
             "unit": "ns/op",
             "extra": "973497 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "3c014d4567b7504859a573a6673ec2ea7ebe6b0f",
+          "message": "[Snyk] Upgrade highlight.js from 10.6.0 to 10.7.1",
+          "timestamp": "2021-04-20T13:04:12Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/276/commits/3c014d4567b7504859a573a6673ec2ea7ebe6b0f"
+        },
+        "date": 1619052968283,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7884992,
+            "unit": "ns/op",
+            "extra": "140 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 453329,
+            "unit": "ns/op",
+            "extra": "2851 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1317,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 99836,
+            "unit": "ns/op",
+            "extra": "12117 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1191,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
           }
         ]
       }
