@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619052994035,
+  "lastUpdate": 1619099698523,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -5588,6 +5588,56 @@ window.BENCHMARK_DATA = {
             "value": 1424,
             "unit": "ns/op",
             "extra": "867214 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "012fd9982eac43d5c6ce86cef4ce1af5cba4443d",
+          "message": "update tiptap to v2",
+          "timestamp": "2021-04-20T13:04:12Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/280/commits/012fd9982eac43d5c6ce86cef4ce1af5cba4443d"
+        },
+        "date": 1619099697627,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10909907,
+            "unit": "ns/op",
+            "extra": "100 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 490934,
+            "unit": "ns/op",
+            "extra": "2919 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1272,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 145959,
+            "unit": "ns/op",
+            "extra": "8299 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1250,
+            "unit": "ns/op",
+            "extra": "957219 times\n2 procs"
           }
         ]
       }
