@@ -3,6 +3,8 @@
     <input
       type="file"
       ref="f"
+      name="Upload Image"
+      title="Upload Image"
       accept="image/*"
       style="display: none"
       @change="fileSelected"
@@ -110,6 +112,36 @@
             >
               <v-icon>mdi-format-strikethrough</v-icon>
             </v-btn>
+            <form
+              class="menububble__form"
+              v-if="linkMenuIsActive"
+              @submit.prevent="setLinkUrl(linkUrl)"
+            >
+              <input
+                class="menububble__input"
+                type="text"
+                v-model="linkUrl"
+                placeholder="https://"
+                ref="linkInput"
+                @keydown.esc="hideLinkMenu"
+              />
+              <button
+                class="menububble__button"
+                @click="setLinkUrl(null)"
+                type="button"
+              >
+                <v-icon>mdi-close</v-icon>
+              </button>
+            </form>
+            <v-btn
+              v-else
+              @click="showLinkMenu(editor.getMarkAttributes('link'))"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive('link'),
+              }"
+            >
+              <v-icon>mdi-link-variant-plus</v-icon>
+            </v-btn>
           </v-btn-toggle>
         </bubble-menu>
         <floating-menu v-if="editor" :editor="editor">
@@ -125,6 +157,18 @@
               @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
             >
               <v-icon>mdi-format-header-2</v-icon>
+            </v-btn>
+            <v-btn
+              small
+              @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+            >
+              <v-icon>mdi-format-header-3</v-icon>
+            </v-btn>
+            <v-btn
+              small
+              @click="editor.chain().focus().toggleHeading({ level: 4 }).run()"
+            >
+              <v-icon>mdi-format-header-4</v-icon>
             </v-btn>
             <v-btn
               small
@@ -150,11 +194,17 @@
             >
               <v-icon>mdi-format-list-numbered</v-icon>
             </v-btn>
+            <v-btn small @click="editor.chain().focus().toggleTaskList().run()">
+              <v-icon>mdi-format-list-checks</v-icon>
+            </v-btn>
             <v-btn
               small
               @click="editor.chain().focus().toggleCodeBlock().run()"
             >
               <v-icon>mdi-code-json</v-icon>
+            </v-btn>
+            <v-btn small @click="$refs.f.click()">
+              <v-icon>mdi-image-plus</v-icon>
             </v-btn>
           </v-btn-toggle>
         </floating-menu>
@@ -176,6 +226,7 @@ import {
   BubbleMenu,
   VueNodeViewRenderer,
 } from "@tiptap/vue-2";
+import { PasteHandlerExt } from "./PasteHandlerExt/pasteHandlerExt";
 import Placeholder from "@tiptap/extension-placeholder";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
@@ -197,6 +248,11 @@ import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import Typography from "@tiptap/extension-typography";
 import CharacterCount from "@tiptap/extension-character-count";
+import Image from "@tiptap/extension-image";
+import Dropcursor from "@tiptap/extension-dropcursor";
+import Link from "@tiptap/extension-link";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
 import { Prop, Watch } from "vue-property-decorator";
 import { timeout } from "@/utils";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -204,13 +260,11 @@ import CodeBlockComponent from "./Lowlight/CodeBlockComponent.vue";
 // load all highlight.js languages
 import lowlight from "lowlight";
 
-let that: MO2Editor | any = {};
 @Component({
   components: {
     EditorContent,
     FloatingMenu,
     BubbleMenu,
-    // EditorMenuBar,
   },
 })
 export default class MO2Editor extends Vue {
@@ -219,7 +273,7 @@ export default class MO2Editor extends Vue {
   @Prop()
   uploadImgs: (
     blobs: File[],
-    callback: (imgprop: { src: string }) => void
+    callback: (imgprop: { src: string; alt?: string; title?: string }) => void
   ) => Promise<void>;
   isuploading = false;
   linkMenuIsActive = false;
@@ -259,6 +313,14 @@ export default class MO2Editor extends Vue {
         TableRow,
         TableHeader,
         TableCell,
+        Image,
+        Dropcursor,
+        Link,
+        TaskList,
+        TaskItem,
+        PasteHandlerExt.configure({
+          uploadImgs: this.uploadImages,
+        }),
         Placeholder.configure({ showOnlyCurrent: false }),
         Heading.configure({ levels: [1, 2, 3, 4] }),
         CodeBlockLowlight.extend({
@@ -269,32 +331,32 @@ export default class MO2Editor extends Vue {
       ],
       content: content ?? "<h1></h1>",
       onUpdate() {
-        (that as MO2Editor).update = true;
+        this.update = true;
       },
     });
   }
   fileSelected() {
-    this.isuploading = true;
-    // this.uploadImgs(
-    //   [...(this.$refs.f as HTMLInputElement).files],
-    //   this.editor.commands.image
-    // )
-    //   .then(() => (that.isuploading = false))
-    //   .catch(() => {
-    //     that.isuploading = false;
-    //   });
+    this.uploadImages([...(this.$refs.f as HTMLInputElement).files]);
     (this.$refs.f as HTMLInputElement).value = "";
   }
+  uploadImages(files: File[]) {
+    this.isuploading = true;
+    this.uploadImgs(files, this.editor.commands.setImage)
+      .then(() => (this.isuploading = false))
+      .catch(() => {
+        this.isuploading = false;
+      });
+  }
   mounted() {
-    that = this;
     this.initEditor(this.content);
     this.$emit("loaded", this);
     this.startAutoSave();
   }
   async startAutoSave() {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       if (this.update) {
-        (that as MO2Editor).$emit("autosave");
+        this.$emit("autosave");
         this.update = false;
       }
       await timeout(5000);
@@ -316,15 +378,20 @@ export default class MO2Editor extends Vue {
     this.linkUrl = attrs.href;
     this.linkMenuIsActive = true;
     this.$nextTick(() => {
-      (this.$refs.linkInput as any).focus();
+      (this.$refs.linkInput as HTMLElement).focus();
     });
   }
   hideLinkMenu() {
     this.linkUrl = null;
     this.linkMenuIsActive = false;
   }
-  setLinkUrl(command, url) {
-    command({ href: url });
+  setLinkUrl(url: string) {
+    if (!url || !url.startsWith("http")) {
+      this.editor.commands.unsetLink();
+      this.hideLinkMenu();
+      return;
+    }
+    this.editor.commands.setLink({ href: url });
     this.hideLinkMenu();
   }
   @Watch("editable")

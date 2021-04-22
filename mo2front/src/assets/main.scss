@@ -342,7 +342,6 @@
         font: inherit;
         border: none;
         background: transparent;
-        color: #fff
     }
 
     .banner {
@@ -1138,6 +1137,43 @@ li[data-done="false"] {
         a {
             text-decoration: none;
             color: unset;
+        }
+    }
+}
+
+ul[data-type="taskList"] {
+    list-style: none;
+    padding: 0;
+
+    li {
+        display: flex;
+        align-items: center;
+
+        >label {
+            flex: 0 0 auto;
+            margin-right: 0.5rem;
+        }
+    }
+}
+
+#mo2blog {
+    ul[data-type="taskList"] {
+        padding-left: 14px;
+
+        li[data-checked="true"] {
+            list-style: "\F0135";
+            font: normal normal normal 17px/1 "Material Design Icons";
+        }
+
+        li[data-checked="false"] {
+            list-style: "\F0131";
+            font: normal normal normal 17px/1 "Material Design Icons";
+        }
+
+        li {
+            display: list-item;
+            align-items: center;
+
         }
     }
 }
