@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619052968887,
+  "lastUpdate": 1619052988272,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -5438,6 +5438,56 @@ window.BENCHMARK_DATA = {
             "value": 1191,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "24905957c6dc53f11a902ac8ae5ec7b9f668ce65",
+          "message": "[Snyk] Upgrade @types/sanitize-html from 1.27.1 to 1.27.2",
+          "timestamp": "2021-04-20T13:04:12Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/277/commits/24905957c6dc53f11a902ac8ae5ec7b9f668ce65"
+        },
+        "date": 1619052987231,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10032651,
+            "unit": "ns/op",
+            "extra": "105 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 538930,
+            "unit": "ns/op",
+            "extra": "2672 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1478,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 162587,
+            "unit": "ns/op",
+            "extra": "7722 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1215,
+            "unit": "ns/op",
+            "extra": "929348 times\n2 procs"
           }
         ]
       }
