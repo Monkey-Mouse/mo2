@@ -80,6 +80,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 			"key_words":   b.KeyWords,
 			"categories":  b.CategoryIDs,
 			"author_id":   b.AuthorID,
+			"y_doc":       b.YDoc,
 		}}},
 		options.Update().SetUpsert(true),
 	)
