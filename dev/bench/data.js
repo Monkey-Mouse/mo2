@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619198094768,
+  "lastUpdate": 1619201050815,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -5900,6 +5900,60 @@ window.BENCHMARK_DATA = {
             "value": 1140,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": false,
+          "id": "5daf9e82cc4245009c9c1d94f72a394e94db636c",
+          "message": "[enhance]add websocket support for co-edit",
+          "timestamp": "2021-04-24T02:01:48+08:00",
+          "tree_id": "12d84077a8d3e2cc8c8ee590415ce5bc1b17c535",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/5daf9e82cc4245009c9c1d94f72a394e94db636c"
+        },
+        "date": 1619201050191,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7281102,
+            "unit": "ns/op",
+            "extra": "153 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 482920,
+            "unit": "ns/op",
+            "extra": "2668 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1505,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 113211,
+            "unit": "ns/op",
+            "extra": "9734 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1350,
+            "unit": "ns/op",
+            "extra": "860410 times\n2 procs"
           }
         ]
       }
