@@ -348,6 +348,7 @@ import Underline from "@tiptap/extension-underline";
 import Collaboration from "@tiptap/extension-collaboration";
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
+import { WebsocketProvider } from "y-websocket";
 import { Prop, Watch } from "vue-property-decorator";
 import { getRandomColor, Prompt, SetBlogType, timeout } from "@/utils";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -385,7 +386,8 @@ export default class MO2Editor extends Vue {
   editable = true;
   load = false;
   editor: Editor = null;
-  provider: WebrtcProvider = null;
+  provider: WebsocketProvider = null;
+  rtcProvider: WebrtcProvider = null;
   ydoc: Y.Doc = null;
   userNum = 0;
   connected = false;
@@ -484,7 +486,12 @@ export default class MO2Editor extends Vue {
           Uint8Array.from(atob(this.ystate), (c) => c.charCodeAt(0))
         );
       }
-      this.provider = new WebrtcProvider(group, this.ydoc);
+      this.rtcProvider = new WebrtcProvider(group, this.ydoc);
+      this.provider = new WebsocketProvider(
+        "wss://demos.yjs.dev",
+        group,
+        this.ydoc
+      );
       exts.push(
         Collaboration.configure({
           document: this.ydoc,
@@ -550,6 +557,7 @@ export default class MO2Editor extends Vue {
   dispose() {
     this.editor.destroy();
     this.ydoc?.destroy();
+    this.rtcProvider?.destroy();
     this.provider?.destroy();
   }
 
