@@ -113,6 +113,14 @@
               <v-icon>mdi-format-strikethrough</v-icon>
             </v-btn>
             <v-btn
+              @click="editor.chain().focus().toggleUnderline().run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive('underline'),
+              }"
+            >
+              <v-icon>mdi-format-underline</v-icon>
+            </v-btn>
+            <v-btn
               @click="editor.chain().focus().setTextAlign('left').run()"
               :class="{
                 'v-item--active v-btn--active': editor.isActive({
@@ -243,6 +251,12 @@
             >
               <v-icon>mdi-code-json</v-icon>
             </v-btn>
+            <v-btn
+              small
+              @click="editor.chain().focus().setHorizontalRule().run()"
+            >
+              <v-icon>mdi-arrow-split-horizontal</v-icon>
+            </v-btn>
             <v-btn small @click="$refs.f.click()">
               <v-icon>mdi-image-plus</v-icon>
             </v-btn>
@@ -298,6 +312,7 @@ import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import TextAlign from "@tiptap/extension-text-align";
 import Hr from "@tiptap/extension-horizontal-rule";
+import Underline from "@tiptap/extension-underline";
 import { Prop, Watch } from "vue-property-decorator";
 import { timeout } from "@/utils";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -365,6 +380,7 @@ export default class MO2Editor extends Vue {
         TaskItem,
         TextAlign,
         Hr,
+        Underline,
         PasteHandlerExt.configure({
           uploadImgs: this.uploadImages,
         }),
