@@ -69,7 +69,7 @@ func (c *Controller) SetDocType(ctx *gin.Context, u dto.LoginUserInfo) (status i
 	if blog.IsYDoc {
 		blog.YToken = primitive.NewObjectID()
 	}
-	_, err = database.BlogCol.UpdateByID(ctx, blog.ID,
+	_, err = database.DraftCol.UpdateByID(ctx, blog.ID,
 		bson.M{
 			"y_doc":    blog.YDoc,
 			"y_token":  blog.YToken,
