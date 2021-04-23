@@ -384,7 +384,6 @@ export default class MO2Editor extends Vue {
   editor: Editor = null;
   provider: WebrtcProvider = null;
   ydoc: Y.Doc = null;
-  exts = [];
   get collab() {
     return this.$route.query["group"] !== undefined;
   }
@@ -397,7 +396,7 @@ export default class MO2Editor extends Vue {
         id: this.$route.params["id"],
       })
         .then((d) => {
-          this.initEditor(this.content, d.token);
+          this.initEditor(this.GetHTML(), d.token);
           this.$router.replace(this.$route.fullPath + "?group=" + d.token);
           navigator.clipboard.writeText(window.location.href).then(() => {
             Prompt("合作编辑加入链接已复制到剪贴板！分享给别人即可", 10000);
@@ -415,7 +414,7 @@ export default class MO2Editor extends Vue {
         id: this.$route.params["id"],
       }).then(() => {
         this.$router.replace(this.$route.path).then(() => {
-          this.initEditor(this.content);
+          this.initEditor(this.GetHTML());
         });
         Prompt("退出合作编辑！", 10000);
       });
@@ -423,7 +422,7 @@ export default class MO2Editor extends Vue {
   }
 
   initEditor(content: string, group?: string) {
-    this.exts = [
+    const exts = [
       Paragraph,
       Text,
       Doc,
@@ -481,7 +480,7 @@ export default class MO2Editor extends Vue {
         );
       }
       this.provider = new WebrtcProvider(group, this.ydoc);
-      this.exts.push(
+      exts.push(
         Collaboration.configure({
           document: this.ydoc,
         }),
@@ -493,12 +492,12 @@ export default class MO2Editor extends Vue {
           },
         })
       );
-    } else this.exts.push(History);
+    } else exts.push(History);
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const that = this;
     this.editor = new Editor({
       content: content,
-      extensions: this.exts,
+      extensions: exts,
       onUpdate() {
         that.update = true;
       },
