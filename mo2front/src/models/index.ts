@@ -30,6 +30,9 @@ export interface DisplayBlogBrief extends BlogBrief {
 
 export interface Blog extends BlogBrief {
     content: string;
+    y_doc?: string;
+    is_y_doc?: boolean;
+    y_token?: string;
 }
 export const BlankBlog: Blog = {
     title: "",
@@ -51,7 +54,11 @@ export interface BlogUpsert {
     description?: string;
     keyWords?: string[];
     title?: string;
-    categories?: string[]
+    categories?: string[];
+    y_doc?: string;
+    is_y_doc?: boolean;
+    y_token?: string;
+    authorId?: string;
 }
 export interface UserSettings {
     avatar?: string;

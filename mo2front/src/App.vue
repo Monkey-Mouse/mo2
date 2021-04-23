@@ -76,11 +76,12 @@
         v-if="!isUser && !search"
         color="success"
         outlined
+        style="margin-right: 10px"
         @click="showLogin()"
       >
         LOGIN
       </v-btn>
-      <div v-if="$route.path.indexOf('/edit') === 0">
+      <div v-if="$route.path.indexOf('/edit') === 0 && !search">
         <v-row>
           <div v-if="autoSaving" class="grey--text ma-2">
             <v-progress-circular
@@ -88,11 +89,17 @@
               indeterminate
             ></v-progress-circular>
           </div>
+
           <div v-else-if="autoSaving === null" class="error--text ma-2">
             Failed!
           </div>
           <div v-else class="success--text ma-2">Saved!</div>
-          <v-btn class="ml-1" color="success" outlined @click="publishClick"
+          <v-btn
+            class="ml-1 mt-1"
+            color="success"
+            small
+            outlined
+            @click="publishClick"
             >publish</v-btn
           >
         </v-row>

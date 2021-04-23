@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/Monkey-Mouse/go-abac/abac"
+	"github.com/Monkey-Mouse/mo2/dto"
 	"github.com/Monkey-Mouse/mo2/services/accessControl"
 
 	"github.com/Monkey-Mouse/mo2/database"
@@ -13,6 +15,7 @@ import (
 	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
 	"github.com/Monkey-Mouse/mo2/server/model"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +35,7 @@ import (
 // @Failure 401 {object} badresponse.ResponseError
 // @Router /api/blogs/publish [post]
 func (c *Controller) UpsertBlog(ctx *gin.Context) {
-
+	// TODO 允许持有正确的token的用户保存文章
 	isDraft := parseString2Bool(ctx.DefaultQuery("draft", "true"))
 	var blog model.Blog
 	if err := ctx.ShouldBindJSON(&blog); err != nil {
@@ -54,7 +57,31 @@ func (c *Controller) UpsertBlog(ctx *gin.Context) {
 		return
 	}
 	ctx.Status(http.StatusNoContent)
-	return
+}
+
+func (c *Controller) SetDocType(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
+	var blog model.Blog
+	if err = ctx.ShouldBindJSON(&blog); err != nil {
+		status = 400
+		err = errors.New("内容含非法字符，请检查")
+		return
+	}
+	if blog.IsYDoc {
+		blog.YToken = primitive.NewObjectID()
+	}
+	_, err = database.DraftCol.UpdateByID(ctx, blog.ID,
+		bson.M{"$set": bson.M{
+			"y_doc":    blog.YDoc,
+			"y_token":  blog.YToken,
+			"is_y_doc": blog.IsYDoc},
+		},
+	)
+	if err != nil {
+		status = http.StatusUnprocessableEntity
+		err = errors.New("db error")
+		return
+	}
+	return 200, gin.H{"token": blog.YToken}, nil
 }
 
 // DeleteBlog godoc
@@ -178,7 +205,6 @@ func (c *Controller) ProcessBlog(ctx *gin.Context) {
 				return
 			}
 		}
-		return
 	}
 	ctx.Status(http.StatusNoContent)
 }
@@ -275,6 +301,7 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 // @Router /api/blogs/find/id [get]
 func (c *Controller) FindBlogById(ctx *gin.Context) {
 	isDraft := parseString2Bool(ctx.DefaultQuery("draft", "true"))
+	token, _ := primitive.ObjectIDFromHex(ctx.DefaultQuery("token", primitive.NilObjectID.Hex()))
 	id, err := primitive.ObjectIDFromHex(ctx.Query("id"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
@@ -285,6 +312,10 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
 		return
 	}
+	if blog.YToken == token {
+		ctx.JSON(http.StatusOK, blog)
+		return
+	}
 	var mErr mo2errors.Mo2Errors
 	if isDraft {
 		if mErr = JudgeAuthorize(ctx, &blog); mErr.IsError() {
@@ -293,6 +324,10 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 				return
 			}
 		}
+	}
+	uinfo, _ := mo2utils.GetUserInfo(ctx)
+	if uinfo.ID != blog.AuthorID {
+		blog.YToken = primitive.NilObjectID
 	}
 	if !isDraft || !mErr.IsError() {
 		ctx.JSON(http.StatusOK, blog)

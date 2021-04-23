@@ -85,15 +85,22 @@ func GenerateJwtCode(info dto.LoginUserInfo) string {
 	return tokenString
 }
 
+// GenerateVerifyJwtToken generate jwt token with claim in type JwtClaims
+// for info string
+// jwtToken string
+func GenerateVerifyJwtToken(info string) string {
+	return GenerateJwtToken(info, time.Now().Add(time.Minute*10))
+}
+
 // GenerateJwtToken generate jwt token with claim in type JwtClaims
 // for info string
 // jwtToken string
-func GenerateJwtToken(info string) string {
+func GenerateJwtToken(info string, expireAt time.Time) string {
 
 	claims := JwtInfoClaims{
 		Info: info,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 10).Unix(),
+			ExpiresAt: expireAt.Unix(),
 		},
 	}
 

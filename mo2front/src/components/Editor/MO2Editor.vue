@@ -11,7 +11,12 @@
     />
     <v-row justify="center">
       <v-col cols="12" lg="7" class="mo2editor">
-        <div v-if="editor" class="menubar mt-4" style="z-index: 9999">
+        <div
+          v-if="editor"
+          class="menubar mt-4"
+          style="z-index: 9999"
+          :style="{ 'overflow-x': $vuetify.breakpoint.xsOnly ? 'auto' : '' }"
+        >
           <div class="toolbar row">
             <span v-if="editor.isActive('table')">
               <button
@@ -74,12 +79,24 @@
         <v-progress-circular
           v-if="isuploading"
           class="offset-10 offset-lg-7"
-          style="position: fixed; z-index: 999"
+          style="position: fixed; z-index: 0"
           indeterminate
           color="amber"
         ></v-progress-circular>
+        <v-switch
+          hint="collab"
+          persistent-hint
+          v-else
+          v-model="collab"
+          class="offset-10 offset-lg-7"
+          style="position: fixed; z-index: 0"
+        ></v-switch>
         <bubble-menu v-if="editor" :editor="editor">
-          <v-btn-toggle dense :value="[]">
+          <v-btn-toggle
+            dense
+            :value="[]"
+            :style="{ 'overflow-x': $vuetify.breakpoint.xsOnly ? 'auto' : '' }"
+          >
             <v-btn
               @click="editor.chain().focus().toggleBold().run()"
               :class="{
@@ -111,6 +128,54 @@
               }"
             >
               <v-icon>mdi-format-strikethrough</v-icon>
+            </v-btn>
+            <v-btn
+              @click="editor.chain().focus().toggleUnderline().run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive('underline'),
+              }"
+            >
+              <v-icon>mdi-format-underline</v-icon>
+            </v-btn>
+            <v-btn
+              @click="editor.chain().focus().setTextAlign('left').run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive({
+                  textAlign: 'left',
+                }),
+              }"
+            >
+              <v-icon>mdi-format-align-left</v-icon>
+            </v-btn>
+            <v-btn
+              @click="editor.chain().focus().setTextAlign('center').run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive({
+                  textAlign: 'center',
+                }),
+              }"
+            >
+              <v-icon>mdi-format-align-center</v-icon>
+            </v-btn>
+            <v-btn
+              @click="editor.chain().focus().setTextAlign('right').run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive({
+                  textAlign: 'right',
+                }),
+              }"
+            >
+              <v-icon>mdi-format-align-right</v-icon>
+            </v-btn>
+            <v-btn
+              @click="editor.chain().focus().setTextAlign('justify').run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive({
+                  textAlign: 'justify',
+                }),
+              }"
+            >
+              <v-icon>mdi-format-align-justify</v-icon>
             </v-btn>
             <form
               class="menububble__form"
@@ -145,7 +210,11 @@
           </v-btn-toggle>
         </bubble-menu>
         <floating-menu v-if="editor" :editor="editor">
-          <v-btn-toggle dense :value="[]">
+          <v-btn-toggle
+            dense
+            :value="[]"
+            :style="{ 'overflow-x': $vuetify.breakpoint.xsOnly ? 'auto' : '' }"
+          >
             <v-btn
               small
               @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
@@ -203,6 +272,12 @@
             >
               <v-icon>mdi-code-json</v-icon>
             </v-btn>
+            <v-btn
+              small
+              @click="editor.chain().focus().setHorizontalRule().run()"
+            >
+              <v-icon>mdi-arrow-split-horizontal</v-icon>
+            </v-btn>
             <v-btn small @click="$refs.f.click()">
               <v-icon>mdi-image-plus</v-icon>
             </v-btn>
@@ -210,6 +285,16 @@
         </floating-menu>
         <div class="mo2content" spellcheck="false">
           <editor-content v-if="editor" :editor="editor" />
+          <div v-if="editor" class="character-count grey--text mt-16">
+            {{ editor.getCharacterCount() }} characters
+            <span
+              v-if="
+                this.provider && this.provider.room && this.provider.connected
+              "
+            >
+              ,{{ this.provider.room.webrtcConns.size }} co-editors</span
+            >
+          </div>
         </div>
       </v-col>
     </v-row>
@@ -217,6 +302,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable @typescript-eslint/camelcase */
 import Vue from "vue";
 import Component from "vue-class-component";
 import {
@@ -253,12 +339,21 @@ import Dropcursor from "@tiptap/extension-dropcursor";
 import Link from "@tiptap/extension-link";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
+import TextAlign from "@tiptap/extension-text-align";
+import Hr from "@tiptap/extension-horizontal-rule";
+import Underline from "@tiptap/extension-underline";
+import Collaboration from "@tiptap/extension-collaboration";
+import * as Y from "yjs";
+import { WebrtcProvider } from "y-webrtc";
 import { Prop, Watch } from "vue-property-decorator";
-import { timeout } from "@/utils";
+import { getRandomColor, Prompt, SetBlogType, timeout } from "@/utils";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import CodeBlockComponent from "./Lowlight/CodeBlockComponent.vue";
+import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
+
 // load all highlight.js languages
 import lowlight from "lowlight";
+import { User } from "@/models";
 
 @Component({
   components: {
@@ -275,63 +370,137 @@ export default class MO2Editor extends Vue {
     blobs: File[],
     callback: (imgprop: { src: string; alt?: string; title?: string }) => void
   ) => Promise<void>;
+  @Prop()
+  user: User;
+  @Prop()
+  ystate: string;
+  // @Prop({default:false})
+  // isydoc:boolean;
   isuploading = false;
   linkMenuIsActive = false;
   update = false;
   editable = true;
   load = false;
   editor: Editor = null;
-  initEditor(content: string) {
-    console.log("init");
-    if (this.editor) {
-      this.editor.commands.setContent(content ?? "<h1></h1>");
-      return;
+  provider: WebrtcProvider = null;
+  ydoc: Y.Doc = null;
+  exts = [];
+  get collab() {
+    return this.$route.query["group"] !== undefined;
+  }
+  set collab(v: boolean) {
+    if (v) {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      SetBlogType({
+        y_doc: "",
+        is_y_doc: true,
+        id: this.$route.params["id"],
+      })
+        .then((d) => {
+          this.initEditor(this.content, d.token);
+          this.$router.replace(this.$route.fullPath + "?group=" + d.token);
+          navigator.clipboard.writeText(window.location.href).then(() => {
+            Prompt("合作编辑加入链接已复制到剪贴板！分享给别人即可", 10000);
+          });
+        })
+        .catch(() => {
+          this.$router.replace(this.$route.path);
+          Prompt("初始化合作编辑失败！", 10000);
+        });
+    } else {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      SetBlogType({
+        y_doc: "",
+        is_y_doc: false,
+        id: this.$route.params["id"],
+      }).then(() => {
+        this.$router.replace(this.$route.path).then(() => {
+          this.initEditor(this.content);
+        });
+        Prompt("退出合作编辑！", 10000);
+      });
     }
+  }
+
+  initEditor(content: string, group?: string) {
+    this.exts = [
+      Paragraph,
+      Text,
+      Doc,
+      Italic,
+      Bold,
+      BulletList,
+      OrderedList,
+      Strike,
+      BlockQuote,
+      ListItem,
+      Code,
+      Gapcursor,
+      // History,
+      Typography,
+      CharacterCount,
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      Image,
+      Dropcursor,
+      Link,
+      TaskList,
+      TaskItem,
+      TextAlign,
+      Hr,
+      Underline,
+      PasteHandlerExt.configure({
+        uploadImgs: this.uploadImages,
+      }),
+      Placeholder.configure({ showOnlyCurrent: false }),
+      Heading.configure({ levels: [1, 2, 3, 4] }),
+      CodeBlockLowlight.extend({
+        addNodeView() {
+          return VueNodeViewRenderer(CodeBlockComponent as any);
+        },
+      }).configure({ lowlight }),
+    ];
     if (!content || content.length === 0) {
       content = "<h1></h1><p></p>";
     }
-    this.editor = new Editor({
-      extensions: [
-        Paragraph,
-        Text,
-        Doc,
-        Italic,
-        Bold,
-        BulletList,
-        OrderedList,
-        Strike,
-        BlockQuote,
-        ListItem,
-        Code,
-        Gapcursor,
-        History,
-        Typography,
-        CharacterCount,
-        Table.configure({
-          resizable: true,
+    if (this.editor) {
+      this.dispose();
+    }
+    group = group ?? (this.$route.query["group"] as string);
+    if (group) {
+      content = "";
+      this.ydoc = new Y.Doc();
+      if (this.ystate) {
+        Y.applyUpdateV2(
+          this.ydoc,
+          Uint8Array.from(atob(this.ystate), (c) => c.charCodeAt(0))
+        );
+      }
+      this.provider = new WebrtcProvider(group, this.ydoc);
+      this.exts.push(
+        Collaboration.configure({
+          document: this.ydoc,
         }),
-        TableRow,
-        TableHeader,
-        TableCell,
-        Image,
-        Dropcursor,
-        Link,
-        TaskList,
-        TaskItem,
-        PasteHandlerExt.configure({
-          uploadImgs: this.uploadImages,
-        }),
-        Placeholder.configure({ showOnlyCurrent: false }),
-        Heading.configure({ levels: [1, 2, 3, 4] }),
-        CodeBlockLowlight.extend({
-          addNodeView() {
-            return VueNodeViewRenderer(CodeBlockComponent as any);
+        CollaborationCursor.configure({
+          provider: this.provider,
+          user: {
+            name: this.user.name,
+            color: getRandomColor(),
           },
-        }).configure({ lowlight }),
-      ],
-      content: content ?? "<h1></h1>",
+        })
+      );
+    } else this.exts.push(History);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const that = this;
+    this.editor = new Editor({
+      content: content,
+      extensions: this.exts,
       onUpdate() {
-        this.update = true;
+        that.update = true;
       },
     });
   }
@@ -353,6 +522,7 @@ export default class MO2Editor extends Vue {
     this.startAutoSave();
   }
   async startAutoSave() {
+    console.log("[editor]: start auto save");
     // eslint-disable-next-line no-constant-condition
     while (true) {
       if (this.update) {
@@ -362,16 +532,20 @@ export default class MO2Editor extends Vue {
       await timeout(5000);
     }
   }
-
   @Watch("content")
   contentSet() {
     if (this.content !== null && this.content !== undefined) {
       this.initEditor(this.content);
     }
   }
+  dispose() {
+    this.editor.destroy();
+    this.ydoc?.destroy();
+    this.provider?.destroy();
+  }
 
   beforeDestroy() {
-    this.editor.destroy();
+    this.dispose();
   }
   linkUrl = null;
   showLinkMenu(attrs) {
@@ -403,5 +577,47 @@ export default class MO2Editor extends Vue {
   public GetHTML() {
     return this.editor.getHTML() as string;
   }
+  Uint8ToString(u8a) {
+    let CHUNK_SZ = 0x8000;
+    let c = [];
+    for (let i = 0; i < u8a.length; i += CHUNK_SZ) {
+      c.push(String.fromCharCode.apply(null, u8a.subarray(i, i + CHUNK_SZ)));
+    }
+    return c.join("");
+  }
+  public GetYDoc() {
+    return this.ydoc
+      ? btoa(this.Uint8ToString(Y.encodeStateAsUpdateV2(this.ydoc)))
+      : "";
+  }
 }
 </script>
+
+<style lang="scss">
+/* Give a remote user a caret */
+.collaboration-cursor__caret {
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-left: 1px solid #0d0d0d;
+  border-right: 1px solid #0d0d0d;
+  word-break: normal;
+  pointer-events: none;
+}
+
+/* Render the username above the caret */
+.collaboration-cursor__label {
+  position: absolute;
+  top: -1.4em;
+  left: -1px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  user-select: none;
+  color: #0d0d0d;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px 3px 3px 0;
+  white-space: nowrap;
+}
+</style>

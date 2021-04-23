@@ -50,7 +50,9 @@ export function ParseQuery(query: { [key: string]: any }) {
     const queryList: string[] = [];
     for (const key in query) {
         const element = query[key];
-        queryList.push(`${key}=${element}`)
+        if (element !== undefined && element !== null) {
+            queryList.push(`${key}=${element}`)
+        }
     }
     queryStr = queryStr + queryList.join('&');
     return queryStr
@@ -68,14 +70,14 @@ export function UpSertBlogSync(query: { draft: boolean }, blog: BlogUpsert) {
 
     navigator.sendBeacon("/api/blogs/publish" + ParseQuery(query), JSON.stringify(blog))
 }
-export async function GetArticle(query: { id: string; draft: boolean }) {
+export async function GetArticle(query: { id: string; draft: boolean; token?: string }) {
     return (await axios.get<Blog>('/api/blogs/find/id' + ParseQuery(query))).data
 }
 export const GetOwnArticles = async (query: { page: number; pageSize: number; draft: boolean, deleted?: boolean }) => {
     return (await axios.get<BlogBrief[]>('/api/blogs/find/own' + ParseQuery(query))).data
 }
 
-export const GetUserArticles = async (query: { page: number; pageSize: number; draft: boolean; id: string }) => {
+export const GetUserArticles = async (query: { page: number; pageSize: number; draft: boolean; id: string; }) => {
     return (await axios.get<BlogBrief[]>('/api/blogs/find/userId' + ParseQuery(query))).data
 }
 export async function DeleteArticle(id: string, query: { draft: boolean }) {
@@ -129,8 +131,11 @@ export async function GetNotifications(query: { page: number, pagesize: number }
     return (await axios.get<Notification[]>("/api/notification" + ParseQuery(query))).data
 }
 export async function RecycleBlog(id: string, query: { draft: boolean }) {
-    axios.put('/api/blogs/recycle/' + id + ParseQuery(query))
+    await axios.put('/api/blogs/recycle/' + id + ParseQuery(query))
 }
 export async function RestoreBlog(id: string, query: { draft: boolean }) {
-    axios.put('/api/blogs/restore/' + id + ParseQuery(query))
+    await axios.put('/api/blogs/restore/' + id + ParseQuery(query))
+}
+export async function SetBlogType(b: { y_doc: string, is_y_doc: boolean, id: string }) {
+    return (await axios.post<{ token: string }>('/api/blogs/doctype', b)).data
 }

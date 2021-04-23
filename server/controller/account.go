@@ -158,7 +158,7 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 		return
 	}
 	baseURL := "http://" + ctx.Request.Host + "/api/accounts/verify"
-	token := mo2utils.GenerateJwtToken(addAccount.Email)
+	token := mo2utils.GenerateVerifyJwtToken(addAccount.Email)
 	url := baseURL + "?email=" + addAccount.Email + "&token=" + token
 	senderr := mo2utils.SendEmail(mo2utils.VerifyEmailMessage(url, addAccount.UserName, []string{addAccount.Email}), ctx.ClientIP())
 	if senderr != nil {

@@ -17,6 +17,9 @@ type Blog struct {
 	Cover       string               `json:"cover,omitempty" example:"https://xxx/xxx" bson:"cover,omitempty"`
 	KeyWords    []string             `json:"keyWords,omitempty" example:"xxx,xxx" bson:"key_words,omitempty"`
 	CategoryIDs []primitive.ObjectID `json:"categories,omitempty" bson:"categories,omitempty"`
+	YDoc        string               `json:"y_doc,omitempty" bson:"y_doc,omitempty"`       // 用于collaboration
+	IsYDoc      bool                 `json:"is_y_doc,omitempty" bson:"is_y_doc,omitempty"` // 用于collaboration
+	YToken      primitive.ObjectID   `json:"y_token,omitempty" bson:"y_token,omitempty"`   //用于collaboration
 }
 
 type Filter struct {

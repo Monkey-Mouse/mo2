@@ -93,6 +93,7 @@ func SetupHandlers(c *Controller) {
 				user.POST("publish", c.UpsertBlog)
 				user.DELETE(":id", c.DeleteBlog)
 				user.PUT(":operation/:id", c.ProcessBlog)
+				user.POST("doctype", adapter.ReAdapterWithUinfo(c.SetDocType))
 			}
 
 			find := blogs.Group("/find")

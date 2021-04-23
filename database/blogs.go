@@ -80,6 +80,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 			"key_words":   b.KeyWords,
 			"categories":  b.CategoryIDs,
 			"author_id":   b.AuthorID,
+			"y_doc":       b.YDoc,
 		}}},
 		options.Update().SetUpsert(true),
 	)
@@ -155,7 +156,7 @@ func FindBlogsByUser(u dto.LoginUserInfo, filter model.Filter) (b []model.Blog) 
 	return FindBlogsByUserId(u.ID, filter)
 }
 func getBlogListQueryOption() *options.FindOptions {
-	return options.Find().SetSort(bson.D{{"entity_info.update_time", -1}}).SetProjection(bson.D{{"content", 0}})
+	return options.Find().SetSort(bson.D{{"entity_info.update_time", -1}}).SetProjection(bson.D{{"content", 0}, {"y_doc", 0}})
 }
 
 //find blog by userId

@@ -14,11 +14,13 @@
       </v-col>
     </v-row>
     <editor
-      v-show="!loading && editorLoaded"
+      v-if="!loading"
       :uploadImgs="uploadImgs"
       :content="content"
       @loaded="editorLoad"
       @autosave="autoSave"
+      :user="user"
+      :ystate="blog.y_doc"
     />
     <MO2Dialog
       v-if="propLoad"
@@ -53,6 +55,7 @@ import {
   GetArticle,
   GetCates,
   GetErrorMsg,
+  Prompt,
   UploadImgToQiniu,
   UploadMD,
   UpsertBlog,
@@ -185,7 +188,11 @@ export default class EditArticle extends Vue {
   init() {
     if (this.$route.params["id"]) {
       this.blog.id = this.$route.params["id"];
-      GetArticle({ id: this.blog.id, draft: true })
+      GetArticle({
+        id: this.blog.id,
+        draft: true,
+        token: this.$route.query["group"] as string,
+      })
         .then((val) => {
           this.blog = val;
           this.content = `<h1>${val.title}</h1>${val.content}`;
@@ -193,13 +200,24 @@ export default class EditArticle extends Vue {
         })
         .catch((reason: AxiosError) => {
           if (reason.response.status === 404) {
-            GetArticle({ id: this.blog.id, draft: false })
+            GetArticle({
+              id: this.blog.id,
+              draft: false,
+              token: this.$route.query["group"] as string,
+            })
               .then((val) => {
+                if (val.authorId !== this.user.id) {
+                  this.$router.push("/404");
+                }
                 this.blog = val;
                 this.content = `<h1>${val.title}</h1>${val.content}`;
                 this.loading = false;
               })
-              .catch((err) => {});
+              .catch(() => {
+                this.$router.push("/404");
+              });
+          } else {
+            this.$router.push("/404");
           }
         });
     } else this.loading = false;
@@ -224,11 +242,21 @@ export default class EditArticle extends Vue {
   editorLoad(editor: Editor) {
     this.editor = editor;
     this.editorLoaded = true;
+    if (this.$route.query["group"] && this.blog.authorId !== this.user.id) {
+      Prompt(
+        "你正在合作编辑模式下与共享者一起编辑文章。请注意你的更改在分享者不在线时将不会自动保存：）",
+        100000
+      );
+    }
   }
   getTitleAndContent() {
     const raw = this.editor.GetHTML();
     const titlePos = raw.indexOf("</h1>");
-    this.blog.title = raw.substring(4, titlePos);
+    const titleStart = raw.indexOf(">");
+    if (titlePos < titleStart) {
+      return;
+    }
+    this.blog.title = raw.substring(titleStart + 1, titlePos);
     this.blog.content = raw.substring(titlePos + 5);
   }
   publish() {
@@ -298,16 +326,17 @@ export default class EditArticle extends Vue {
     }
   }
   autoSave() {
-    if (this.published) {
+    if (this.published || this.blog.authorId !== this.user.id) {
       return;
     }
     this.$emit("update:autoSaving", true);
     this.getTitleAndContent();
+    this.blog.y_doc = this.editor.GetYDoc();
     if (!this.blog || this.blog.title === "") {
       this.$emit("update:autoSaving", false);
       return;
     }
-    this.postBlog({}, true)
+    this.postBlog(this.blog, true)
       .then(() => {
         this.$emit("update:autoSaving", false);
       })
