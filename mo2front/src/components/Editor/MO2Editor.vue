@@ -112,6 +112,46 @@
             >
               <v-icon>mdi-format-strikethrough</v-icon>
             </v-btn>
+            <v-btn
+              @click="editor.chain().focus().setTextAlign('left').run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive({
+                  textAlign: 'left',
+                }),
+              }"
+            >
+              <v-icon>mdi-format-align-left</v-icon>
+            </v-btn>
+            <v-btn
+              @click="editor.chain().focus().setTextAlign('center').run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive({
+                  textAlign: 'center',
+                }),
+              }"
+            >
+              <v-icon>mdi-format-align-center</v-icon>
+            </v-btn>
+            <v-btn
+              @click="editor.chain().focus().setTextAlign('right').run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive({
+                  textAlign: 'right',
+                }),
+              }"
+            >
+              <v-icon>mdi-format-align-right</v-icon>
+            </v-btn>
+            <v-btn
+              @click="editor.chain().focus().setTextAlign('justify').run()"
+              :class="{
+                'v-item--active v-btn--active': editor.isActive({
+                  textAlign: 'justify',
+                }),
+              }"
+            >
+              <v-icon>mdi-format-align-justify</v-icon>
+            </v-btn>
             <form
               class="menububble__form"
               v-if="linkMenuIsActive"
@@ -210,6 +250,9 @@
         </floating-menu>
         <div class="mo2content" spellcheck="false">
           <editor-content v-if="editor" :editor="editor" />
+          <div class="character-count grey--text mt-16">
+            {{ editor.getCharacterCount() }} characters
+          </div>
         </div>
       </v-col>
     </v-row>
@@ -253,6 +296,8 @@ import Dropcursor from "@tiptap/extension-dropcursor";
 import Link from "@tiptap/extension-link";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
+import TextAlign from "@tiptap/extension-text-align";
+import Hr from "@tiptap/extension-horizontal-rule";
 import { Prop, Watch } from "vue-property-decorator";
 import { timeout } from "@/utils";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
@@ -318,6 +363,8 @@ export default class MO2Editor extends Vue {
         Link,
         TaskList,
         TaskItem,
+        TextAlign,
+        Hr,
         PasteHandlerExt.configure({
           uploadImgs: this.uploadImages,
         }),
