@@ -216,7 +216,7 @@ func GenerateEmailToken(addAccount model.AddAccount) (account *model.Account, er
 	if account.Infos == nil {
 		account.Infos = make(map[string]string)
 	}
-	account.Infos[model.Token] = mo2utils.GenerateJwtToken(account.Email)
+	account.Infos[model.Token] = mo2utils.GenerateVerifyJwtToken(account.Email)
 	account.Infos[model.IsActive] = model.False
 	return
 }
