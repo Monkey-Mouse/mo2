@@ -79,16 +79,17 @@
         <v-progress-circular
           v-if="isuploading"
           class="offset-10 offset-lg-7"
-          style="position: fixed; z-index: 999"
+          style="position: fixed; z-index: 0"
           indeterminate
           color="amber"
         ></v-progress-circular>
         <v-switch
-          label="Collab"
+          hint="collab"
+          persistent-hint
           v-else
           v-model="collab"
           class="offset-10 offset-lg-7"
-          style="position: fixed; z-index: 999"
+          style="position: fixed; z-index: 0"
         ></v-switch>
         <bubble-menu v-if="editor" :editor="editor">
           <v-btn-toggle
@@ -286,10 +287,12 @@
           <editor-content v-if="editor" :editor="editor" />
           <div v-if="editor" class="character-count grey--text mt-16">
             {{ editor.getCharacterCount() }} characters
-            <span v-if="this.provider && this.provider.room">
-              ,{{ this.provider.room.webrtcConns.size }} co-editors{{
-                this.provider.connected
-              }}</span
+            <span
+              v-if="
+                this.provider && this.provider.room && this.provider.connected
+              "
+            >
+              ,{{ this.provider.room.webrtcConns.size }} co-editors</span
             >
           </div>
         </div>
@@ -343,7 +346,7 @@ import Collaboration from "@tiptap/extension-collaboration";
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { Prop, Watch } from "vue-property-decorator";
-import { SetBlogType, timeout } from "@/utils";
+import { getRandomColor, Prompt, SetBlogType, timeout } from "@/utils";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import CodeBlockComponent from "./Lowlight/CodeBlockComponent.vue";
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
@@ -386,128 +389,40 @@ export default class MO2Editor extends Vue {
     return this.$route.query["group"] !== undefined;
   }
   set collab(v: boolean) {
-    this.editor.destroy();
     if (v) {
       // eslint-disable-next-line @typescript-eslint/camelcase
       SetBlogType({
         y_doc: "",
         is_y_doc: true,
         id: this.$route.params["id"],
-      }).then((d) => {
-        this.exts.pop();
-        this.ydoc = new Y.Doc();
-        this.provider = new WebrtcProvider(d.token, this.ydoc);
-        this.exts.push(
-          Collaboration.configure({
-            document: this.ydoc,
-          }),
-          CollaborationCursor.configure({
-            provider: this.provider,
-            user: {
-              name: this.user.name,
-              color: this.$vuetify.theme.currentTheme.primary,
-            },
-          })
-        );
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const that = this;
-        this.editor = new Editor({
-          content: this.content,
-          extensions: this.exts,
-          onUpdate() {
-            console.log("update");
-            that.update = true;
-          },
+      })
+        .then((d) => {
+          this.initEditor(this.content, d.token);
+          this.$router.replace(this.$route.fullPath + "?group=" + d.token);
+          navigator.clipboard.writeText(window.location.href).then(() => {
+            Prompt("合作编辑加入链接已复制到剪贴板！分享给别人即可", 10000);
+          });
+        })
+        .catch(() => {
+          this.$router.replace(this.$route.path);
+          Prompt("初始化合作编辑失败！", 10000);
         });
-        this.$router.replace(this.$route.fullPath + "?group=" + d.token);
-      });
     } else {
       // eslint-disable-next-line @typescript-eslint/camelcase
       SetBlogType({
         y_doc: "",
         is_y_doc: false,
         id: this.$route.params["id"],
-      }).then((d) => {
-        this.exts.pop();
-        this.exts.pop();
-        this.provider.destroy();
-        this.exts.push(History);
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        const that = this;
-        this.editor = new Editor({
-          content: this.content,
-          extensions: this.exts,
-          onUpdate() {
-            console.log("update");
-            that.update = true;
-          },
+      }).then(() => {
+        this.$router.replace(this.$route.path).then(() => {
+          this.initEditor(this.content);
         });
-        this.$router.replace(this.$route.path);
+        Prompt("退出合作编辑！", 10000);
       });
     }
   }
-  initEditor(content: string) {
-    console.log("load");
-    console.log(content);
-    if (!content || content.length === 0) {
-      content = "<h1></h1><p></p>";
-    }
-    if (this.editor) {
-      this.editor.commands.setContent(content);
-      return;
-    }
-    if (this.$route.query["group"]) {
-      content = "";
-      this.ydoc = new Y.Doc();
-      console.log(this.ystate);
-      if (this.ystate) {
-        Y.applyUpdateV2(
-          this.ydoc,
-          Uint8Array.from(atob(this.ystate), (c) => c.charCodeAt(0))
-        );
-      }
-      console.log(window.location.href);
-      this.provider = new WebrtcProvider(
-        this.$route.query["group"] as string,
-        this.ydoc
-      );
-      this.exts.push(
-        Collaboration.configure({
-          document: this.ydoc,
-        }),
-        CollaborationCursor.configure({
-          provider: this.provider,
-          user: {
-            name: this.user.name,
-            color: this.$vuetify.theme.currentTheme.primary,
-          },
-        })
-      );
-    } else this.exts.push(History);
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const that = this;
-    this.editor = new Editor({
-      content: content,
-      extensions: this.exts,
-      onUpdate() {
-        console.log("update");
-        that.update = true;
-      },
-    });
-  }
-  fileSelected() {
-    this.uploadImages([...(this.$refs.f as HTMLInputElement).files]);
-    (this.$refs.f as HTMLInputElement).value = "";
-  }
-  uploadImages(files: File[]) {
-    this.isuploading = true;
-    this.uploadImgs(files, this.editor.commands.setImage)
-      .then(() => (this.isuploading = false))
-      .catch(() => {
-        this.isuploading = false;
-      });
-  }
-  mounted() {
+
+  initEditor(content: string, group?: string) {
     this.exts = [
       Paragraph,
       Text,
@@ -549,6 +464,59 @@ export default class MO2Editor extends Vue {
         },
       }).configure({ lowlight }),
     ];
+    if (!content || content.length === 0) {
+      content = "<h1></h1><p></p>";
+    }
+    if (this.editor) {
+      this.dispose();
+    }
+    group = group ?? (this.$route.query["group"] as string);
+    if (group) {
+      content = "";
+      this.ydoc = new Y.Doc();
+      if (this.ystate) {
+        Y.applyUpdateV2(
+          this.ydoc,
+          Uint8Array.from(atob(this.ystate), (c) => c.charCodeAt(0))
+        );
+      }
+      this.provider = new WebrtcProvider(group, this.ydoc);
+      this.exts.push(
+        Collaboration.configure({
+          document: this.ydoc,
+        }),
+        CollaborationCursor.configure({
+          provider: this.provider,
+          user: {
+            name: this.user.name,
+            color: getRandomColor(),
+          },
+        })
+      );
+    } else this.exts.push(History);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const that = this;
+    this.editor = new Editor({
+      content: content,
+      extensions: this.exts,
+      onUpdate() {
+        that.update = true;
+      },
+    });
+  }
+  fileSelected() {
+    this.uploadImages([...(this.$refs.f as HTMLInputElement).files]);
+    (this.$refs.f as HTMLInputElement).value = "";
+  }
+  uploadImages(files: File[]) {
+    this.isuploading = true;
+    this.uploadImgs(files, this.editor.commands.setImage)
+      .then(() => (this.isuploading = false))
+      .catch(() => {
+        this.isuploading = false;
+      });
+  }
+  mounted() {
     this.initEditor(this.content);
     this.$emit("loaded", this);
     this.startAutoSave();
@@ -570,10 +538,14 @@ export default class MO2Editor extends Vue {
       this.initEditor(this.content);
     }
   }
+  dispose() {
+    this.editor.destroy();
+    this.ydoc?.destroy();
+    this.provider?.destroy();
+  }
 
   beforeDestroy() {
-    this.editor.destroy();
-    this.provider?.destroy();
+    this.dispose();
   }
   linkUrl = null;
   showLinkMenu(attrs) {

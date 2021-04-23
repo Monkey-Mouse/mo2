@@ -55,6 +55,7 @@ import {
   GetArticle,
   GetCates,
   GetErrorMsg,
+  Prompt,
   UploadImgToQiniu,
   UploadMD,
   UpsertBlog,
@@ -194,9 +195,6 @@ export default class EditArticle extends Vue {
       })
         .then((val) => {
           this.blog = val;
-          // if (this.blog.is_y_doc) {
-          //   this.$route.query["group"] = this.blog.y_token;
-          // }
           this.content = `<h1>${val.title}</h1>${val.content}`;
           this.loading = false;
         })
@@ -208,11 +206,18 @@ export default class EditArticle extends Vue {
               token: this.$route.query["group"] as string,
             })
               .then((val) => {
+                if (val.authorId !== this.user.id) {
+                  this.$router.push("/404");
+                }
                 this.blog = val;
                 this.content = `<h1>${val.title}</h1>${val.content}`;
                 this.loading = false;
               })
-              .catch((err) => {});
+              .catch(() => {
+                this.$router.push("/404");
+              });
+          } else {
+            this.$router.push("/404");
           }
         });
     } else this.loading = false;
@@ -237,6 +242,12 @@ export default class EditArticle extends Vue {
   editorLoad(editor: Editor) {
     this.editor = editor;
     this.editorLoaded = true;
+    if (this.$route.query["group"] && this.blog.authorId !== this.user.id) {
+      Prompt(
+        "你正在合作编辑模式下与共享者一起编辑文章。请注意你的更改在分享者不在线时将不会自动保存：）",
+        100000
+      );
+    }
   }
   getTitleAndContent() {
     const raw = this.editor.GetHTML();
@@ -321,7 +332,6 @@ export default class EditArticle extends Vue {
     this.$emit("update:autoSaving", true);
     this.getTitleAndContent();
     this.blog.y_doc = this.editor.GetYDoc();
-    console.log(this.blog.y_doc);
     if (!this.blog || this.blog.title === "") {
       this.$emit("update:autoSaving", false);
       return;
