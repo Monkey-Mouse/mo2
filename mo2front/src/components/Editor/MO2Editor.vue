@@ -13,6 +13,7 @@
       <v-col cols="12" lg="7" class="mo2editor">
         <div
           v-if="editor"
+          v-show="this.editor.isFocused"
           class="menubar mt-4"
           style="z-index: 9999"
           :style="{ 'overflow-x': $vuetify.breakpoint.xsOnly ? 'auto' : '' }"
@@ -91,7 +92,11 @@
           class="offset-10 offset-lg-7"
           style="position: fixed; z-index: 0"
         ></v-switch>
-        <bubble-menu v-if="editor" :editor="editor">
+        <bubble-menu
+          v-if="editor"
+          v-show="this.editor.isFocused"
+          :editor="editor"
+        >
           <v-btn-toggle
             dense
             :value="[]"
@@ -209,7 +214,11 @@
             </v-btn>
           </v-btn-toggle>
         </bubble-menu>
-        <floating-menu v-if="editor" :editor="editor">
+        <floating-menu
+          v-if="editor"
+          v-show="this.editor.isFocused"
+          :editor="editor"
+        >
           <v-btn-toggle
             dense
             :value="[]"
@@ -287,13 +296,7 @@
           <editor-content v-if="editor" :editor="editor" />
           <div v-if="editor" class="character-count grey--text mt-16">
             {{ editor.getCharacterCount() }} characters
-            <span
-              v-if="
-                this.provider && this.provider.room && this.provider.connected
-              "
-            >
-              ,{{ this.provider.room.webrtcConns.size }} co-editors</span
-            >
+            <span v-if="this.connected"> ,{{ this.userNum }} co-editors</span>
           </div>
         </div>
       </v-col>
@@ -384,6 +387,8 @@ export default class MO2Editor extends Vue {
   editor: Editor = null;
   provider: WebrtcProvider = null;
   ydoc: Y.Doc = null;
+  userNum = 0;
+  connected = false;
   get collab() {
     return this.$route.query["group"] !== undefined;
   }
@@ -489,6 +494,11 @@ export default class MO2Editor extends Vue {
           user: {
             name: this.user.name,
             color: getRandomColor(),
+          },
+          onUpdate: (users) => {
+            this.connected = true;
+            this.userNum = users.length;
+            return null;
           },
         })
       );
