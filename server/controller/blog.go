@@ -70,11 +70,12 @@ func (c *Controller) SetDocType(ctx *gin.Context, u dto.LoginUserInfo) (status i
 		blog.YToken = primitive.NewObjectID()
 	}
 	_, err = database.DraftCol.UpdateByID(ctx, blog.ID,
-		bson.M{
+		bson.M{"$set": bson.M{
 			"y_doc":    blog.YDoc,
 			"y_token":  blog.YToken,
-			"is_y_doc": blog.IsYDoc,
-		})
+			"is_y_doc": blog.IsYDoc},
+		},
+	)
 	if err != nil {
 		status = http.StatusUnprocessableEntity
 		err = errors.New("db error")
