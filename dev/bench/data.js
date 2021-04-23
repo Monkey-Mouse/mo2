@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619193806202,
+  "lastUpdate": 1619193815854,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -5792,6 +5792,60 @@ window.BENCHMARK_DATA = {
             "value": 1077,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49905799+Chronostasys@users.noreply.github.com",
+            "name": "Boxiu Lee",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "6a132ff8f21a4ccc5a1f858ce2e2b1749cc2b866",
+          "message": "Merge pull request #284 from Monkey-Mouse/Chronostasys/issue281\n\n[fix] ext bug",
+          "timestamp": "2021-04-24T00:01:45+08:00",
+          "tree_id": "eb62d1c3792780b20b9d321f905e0a8f671386ee",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/6a132ff8f21a4ccc5a1f858ce2e2b1749cc2b866"
+        },
+        "date": 1619193814826,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7166590,
+            "unit": "ns/op",
+            "extra": "156 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 482948,
+            "unit": "ns/op",
+            "extra": "2799 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1402,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 106055,
+            "unit": "ns/op",
+            "extra": "10000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1280,
+            "unit": "ns/op",
+            "extra": "918340 times\n2 procs"
           }
         ]
       }
