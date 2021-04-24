@@ -580,7 +580,7 @@ export default class MO2Editor extends Vue {
         this.$emit("autosave");
         this.update = false;
       }
-      await timeout(5000);
+      await timeout(20000);
     }
   }
   @Watch("content")

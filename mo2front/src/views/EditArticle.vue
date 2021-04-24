@@ -200,6 +200,11 @@ export default class EditArticle extends Vue {
           this.blog = val;
           this.content = `<h1>${val.title}</h1>${val.content}`;
           this.loading = false;
+          if (this.blog.is_y_doc && !this.$route.query["group"]) {
+            this.$router.replace(
+              this.$route.path + "?group=" + this.blog.y_token
+            );
+          }
         })
         .catch((reason: AxiosError) => {
           if (reason.response.status === 404) {
