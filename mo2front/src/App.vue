@@ -81,7 +81,13 @@
       >
         LOGIN
       </v-btn>
-      <div v-if="$route.path.indexOf('/edit') === 0 && !search">
+      <div
+        v-if="
+          $route.path.indexOf('/edit') === 0 &&
+          !search &&
+          autoSaving !== 'notme'
+        "
+      >
         <v-row>
           <div v-if="autoSaving" class="grey--text ma-2">
             <v-progress-circular
@@ -326,7 +332,7 @@ Vue.use(Vuelidate);
 export default class App extends Vue {
   drawer = false;
   user: User = BlankUser;
-  autoSaving = false;
+  autoSaving: boolean | "notme" = "notme";
   snackbar = false;
   userload = false;
   search = false;

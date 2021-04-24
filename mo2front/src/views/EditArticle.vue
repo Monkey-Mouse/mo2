@@ -21,6 +21,7 @@
       @autosave="autoSave"
       :user="user"
       :ystate="blog.y_doc"
+      :authorId="blog.authorId"
     />
     <MO2Dialog
       v-if="propLoad"
@@ -194,6 +195,8 @@ export default class EditArticle extends Vue {
         token: this.$route.query["group"] as string,
       })
         .then((val) => {
+          if (val.authorId !== this.user.id)
+            this.$emit("update:autoSaving", "notme");
           this.blog = val;
           this.content = `<h1>${val.title}</h1>${val.content}`;
           this.loading = false;

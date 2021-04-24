@@ -13,7 +13,7 @@
       <v-col cols="12" lg="7" class="mo2editor">
         <div
           v-if="editor"
-          v-show="this.editor.isFocused"
+          v-show="focusedOnce"
           class="menubar mt-4"
           style="z-index: 9999"
           :style="{ 'overflow-x': $vuetify.breakpoint.xsOnly ? 'auto' : '' }"
@@ -80,23 +80,20 @@
         <v-progress-circular
           v-if="isuploading"
           class="offset-10 offset-lg-7"
-          style="position: fixed; z-index: 0"
+          style="position: fixed; z-index: 1"
           indeterminate
           color="amber"
         ></v-progress-circular>
         <v-switch
+          :disabled="authorId !== user.id"
           hint="collab"
           persistent-hint
           v-else
           v-model="collab"
-          class="offset-10 offset-lg-7"
-          style="position: fixed; z-index: 0"
+          class="offset-9 offset-lg-7"
+          style="position: fixed; z-index: 1"
         ></v-switch>
-        <bubble-menu
-          v-if="editor"
-          v-show="this.editor.isFocused"
-          :editor="editor"
-        >
+        <bubble-menu v-if="editor" v-show="focusedOnce" :editor="editor">
           <v-btn-toggle
             dense
             :value="[]"
@@ -214,11 +211,7 @@
             </v-btn>
           </v-btn-toggle>
         </bubble-menu>
-        <floating-menu
-          v-if="editor"
-          v-show="this.editor.isFocused"
-          :editor="editor"
-        >
+        <floating-menu v-if="editor" v-show="focusedOnce" :editor="editor">
           <v-btn-toggle
             dense
             :value="[]"
@@ -366,7 +359,14 @@ import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { WebsocketProvider } from "y-websocket";
 import { Prop, Watch } from "vue-property-decorator";
-import { getRandomColor, Prompt, SetBlogType, timeout } from "@/utils";
+import {
+  getRandomColor,
+  makeid,
+  Prompt,
+  SetBlogType,
+  timeout,
+  UserRole,
+} from "@/utils";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import CodeBlockComponent from "./Lowlight/CodeBlockComponent.vue";
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
@@ -393,7 +393,16 @@ export default class MO2Editor extends Vue {
   @Prop()
   user: User;
   @Prop()
+  authorId: string;
+  @Prop()
   ystate: string;
+  _f = false;
+  get focusedOnce() {
+    if (this.editor.isFocused) {
+      this._f = true;
+    }
+    return this._f;
+  }
   // @Prop({default:false})
   // isydoc:boolean;
   isuploading = false;
@@ -444,7 +453,9 @@ export default class MO2Editor extends Vue {
       });
     }
   }
-
+  get isUser() {
+    return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
+  }
   initEditor(content: string, group?: string, dontUseYstate?: boolean) {
     const exts = [
       Paragraph,
@@ -501,7 +512,6 @@ export default class MO2Editor extends Vue {
 
       this.ydoc = new Y.Doc();
       if (this.ystate && !dontUseYstate) {
-        console.log(this.ystate);
         Y.applyUpdateV2(
           this.ydoc,
           Uint8Array.from(atob(this.ystate), (c) => c.charCodeAt(0))
@@ -523,7 +533,9 @@ export default class MO2Editor extends Vue {
         CollaborationCursor.configure({
           provider: this.provider,
           user: {
-            name: this.user.name,
+            name: this.isUser
+              ? this.user.name
+              : this.user.name + "_" + makeid(4),
             color: getRandomColor(),
           },
           onUpdate: (users) => {

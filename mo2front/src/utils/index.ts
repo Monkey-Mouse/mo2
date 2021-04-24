@@ -63,12 +63,22 @@ export function GetErrorMsg(apiError: any) {
     }
 }
 export function getRandomColor() {
-    var letters = '0123456789ABCDEF';
+    var letters = '456789ABCD';
     var color = '#';
     for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
+        color += letters[Math.floor(Math.random() * letters.length)];
     }
     return color;
+}
+export function makeid(length) {
+    var result = [];
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result.push(characters.charAt(Math.floor(Math.random() *
+            charactersLength)));
+    }
+    return result.join('');
 }
 export var globaldic: any = {};
 
