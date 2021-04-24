@@ -509,7 +509,7 @@ export default class MO2Editor extends Vue {
       }
       this.rtcProvider = new WebrtcProvider(group, this.ydoc);
       this.provider = new WebsocketProvider(
-        "wss://demos.yjs.dev",
+        "wss://www.motwo.cn/yjs",
         group,
         this.ydoc
       );
