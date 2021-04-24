@@ -326,7 +326,10 @@ export default class EditArticle extends Vue {
     }
   }
   autoSave() {
-    if (this.published || this.blog.authorId !== this.user.id) {
+    if (
+      this.published ||
+      (this.blog.authorId && this.blog.authorId !== this.user.id)
+    ) {
       return;
     }
     this.$emit("update:autoSaving", true);

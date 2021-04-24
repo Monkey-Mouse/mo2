@@ -9,7 +9,7 @@
       style="display: none"
       @change="fileSelected"
     />
-    <v-row justify="center">
+    <v-row v-show="connected || !this.$route.query['group']" justify="center">
       <v-col cols="12" lg="7" class="mo2editor">
         <div
           v-if="editor"
@@ -301,6 +301,22 @@
         </div>
       </v-col>
     </v-row>
+    <v-row v-if="!(connected || !this.$route.query['group'])" justify="center">
+      <v-col align-self="center" class="text-center">
+        <v-progress-circular
+          size="128"
+          indeterminate
+          color="primary"
+        ></v-progress-circular
+      ></v-col>
+    </v-row>
+    <v-row
+      v-if="!(connected || !this.$route.query['group'])"
+      class="text-center"
+      justify="center"
+    >
+      <v-col align-self="center"> Connecting to collaborators</v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -395,6 +411,7 @@ export default class MO2Editor extends Vue {
     return this.$route.query["group"] !== undefined;
   }
   set collab(v: boolean) {
+    const c = this.GetHTML();
     if (v) {
       // eslint-disable-next-line @typescript-eslint/camelcase
       SetBlogType({
@@ -403,7 +420,7 @@ export default class MO2Editor extends Vue {
         id: this.$route.params["id"],
       })
         .then((d) => {
-          this.initEditor(this.GetHTML(), d.token);
+          this.initEditor(c, d.token, true);
           this.$router.replace(this.$route.fullPath + "?group=" + d.token);
           navigator.clipboard.writeText(window.location.href).then(() => {
             Prompt("合作编辑加入链接已复制到剪贴板！分享给别人即可", 10000);
@@ -421,14 +438,14 @@ export default class MO2Editor extends Vue {
         id: this.$route.params["id"],
       }).then(() => {
         this.$router.replace(this.$route.path).then(() => {
-          this.initEditor(this.GetHTML());
+          this.initEditor(c);
         });
         Prompt("退出合作编辑！", 10000);
       });
     }
   }
 
-  initEditor(content: string, group?: string) {
+  initEditor(content: string, group?: string, dontUseYstate?: boolean) {
     const exts = [
       Paragraph,
       Text,
@@ -478,9 +495,13 @@ export default class MO2Editor extends Vue {
     }
     group = group ?? (this.$route.query["group"] as string);
     if (group) {
-      content = "";
+      if (!dontUseYstate) {
+        content = "";
+      }
+
       this.ydoc = new Y.Doc();
-      if (this.ystate) {
+      if (this.ystate && !dontUseYstate) {
+        console.log(this.ystate);
         Y.applyUpdateV2(
           this.ydoc,
           Uint8Array.from(atob(this.ystate), (c) => c.charCodeAt(0))
@@ -492,6 +513,9 @@ export default class MO2Editor extends Vue {
         group,
         this.ydoc
       );
+      this.provider.on("status", (event) => {
+        this.connected = event.status === "connected";
+      });
       exts.push(
         Collaboration.configure({
           document: this.ydoc,
@@ -503,7 +527,6 @@ export default class MO2Editor extends Vue {
             color: getRandomColor(),
           },
           onUpdate: (users) => {
-            this.connected = true;
             this.userNum = users.length;
             return null;
           },
@@ -557,6 +580,8 @@ export default class MO2Editor extends Vue {
   dispose() {
     this.editor.destroy();
     this.ydoc?.destroy();
+    this.rtcProvider?.disconnect();
+    this.provider?.disconnect();
     this.rtcProvider?.destroy();
     this.provider?.destroy();
   }
