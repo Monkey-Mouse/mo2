@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619257344263,
+  "lastUpdate": 1619265497196,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -6170,6 +6170,60 @@ window.BENCHMARK_DATA = {
             "value": 1312,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "c9e9cf8aa7ba7955d31a9d6bf56f12323f042b82",
+          "message": "✨ [choir] small editor enhancements\n- longer autosave time\n- auto enter collab for ydoc",
+          "timestamp": "2021-04-24T19:56:19+08:00",
+          "tree_id": "b32e1b081164f400f8dacd80818d6f8af08ca6c7",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/c9e9cf8aa7ba7955d31a9d6bf56f12323f042b82"
+        },
+        "date": 1619265496155,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7141546,
+            "unit": "ns/op",
+            "extra": "159 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 479486,
+            "unit": "ns/op",
+            "extra": "2596 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1419,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 110693,
+            "unit": "ns/op",
+            "extra": "9356 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1324,
+            "unit": "ns/op",
+            "extra": "932756 times\n2 procs"
           }
         ]
       }
