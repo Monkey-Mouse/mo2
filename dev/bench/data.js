@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619245125867,
+  "lastUpdate": 1619257344263,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -6116,6 +6116,60 @@ window.BENCHMARK_DATA = {
             "value": 1269,
             "unit": "ns/op",
             "extra": "933775 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "a1421d639e8bbb0a5cf899c595cec198ce0a7fb0",
+          "message": "✅ [chore] minimun fixes",
+          "timestamp": "2021-04-24T17:40:08+08:00",
+          "tree_id": "d9c263ccf44a0004c1e67ff7123d834f8927ac63",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/a1421d639e8bbb0a5cf899c595cec198ce0a7fb0"
+        },
+        "date": 1619257343678,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7456038,
+            "unit": "ns/op",
+            "extra": "159 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 507069,
+            "unit": "ns/op",
+            "extra": "2685 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1507,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 116036,
+            "unit": "ns/op",
+            "extra": "10454 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1312,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
           }
         ]
       }
