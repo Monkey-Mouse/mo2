@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619233720601,
+  "lastUpdate": 1619245125867,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -6062,6 +6062,60 @@ window.BENCHMARK_DATA = {
             "value": 1258,
             "unit": "ns/op",
             "extra": "930506 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "0a34c677639571f9b6160f4db8350ffcf944b07c",
+          "message": "[feat] update to use mo2 yjs server",
+          "timestamp": "2021-04-24T14:16:44+08:00",
+          "tree_id": "30d2b5b02e98345bfd23eeef6be26a9078630014",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/0a34c677639571f9b6160f4db8350ffcf944b07c"
+        },
+        "date": 1619245125278,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7017172,
+            "unit": "ns/op",
+            "extra": "156 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 470854,
+            "unit": "ns/op",
+            "extra": "2821 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1382,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 104525,
+            "unit": "ns/op",
+            "extra": "10000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1269,
+            "unit": "ns/op",
+            "extra": "933775 times\n2 procs"
           }
         ]
       }
