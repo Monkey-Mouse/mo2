@@ -136,7 +136,10 @@
       :expand-on-hover="this.$vuetify.breakpoint.mdAndUp"
       v-model="drawerProp"
     >
-      <v-list-item class="px-2" :style="`height: ${appBarHeight}px`">
+      <v-list-item
+        class="px-2"
+        :style="`height: ${appBarHeight === 0 ? 64 : appBarHeight}px`"
+      >
         <v-badge
           :value="notificationNum !== 0"
           color="red"
@@ -331,6 +334,7 @@ Vue.use(Vuelidate);
 })
 export default class App extends Vue {
   drawer = false;
+  appBarHeight = 64;
   user: User = BlankUser;
   autoSaving: boolean | "notme" = "notme";
   snackbar = false;
@@ -566,7 +570,6 @@ export default class App extends Vue {
       this.user
     );
   }
-  appBarHeight = 64;
 }
 </script>
 <style lang="scss">
