@@ -79,8 +79,9 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 			"cover":       b.Cover,
 			"key_words":   b.KeyWords,
 			"categories":  b.CategoryIDs,
-			"author_id":   b.AuthorID,
 			"y_doc":       b.YDoc,
+		}}, {"$setOnInsert", bson.M{
+			"author_id": b.AuthorID,
 		}}},
 		options.Update().SetUpsert(true),
 	)
@@ -99,7 +100,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	return
 }
 
-// DeleteBlogs set flag of blog or draft to isDeleted
+// DeleteBlogs 彻底删除
 func DeleteBlogs(isDraft bool, blogIDs ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
 	if res, err := chooseCol(isDraft).DeleteMany(context.TODO(), bson.M{"_id": bson.M{"$in": blogIDs}}); err != nil {
 		mErr.InitError(err)
