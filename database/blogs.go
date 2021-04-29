@@ -70,7 +70,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	b.EntityInfo.Update()
 	result, err := col.UpdateOne(
 		context.TODO(),
-		bson.D{{"_id", b.ID}},
+		bson.D{{"_id", b.ID}, {"author_id", b.AuthorID}},
 		bson.D{{"$set", bson.M{
 			"entity_info": b.EntityInfo,
 			"title":       b.Title,
@@ -80,8 +80,6 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 			"key_words":   b.KeyWords,
 			"categories":  b.CategoryIDs,
 			"y_doc":       b.YDoc,
-		}}, {"$setOnInsert", bson.M{
-			"author_id": b.AuthorID,
 		}}},
 		options.Update().SetUpsert(true),
 	)

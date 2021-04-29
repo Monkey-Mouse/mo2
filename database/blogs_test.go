@@ -21,19 +21,16 @@ func Test_upsertBlog(t *testing.T) {
 	tests := []struct {
 		name         string
 		args         args
+		wantErr      bool
 		wantAuthorID primitive.ObjectID
 	}{
-		// first insert
-
-		{"first insert", args{isDraft: isDraft, b: &model.Blog{ID: id, AuthorID: uID}}, uID},
-		{"second update", args{isDraft: isDraft, b: &model.Blog{ID: id, AuthorID: primitive.NewObjectID()}}, uID},
+		{"first insert", args{isDraft: isDraft, b: &model.Blog{ID: id, AuthorID: uID, Content: "pita"}}, false, uID},
+		{"second update", args{isDraft: isDraft, b: &model.Blog{ID: id, AuthorID: primitive.NewObjectID(), Content: "wula"}}, true, uID},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			//fmt.Println(tt.args.b)
-			if mErr := upsertBlog(tt.args.b, tt.args.isDraft); mErr.IsError() {
+			if mErr := upsertBlog(tt.args.b, tt.args.isDraft); tt.wantErr != mErr.IsError() {
 				t.Errorf("upsertBlog() got Error= %v", mErr.ErrorTip)
-
 			}
 
 			if blog := FindBlogById(id, isDraft); !reflect.DeepEqual(blog.AuthorID, tt.wantAuthorID) {
