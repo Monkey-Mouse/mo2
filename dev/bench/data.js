@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619667854687,
+  "lastUpdate": 1619668163021,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -6540,6 +6540,60 @@ window.BENCHMARK_DATA = {
             "value": 1086,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "59b3c4bcfc51302a06438422d100af2315963d2e",
+          "message": "🐛 [fix] oauth err bug",
+          "timestamp": "2021-04-29T11:47:21+08:00",
+          "tree_id": "994d2bd10169173f7e22702133384789a501f5d0",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/59b3c4bcfc51302a06438422d100af2315963d2e"
+        },
+        "date": 1619668162458,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 9155315,
+            "unit": "ns/op",
+            "extra": "123 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 539776,
+            "unit": "ns/op",
+            "extra": "2593 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1416,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 154658,
+            "unit": "ns/op",
+            "extra": "6813 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1301,
+            "unit": "ns/op",
+            "extra": "923469 times\n2 procs"
           }
         ]
       }
