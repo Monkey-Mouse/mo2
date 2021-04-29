@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619668163021,
+  "lastUpdate": 1619671412219,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -6594,6 +6594,60 @@ window.BENCHMARK_DATA = {
             "value": 1301,
             "unit": "ns/op",
             "extra": "923469 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": false,
+          "id": "65c12069412c1100fbeeb85a2e75e6699b8ca1d4",
+          "message": "🐛 [fix] redirect",
+          "timestamp": "2021-04-29T12:40:53+08:00",
+          "tree_id": "993a5a79719be54ede9cb3be52f3d955cc049a02",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/65c12069412c1100fbeeb85a2e75e6699b8ca1d4"
+        },
+        "date": 1619671411676,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7256189,
+            "unit": "ns/op",
+            "extra": "150 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 544518,
+            "unit": "ns/op",
+            "extra": "2695 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1544,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 124260,
+            "unit": "ns/op",
+            "extra": "8772 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1380,
+            "unit": "ns/op",
+            "extra": "890234 times\n2 procs"
           }
         ]
       }
