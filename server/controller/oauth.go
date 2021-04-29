@@ -86,7 +86,7 @@ func (c *Controller) GithubOauth(ctx *gin.Context) {
 	guser := GithubUser{}
 	fmt.Println(string(udata))
 	err = json.Unmarshal(udata, &guser)
-	if err != nil {
+	if err != nil || guser.ID == 0 {
 		ctx.Redirect(307, "/oautherr")
 		fmt.Println(err, string(udata), "90")
 		return
