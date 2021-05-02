@@ -37,50 +37,83 @@
                 <v-spacer />
                 <v-tooltip v-if="draft" bottom>
                   <template v-slot:activator="{ on, attrs }">
-                    <v-btn plain small v-bind="attrs" v-on="on">
-                      <v-icon>mdi-eye-check</v-icon>
+                    <v-btn
+                      plain
+                      small
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="publish"
+                      :style="
+                        $vuetify.breakpoint.mobile
+                          ? 'padding: 0px;min-width:0px'
+                          : ''
+                      "
+                    >
+                      <v-icon>mdi-publish</v-icon>
                     </v-btn>
                   </template>
-                  <span>This is a draft</span>
+                  <span>Publish</span>
                 </v-tooltip>
-                <div v-if="user.id === blog.authorId">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn plain small v-bind="attrs" v-on="on" @click="edit">
-                        <v-icon>mdi-file-document-edit</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Edit</span>
-                  </v-tooltip>
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn
-                        @click="deleteArticle"
-                        plain
-                        small
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        <v-icon>mdi-delete</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Delete</span>
-                  </v-tooltip>
-                  <v-tooltip v-if="blog.entityInfo.is_deleted" bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn
-                        @click="restoreArticle"
-                        plain
-                        small
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        <v-icon>mdi-delete-restore</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Restore</span>
-                  </v-tooltip>
-                </div>
+                <v-tooltip v-if="user.id === blog.authorId" bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      plain
+                      small
+                      :style="
+                        $vuetify.breakpoint.mobile
+                          ? 'padding: 0px;min-width:0px'
+                          : ''
+                      "
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="edit"
+                    >
+                      <v-icon>mdi-file-document-edit</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Edit</span>
+                </v-tooltip>
+                <v-tooltip v-if="user.id === blog.authorId" bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      @click="deleteArticle"
+                      plain
+                      small
+                      v-bind="attrs"
+                      v-on="on"
+                      :style="
+                        $vuetify.breakpoint.mobile
+                          ? 'padding: 0px;min-width:0px'
+                          : ''
+                      "
+                    >
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Delete</span>
+                </v-tooltip>
+                <v-tooltip
+                  v-if="blog.entityInfo.is_deleted && user.id === blog.authorId"
+                  bottom
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      :style="
+                        $vuetify.breakpoint.mobile
+                          ? 'padding: 0px;min-width:0px'
+                          : ''
+                      "
+                      @click="restoreArticle"
+                      plain
+                      small
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      <v-icon>mdi-delete-restore</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Restore</span>
+                </v-tooltip>
               </v-row>
             </v-container>
             <v-row v-else class="mb-6">
@@ -281,6 +314,16 @@
                 </v-list-item>
               </v-list>
             </v-navigation-drawer>
+            <MO2Dialog
+              :show.sync="showPublish"
+              confirmText="发布"
+              title="发布文章"
+              :inputProps="inputProps"
+              :validator="validator"
+              ref="dialog"
+              :confirm="confirm"
+              :uploadImgs="uploadImgs"
+            />
           </div>
         </v-col>
       </v-row>
@@ -311,28 +354,93 @@ import {
   ShareToQQ,
   ShowLogin,
   ToggleLikeBlog,
+  UploadImgToQiniu,
+  UpsertBlog,
   UpsertComment,
   UpsertSubComment,
   UserRole,
 } from "@/utils";
 import hljs from "highlight.js";
-import { Blog, User, Comment, UserListData, BlankBlog } from "@/models";
+import {
+  Blog,
+  User,
+  Comment,
+  UserListData,
+  BlankBlog,
+  InputProp,
+  BlogUpsert,
+} from "@/models";
 import Avatar from "@/components/UserAvatar.vue";
 import { Prop, Watch } from "vue-property-decorator";
 import { TimeAgo } from "vue2-timeago";
 import DeleteConfirm from "@/components/DeleteConfirm.vue";
-import vuetify from "@/plugins/vuetify";
+import { required, minLength } from "vuelidate/lib/validators";
+import MO2Dialog from "../components/MO2Dialog.vue";
 @Component({
   components: {
     Editor,
     Avatar,
     DeleteConfirm,
     TimeAgo,
+    MO2Dialog,
   },
 })
 export default class ReadArticle extends Vue {
   @Prop()
   user: User;
+  uploadImgs = UploadImgToQiniu;
+  showPublish = false;
+  validator = {
+    description: {
+      required: required,
+      min: minLength(8),
+    },
+    title: {
+      required: required,
+    },
+  };
+  inputProps: { [name: string]: InputProp } = {
+    title: {
+      errorMsg: {
+        required: "标题不可为空",
+      },
+      label: "Title",
+      default: "",
+      icon: "mdi-format-title",
+      col: 12,
+      type: "text",
+    },
+    description: {
+      errorMsg: {
+        required: "描述不可为空",
+        min: "描述长度不小于8",
+      },
+      label: "Description",
+      default: "",
+      icon: "mdi-text",
+      col: 12,
+      type: "textarea",
+    },
+    cover: {
+      errorMsg: {},
+      label: "Cover",
+      default: {},
+      icon: "mdi-image",
+      col: 12,
+      type: "imgselector",
+    },
+    categories: {
+      errorMsg: {},
+      label: "Categories",
+      default: "",
+      col: 12,
+      options: [],
+      type: "select",
+    },
+  };
+  get dialog() {
+    return this.$refs["dialog"] as MO2Dialog;
+  }
   title = "";
   html = "";
   writeCommentShow = false;
@@ -359,6 +467,7 @@ export default class ReadArticle extends Vue {
   commentNum = 0;
   praiseNum = 0;
   liked = false;
+
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
@@ -374,6 +483,15 @@ export default class ReadArticle extends Vue {
         : "删除后此文章将保存在垃圾箱里24小时")
     );
   }
+  async confirm(model: BlogUpsert, draft = false) {
+    try {
+      await UpsertBlog({ draft: false }, model);
+      this.$router.push("/article/" + this.blog.id);
+      return { err: "", pass: true };
+    } catch (error) {
+      return { err: GetErrorMsg(error), pass: false };
+    }
+  }
   restoreArticle() {
     RestoreBlog(this.blog.id, { draft: this.draft })
       .then(() => {
@@ -383,6 +501,30 @@ export default class ReadArticle extends Vue {
       .catch((err) => {
         Prompt(GetErrorMsg(err), 10000);
       });
+  }
+  publish() {
+    this.showPublish = true;
+    this.dialog.setModel(this.blog);
+    let imgEs = document.querySelectorAll(".mo2content img");
+    const array = [...imgEs];
+    const list = [];
+    if (this.blog.cover && this.blog.cover !== "") {
+      list.push({
+        src: this.blog.cover,
+        active: false,
+      });
+    }
+    array.map((e) => {
+      const i = e as HTMLImageElement;
+      list.push({ src: i.src, active: false });
+    });
+    list.push({
+      src:
+        "//cdn.mo2.leezeeyee.com/60365aae06fd3124561400c3/1614260703850314778image.png",
+      active: false,
+    });
+    list[0].active = true;
+    this.dialog.setModel({ cover: list });
   }
   scrollToTop() {
     window.scrollTo(0, 0);
@@ -448,6 +590,7 @@ export default class ReadArticle extends Vue {
             this.liked = l.liked;
           });
         }
+
         setTimeout(() => {
           GenerateTOC();
           // first, find all the code blocks

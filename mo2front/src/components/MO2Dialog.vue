@@ -88,6 +88,7 @@ export default class About extends Vue {
     }
   }
   setModel(model: any) {
+    console.log(model);
     setTimeout(() => {
       (this.$refs["inputs"] as InputList).setModel(model);
     }, 100);
