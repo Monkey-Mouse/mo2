@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1619671412219,
+  "lastUpdate": 1619973877492,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -6648,6 +6648,60 @@ window.BENCHMARK_DATA = {
             "value": 1380,
             "unit": "ns/op",
             "extra": "890234 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "a80bd0088584573aa92c29791eab04cd1ec6f7a6",
+          "message": "✨ [feat]add publish button to read article",
+          "timestamp": "2021-05-03T00:42:25+08:00",
+          "tree_id": "b3f54741b7f4f0a19f502740a9e0a038d79dcfb6",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/a80bd0088584573aa92c29791eab04cd1ec6f7a6"
+        },
+        "date": 1619973876457,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 9691593,
+            "unit": "ns/op",
+            "extra": "116 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 579059,
+            "unit": "ns/op",
+            "extra": "2373 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1605,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 169619,
+            "unit": "ns/op",
+            "extra": "5916 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1511,
+            "unit": "ns/op",
+            "extra": "814452 times\n2 procs"
           }
         ]
       }
