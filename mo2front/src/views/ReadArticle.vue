@@ -703,3 +703,16 @@ export default class ReadArticle extends Vue {
   margin-bottom: 6px !important;
 }
 </style>
+<style scoped>
+@import url("https://cdn.jsdelivr.net/npm/katex@0.13.5/dist/katex.min.css");
+</style>
+<style lang="scss">
+.v-application {
+  span.katex {
+    .accent {
+      background-color: unset !important;
+      border-color: unset !important;
+    }
+  }
+}
+</style>

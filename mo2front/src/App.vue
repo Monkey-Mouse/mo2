@@ -583,4 +583,8 @@ export default class App extends Vue {
   padding-top: 70px !important;
   margin-top: -70px !important;
 }
+[anchor] {
+  padding-top: 70px !important;
+  margin-top: -70px !important;
+}
 </style>

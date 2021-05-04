@@ -207,7 +207,7 @@ export function GenerateTOC() {
         toc += "<li><a href=\"#" + anchor + "\">" + `<div>${titleText}</div>`
             + "</a></li>";
 
-        return "<h" + (openLevel) + attrs + ` id="${anchor}" class="anchor h">`
+        return "<h" + (openLevel) + attrs + ` id="${anchor}" anchor class="anchor h">`
             + titleText + "</h" + closeLevel + ">";
     }
     document.getElementById("titleContainer").innerHTML =
@@ -229,7 +229,7 @@ export function GenerateTOC() {
     let prevNode: Element = null;
     let prev: Element = null;
     setTimeout(() => {
-        const hs = document.getElementsByClassName('h')
+        const hs = document.querySelectorAll("h1, h2, h3, h4, h5, h6")
         window.addEventListener('scroll', () => {
             for (const i of hs) {
                 if (ElementInViewport(i as HTMLElement)) {
