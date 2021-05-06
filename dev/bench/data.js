@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1620141142479,
+  "lastUpdate": 1620262502874,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -6756,6 +6756,56 @@ window.BENCHMARK_DATA = {
             "value": 1237,
             "unit": "ns/op",
             "extra": "916735 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "20789a54b2956cd68fca3067717d524124be4df4",
+          "message": "[Snyk] Security upgrade vue2-timeago from 2.0.0-beta.5 to 2.0.0",
+          "timestamp": "2021-05-04T15:10:26Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/287/commits/20789a54b2956cd68fca3067717d524124be4df4"
+        },
+        "date": 1620262501399,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 8387676,
+            "unit": "ns/op",
+            "extra": "138 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 498439,
+            "unit": "ns/op",
+            "extra": "2458 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1461,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 139660,
+            "unit": "ns/op",
+            "extra": "7990 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1159,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
           }
         ]
       }
