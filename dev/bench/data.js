@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1620262502874,
+  "lastUpdate": 1620637125610,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -6806,6 +6806,60 @@ window.BENCHMARK_DATA = {
             "value": 1159,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "9fdd91fe3c511ad904d01fef8cf20a1e04527e37",
+          "message": "💄 [enhance] smaller cover img",
+          "timestamp": "2021-05-10T16:56:38+08:00",
+          "tree_id": "5833edf271e2d206087e01efe80d27be8533a4f2",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/9fdd91fe3c511ad904d01fef8cf20a1e04527e37"
+        },
+        "date": 1620637124635,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7229783,
+            "unit": "ns/op",
+            "extra": "157 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 472431,
+            "unit": "ns/op",
+            "extra": "2680 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1397,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 105957,
+            "unit": "ns/op",
+            "extra": "9555 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1316,
+            "unit": "ns/op",
+            "extra": "887475 times\n2 procs"
           }
         ]
       }
