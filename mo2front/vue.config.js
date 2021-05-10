@@ -85,7 +85,7 @@ module.exports = {
           cacheName: 'api-cache',
         },
       }, {
-        urlPattern: new RegExp(".*\\.(jpg|png|tif|ico|txt|css)$"),
+        urlPattern: new RegExp(".*\\.(jpg|png|tif|ico|txt|css|webp)$"),
         handler: 'StaleWhileRevalidate',
         options: {
           cacheName: 'static-cache',

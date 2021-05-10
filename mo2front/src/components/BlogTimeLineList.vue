@@ -66,12 +66,14 @@
                   contain
                   height="125px"
                   :src="
-                    blog.cover ? blog.cover : '//cdn.mo2.leezeeyee.com/404.jpg'
+                    (blog.cover
+                      ? blog.cover
+                      : '//cdn.mo2.leezeeyee.com/404.jpg') + '~cover'
                   "
                   :lazy-src="
-                    blog.cover
+                    (blog.cover
                       ? blog.cover
-                      : '//cdn.mo2.leezeeyee.com/404.jpg' + '~thumb'
+                      : '//cdn.mo2.leezeeyee.com/404.jpg') + '~thumb'
                   "
                   style="flex-basis: 125px"
                 >
