@@ -68,12 +68,18 @@
                   :src="
                     (blog.cover
                       ? blog.cover
-                      : '//cdn.mo2.leezeeyee.com/404.jpg') + '~cover'
+                      : '//cdn.mo2.leezeeyee.com/404.jpg') +
+                    (blog.cover.indexOf('//cdn.mo2.leezeeyee.com') > 0
+                      ? '~cover'
+                      : '')
                   "
                   :lazy-src="
                     (blog.cover
                       ? blog.cover
-                      : '//cdn.mo2.leezeeyee.com/404.jpg') + '~thumb'
+                      : '//cdn.mo2.leezeeyee.com/404.jpg') +
+                    (blog.cover.indexOf('//cdn.mo2.leezeeyee.com') > 0
+                      ? '~thumb'
+                      : '')
                   "
                   style="flex-basis: 125px"
                 >
