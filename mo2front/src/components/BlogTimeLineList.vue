@@ -69,7 +69,7 @@
                     (blog.cover
                       ? blog.cover
                       : '//cdn.mo2.leezeeyee.com/404.jpg') +
-                    (blog.cover.indexOf('//cdn.mo2.leezeeyee.com') > 0
+                    ((blog.cover && blog.cover.indexOf('//cdn.mo2.leezeeyee.com') > 0)
                       ? '~cover'
                       : '')
                   "
@@ -77,7 +77,7 @@
                     (blog.cover
                       ? blog.cover
                       : '//cdn.mo2.leezeeyee.com/404.jpg') +
-                    (blog.cover.indexOf('//cdn.mo2.leezeeyee.com') > 0
+                    ((blog.cover && blog.cover.indexOf('//cdn.mo2.leezeeyee.com') > 0)
                       ? '~thumb'
                       : '')
                   "
