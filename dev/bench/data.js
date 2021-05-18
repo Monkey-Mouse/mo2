@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1620870647358,
+  "lastUpdate": 1621301626880,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -6968,6 +6968,60 @@ window.BENCHMARK_DATA = {
             "value": 1248,
             "unit": "ns/op",
             "extra": "994926 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "liboxiu@dreamofalice.club",
+            "name": "李博修",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "be49f38fa6a85fd5b1010f67db4ded2d3c20b805",
+          "message": "🐛 [fix] publish article",
+          "timestamp": "2021-05-18T09:31:47+08:00",
+          "tree_id": "9940ee89a22dbdd3442561f3b99fd3be83bef284",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/be49f38fa6a85fd5b1010f67db4ded2d3c20b805"
+        },
+        "date": 1621301626271,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 8977852,
+            "unit": "ns/op",
+            "extra": "124 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 560364,
+            "unit": "ns/op",
+            "extra": "2404 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1481,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 150210,
+            "unit": "ns/op",
+            "extra": "6678 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1293,
+            "unit": "ns/op",
+            "extra": "878635 times\n2 procs"
           }
         ]
       }
