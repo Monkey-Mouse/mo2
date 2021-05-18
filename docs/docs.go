@@ -67,19 +67,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -117,13 +117,13 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -161,19 +161,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -214,13 +214,13 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -243,8 +243,8 @@ var doc = `{
                     {
                         "type": "array",
                         "description": "user IDs list",
-                        "name": "userIDs",
-                        "in": "path",
+                        "name": "id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -289,19 +289,19 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginUserInfo"
+                            "$ref": "#/definitions/dto.UserInfo"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -358,19 +358,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -412,34 +412,42 @@ var doc = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
             }
         },
-        "/api/blogs/addBlogs2Categories": {
+        "/api/admin/indexblogs": {
             "post": {
-                "description": "blogs 与 categories皆为id列表，方便批量操作",
-                "consumes": [
-                    "application/json"
+                "description": "none",
+                "tags": [
+                    "admin"
                 ],
+                "summary": "index all blogs",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/blogs/category": {
+            "get": {
+                "description": "若id为空，返回所有categories(debug mode)；若id不为空，返回该id的category",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "category"
                 ],
-                "summary": "add blogs to chosen categories",
+                "summary": "find categories",
                 "parameters": [
                     {
-                        "description": "dto.AddBlogs2Categories",
+                        "type": "string",
+                        "description": "string ObjectID",
                         "name": "id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.AddBlogs2Categories"
-                        }
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -448,14 +456,12 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlog"
+                                "$ref": "#/definitions/model.Directory"
                             }
                         }
                     }
                 }
-            }
-        },
-        "/api/blogs/addCategory": {
+            },
             "post": {
                 "description": "add by json",
                 "consumes": [
@@ -475,7 +481,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Category"
+                            "$ref": "#/definitions/model.Directory"
                         }
                     }
                 ],
@@ -483,75 +489,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Category"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/addCategory2Category": {
-            "post": {
-                "description": "category为model.Category(若id存在，直接存放；否则新建) parent category 为id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "add category to parent category",
-                "parameters": [
-                    {
-                        "description": "category info and parent id",
-                        "name": "id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.AddCategory2Category"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Category"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/addCategory2User": {
-            "post": {
-                "description": "user 与 category 皆为id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "add category to user",
-                "parameters": [
-                    {
-                        "description": "category id and user id",
-                        "name": "id",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.AddCategory2User"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.AddCategory2User"
+                            "$ref": "#/definitions/model.Directory"
                         }
                     }
                 }
@@ -593,19 +531,19 @@ var doc = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -655,7 +593,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlogs"
+                                "$ref": "#/definitions/model.Blog"
                             }
                         }
                     },
@@ -664,26 +602,26 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlogs"
+                                "$ref": "#/definitions/model.Blog"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -739,128 +677,29 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlogs"
+                                "$ref": "#/definitions/model.Blog"
                             }
                         }
                     },
                     "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/dto.QueryBlogs"
-                            }
-                        }
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/findAllCategories": {
-            "get": {
-                "description": "若id为空，返回所有categories；若id不为空，返回该id的category",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find categories",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "string ObjectID",
-                        "name": "id",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Category"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/findCategoriesByUserId": {
-            "get": {
-                "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find categories by user id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "string ObjectID",
-                        "name": "userId",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/model.Category"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/api/blogs/findCategoryByUserId": {
-            "get": {
-                "description": "return (main category)个人的主存档 于前端不可见，用于后端存储",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "category"
-                ],
-                "summary": "find category by user id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "string ObjectID",
-                        "name": "userId",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Category"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -904,21 +743,18 @@ var doc = `{
                         }
                     },
                     "204": {
-                        "description": "No Content",
-                        "schema": {
-                            "$ref": "#/definitions/model.Blog"
-                        }
+                        "description": ""
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -958,6 +794,12 @@ var doc = `{
                         "description": "int 5",
                         "name": "pageSize",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "aaaa",
+                        "name": "search",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -966,7 +808,7 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlog"
+                                "$ref": "#/definitions/model.Blog"
                             }
                         }
                     },
@@ -975,88 +817,34 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.QueryBlog"
+                                "$ref": "#/definitions/model.Blog"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
             }
         },
         "/api/blogs/{id}": {
-            "put": {
-                "description": "restore by path",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "blogs"
-                ],
-                "summary": "restore Blog",
-                "parameters": [
-                    {
-                        "type": "boolean",
-                        "description": "bool true",
-                        "name": "draft",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "string xxxxxxxx",
-                        "name": "id",
-                        "in": "path"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Blog"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
-                        }
-                    }
-                }
-            },
             "delete": {
-                "description": "delete by path",
+                "description": "delete by id path(draft/blog)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1066,7 +854,7 @@ var doc = `{
                 "tags": [
                     "blogs"
                 ],
-                "summary": "delete Blog",
+                "summary": "彻底删除blog",
                 "parameters": [
                     {
                         "type": "boolean",
@@ -1089,22 +877,388 @@ var doc = `{
                     "204": {
                         "description": ""
                     },
+                    "304": {
+                        "description": ""
+                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/controller.ResponseError"
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/blogs/{operation}/{id}": {
+            "put": {
+                "description": "restore by path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "blogs"
+                ],
+                "summary": "restore Blog",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "bool true",
+                        "name": "draft",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "recycle/restore",
+                        "name": "operation",
+                        "in": "path"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Blog id",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/comment": {
+            "post": {
+                "description": "upsert json comments",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "upsert comments",
+                "parameters": [
+                    {
+                        "description": "comment",
+                        "name": "comment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Comment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Comment"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/comment/{id}": {
+            "get": {
+                "description": "get json comments",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "get comments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 0",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 5",
+                        "name": "pagesize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Comment"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "upsert json comments",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "upsert subcomments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "comment id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "subcomment",
+                        "name": "comment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Subcomment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Subcomment"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/commentcount/{id}": {
+            "get": {
+                "description": "get article comment num",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "count comments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "integer"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/directories/category": {
+            "delete": {
+                "description": "根据id删除，并解除与之相关实体的所有关联",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "category"
+                ],
+                "summary": "delete category",
+                "parameters": [
+                    {
+                        "description": "category id to delete",
+                        "name": "ids",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Directory"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/directories/{collection}": {
+            "get": {
+                "description": "from a list of directory ids [usage]:/api/directories/{collection}?id=60223d4042d6febff9f276f0\u0026id=60236866d2a68483adaccc38",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "directory"
+                ],
+                "summary": "List directories brief info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "category/...",
+                        "name": "collection",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "description": "directory IDs list",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Directory"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/file": {
+            "post": {
+                "description": "say something",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "simple test",
+                "parameters": [
+                    {
+                        "description": "file",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Blog"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -1156,24 +1310,244 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginUserInfo"
+                            "$ref": "#/definitions/dto.UserInfo"
                         }
                     }
                 }
             }
         },
-        "/sayHello": {
+        "/api/notification": {
             "get": {
-                "description": "say something",
+                "description": "get notifications",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "simple test",
+                "tags": [
+                    "notification"
+                ],
+                "summary": "get notifications",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "int 0",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "int 5",
+                        "name": "pagesize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/notification/num": {
+            "get": {
+                "description": "get notification num",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notification"
+                ],
+                "summary": "get notification num",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/relation/blogs/{type}/{ID}": {
+            "get": {
+                "description": "根据type返回不同结果：[category] 所有category包含的blog",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relation"
+                ],
+                "summary": "find blogs by given type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "find by category",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "ID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Blog"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/relation/categories/{type}": {
+            "post": {
+                "description": "（根据path中提供的关联类型选择对应方法）目前有：父category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relation"
+                ],
+                "summary": "将列表内的子categories关联到单个实体上",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "types to relate",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "sub category id and parent id",
+                        "name": "id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RelateEntitySet2Entity"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Directory"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/relation/category/{type}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relation"
+                ],
+                "summary": "relate category to given type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "relatedTo user/blog/category/userMain",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "category id to be related",
+                        "name": "e2e",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RelateEntity2Entity"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RelateEntity2Entity"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/relation/category/{type}/{ID}": {
+            "get": {
+                "description": "根据type返回不同结果：[user] 个人的所有category|[sub] 所有子category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "relation"
+                ],
+                "summary": "find categories by given type",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "find by user/sub",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "ID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Directory"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/badresponse.ResponseError"
                         }
                     }
                 }
@@ -1181,54 +1555,13 @@ var doc = `{
         }
     },
     "definitions": {
-        "controller.ResponseError": {
+        "badresponse.ResponseError": {
             "type": "object",
             "properties": {
                 "reason": {
                     "type": "string"
                 },
                 "time": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.AddBlogs2Categories": {
-            "type": "object",
-            "properties": {
-                "blog_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "category_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "dto.AddCategory2Category": {
-            "type": "object",
-            "properties": {
-                "category_id": {
-                    "$ref": "#/definitions/model.Category"
-                },
-                "parent_id": {
-                    "type": "string",
-                    "example": "xxxxxxx"
-                }
-            }
-        },
-        "dto.AddCategory2User": {
-            "type": "object",
-            "properties": {
-                "category_id": {
-                    "type": "string",
-                    "example": "xxxxxxx"
-                },
-                "user_id": {
                     "type": "string"
                 }
             }
@@ -1244,78 +1577,30 @@ var doc = `{
                 }
             }
         },
-        "dto.LoginUserInfo": {
+        "dto.RelateEntity2Entity": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "email@qq.com"
+                "relateTo_id": {
+                    "type": "string"
                 },
-                "id": {
-                    "type": "string",
-                    "example": "xxxxxxxxxxxxx=="
-                },
-                "name": {
-                    "type": "string",
-                    "example": "account name"
-                },
-                "roles": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "ordinaryUser"
-                    ]
+                "related_id": {
+                    "type": "string"
                 }
             }
         },
-        "dto.QueryBlog": {
+        "dto.RelateEntitySet2Entity": {
             "type": "object",
             "properties": {
-                "authorId": {
-                    "type": "string",
-                    "example": "xxxxxxxxxxxxx=="
+                "relateTo_id": {
+                    "type": "string"
                 },
-                "categories": {
+                "related_ids": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
-                },
-                "cover": {
-                    "type": "string",
-                    "example": "https://xxx/xxx"
-                },
-                "description": {
-                    "type": "string",
-                    "example": "mouse ❤ monkey"
-                },
-                "entityInfo": {
-                    "$ref": "#/definitions/model.Entity"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "xxxxxxxxxxxxx=="
-                },
-                "keyWords": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        "xxx",
-                        "xxx"
-                    ]
-                },
-                "title": {
-                    "type": "string",
-                    "example": "mouse ❤ monkey"
                 }
             }
-        },
-        "dto.QueryBlogs": {
-            "type": "object"
         },
         "dto.UserInfo": {
             "type": "object",
@@ -1356,6 +1641,10 @@ var doc = `{
         "dto.UserInfoBrief": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "email@qq.com"
+                },
                 "id": {
                     "type": "string",
                     "example": "xxxxxxxxxxxxx=="
@@ -1460,20 +1749,34 @@ var doc = `{
                 }
             }
         },
-        "model.Category": {
+        "model.Comment": {
             "type": "object",
             "properties": {
+                "article": {
+                    "type": "string"
+                },
+                "aurhor": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string",
+                    "example": "a comment"
+                },
+                "entity_info": {
+                    "$ref": "#/definitions/model.Entity"
+                },
                 "id": {
                     "type": "string",
                     "example": "xxxxxxxxxxxxxx=="
                 },
-                "name": {
-                    "type": "string",
-                    "example": "records"
+                "praise": {
+                    "$ref": "#/definitions/model.Praiseable"
                 },
-                "parent_id": {
-                    "type": "string",
-                    "example": "xxxxxxxxxxxxxx=="
+                "subs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Subcomment"
+                    }
                 }
             }
         },
@@ -1487,6 +1790,45 @@ var doc = `{
                 "password": {
                     "type": "string",
                     "example": "p@ssword"
+                }
+            }
+        },
+        "model.Directory": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxxx=="
+                },
+                "info": {
+                    "$ref": "#/definitions/model.DirectoryInfo"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "records"
+                },
+                "owner_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "parent_id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxxx=="
+                }
+            }
+        },
+        "model.DirectoryInfo": {
+            "type": "object",
+            "properties": {
+                "cover": {
+                    "type": "string",
+                    "example": "https://www.motwo.cn/cover"
+                },
+                "description": {
+                    "type": "string",
+                    "example": "course materials"
                 }
             }
         },
@@ -1516,6 +1858,42 @@ var doc = `{
                 "userNameOrEmail": {
                     "type": "string",
                     "example": "account name/email@mo2.com"
+                }
+            }
+        },
+        "model.Praiseable": {
+            "type": "object",
+            "properties": {
+                "down": {
+                    "type": "integer"
+                },
+                "up": {
+                    "type": "integer"
+                },
+                "weighted": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.Subcomment": {
+            "type": "object",
+            "properties": {
+                "aurhor": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string",
+                    "example": "a comment"
+                },
+                "entity_info": {
+                    "$ref": "#/definitions/model.Entity"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxxx=="
+                },
+                "praise": {
+                    "$ref": "#/definitions/model.Praiseable"
                 }
             }
         }

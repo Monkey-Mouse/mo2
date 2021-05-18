@@ -14,20 +14,34 @@
       </v-col>
     </v-row>
     <editor
-      v-show="!loading && editorLoaded"
+      v-if="!loading"
       :uploadImgs="uploadImgs"
       :content="content"
       @loaded="editorLoad"
       @autosave="autoSave"
+      :user="user"
+      :ystate="blog.y_doc"
+      :authorId="blog.authorId"
     />
     <MO2Dialog
+      v-if="propLoad"
       :show.sync="showPublish"
       confirmText="发布"
       title="发布文章"
       :inputProps="inputProps"
       :validator="validator"
       ref="dialog"
-      @confirm="confirm"
+      :confirm="confirm"
+      :uploadImgs="uploadImgs"
+    />
+    <MO2Dialog
+      v-if="propLoad"
+      :show.sync="uploadMD"
+      confirmText="发布"
+      title="发布文章"
+      :inputProps="uploadProps"
+      :validator="uploadValidator"
+      :confirm="confirmMD"
       :uploadImgs="uploadImgs"
     />
   </div>
@@ -36,20 +50,22 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import Editor from "../components/MO2Editor.vue";
+import Editor from "../components/Editor/MO2Editor.vue";
 import MO2Dialog from "../components/MO2Dialog.vue";
 import {
   GetArticle,
+  GetCates,
   GetErrorMsg,
-  globaldic,
+  Prompt,
   UploadImgToQiniu,
+  UploadMD,
   UpsertBlog,
   UpSertBlogSync,
 } from "@/utils";
-import { BlogUpsert, InputProp } from "@/models";
-import { required, minLength, email } from "vuelidate/lib/validators";
+import { BlogUpsert, InputProp, User } from "@/models";
+import { required, minLength } from "vuelidate/lib/validators";
 import { AxiosError } from "axios";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 @Component({
   components: {
     Editor,
@@ -59,6 +75,8 @@ import { Prop } from "vue-property-decorator";
 export default class EditArticle extends Vue {
   @Prop()
   autoSaving: boolean;
+  @Prop()
+  user: User;
   showPublish = false;
   uploadImgs = UploadImgToQiniu;
   loading = true;
@@ -66,6 +84,24 @@ export default class EditArticle extends Vue {
   content = "";
   editor: Editor;
   blog: BlogUpsert = {};
+  published = false;
+  propLoad = false;
+  uploadProps: { [name: string]: InputProp } = {
+    file: {
+      errorMsg: { required: "文件不可为空" },
+      label: "Markdown文件",
+      default: {},
+      icon: "mdi-file-document",
+      col: 12,
+      type: "file",
+      accept: ".md",
+    },
+  };
+  uploadValidator = {
+    file: {
+      required: required,
+    },
+  };
   validator = {
     description: {
       required: required,
@@ -75,89 +111,173 @@ export default class EditArticle extends Vue {
       required: required,
     },
   };
-  get inputProps(): { [name: string]: InputProp } {
-    return {
-      title: {
-        errorMsg: {
-          required: "标题不可为空",
-        },
-        label: "Title",
-        default: "",
-        icon: "mdi-format-title",
-        col: 12,
-        type: "text",
+  uploadMD = false;
+  inputProps: { [name: string]: InputProp } = {
+    title: {
+      errorMsg: {
+        required: "标题不可为空",
       },
-      description: {
-        errorMsg: {
-          required: "描述不可为空",
-        },
-        label: "Description",
-        default: "",
-        icon: "mdi-text",
-        col: 12,
-        type: "textarea",
+      label: "Title",
+      default: "",
+      icon: "mdi-format-title",
+      col: 12,
+      type: "text",
+    },
+    description: {
+      errorMsg: {
+        required: "描述不可为空",
+        min: "描述长度不小于8",
       },
-      cover: {
-        errorMsg: {},
-        label: "Cover",
-        default: {},
-        icon: "mdi-image",
-        col: 12,
-        type: "imgselector",
-      },
-    };
-  }
+      label: "Description",
+      default: "",
+      icon: "mdi-text",
+      col: 12,
+      type: "textarea",
+    },
+    cover: {
+      errorMsg: {},
+      label: "Cover",
+      default: {},
+      icon: "mdi-image",
+      col: 12,
+      type: "imgselector",
+    },
+    categories: {
+      errorMsg: {},
+      label: "Categories",
+      default: "",
+      col: 12,
+      options: [],
+      type: "select",
+    },
+  };
+
   created() {
-    // this.content = globaldic.article ?? "";
-    // globaldic.article = "";
-    // console.log(this.content, this.$route.params["id"]);
-    if (this.content !== "") {
-      this.loading = false;
+    this.init();
+    GetCates(this.user.id).then((data) => {
+      this.inputProps.categories.options = data.map((v, i, a) => {
+        return { text: v.name, value: v.id };
+      });
+      this.propLoad = true;
+    });
+  }
+  mounted() {
+    this.$emit("update:autoSaving", false);
+  }
+  async confirmMD({ file: file }: { file: File }) {
+    try {
+      this.blog = await UploadMD(file);
+      if (this.blog.title === "") {
+        this.content = this.blog.content;
+      } else {
+        this.content = `<h1>${this.blog.title}</h1>${this.blog.content}`;
+      }
+      this.$router.replace(`/edit/${this.blog.id}`);
+      return { err: "", pass: true };
+    } catch (error) {
+      return { err: GetErrorMsg(error), pass: false };
+    }
+  }
+  @Watch("$route", { immediate: true, deep: true })
+  pageChange() {
+    if (!this.$route.params["id"] || this.$route.params["id"] === "") {
+      this.content = "";
+      this.blog = {};
+      this.init();
+    }
+  }
+  init() {
+    if (this.$route.params["id"]) {
       this.blog.id = this.$route.params["id"];
-    } else if (this.$route.params["id"]) {
-      this.blog.id = this.$route.params["id"];
-      GetArticle({ id: this.blog.id, draft: true })
+      GetArticle({
+        id: this.blog.id,
+        draft: true,
+        token: this.$route.query["group"] as string,
+      })
         .then((val) => {
+          if (val.authorId !== this.user.id)
+            this.$emit("update:autoSaving", "notme");
           this.blog = val;
           this.content = `<h1>${val.title}</h1>${val.content}`;
           this.loading = false;
+          if (this.blog.is_y_doc && !this.$route.query["group"]) {
+            this.$router.replace(
+              this.$route.path + "?group=" + this.blog.y_token
+            );
+          }
         })
         .catch((reason: AxiosError) => {
           if (reason.response.status === 404) {
-            GetArticle({ id: this.blog.id, draft: false })
+            GetArticle({
+              id: this.blog.id,
+              draft: false,
+              token: this.$route.query["group"] as string,
+            })
               .then((val) => {
+                if (val.authorId !== this.user.id) {
+                  this.$router.push("/404");
+                }
                 this.blog = val;
                 this.content = `<h1>${val.title}</h1>${val.content}`;
                 this.loading = false;
               })
-              .catch((err) => {});
+              .catch(() => {
+                this.$router.push("/404");
+              });
+          } else {
+            this.$router.push("/404");
           }
         });
     } else this.loading = false;
-    window.addEventListener("beforeunload", () => {
+    window.onbeforeunload = () => {
+      if (!this.$route.params["id"] || this.$route.params["id"] === "") {
+        return;
+      }
       this.getTitleAndContent();
-      UpSertBlogSync({ draft: true }, this.blog);
-    });
+      if (
+        this.blog.title &&
+        this.blog.content &&
+        this.blog.title !== "" &&
+        this.blog.content !== ""
+      ) {
+        UpSertBlogSync({ draft: true }, this.blog);
+      }
+    };
+  }
+  beforeDestroy() {
+    this.autoSave();
   }
   editorLoad(editor: Editor) {
     this.editor = editor;
     this.editorLoaded = true;
+    if (this.$route.query["group"] && this.blog.authorId !== this.user.id) {
+      Prompt(
+        "你正在合作编辑模式下与共享者一起编辑文章。请注意你的更改在分享者不在线时将不会自动保存：）",
+        100000
+      );
+    }
   }
   getTitleAndContent() {
-    const titleElm = document.querySelector("h1");
-    this.blog.title = titleElm.innerText.trim();
-    this.blog.content = this.editor
-      .GetHTML()
-      .substring(9 + titleElm.innerText.length);
+    const raw = this.editor.GetHTML();
+    const titlePos = raw.indexOf("</h1>");
+    const titleStart = raw.indexOf(">");
+    if (titlePos < titleStart) {
+      return;
+    }
+    this.blog.title = raw.substring(titleStart + 1, titlePos);
+    this.blog.content = raw.substring(titlePos + 5);
   }
   publish() {
     this.getTitleAndContent();
+    if (!this.blog.title || this.blog.title === "") {
+      this.uploadMD = true;
+      return;
+    }
     let elm = document.querySelector(".mo2content p") as any;
     if (this.blog.description === "" || this.blog.description === undefined) {
       this.blog.description = "";
-      const descriptions = [];
       while (this.blog.description.length < 50 && elm) {
-        descriptions.push(elm.innerText);
+        this.blog.description += (elm.innerText as string).trim();
         while (
           elm.nextElementSibling &&
           elm.nextElementSibling.tagName !== "P"
@@ -166,9 +286,8 @@ export default class EditArticle extends Vue {
         }
         elm = elm.nextElementSibling;
       }
-
-      this.blog.description = descriptions.join("").trim();
     }
+    this.blog.description = this.blog.description.substr(0, 50);
     this.showPublish = true;
     (this.$refs["dialog"] as MO2Dialog).setModel(this.blog);
     let imgEs = document.querySelectorAll(".mo2content img");
@@ -197,21 +316,43 @@ export default class EditArticle extends Vue {
       const element = model[key];
       this.blog[key] = element;
     }
-    var data = await UpsertBlog({ draft: draft }, this.blog);
+    let data = await UpsertBlog({ draft: draft }, this.blog);
+    if (this.blog.id !== data.id) {
+      this.$router.replace(`/edit/${data.id}`);
+    }
     this.blog.id = data.id;
   }
   async confirm(model: BlogUpsert, draft = false) {
-    await this.postBlog(model, draft);
-    this.$router.push("/article/" + this.blog.id);
+    try {
+      this.published = true;
+      await this.postBlog(model, draft);
+      this.$router.push("/article/" + this.blog.id);
+      return { err: "", pass: true };
+    } catch (error) {
+      this.published = false;
+      return { err: GetErrorMsg(error), pass: false };
+    }
   }
   autoSave() {
+    if (
+      this.published ||
+      (this.blog.authorId && this.blog.authorId !== this.user.id)
+    ) {
+      return;
+    }
     this.$emit("update:autoSaving", true);
     this.getTitleAndContent();
-    this.postBlog({}, true)
+    this.blog.y_doc = this.editor.GetYDoc();
+    if (!this.blog || this.blog.title === "") {
+      this.$emit("update:autoSaving", false);
+      return;
+    }
+    this.postBlog(this.blog, true)
       .then(() => {
         this.$emit("update:autoSaving", false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error(err);
         this.$emit("update:autoSaving", null);
       });
   }

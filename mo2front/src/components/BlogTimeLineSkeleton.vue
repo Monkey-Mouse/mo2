@@ -18,10 +18,7 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop } from "vue-property-decorator";
-import { Colors } from "vuetify/es5/util/colors";
 import { colors } from "vuetify/lib";
-import { BlogBrief } from "../models/index";
-import { randomProperty, Copy } from "../utils/index";
 @Component
 export default class BlogTimeLineSkeleton extends Vue {
   @Prop()

@@ -1,15 +1,97 @@
 const path = require('path');
 module.exports = {
-  chainWebpack: config => {
-    config.module.rules.delete('eslint');
-  },
+  // chainWebpack: config => {
+  //   config.module.rules.delete('eslint');
+  // },
   pwa: {
     iconPaths: {
-      favicon32: 'img/icons/favicon-32x32.png',
-      favicon16: 'img/icons/favicon-16x16.png',
-      appleTouchIcon: 'img/icons/tile150x150.png',
-      maskIcon: 'img/icons/tile150x150.png',
-      msTileImage: 'img/icons/tile150x150.png',
+      favicon32: 'https://cdn.mo2.leezeeyee.com/dist/img/icons/favicon-32x32.png',
+      favicon16: 'https://cdn.mo2.leezeeyee.com/dist/img/icons/favicon-16x16.png',
+      appleTouchIcon: 'https://cdn.mo2.leezeeyee.com/dist/img/icons/tile150x150.png',
+      maskIcon: 'https://cdn.mo2.leezeeyee.com/dist/img/icons/tile150x150.png',
+      msTileImage: 'https://cdn.mo2.leezeeyee.com/dist/img/icons/tile150x150.png',
+    },
+    manifestOptions: {
+      name: "Mo2",
+      short_name: "Mo2",
+      start_url: "https://www.motwo.cn",
+      display: "standalone",
+      description: "超好用又好看的博客软件。速度快，应用小。安装它只需要不到一秒钟的时间。",
+      features: [
+        "Cross Platform",
+        "Fast",
+        "Small",
+        "Mordern Rich Text Editor"
+      ],
+      "icons": [{
+        "src": "https://cdn.mo2.leezeeyee.com/dist/img/icons/android-chrome-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }, {
+        "src": "https://cdn.mo2.leezeeyee.com/dist/img/icons/android-chrome-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }, {
+        "src": "https://cdn.mo2.leezeeyee.com/dist/img/icons/android-chrome-maskable-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "maskable"
+      }, {
+        "src": "https://cdn.mo2.leezeeyee.com/dist/img/icons/android-chrome-maskable-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable"
+      }],
+      screenshots: [{
+          src: "https://cdn.mo2.leezeeyee.com/mobile.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn.mo2.leezeeyee.com/home.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn.mo2.leezeeyee.com/home-dark.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn.mo2.leezeeyee.com/customize.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn.mo2.leezeeyee.com/editor.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+        {
+          src: "https://cdn.mo2.leezeeyee.com/user-home.png~parallax",
+          sizes: "300x200",
+          type: "image/png"
+        },
+      ],
+    },
+    workboxOptions: {
+      skipWaiting: true,
+      navigateFallback: 'https://cdn.mo2.leezeeyee.com/dist/index.html',
+      runtimeCaching: [{
+        urlPattern: new RegExp('^https://www.motwo.cn/api/'),
+        handler: 'NetworkFirst',
+        options: {
+          networkTimeoutSeconds: 1,
+          cacheName: 'api-cache',
+        },
+      }, {
+        urlPattern: new RegExp(".*\\.(jpg|png|tif|ico|txt|css|webp)$"),
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'static-cache',
+        },
+      }],
+
     }
   },
   transpileDependencies: [
@@ -30,8 +112,6 @@ module.exports = {
   pages: undefined,
   // 是否使用包含运行时编译器的 Vue 构建版本。设置为 true 后你就可以在 Vue 组件中使用 template 选项了，但是这会让你的应用额外增加 10kb 左右。
   runtimeCompiler: true,
-  // 默认情况下 babel-loader 会忽略所有 node_modules 中的文件。如果你想要通过 Babel 显式转译一个依赖，可以在这个选项中列出来。
-  transpileDependencies: [],
   // 如果你不需要生产环境的 source map，可以将其设置为 false 以加速生产环境构建。
   productionSourceMap: false,
   // 设置生成的 HTML 中 <link rel="stylesheet"> 和 <script> 标签的 crossorigin 属性。需要注意的是该选项仅影响由 html-webpack-plugin 在构建时注入的标签 - 直接写在模版 (public/index.html) 中的标签不受影响。
@@ -45,7 +125,7 @@ module.exports = {
     proxy: {
       '/api': {
         // 要访问的跨域的域名
-        target: 'http://47.93.189.12:5001/', //'http://localhost:5001',
+        target: 'https://www.motwo.cn/', //'http://localhost:5001',
         // target: 'https://limfx.pro',
         ws: true, // 是否启用websockets
         pathRewrite: {
@@ -54,7 +134,7 @@ module.exports = {
         secure: false, // 使用的是http协议则设置为false，https协议则设置为true
         // 开启代理：在本地会创建一个虚拟服务端，然后发送请求的数据，并同时接收请求的数据，这样客户端端和服务端进行数据的交互就不会有跨域问题
         // changOrigin: true,
-        // cookieDomainRewrite: "localhost"
+        cookieDomainRewrite: "localhost"
       },
       // '/img': {
       //     // 要访问的跨域的域名
@@ -73,7 +153,7 @@ module.exports = {
     optimization: {
       splitChunks: {
         minSize: 10000,
-        maxSize: 250000,
+        maxSize: 249856,
       }
     }
   }

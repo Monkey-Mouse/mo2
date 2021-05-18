@@ -3,8 +3,13 @@ package database
 import (
 	"context"
 	"log"
-	"mo2/dto"
-	"mo2/server/model"
+	"time"
+
+	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/server/model"
+
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -12,41 +17,60 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var blogCol *mongo.Collection = GetCollection("blog")
-var draftCol *mongo.Collection = GetCollection("draft")
+const (
+	OperationKey     = "operation"
+	OperationRecycle = "recycle"
+	OperationRestore = "restore"
+)
+const (
+	DurationBeforeBlogDelete = time.Hour * 24 * 30
+)
 
-func ensureBlogIndex() {
-	blogCol.Indexes().CreateMany(context.TODO(), append([]mongo.IndexModel{
+// BlogCol blog col
+var BlogCol *mongo.Collection = GetCollection("blog")
+
+// DraftCol draft col
+var DraftCol *mongo.Collection = GetCollection("draft")
+
+func init() {
+	createBlogIndexes(BlogCol)
+	createBlogIndexes(DraftCol)
+}
+
+func createBlogIndexes(col *mongo.Collection) {
+	col.Indexes().CreateMany(context.TODO(), append([]mongo.IndexModel{
 		{Keys: bson.M{"ket_words": 1}},
+		{Keys: bson.M{"author_id": 1}},
+		{Keys: bson.M{"categories": 1}},
 	}, model.IndexModels...))
 }
 func chooseCol(isDraft bool) (col *mongo.Collection) {
-	col = draftCol
+	col = DraftCol
 	if !isDraft {
-		col = blogCol
+		col = BlogCol
 	}
 	return
 }
 
 // InsertBlog insert
-func insertBlog(b *model.Blog, isDraft bool) (success bool) {
-	b.Init()
+func insertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	col := chooseCol(isDraft)
-	success = true
-	if _, err := col.InsertOne(context.TODO(), b); err != nil {
+	if res, err := col.InsertOne(context.TODO(), b); err != nil {
 		log.Println(err)
-		success = false
+		mErr.InitError(err)
+	} else {
+		mErr.InitNoError("insert %v", res.InsertedID)
 	}
 	return
 }
 
 // upsertBlog
-func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
+func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	col := chooseCol(isDraft)
 	b.EntityInfo.Update()
 	result, err := col.UpdateOne(
 		context.TODO(),
-		bson.D{{"_id", b.ID}},
+		bson.D{{"_id", b.ID}, {"author_id", b.AuthorID}},
 		bson.D{{"$set", bson.M{
 			"entity_info": b.EntityInfo,
 			"title":       b.Title,
@@ -55,45 +79,73 @@ func upsertBlog(b *model.Blog, isDraft bool) (success bool) {
 			"cover":       b.Cover,
 			"key_words":   b.KeyWords,
 			"categories":  b.CategoryIDs,
-			"author_id":   b.AuthorID,
+			"y_doc":       b.YDoc,
 		}}},
 		options.Update().SetUpsert(true),
 	)
-	success = true
 	if err != nil {
 		log.Println(err)
-		success = false
+		mErr.InitError(err)
+		return
 	}
 	if !isDraft {
 		log.Println("发布时删除草稿" + b.ID.String())
-		deleteBlog(*b, true)
+		mErr = DeleteBlogs(true, b.ID)
 	}
 	if result.UpsertedCount != 0 {
-		log.Println("新建文章" + b.ID.String())
+		mErr.InitNoError("新建文章" + b.ID.String())
 	}
 	return
 }
 
-// deleteBlog set flag of blog or draft to isDeleted
-func deleteBlog(b model.Blog, isDraft bool) (success bool) {
-	success = true
-	res, err := chooseCol(isDraft).DeleteMany(context.TODO(), bson.M{"_id": b.ID})
-	if err != nil {
-		log.Fatal(err)
+// DeleteBlogs 彻底删除
+func DeleteBlogs(isDraft bool, blogIDs ...primitive.ObjectID) (mErr mo2errors.Mo2Errors) {
+	if res, err := chooseCol(isDraft).DeleteMany(context.TODO(), bson.M{"_id": bson.M{"$in": blogIDs}}); err != nil {
+		mErr.InitError(err)
+	} else {
+		mErr.InitNoError("delete %v %v(s)\n", res.DeletedCount, If(isDraft, "draft", "blog"))
 	}
-	if res.DeletedCount == 0 {
-		success = false
-	}
+	log.Println(mErr)
 	return
 }
 
 // UpsertBlog upsert blog or draft
-func UpsertBlog(b *model.Blog, isDraft bool) (success bool) {
-
+func UpsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	if b.ID == primitive.NilObjectID {
-		success = insertBlog(b, isDraft)
+		b.Init()
+		mErr = insertBlog(b, isDraft)
 	} else {
-		success = upsertBlog(b, isDraft)
+		mErr = upsertBlog(b, isDraft)
+	}
+	if !isDraft {
+		mo2utils.IndexBlog(b)
+	}
+	return
+}
+
+// ProcessBlog process blog or draft
+// 根据operation对blog/draft的信息进行更新
+// recycle:新增关于本blog/draft的recycleBin信息，且isDeleted字段置为true状态
+// restore:将recycleBin中关于本blog/draft的信息进行删除，且isDeleted字段恢复为false状态
+func ProcessBlog(isDraft bool, b *model.Blog, operation string) (mErr mo2errors.Mo2Errors) {
+
+	item := model.RecycleItem{
+		ID:         primitive.NewObjectID(),
+		ItemID:     b.ID,
+		CreateTime: time.Now(),
+		DeleteTime: time.Now().Add(DurationBeforeBlogDelete),
+		Handler:    If(isDraft, model.HandlerDraft, model.HandlerBlog).(string),
+	}
+	switch operation {
+	case OperationRecycle:
+		b.EntityInfo.IsDeleted = true
+		mErr = UpsertRecycleItem(item)
+	case OperationRestore:
+		b.EntityInfo.IsDeleted = false
+		mErr = DeleteByRecycleItemInfo(b.ID, item.Handler)
+	default:
+		log.Println("invalid operation")
+		mErr.Init(mo2errors.Mo2NoExist, "invalid operation")
 	}
 	return
 }
@@ -102,15 +154,18 @@ func UpsertBlog(b *model.Blog, isDraft bool) (success bool) {
 func FindBlogsByUser(u dto.LoginUserInfo, filter model.Filter) (b []model.Blog) {
 	return FindBlogsByUserId(u.ID, filter)
 }
+func getBlogListQueryOption() *options.FindOptions {
+	return options.Find().SetSort(bson.D{{"entity_info.update_time", -1}}).SetProjection(bson.D{{"content", 0}, {"y_doc", 0}})
+}
 
 //find blog by userId
 func FindBlogsByUserId(id primitive.ObjectID, filter model.Filter) (b []model.Blog) {
 	col := chooseCol(filter.IsDraft)
-	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
+	opts := getBlogListQueryOption().SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
 	cursor, err := col.Find(context.TODO(), bson.M{"author_id": id, "entity_info.isdeleted": filter.IsDeleted}, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return
 }
@@ -123,19 +178,46 @@ func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
 		if err == mongo.ErrNoDocuments {
 			return
 		}
-		log.Fatal(err)
+		panic(err)
 	}
 	return
 }
 
-//find blog
-func FindAllBlogs(filter model.Filter) (b []model.Blog) {
+// FindBlogs find blog
+func FindBlogs(filter model.Filter) (b []model.Blog) {
 	col := chooseCol(filter.IsDraft)
-	opts := options.Find().SetSort(bson.D{{"entity_info", 1}})
-	cursor, err := col.Find(context.TODO(), bson.D{{"entity_info.isdeleted", filter.IsDeleted}}, opts)
+	opts := getBlogListQueryOption().SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
+	f := bson.D{{"entity_info.isdeleted", filter.IsDeleted}}
+	if filter.Ids != nil {
+		f = bson.D{
+			{"entity_info.isdeleted", filter.IsDeleted},
+			{"_id", bson.M{"$in": filter.Ids}},
+		}
+	}
+	cursor, err := col.Find(context.TODO(), f, opts)
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
+	}
+	return
+}
+
+// FindBlogsByCategoryId 寻找包括categoryId的所有blogs的信息
+func FindBlogsByCategoryId(catID primitive.ObjectID, filter model.Filter) (bs []model.Blog, mErr mo2errors.Mo2Errors) {
+	var cursor *mongo.Cursor
+	var err error
+	col := chooseCol(filter.IsDraft)
+	opts := getBlogListQueryOption() //.SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
+
+	cursor, err = col.Find(context.TODO(), bson.M{"categories": catID, "entity_info.isdeleted": filter.IsDeleted}, opts)
+
+	if err != nil {
+		mErr.InitError(err)
+		return
+	}
+	if err = cursor.All(context.TODO(), &bs); err != nil {
+		mErr.InitError(err)
+		return
 	}
 	return
 }

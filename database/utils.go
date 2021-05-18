@@ -1,6 +1,9 @@
 package database
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
 
 var globalClient *mongo.Client
 
@@ -17,9 +20,14 @@ func GetCollection(colName string) *mongo.Collection {
 	return client.Database(dbName).Collection(colName)
 }
 
-//TODO implement
-//get max ID in collection
-func GetMaxID(collection string) int {
-	return 1
+func getPaginationOption(page int64, pagesize int64) *options.FindOptions {
+	return options.Find().SetSkip(page * pagesize).SetLimit(pagesize)
+}
 
+func If(condition bool, trueVal interface{}, falseVal interface{}) interface{} {
+	if condition {
+		return trueVal
+	} else {
+		return falseVal
+	}
 }

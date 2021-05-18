@@ -1,9 +1,9 @@
 package config
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Configuration struct {
@@ -14,12 +14,12 @@ type Configuration struct {
 func LoadConfig(filename string) (c Configuration) {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	err = yaml.Unmarshal(bytes, &c)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return
 }

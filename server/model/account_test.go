@@ -39,7 +39,7 @@ func TestAddRoles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			AddRoles(tt.args.a, tt.args.roles...)
-			m := make(map[string]string, 0)
+			m := make(map[string]string)
 			for _, v := range acc.Roles {
 				m[v] = v
 			}

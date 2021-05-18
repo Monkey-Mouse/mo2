@@ -1,6 +1,8 @@
 package mo2errors
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Mo2Errors standard mo2 err
 type Mo2Errors struct {
@@ -17,13 +19,49 @@ func (e *Mo2Errors) SetErrorTip(s string) {
 	e.ErrorTip = s
 }
 
-// Init as name
-func (e *Mo2Errors) Init(c int, s string) {
+// Init init with code and tip
+func (e *Mo2Errors) Init(c int, format string, a ...interface{}) {
 	e.ErrorCode = c
-	e.ErrorTip = s
+	e.ErrorTip = fmt.Sprintf(format, a...)
 }
 
-// InitCode as name
+// Init init with code and tip
+func Init(c int, format string, a ...interface{}) Mo2Errors {
+	return Mo2Errors{
+		ErrorCode: c,
+		ErrorTip:  fmt.Sprintf(format, a...),
+	}
+}
+
+// InitError init with error
+func (e *Mo2Errors) InitError(err error) {
+	e.ErrorCode = Mo2Error
+	e.ErrorTip = err.Error()
+}
+
+// InitError init with error
+func InitError(err error) Mo2Errors {
+	return Mo2Errors{
+		ErrorCode: Mo2Error,
+		ErrorTip:  err.Error(),
+	}
+}
+
+// InitNoError init with no error tips
+func (e *Mo2Errors) InitNoError(format string, a ...interface{}) {
+	e.ErrorCode = Mo2NoError
+	e.ErrorTip = fmt.Sprintf(format, a...)
+}
+
+// InitNoError init with no error tips
+func InitNoError(format string, a ...interface{}) Mo2Errors {
+	return Mo2Errors{
+		ErrorCode: Mo2NoError,
+		ErrorTip:  fmt.Sprintf(format, a...),
+	}
+}
+
+// InitCode init with code
 func (e *Mo2Errors) InitCode(c int) {
 	e.ErrorCode = c
 	e.ErrorTip = CodeText(c)
@@ -32,7 +70,7 @@ func (e *Mo2Errors) InitCode(c int) {
 // IsError as name
 func (e Mo2Errors) IsError() (error bool) {
 	error = true
-	if e.ErrorCode == Mo2NoError {
+	if e.ErrorCode == Mo2NoError || e == (Mo2Errors{}) {
 		error = false
 	}
 	return

@@ -41,8 +41,47 @@ const routes: Array<RouteConfig> = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "about" */ '../views/EditArticle.vue')
-  }
-  ,
+  },
+  {
+    path: '/search',
+    name: 'Search Article',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Search.vue')
+  },
+  {
+    path: '/settings',
+    name: 'Setting page',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Settings.vue')
+  },
+  {
+    path: '/notifications',
+    name: 'Notification page',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Notifications.vue')
+  },
+  {
+    path: '/recycle',
+    name: 'Recycle page',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Recycle.vue')
+  },
+  {
+    path: '/api/*',
+    name: 'Processing',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import(/* webpackChunkName: "about" */ '../views/Processing.vue')
+  },
   {
     path: '*',
     name: 'Not Found',
@@ -57,6 +96,12 @@ const router = new VueRouter({
   mode: 'history',
   // hard code base, sothat router won't change to cdn url
   base: '/',
+  scrollBehavior(to, from, savedPosition) {
+    if (to.path === from.path) {
+      return
+    }
+    return { x: 0, y: 0 };
+  },
   routes
 })
 

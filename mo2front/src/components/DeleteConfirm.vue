@@ -10,8 +10,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="confirm"> 确认删除 </v-btn>
-          <v-btn color="green darken-1" text @click="close"> 取消 </v-btn>
+          <v-btn color="error darken-1" text @click="confirm"> 确认删除 </v-btn>
+          <v-btn color="success darken-1" text @click="close"> 取消 </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

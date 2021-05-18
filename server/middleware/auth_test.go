@@ -3,41 +3,110 @@ package middleware
 import (
 	"fmt"
 	"math/rand"
-	"mo2/mo2utils/mo2errors"
 	"net/http"
+	"net/http/httptest"
 	"path"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/modern-go/concurrent"
 )
 
-func Test_checkRL(t *testing.T) {
-	type args struct {
-		prop handlerProp
-		ip   string
+func setupTestHandlers() {
+	api := H.Group("/apitest")
+	{
+		api.GetWithRL("/logs", func(c *gin.Context) {
+
+		}, 10)
 	}
-	prop := handlerProp{rates: concurrent.NewMap(), limit: 3}
-	tests := []struct {
-		name string
-		args args
-		want bool
-	}{
-		{name: "test add 1", args: args{prop: prop, ip: "xxxx"}, want: true},
-		{name: "test add 2", args: args{prop: prop, ip: "xxxx"}, want: true},
-		{name: "test add 3", args: args{prop: prop, ip: "xxxx"}, want: true},
-		{name: "test block ip", args: args{prop: prop, ip: "xxxx"}, want: false},
-		{name: "test another ip", args: args{prop: prop, ip: "xxxxy"}, want: true},
+}
+
+func Test_RedisAuthMiddleware(t *testing.T) {
+	testMiddleware(t, true)
+}
+func benchmark(useredis bool) {
+	gin.SetMode(gin.ReleaseMode)
+	resetVar()
+	authR := gin.New()
+	req, _ := http.NewRequest("GET", "/apitest/logs", nil)
+	setupTestHandlers()
+	H.RegisterMapedHandlers(authR, &OptionalParams{LimitEvery: 5, Unblockevery: 5, UseRedis: useredis})
+	ch := make(chan bool)
+	for i := 0; i < 100; i++ {
+		go func() {
+			resp := httptest.NewRecorder()
+			authR.ServeHTTP(resp, req)
+			ch <- resp.Code == 200
+		}()
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := checkRL(tt.args.prop, tt.args.ip); got != tt.want {
-				t.Errorf("checkRateLimit() = %v, want %v", got, tt.want)
+	sucNum := 0
+	for i := 0; i < 100; i++ {
+		success := <-ch
+		if success {
+			sucNum++
+		}
+	}
+}
+func Benchmark_Middleware_redis(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		benchmark(true)
+	}
+}
+func Benchmark_Middleware_memory(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		benchmark(false)
+	}
+}
+func testMiddleware(t *testing.T, useredis bool) {
+	resetVar()
+	authR := gin.New()
+	req, _ := http.NewRequest("GET", "/apitest/logs", nil)
+	setupTestHandlers()
+	H.RegisterMapedHandlers(authR, &OptionalParams{LimitEvery: 5, Unblockevery: 5, UseRedis: useredis})
+	ch := make(chan bool)
+	t.Run("Test rate limit block", func(t *testing.T) {
+		for i := 0; i < 100; i++ {
+			go func() {
+				resp := httptest.NewRecorder()
+				authR.ServeHTTP(resp, req)
+				ch <- resp.Code == 200
+			}()
+		}
+		sucNum := 0
+		for i := 0; i < 100; i++ {
+			success := <-ch
+			if success {
+				sucNum++
 			}
-		})
-	}
+		}
+		if sucNum != 10 {
+			t.Errorf("auth middleware should ban 90 times, actual baned: %v", 100-sucNum)
+		}
+	})
+	time.Sleep(5 * time.Second)
+	t.Run("Test rate limit unblock", func(t *testing.T) {
+		for i := 0; i < 100; i++ {
+			go func() {
+				resp := httptest.NewRecorder()
+				authR.ServeHTTP(resp, req)
+				ch <- resp.Code == 200
+			}()
+		}
+		sucNum := 0
+		for i := 0; i < 100; i++ {
+			success := <-ch
+			if success {
+				sucNum++
+			}
+		}
+		if sucNum != 10 {
+			t.Errorf("auth middleware should ban 90 times, actual baned: %v", 100-sucNum)
+		}
+	})
+}
+func Test_AuthMiddleware(t *testing.T) {
+	testMiddleware(t, false)
 }
 
 func Test_handlerMap_Group1(t *testing.T) {
@@ -144,7 +213,9 @@ func Benchmark_checkRoles(b *testing.B) {
 		rolePolicies: rolePolicy,
 	}
 	b.ResetTimer()
-	checkRoles(arguments.uinfo, arguments.rolePolicies)
+	for n := 0; n < b.N; n++ {
+		checkRoles(arguments.uinfo, arguments.rolePolicies)
+	}
 }
 
 func Test_handlerMap_Get(t *testing.T) {
@@ -162,7 +233,7 @@ func Test_handlerMap_Get(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.h.Get(tt.args.relativPath, tt.args.handler, tt.args.roles...)
+			tt.h.GET(tt.args.relativPath, tt.args.handler, tt.args.roles...)
 			_, ok := H.innerMap[handlerKey{tt.args.relativPath, http.MethodGet}]
 			if !ok {
 				t.Errorf("get test failed! failed to find handler after registered!")
@@ -256,43 +327,6 @@ func Test_handlerMap_PostWithRL(t *testing.T) {
 	}
 }
 
-func Test_checkBlockAndRL(t *testing.T) {
-	h := handlerMap{handlers, "", make([][]string, 0), -1}
-	unblockEvery = 1
-	duration = 1
-	h.GetWithRL("/xx", nil, 3)
-	handlers = h.innerMap
-	type args struct {
-		prop handlerProp
-		ip   string
-	}
-	tests := []struct {
-		name string
-		args args
-		want *mo2errors.Mo2Errors
-	}{
-		{name: "Test ip enter1", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-		{name: "Test ip enter2", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-		{name: "Test ip enter3", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-		{name: "Test ip ban", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: mo2errors.New(429, "Too frequent!")},
-		{name: "Test ip block", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: mo2errors.New(403, "IP Blocked!检测到该ip地址存在潜在的ddos行为")},
-		{name: "Test ip unblock", args: args{prop: h.innerMap[handlerKey{"/xx", http.MethodGet}], ip: "aa"}, want: nil},
-	}
-	go cleaner()
-	go resetBlocker()
-	for _, tt := range tests {
-		if tt.name == "Test ip unblock" {
-			time.Sleep(2 * time.Second)
-		}
-		hm := getHandlers()
-		t.Run(tt.name, func(t *testing.T) {
-			if got := checkBlockAndRL(hm[handlerKey{"/xx", http.MethodGet}], tt.args.ip); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("checkBlockAndRL() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_handlerMap_HandlerWithRL(t *testing.T) {
 	h := handlerMap{handlers, "", make([][]string, 0), -1}
 	type args struct {
@@ -317,5 +351,22 @@ func Test_handlerMap_HandlerWithRL(t *testing.T) {
 				t.Errorf("nil or empty role appended!")
 			}
 		})
+	}
+}
+
+func Benchmark_redisCheckRL(t *testing.B) {
+	setupRateLimiter(10, 3600, true)
+	t.ResetTimer()
+	for i := 0; i < t.N; i++ {
+		redisCheckRL("api", "127.0.0.1", 10)
+	}
+}
+
+func Benchmark_checkRL(t *testing.B) {
+	setupRateLimiter(10, 3600, false)
+	go cleaner()
+	t.ResetTimer()
+	for i := 0; i < t.N; i++ {
+		checkRL("api", "127.0.0.1", 10)
 	}
 }

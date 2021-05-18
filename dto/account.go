@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"mo2/server/model"
+	"github.com/Monkey-Mouse/mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -60,6 +60,7 @@ func Account2UserPublicInfo(a model.Account) (u UserInfo) {
 type UserInfoBrief struct {
 	ID       primitive.ObjectID `json:"id" example:"xxxxxxxxxxxxx==" bson:"_id"`
 	Name     string             `json:"name" example:"account name" bson:"username"`
+	Email    string             `json:"email" example:"email@qq.com"`
 	Settings map[string]string  `json:"settings" example:"'avatar': 'www.avatar.com/account_name','site':'www.limfx.com'(public data)" bson:"settings,omitempty"`
 }
 

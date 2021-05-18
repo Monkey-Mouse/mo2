@@ -2,8 +2,9 @@ package mo2errors_test
 
 import (
 	"fmt"
-	"mo2/mo2utils/mo2errors"
 	"testing"
+
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
 )
 
 func TestNewEqual(t *testing.T) {

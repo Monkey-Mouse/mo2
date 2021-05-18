@@ -1,10 +1,11 @@
 package mo2utils
 
 import (
-	"mo2/dto"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/Monkey-Mouse/mo2/dto"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

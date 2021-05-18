@@ -1,37 +1,10 @@
 basePath: /
 definitions:
-  controller.ResponseError:
+  badresponse.ResponseError:
     properties:
       reason:
         type: string
       time:
-        type: string
-    type: object
-  dto.AddBlogs2Categories:
-    properties:
-      blog_ids:
-        items:
-          type: string
-        type: array
-      category_ids:
-        items:
-          type: string
-        type: array
-    type: object
-  dto.AddCategory2Category:
-    properties:
-      category_id:
-        $ref: '#/definitions/model.Category'
-      parent_id:
-        example: xxxxxxx
-        type: string
-    type: object
-  dto.AddCategory2User:
-    properties:
-      category_id:
-        example: xxxxxxx
-        type: string
-      user_id:
         type: string
     type: object
   dto.ImgUploadToken:
@@ -41,56 +14,21 @@ definitions:
       token:
         type: string
     type: object
-  dto.LoginUserInfo:
+  dto.RelateEntity2Entity:
     properties:
-      email:
-        example: email@qq.com
+      relateTo_id:
         type: string
-      id:
-        example: xxxxxxxxxxxxx==
-        type: string
-      name:
-        example: account name
-        type: string
-      roles:
-        example:
-        - ordinaryUser
-        items:
-          type: string
-        type: array
-    type: object
-  dto.QueryBlog:
-    properties:
-      authorId:
-        example: xxxxxxxxxxxxx==
-        type: string
-      categories:
-        items:
-          type: string
-        type: array
-      cover:
-        example: https://xxx/xxx
-        type: string
-      description:
-        example: mouse ❤ monkey
-        type: string
-      entityInfo:
-        $ref: '#/definitions/model.Entity'
-      id:
-        example: xxxxxxxxxxxxx==
-        type: string
-      keyWords:
-        example:
-        - xxx
-        - xxx
-        items:
-          type: string
-        type: array
-      title:
-        example: mouse ❤ monkey
+      related_id:
         type: string
     type: object
-  dto.QueryBlogs:
+  dto.RelateEntitySet2Entity:
+    properties:
+      relateTo_id:
+        type: string
+      related_ids:
+        items:
+          type: string
+        type: array
     type: object
   dto.UserInfo:
     properties:
@@ -119,6 +57,9 @@ definitions:
     type: object
   dto.UserInfoBrief:
     properties:
+      email:
+        example: email@qq.com
+        type: string
       id:
         example: xxxxxxxxxxxxx==
         type: string
@@ -194,17 +135,26 @@ definitions:
         example: mouse ❤ monkey
         type: string
     type: object
-  model.Category:
+  model.Comment:
     properties:
+      article:
+        type: string
+      aurhor:
+        type: string
+      content:
+        example: a comment
+        type: string
+      entity_info:
+        $ref: '#/definitions/model.Entity'
       id:
         example: xxxxxxxxxxxxxx==
         type: string
-      name:
-        example: records
-        type: string
-      parent_id:
-        example: xxxxxxxxxxxxxx==
-        type: string
+      praise:
+        $ref: '#/definitions/model.Praiseable'
+      subs:
+        items:
+          $ref: '#/definitions/model.Subcomment'
+        type: array
     type: object
   model.DeleteAccount:
     properties:
@@ -213,6 +163,33 @@ definitions:
         type: string
       password:
         example: p@ssword
+        type: string
+    type: object
+  model.Directory:
+    properties:
+      id:
+        example: xxxxxxxxxxxxxx==
+        type: string
+      info:
+        $ref: '#/definitions/model.DirectoryInfo'
+      name:
+        example: records
+        type: string
+      owner_ids:
+        items:
+          type: string
+        type: array
+      parent_id:
+        example: xxxxxxxxxxxxxx==
+        type: string
+    type: object
+  model.DirectoryInfo:
+    properties:
+      cover:
+        example: https://www.motwo.cn/cover
+        type: string
+      description:
+        example: course materials
         type: string
     type: object
   model.Entity:
@@ -234,6 +211,30 @@ definitions:
       userNameOrEmail:
         example: account name/email@mo2.com
         type: string
+    type: object
+  model.Praiseable:
+    properties:
+      down:
+        type: integer
+      up:
+        type: integer
+      weighted:
+        type: integer
+    type: object
+  model.Subcomment:
+    properties:
+      aurhor:
+        type: string
+      content:
+        example: a comment
+        type: string
+      entity_info:
+        $ref: '#/definitions/model.Entity'
+      id:
+        example: xxxxxxxxxxxxxx==
+        type: string
+      praise:
+        $ref: '#/definitions/model.Praiseable'
     type: object
 host: localhost:5001
 info:
@@ -271,15 +272,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: delete Blog
       tags:
       - accounts
@@ -304,11 +305,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: Add an account
       tags:
       - accounts
@@ -333,15 +334,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: 修改名称（唯一用于登录）/偏好设置
       tags:
       - accounts
@@ -368,11 +369,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: Show account's info
       tags:
       - accounts
@@ -383,8 +384,8 @@ paths:
       description: from a list of user ids [usage]:/api/accounts/listBrief?id=60223d4042d6febff9f276f0&id=60236866d2a68483adaccc38
       parameters:
       - description: user IDs list
-        in: path
-        name: userIDs
+        in: query
+        name: id
         required: true
         type: array
       produces:
@@ -417,15 +418,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.LoginUserInfo'
+            $ref: '#/definitions/dto.UserInfo'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: login an account
       tags:
       - accounts
@@ -462,15 +463,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: Add role for an account
       tags:
       - admin
@@ -498,15 +499,24 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: verify an account's email
       tags:
       - accounts
+  /api/admin/indexblogs:
+    post:
+      description: none
+      responses:
+        "200":
+          description: ""
+      summary: index all blogs
+      tags:
+      - admin
   /api/blogs/{id}:
     delete:
       consumes:
       - application/json
-      description: delete by path
+      description: delete by id path(draft/blog)
       parameters:
       - description: bool true
         in: query
@@ -524,21 +534,24 @@ paths:
           description: ""
         "204":
           description: ""
+        "304":
+          description: ""
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
-      summary: delete Blog
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: 彻底删除blog
       tags:
       - blogs
+  /api/blogs/{operation}/{id}:
     put:
       consumes:
       - application/json
@@ -549,8 +562,40 @@ paths:
         name: draft
         required: true
         type: boolean
-      - description: string xxxxxxxx
+      - description: recycle/restore
         in: path
+        name: operation
+        type: string
+      - description: Blog id
+        in: path
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: restore Blog
+      tags:
+      - blogs
+  /api/blogs/category:
+    get:
+      description: 若id为空，返回所有categories(debug mode)；若id不为空，返回该id的category
+      parameters:
+      - description: string ObjectID
+        in: query
         name: id
         type: string
       produces:
@@ -559,47 +604,12 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Blog'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/controller.ResponseError'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/controller.ResponseError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/controller.ResponseError'
-      summary: restore Blog
-      tags:
-      - blogs
-  /api/blogs/addBlogs2Categories:
-    post:
-      consumes:
-      - application/json
-      description: blogs 与 categories皆为id列表，方便批量操作
-      parameters:
-      - description: dto.AddBlogs2Categories
-        in: body
-        name: id
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AddBlogs2Categories'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
             items:
-              $ref: '#/definitions/dto.QueryBlog'
+              $ref: '#/definitions/model.Directory'
             type: array
-      summary: add blogs to chosen categories
+      summary: find categories
       tags:
       - category
-  /api/blogs/addCategory:
     post:
       consumes:
       - application/json
@@ -610,59 +620,15 @@ paths:
         name: account
         required: true
         schema:
-          $ref: '#/definitions/model.Category'
+          $ref: '#/definitions/model.Directory'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Category'
+            $ref: '#/definitions/model.Directory'
       summary: upsert category
-      tags:
-      - category
-  /api/blogs/addCategory2Category:
-    post:
-      consumes:
-      - application/json
-      description: category为model.Category(若id存在，直接存放；否则新建) parent category 为id
-      parameters:
-      - description: category info and parent id
-        in: body
-        name: id
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AddCategory2Category'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Category'
-      summary: add category to parent category
-      tags:
-      - category
-  /api/blogs/addCategory2User:
-    post:
-      consumes:
-      - application/json
-      description: user 与 category 皆为id
-      parameters:
-      - description: category id and user id
-        in: body
-        name: id
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AddCategory2User'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.AddCategory2User'
-      summary: add category to user
       tags:
       - category
   /api/blogs/find/id:
@@ -688,15 +654,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: find Blog by id
       tags:
       - blogs
@@ -728,26 +694,26 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlogs'
+              $ref: '#/definitions/model.Blog'
             type: array
         "204":
           description: No Content
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlogs'
+              $ref: '#/definitions/model.Blog'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: find Blog
       tags:
       - blogs
@@ -783,89 +749,25 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlogs'
+              $ref: '#/definitions/model.Blog'
             type: array
         "204":
-          description: No Content
-          schema:
-            items:
-              $ref: '#/definitions/dto.QueryBlogs'
-            type: array
+          description: ""
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: find Blog by userid
       tags:
       - blogs
-  /api/blogs/findAllCategories:
-    get:
-      description: 若id为空，返回所有categories；若id不为空，返回该id的category
-      parameters:
-      - description: string ObjectID
-        in: query
-        name: id
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.Category'
-            type: array
-      summary: find categories
-      tags:
-      - category
-  /api/blogs/findCategoriesByUserId:
-    get:
-      description: return (main category)个人的主存档 于前端不可见，用于后端存储
-      parameters:
-      - description: string ObjectID
-        in: query
-        name: userId
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties:
-              items:
-                $ref: '#/definitions/model.Category'
-              type: array
-            type: object
-      summary: find categories by user id
-      tags:
-      - category
-  /api/blogs/findCategoryByUserId:
-    get:
-      description: return (main category)个人的主存档 于前端不可见，用于后端存储
-      parameters:
-      - description: string ObjectID
-        in: query
-        name: userId
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.Category'
-      summary: find category by user id
-      tags:
-      - category
   /api/blogs/publish:
     post:
       consumes:
@@ -890,17 +792,15 @@ paths:
           schema:
             $ref: '#/definitions/model.Blog'
         "204":
-          description: No Content
-          schema:
-            $ref: '#/definitions/model.Blog'
+          description: ""
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: Publish Blog
       tags:
       - blogs
@@ -924,6 +824,10 @@ paths:
         in: query
         name: pageSize
         type: integer
+      - description: aaaa
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
@@ -931,29 +835,229 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlog'
+              $ref: '#/definitions/model.Blog'
             type: array
         "204":
           description: No Content
           schema:
             items:
-              $ref: '#/definitions/dto.QueryBlog'
+              $ref: '#/definitions/model.Blog'
             type: array
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/controller.ResponseError'
+            $ref: '#/definitions/badresponse.ResponseError'
       summary: find all Blogs
       tags:
       - blogs
+  /api/comment:
+    post:
+      consumes:
+      - application/json
+      description: upsert json comments
+      parameters:
+      - description: comment
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/model.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Comment'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: upsert comments
+      tags:
+      - comments
+  /api/comment/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get json comments
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: int 0
+        in: query
+        name: page
+        type: integer
+      - description: int 5
+        in: query
+        name: pagesize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Comment'
+            type: array
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: get comments
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      description: upsert json comments
+      parameters:
+      - description: comment id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: subcomment
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/model.Subcomment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Subcomment'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: upsert subcomments
+      tags:
+      - comments
+  /api/commentcount/{id}:
+    get:
+      description: get article comment num
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: count comments
+      tags:
+      - comments
+  /api/directories/{collection}:
+    get:
+      consumes:
+      - application/json
+      description: from a list of directory ids [usage]:/api/directories/{collection}?id=60223d4042d6febff9f276f0&id=60236866d2a68483adaccc38
+      parameters:
+      - description: category/...
+        in: path
+        name: collection
+        required: true
+        type: string
+      - description: directory IDs list
+        in: query
+        name: id
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Directory'
+            type: array
+      summary: List directories brief info
+      tags:
+      - directory
+  /api/directories/category:
+    delete:
+      consumes:
+      - application/json
+      description: 根据id删除，并解除与之相关实体的所有关联
+      parameters:
+      - description: category id to delete
+        in: body
+        name: ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Directory'
+      summary: delete category
+      tags:
+      - category
+  /api/file:
+    post:
+      consumes:
+      - multipart/form-data
+      description: say something
+      parameters:
+      - description: file
+        in: body
+        name: form
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Blog'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: simple test
   /api/img/{filename}:
     get:
       description: add by json
@@ -984,19 +1088,164 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.LoginUserInfo'
+            $ref: '#/definitions/dto.UserInfo'
       summary: get user info
       tags:
       - logs
-  /sayHello:
+  /api/notification:
     get:
-      description: say something
+      description: get notifications
+      parameters:
+      - description: int 0
+        in: query
+        name: page
+        type: integer
+      - description: int 5
+        in: query
+        name: pagesize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: get notifications
+      tags:
+      - notification
+  /api/notification/num:
+    get:
+      description: get notification num
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: get notification num
+      tags:
+      - notification
+  /api/relation/blogs/{type}/{ID}:
+    get:
+      consumes:
+      - application/json
+      description: 根据type返回不同结果：[category] 所有category包含的blog
+      parameters:
+      - description: find by category
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: ID
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
-      summary: simple test
+            items:
+              $ref: '#/definitions/model.Blog'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: find blogs by given type
+      tags:
+      - relation
+  /api/relation/categories/{type}:
+    post:
+      consumes:
+      - application/json
+      description: （根据path中提供的关联类型选择对应方法）目前有：父category
+      parameters:
+      - description: types to relate
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: sub category id and parent id
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RelateEntitySet2Entity'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Directory'
+      summary: 将列表内的子categories关联到单个实体上
+      tags:
+      - relation
+  /api/relation/category/{type}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: relatedTo user/blog/category/userMain
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: category id to be related
+        in: body
+        name: e2e
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RelateEntity2Entity'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RelateEntity2Entity'
+      summary: relate category to given type
+      tags:
+      - relation
+  /api/relation/category/{type}/{ID}:
+    get:
+      consumes:
+      - application/json
+      description: 根据type返回不同结果：[user] 个人的所有category|[sub] 所有子category
+      parameters:
+      - description: find by user/sub
+        in: path
+        name: type
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: ID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Directory'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/badresponse.ResponseError'
+      summary: find categories by given type
+      tags:
+      - relation
 swagger: "2.0"

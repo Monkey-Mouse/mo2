@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"mo2/dto"
-	"mo2/mo2utils"
-	"mo2/mo2utils/mo2errors"
-	"mo2/server/model"
+
+	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
+	"github.com/Monkey-Mouse/mo2/server/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -30,6 +31,9 @@ func CreateAccountIndex() (err error) {
 		{
 			Keys:    bson.D{{"email", 1}},
 			Options: options.Index().SetUnique(true),
+		},
+		{
+			Keys: bson.D{{"settings.github_id", 1}},
 		},
 	}
 	_, err = GetCollection("accounts").Indexes().CreateMany(context.TODO(), indexModel)
@@ -78,12 +82,12 @@ func EnsureEmailUnique(email string) (unique bool, e mo2errors.Mo2Errors) {
 func InitAccount(newAccount model.AddAccount, token string) (account model.Account, err error) {
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(newAccount.Password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 		return
 	}
 	//var account model.Account
 	account = model.Account{
-		UserName:   primitive.NewObjectID().String() + newAccount.UserName,
+		UserName:   newAccount.UserName,
 		Email:      newAccount.Email,
 		HashedPwd:  string(hashedPwd),
 		EntityInfo: model.InitEntity(),
@@ -95,18 +99,49 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 	if err != nil {
 		merr := err.(mongo.WriteException).WriteErrors[0]
 		if merr.Code == 11000 {
-			err = mo2errors.New(mo2errors.Mo2Conflict, "Name已被注册！")
+			acc, _ := FindAccountByName(account.UserName)
+			if acc.Infos[model.IsActive] == model.True {
+				err = mo2errors.New(mo2errors.Mo2Conflict, "Name已被注册！")
+				return
+			}
+			DeleteAccount(acc.ID)
+			insertResult, err = accCol.InsertOne(context.TODO(), account)
+		} else {
+			return
 		}
-		return
+	} else {
+		if insertResult.InsertedID != nil {
+			id, ext := insertResult.InsertedID.(primitive.ObjectID)
+			if ext {
+				account.ID = id
+			}
+		}
 	}
-	account.ID = insertResult.InsertedID.(primitive.ObjectID)
+	return
+}
+
+// FindAccountByName as name
+func FindAccountByName(name string) (a model.Account, exist bool) {
+	exist = false
+	if err := accCol.FindOne(context.TODO(), bson.D{{"username", name}}).Decode(&a); err != nil {
+		if err != mongo.ErrNoDocuments {
+			panic(err)
+		}
+	}
+	if a.IsValid() {
+		exist = true
+	}
 	return
 }
 
 // UpsertAccount
 func UpsertAccount(a *model.Account) (merr mo2errors.Mo2Errors) {
+	merr = UpsertAccountWithF(a, bson.M{"_id": a.ID})
+	return
+}
+func UpsertAccountWithF(a *model.Account, filter interface{}) (merr mo2errors.Mo2Errors) {
 	a.EntityInfo.Update()
-	result, err := accCol.UpdateOne(context.TODO(), bson.M{"_id": a.ID}, bson.M{
+	result, err := accCol.UpdateOne(context.TODO(), filter, bson.M{
 		"$set": bson.M{
 			"username":    a.UserName,
 			"email":       a.Email,
@@ -120,6 +155,12 @@ func UpsertAccount(a *model.Account) (merr mo2errors.Mo2Errors) {
 	if err != nil {
 		merr.Init(mo2errors.Mo2Error, err.Error())
 		return
+	}
+	if result.UpsertedID != nil {
+		id, ext := result.UpsertedID.(primitive.ObjectID)
+		if ext {
+			a.ID = id
+		}
 	}
 	if result.ModifiedCount != 0 {
 		merr.Init(mo2errors.Mo2NoError, "更新完成")
@@ -175,7 +216,7 @@ func GenerateEmailToken(addAccount model.AddAccount) (account *model.Account, er
 	if account.Infos == nil {
 		account.Infos = make(map[string]string)
 	}
-	account.Infos[model.Token] = mo2utils.GenerateJwtToken(account.Email)
+	account.Infos[model.Token] = mo2utils.GenerateVerifyJwtToken(account.Email)
 	account.Infos[model.IsActive] = model.False
 	return
 }
@@ -191,7 +232,6 @@ func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
 	if account.Infos[model.Token] == info.Token {
 		account.Infos[model.IsActive] = model.True
 		delete(account.Infos, model.Token)
-		account.UserName = account.UserName[24:]
 		UpsertAccount(&account)
 	} else {
 		err = errors.New("token不符")
@@ -218,7 +258,7 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 			}
 		} else {
 			err = errors.New("未知错误：数据异常")
-			// log.Fatal(err)
+			// panic(err)
 			return
 		}
 
@@ -243,7 +283,7 @@ func FindAccount(id primitive.ObjectID) (a model.Account, exist bool) {
 	exist = false
 	if err := accCol.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
 		if err != mongo.ErrNoDocuments {
-			log.Fatal(err)
+			panic(err)
 		}
 	}
 	if a.IsValid() {
@@ -265,10 +305,10 @@ func FindAllAccountsInfo() (us []dto.UserInfo) {
 func FindAllAccounts() (as []model.Account) {
 	results, err := accCol.Find(context.TODO(), bson.D{{}})
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	if err = results.All(context.TODO(), &as); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return
 }

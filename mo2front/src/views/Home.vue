@@ -1,18 +1,25 @@
 <template>
   <div>
     <v-parallax
-      src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
+      src="https://cdn.mo2.leezeeyee.com/material.jpg~parallax"
       height="200"
     >
       <v-row align="center" justify="center">
         <v-col class="text-center" cols="12">
-          <h1 class="display-1 font-weight-thin mb-4">MO2</h1>
-          <h4 class="subheading">Monkey ❤ Mouse</h4>
+          <h1
+            @click="$router.push('/about')"
+            class="display-1 font-weight-thin mb-4 clickable"
+          >
+            MO2
+          </h1>
+          <h4 @click="$router.push('/about')" class="subheading clickable">
+            Blog site build for everyone, built by everyone
+          </h4>
         </v-col>
       </v-row>
     </v-parallax>
     <v-container>
-      <blog-time-line-list v-if="!firstloading" :blogs="blogs" />
+      <blog-time-line-list v-if="!firstloading" :blogs="datalist" />
       <blog-skeleton v-if="loading" :num="pagesize" />
     </v-container>
   </div>
@@ -20,13 +27,7 @@
 
 <script lang="ts">
 import { BlogBrief } from "@/models";
-import {
-  GetArticles,
-  BlogAutoLoader,
-  AddMore,
-  ElmReachedButtom,
-} from "@/utils";
-import axios from "axios";
+import { GetArticles, AutoLoader, AddMore, ElmReachedButtom } from "../utils";
 import Vue from "vue";
 import Component from "vue-class-component";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
@@ -37,8 +38,8 @@ import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
     BlogSkeleton,
   },
 })
-export default class Home extends Vue implements BlogAutoLoader {
-  blogs: BlogBrief[] = [];
+export default class Home extends Vue implements AutoLoader<BlogBrief> {
+  datalist: BlogBrief[] = [];
   loading = true;
   firstloading = true;
   page = 0;

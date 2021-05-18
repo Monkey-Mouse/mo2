@@ -1,7 +1,12 @@
 <template>
   <v-card-text>
     <v-row>
-      <v-col v-for="(value, key) in inputProps" :key="key" :cols="value['col']">
+      <v-col
+        v-for="(value, key) in inputProps"
+        :key="key"
+        :lg="value['col']"
+        cols="12"
+      >
         <v-textarea
           v-if="value['type'] === 'textarea'"
           outlined
@@ -12,6 +17,48 @@
           :type="value['type']"
           :append-icon="value.icon"
         />
+        <div v-else-if="value['type'] === 'color'">
+          <div class="v-label mb-3">{{ value.label }}</div>
+          <v-color-picker
+            :label="value.label"
+            v-model="model[key]"
+            @update:color="value.onChange"
+            mode="hexa"
+          >
+            <v-icon
+              class="clickable"
+              v-if="value.icon && value['iconClick']"
+              slot="append"
+              color="gray"
+              @click="value['iconClick'](value)"
+            >
+              {{ value.icon }}
+            </v-icon>
+            <v-icon v-else-if="value.icon" slot="append" color="gray">
+              {{ value.icon }}
+            </v-icon>
+          </v-color-picker>
+        </div>
+        <v-switch
+          v-else-if="value['type'] === 'switch'"
+          :label="value.label"
+          v-model="model[key]"
+          @change="value.onChange"
+          :messages="value.message"
+        >
+          <v-icon
+            class="clickable"
+            v-if="value.icon && value['iconClick']"
+            slot="append"
+            color="gray"
+            @click="value['iconClick'](value)"
+          >
+            {{ value.icon }}
+          </v-icon>
+          <v-icon v-else-if="value.icon" slot="append" color="gray">
+            {{ value.icon }}
+          </v-icon>
+        </v-switch>
         <img-selector
           v-else-if="value['type'] === 'imgselector'"
           :imgs="imgVals[key]"
@@ -20,6 +67,35 @@
           :uploadImgs="uploadImgs"
           @imgselect="(img) => (model[key] = img)"
         />
+        <v-select
+          v-else-if="value['type'] === 'select'"
+          v-model="model[key]"
+          :items="value['options']"
+          deletable-chips
+          chips
+          :label="value.label"
+          multiple
+        />
+        <v-file-input
+          v-else-if="value['type'] === 'file'"
+          :label="value.label"
+          v-model="model[key]"
+          :rules="buildValidationRoles(key)"
+          :accept="value['accept']"
+        >
+          <v-icon
+            class="clickable"
+            v-if="value.icon && value['iconClick']"
+            slot="append"
+            color="gray"
+            @click="value['iconClick'](value)"
+          >
+            {{ value.icon }}
+          </v-icon>
+          <v-icon v-else-if="value.icon" slot="append" color="gray">
+            {{ value.icon }}
+          </v-icon>
+        </v-file-input>
         <v-text-field
           v-else
           :label="value.label"
@@ -100,7 +176,7 @@ export default class InputList extends Vue {
   }
   setModel(model: any) {
     for (const key in this.model) {
-      if (model[key]) {
+      if (model[key] || model[key] === false) {
         this.model[key] = model[key];
       }
     }

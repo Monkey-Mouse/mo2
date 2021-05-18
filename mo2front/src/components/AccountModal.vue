@@ -32,6 +32,7 @@
                 <v-tabs align-with-title v-model="tabkey">
                   <v-tab :key="1">登录</v-tab>
                   <v-tab :key="2">注册</v-tab>
+                  <v-tab :key="3">OAuth</v-tab>
                 </v-tabs>
               </v-card-title>
             </v-col>
@@ -42,11 +43,11 @@
                 <v-row>
                   <v-col cols="12">
                     <v-text-field
-                      label="Email"
-                      v-model="email"
-                      :rules="validateEmail()"
+                      label="Email or UserName"
+                      v-model="emailOrName"
+                      :rules="validateNameOrEmail()"
                     >
-                      <v-icon slot="append" color="gray"> mdi-email </v-icon>
+                      <v-icon slot="append" color="gray"> mdi-account </v-icon>
                     </v-text-field>
                   </v-col>
                 </v-row>
@@ -77,12 +78,12 @@
                   outlined
                   text
                   :disabled="
-                    this.$v.password.$anyError || this.$v.email.$anyError
+                    this.$v.password.$anyError || this.$v.emailOrName.$anyError
                   "
                   @click="login"
                   >登录</v-btn
                 >
-                <v-btn @click="close" color="red">取消</v-btn>
+                <v-btn @click="close" color="error">取消</v-btn>
               </v-card-actions>
             </v-tab-item>
             <v-tab-item :key="2">
@@ -138,35 +139,33 @@
                   outlined
                   text
                   @click="login"
-                  >确认并登录</v-btn
+                  >确认</v-btn
                 >
-                <v-btn
+                <!-- <v-btn
                   v-if="emailSent"
                   :disabled="this.$v.$anyError"
                   outlined
                   text
                   @click="backToMain"
                   >先继续浏览</v-btn
-                >
-                <v-btn
-                  :disabled="
-                    this.$v.password.$anyError ||
-                    this.$v.email.$anyError ||
-                    this.$v.name.$anyError ||
-                    seconds > 0
-                  "
-                  outlined
-                  text
-                  @click="register"
-                  >{{
-                    emailSent
-                      ? "重新发送" + (seconds > 0 ? `${seconds}` : "")
-                      : "注册"
-                  }}</v-btn
-                >
+                > -->
+                <v-btn :disabled="regDisable" outlined text @click="register">{{
+                  emailSent
+                    ? "重新发送" + (seconds > 0 ? `${seconds}` : "")
+                    : "注册"
+                }}</v-btn>
 
-                <v-btn v-if="!emailSent" @click="close" color="red">取消</v-btn>
+                <v-btn @click="close" color="error">取消</v-btn>
               </v-card-actions>
+            </v-tab-item>
+            <v-tab-item :key="3" style="min-height: 150px">
+              <v-row justify="center">
+                <v-col cols="12" align-self="center" class="text-center"
+                  ><v-btn @click="github"
+                    ><v-icon>mdi-github</v-icon>使用GitHub账号</v-btn
+                  ></v-col
+                >
+              </v-row>
             </v-tab-item>
           </v-tabs-items>
         </v-container>
@@ -177,7 +176,7 @@
 
 <script lang="ts">
 import { User } from "@/models";
-import { GetErrorMsg, LoginAsync, RegisterAsync } from "@/utils";
+import { GetErrorMsg, GithubOauth, LoginAsync, RegisterAsync } from "../utils";
 import { AxiosError } from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
@@ -196,6 +195,7 @@ export default class AccountModal extends Vue {
   enable!: boolean;
   @Prop()
   user!: User;
+  emailOrName = "";
   regerror: string = "";
   loginerr = "";
   processing = false;
@@ -219,12 +219,24 @@ export default class AccountModal extends Vue {
     name: {
       required: required,
     },
+    emailOrName: {
+      required: required,
+    },
   };
   showPasswd: boolean = false;
+
+  public get regDisable(): boolean {
+    return (
+      this.$v.password.$anyError ||
+      this.$v.email.$anyError ||
+      this.$v.name.$anyError ||
+      this.seconds > 0
+    );
+  }
+
   created() {
     this.email = "";
     this.password = "";
-    this.seconds = 30;
     setInterval(() => {
       this.seconds--;
     }, 1000);
@@ -234,15 +246,21 @@ export default class AccountModal extends Vue {
     this.tipbar = true;
     this.close();
   }
+  github() {
+    GithubOauth();
+  }
   close() {
     this.$emit("update:enable", false);
   }
   login() {
+    if (this.tabkey === 1) {
+      this.emailOrName = this.email;
+    }
     this.$v.$touch();
-    if (this.$v.password.$anyError || this.$v.email.$anyError) return;
+    if (this.$v.password.$anyError || this.$v.emailOrName.$anyError) return;
     this.processing = true;
     LoginAsync({
-      userNameOrEmail: this.email,
+      userNameOrEmail: this.emailOrName,
       password: this.password,
     })
       .then((u) => {
@@ -259,6 +277,11 @@ export default class AccountModal extends Vue {
         this.loginerr = GetErrorMsg(err);
       });
   }
+  validateNameOrEmail() {
+    this.$v.emailOrName.$touch();
+
+    return [() => this.$v.emailOrName.required || "登录信息不可为空"];
+  }
   validateName() {
     this.$v.name.$touch();
 
@@ -266,7 +289,8 @@ export default class AccountModal extends Vue {
   }
   register() {
     this.$v.$touch();
-    if (this.$v.$anyError) return;
+    if (this.regDisable) return;
+    this.emailOrName = this.name;
     this.processing = true;
     RegisterAsync({
       email: this.email,

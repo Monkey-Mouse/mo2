@@ -3,10 +3,12 @@ package mo2utils
 import (
 	"errors"
 	"io/ioutil"
-	"log"
 	"math/rand"
-	"mo2/dto"
+	"os"
+	"path"
 	"time"
+
+	"github.com/Monkey-Mouse/mo2/dto"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -29,12 +31,14 @@ func init() {
 	initKey()
 }
 func initKey() (err error) {
-	bytes, err := ioutil.ReadFile("mo2.secret")
+	os.Mkdir("./secrets", 0755)
+	path := path.Join("./secrets", "mo2.secret")
+	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 
 		rand.Seed(time.Now().UnixNano())
 		_, err = rand.Read(key)
-		err = ioutil.WriteFile("mo2.secret", key, 0)
+		err = ioutil.WriteFile(path, key, 0)
 		return
 	}
 	key = bytes
@@ -76,20 +80,27 @@ func GenerateJwtCode(info dto.LoginUserInfo) string {
 	// Sign and get the complete encoded token as a string using the secret
 	tokenString, err := token.SignedString(key)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return tokenString
+}
+
+// GenerateVerifyJwtToken generate jwt token with claim in type JwtClaims
+// for info string
+// jwtToken string
+func GenerateVerifyJwtToken(info string) string {
+	return GenerateJwtToken(info, time.Now().Add(time.Minute*10))
 }
 
 // GenerateJwtToken generate jwt token with claim in type JwtClaims
 // for info string
 // jwtToken string
-func GenerateJwtToken(info string) string {
+func GenerateJwtToken(info string, expireAt time.Time) string {
 
 	claims := JwtInfoClaims{
 		Info: info,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 10).Unix(),
+			ExpiresAt: expireAt.Unix(),
 		},
 	}
 
@@ -97,7 +108,7 @@ func GenerateJwtToken(info string) string {
 	// Sign and get the complete encoded token as a string using the secret
 	tokenString, err := token.SignedString(key)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return tokenString
 }

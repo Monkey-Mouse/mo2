@@ -1,6 +1,31 @@
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData } from '@/models/index'
-import axios, { AxiosError } from 'axios';
+import Vue from '*.vue';
+import { User, ApiError } from '../models/index'
+import { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
+import { VuetifyThemeVariant } from 'vuetify/types/services/theme';
+import { GetUploadToken, UpdateUserInfo } from './api';
+export * from './api'
+export * from './autoloader'
+export * from './lazy-executor'
+export function ElementInViewport(el: HTMLElement) {
+    var top = el.offsetTop;
+    var left = el.offsetLeft;
+    var width = el.offsetWidth;
+    var height = el.offsetHeight;
+
+    while (el.offsetParent) {
+        el = el.offsetParent as HTMLElement;
+        top += el.offsetTop;
+        left += el.offsetLeft;
+    }
+
+    return (
+        top < (window.pageYOffset + window.innerHeight) &&
+        left < (window.pageXOffset + window.innerWidth) &&
+        (top + height) > window.pageYOffset &&
+        (left + width) > window.pageXOffset
+    );
+}
 
 export function randomProperty(obj: any) {
     const keys = Object.keys(obj);
@@ -15,14 +40,6 @@ export function Copy<T>(mainObject: T) {
     }
     return objectCopy as T;
 }
-export async function GetUserData(uid: string): Promise<User> {
-    let re = await axios.get<User>('/api/accounts/detail/' + uid);
-    return re.data[0]
-}
-export async function GetUserDatas(uids: string[]): Promise<UserListData[]> {
-    let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.join('&id='));
-    return re.data
-}
 
 export function GetInitials(name: string) {
     let rgx = new RegExp(/(\p{L}{1})\p{L}+/, 'gu');
@@ -33,25 +50,62 @@ export function GetInitials(name: string) {
         (initials.shift()?.[1] || '') + (initials.pop()?.[1] || '')
     ).toUpperCase();
 }
-export async function GetUserInfoAsync() {
-    let re = await axios.get<User>('/api/logs');
-    return re.data
-}
-export async function RegisterAsync(userInfo: { email: string, password: string, userName: string }) {
-    return (await axios.post<User>('/api/accounts', userInfo)).data;
-}
-export async function LoginAsync(userInfo: { userNameOrEmail: string, password: string }) {
-    return (await axios.post<User>('/api/accounts/login', userInfo)).data;
-}
 export function GetErrorMsg(apiError: any) {
+    const err = (apiError as AxiosError<ApiError>);
     try {
-        return (apiError as AxiosError<ApiError>).response.data.reason
+        return err.response.data.reason
     } catch (error) {
         return 'Unknown Error'
     }
 }
-export async function GetUploadToken(fname: string) {
-    return (await axios.get<ImgToken>('/api/img/' + fname)).data
+export function getRandomColor() {
+    var letters = '456789ABCD';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * letters.length)];
+    }
+    return color;
+}
+export function makeid(length) {
+    var result = [];
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result.push(characters.charAt(Math.floor(Math.random() *
+            charactersLength)));
+    }
+    return result.join('');
+}
+export var globaldic: any = {};
+
+
+export const AdminRole = "GeneralAdmin"
+export const UserRole = "OrdinaryUser"
+export const AnonymousRole = "Anonymous"
+export function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+export async function addQuery(that: Vue, key: string, val: string | string[]) {
+    const query: { [key: string]: string | string[] } = {};
+    Object.keys(that.$route.query).map(
+        (k) => (query[k] = that.$route.query[k])
+    );
+    query[key] = val;
+    that.$router.replace({ query: query }).catch(() => { });
+}
+interface App { refresh: boolean, showLogin: () => void, Prompt(msg: string, timeout: number): void }
+var app: App;
+export function SetApp(params: App) {
+    app = params;
+}
+export function ShowLogin() {
+    app.showLogin()
+}
+export function Prompt(msg: string, timeout: number) {
+    app.Prompt(msg, timeout)
+}
+export function ShowRefresh() {
+    app.refresh = true;
 }
 export const UploadImgToQiniu = async (
     blobs: File[],
@@ -62,96 +116,148 @@ export const UploadImgToQiniu = async (
         const element = blobs[index];
         const promise = new Promise<void>((resolve, reject) => {
             GetUploadToken(element.name).then(val => {
-                var ob = qiniu.upload(element, val.file_key, val.token);
+                let ob = qiniu.upload(element, val.file_key, val.token);
                 ob.subscribe(null, (err) => {
                     reject(err)
                 }, res => {
                     callback({ src: '//cdn.mo2.leezeeyee.com/' + res.key })
                     resolve();
                 })
-            })
+            }).catch(err => reject(err))
         })
         promises.push(promise)
     }
-    await Promise.all(promises)
 
-}
-export var globaldic: any = {};
-export function ParseQuery(query: { [key: string]: any }) {
-    let queryStr = '?';
-    const queryList: string[] = [];
-    for (const key in query) {
-        const element = query[key];
-        queryList.push(`${key}=${element}`)
+    try {
+        await Promise.all(promises)
+    } catch (error) {
+        Prompt(GetErrorMsg(error), 5000);
     }
-    queryStr = queryStr + queryList.join('&');
-    return queryStr
+
 }
-export const GetArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
-    return (await axios.get<BlogBrief[]>('/api/blogs/query' + ParseQuery(query))).data
+export function GetTheme() {
+    return JSON.parse(
+        localStorage.getItem("darkTheme")
+    ) as boolean;
 }
-export async function UpsertBlog(query: { draft: boolean }, blog: BlogUpsert) {
-    return (await axios.post<Blog>('/api/blogs/publish' + ParseQuery(query), blog)).data
+export function SetTheme(dark: boolean, that: Vue, themes?: { light: VuetifyThemeVariant, dark: VuetifyThemeVariant }, user?: User) {
+    that.$vuetify.theme.dark = dark;
+    localStorage.setItem("darkTheme", String(that.$vuetify.theme.dark));
+    if (themes) {
+        localStorage.setItem("themes", JSON.stringify(themes));
+    }
+    if (user && user.roles && user.roles.indexOf(UserRole) > -1) {
+        if (!user.settings) {
+            user.settings = {};
+        }
+        user.settings.perferDark = localStorage.getItem("darkTheme");
+        user.settings.themes = localStorage.getItem("themes");
+        UpdateUserInfo(user);
+    }
 }
-export function UpSertBlogSync(query: { draft: boolean }, blog: BlogUpsert) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/blogs/publish" + ParseQuery(query), false);
-    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhr.send(JSON.stringify(blog));
-}
-export async function GetArticle(query: { id: string, draft: boolean }) {
-    return (await axios.get<Blog>('/api/blogs/find/id' + ParseQuery(query))).data
-}
-export const GetOwnArticles = async (query: { page: number, pageSize: number, draft: boolean }) => {
-    return (await axios.get<BlogBrief[]>('/api/blogs/find/own' + ParseQuery(query))).data
+export function SetThemeColors(that: Vue, themes?: { light: VuetifyThemeVariant, dark: VuetifyThemeVariant }) {
+    for (const k in themes.dark) {
+        that.$vuetify.theme.themes.dark[k] = themes.dark[k]
+    }
+    for (const k in themes.light) {
+        that.$vuetify.theme.themes.light[k] = themes.light[k]
+    }
 }
 
-export const GetUserArticles = async (query: { page: number, pageSize: number, draft: boolean, id: string }) => {
-    return (await axios.get<BlogBrief[]>('/api/blogs/find/userId' + ParseQuery(query))).data
+
+export function ShareToQQ(param: { title: string, pic: string, summary: string, desc: string }) {
+    window.open(`https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=${encodeURIComponent(document.location.toString())}&sharesource=qzone&title=${param.title}&pics=${param.pic}&summary=${param.summary}`, "_blank")
 }
-export function ReachedBottom(): boolean {
-    return (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight;
+export function GithubOauth() {
+    window.location.replace("https://github.com/login/oauth/authorize?client_id=c9cb620eaea6bff97e5d")
 }
-export interface BlogAutoLoader {
-    blogs: BlogBrief[],
-    loading: boolean,
-    firstloading: boolean;
-    page: number,
-    pagesize: number,
-    nomore: boolean,
-    ReachedButtom: () => void,
-}
-export function ElmReachedButtom(elm: BlogAutoLoader, getArticles: (query: { page: number, pageSize: number }) => Promise<BlogBrief[]>) {
-    if (elm.loading === false && !elm.nomore) {
-        elm.loading = true;
-        getArticles({
-            page: elm.page++,
-            pageSize: elm.pagesize,
-        }).then((val) => {
-            try {
-                AddMore(elm, val);
-            } catch (error) {
-                elm.loading = false;
+export function GenerateTOC() {
+    var toc = "";
+    var level = 0;
+    var i = 0;
+    let first = true;
+    const processFunc = function (str, openLevel, attrs, titleText, closeLevel) {
+        if (openLevel != closeLevel) {
+            return str;
+        }
+        // openLevel -= 1;
+        if (openLevel > level) {
+            if (!first) {
+                toc = toc.slice(0, toc.length - 9) + `
+                <b
+                    style="float: right;display:inline-block"
+                    class="v-icon notranslate v-icon--link mdi mdi-chevron-left"
+                    onclick="this.parentElement.parentElement.className==='active'?this.parentElement.parentElement.className='':this.parentElement.parentElement.className='active';event.preventDefault()"
+                >
+                </b>` + toc.slice(toc.length - 9)
+            } else first = false;
+
+            toc += (new Array(openLevel - level + 1)).join("<ul>");
+        } else if (openLevel < level) {
+            toc += (new Array(level - openLevel + 1)).join("</ul>");
+        }
+
+        level = parseInt(openLevel);
+
+        var anchor = titleText.replace(/ /g, "_") + Date.now() + i++;
+        toc += "<li><a href=\"#" + anchor + "\">" + `<div>${titleText}</div>`
+            + "</a></li>";
+
+        return "<h" + (openLevel) + attrs + ` id="${anchor}" anchor class="anchor h">`
+            + titleText + "</h" + closeLevel + ">";
+    }
+    document.getElementById("titleContainer").innerHTML =
+        document.getElementById("titleContainer").innerHTML.replace(
+            /<h([\d])([^>]*)>([^<]+)<\/h([\d])>/gi,
+            processFunc
+        );
+    document.getElementById("contents").innerHTML =
+        document.getElementById("contents").innerHTML.replace(
+            /<h([\d])([^>]*)>([^<]+)<\/h([\d])>/gi,
+            processFunc
+        );
+
+    if (level) {
+        toc += (new Array(level + 1)).join("</ul>");
+    }
+    const tocE = document.getElementById("toc");
+    tocE.innerHTML += toc;
+    let prevNode: Element = null;
+    let prev: Element = null;
+    setTimeout(() => {
+        const hs = document.querySelectorAll("h1, h2, h3, h4, h5, h6")
+        window.addEventListener('scroll', () => {
+            for (const i of hs) {
+                if (ElementInViewport(i as HTMLElement)) {
+                    if (prev === i) {
+                        return;
+                    }
+                    prev = i;
+                    if (prevNode) {
+                        prevNode.className = '';
+                    }
+                    const ae = tocE.querySelector('a[href="#' + i.id + '"]')
+                    if (!ae) {
+                        return;
+                    }
+                    const node = ae.parentElement
+                    node.classList.add('active')
+                    if (node.previousElementSibling && node.previousElementSibling.previousElementSibling) {
+                        node.previousElementSibling.className = '';
+                        node.previousElementSibling.previousElementSibling.className = '';
+                    }
+                    prevNode = node;
+                    let n = node;
+                    while (n.parentElement && n.parentElement.tagName === 'UL') {
+                        n = n.parentElement;
+                        if (n.previousElementSibling) {
+
+                            n.previousElementSibling.className = 'active';
+                        }
+                    }
+                    break;
+                }
             }
-        });
-    }
-}
-export function AddMore(elm: BlogAutoLoader, val: BlogBrief[]) {
-    if (!val || val.length < elm.pagesize) {
-        elm.nomore = true;
-    }
-    for (let index = 0; index < val.length; index++) {
-        const element = val[index];
-        elm.blogs.push(element);
-    }
-    elm.loading = false;
-}
-export async function DeleteArticle(id: string, query: { draft: boolean }) {
-    (await axios.delete('/api/blogs/' + id + ParseQuery(query)))
-}
-export async function Logout() {
-    (await axios.post('/api/accounts/logout'));
-}
-export const AdminRole = "GeneralAdmin"
-export const UserRole = "OrdinaryUser"
-export const AnonymousRole = "Anonymous"
+        })
+    }, 100);
+};
