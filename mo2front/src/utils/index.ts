@@ -1,9 +1,8 @@
 import Vue from '*.vue';
-import { User, ApiError, ImgToken, BlogBrief, BlogUpsert, Blog, UserListData, Category, Comment, SubComment, Count, Notification } from '@/models/index'
-import axios, { AxiosError } from 'axios';
+import { User, ApiError } from '../models/index'
+import { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 import { VuetifyThemeVariant } from 'vuetify/types/services/theme';
-import router from '../router'
 import { GetUploadToken, UpdateUserInfo } from './api';
 export * from './api'
 export * from './autoloader'
@@ -54,9 +53,6 @@ export function GetInitials(name: string) {
 export function GetErrorMsg(apiError: any) {
     const err = (apiError as AxiosError<ApiError>);
     try {
-        if (err.response.status === 404) {
-            router.push('/404')
-        }
         return err.response.data.reason
     } catch (error) {
         return 'Unknown Error'

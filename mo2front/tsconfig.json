@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "dist",
     "target": "esnext",
     "module": "esnext",
     "strict": false,
@@ -18,6 +19,7 @@
       "mocha",
       "chai"
     ],
+    "declaration": true,
     "paths": {
       "@/*": [
         "src/*"

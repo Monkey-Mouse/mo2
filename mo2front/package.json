@@ -1,6 +1,6 @@
 {
   "name": "mo2front",
-  "version": "0.1.0",
+  "version": "0.2.9",
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -8,6 +8,11 @@
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
+  "files": [
+    "src/utils/**",
+    "src/models/**",
+    "*.json"
+  ],
   "dependencies": {
     "@pwabuilder/pwainstall": "^1.6.7",
     "@tiptap/extension-character-count": "^2.0.0-beta.3",

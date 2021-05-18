@@ -10,10 +10,8 @@ import {
     UserListData,
     Comment,
     Notification
-} from "@/models";
+} from "../../models";
 import axios from "axios";
-import * as qiniu from 'qiniu-js';
-import { GetErrorMsg } from "..";
 export * from './like'
 
 function onlyUnique(value, index, self) {
