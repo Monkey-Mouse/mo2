@@ -313,7 +313,7 @@ func (c *Controller) FindBlogById(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusNotFound, badresponse.SetResponseReason("页面找不到了"))
 		return
 	}
-	if blog.YToken == token {
+	if token != primitive.NilObjectID && blog.YToken == token {
 		ctx.JSON(http.StatusOK, blog)
 		return
 	}
