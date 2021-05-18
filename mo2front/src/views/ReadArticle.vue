@@ -485,7 +485,13 @@ export default class ReadArticle extends Vue {
   }
   async confirm(model: BlogUpsert, draft = false) {
     try {
-      await UpsertBlog({ draft: false }, model);
+      for (const key in model) {
+        if (Object.prototype.hasOwnProperty.call(model, key)) {
+          const element = model[key];
+          this.blog[key] = element;
+        }
+      }
+      await UpsertBlog({ draft: false }, this.blog);
       this.$router.push("/article/" + this.blog.id);
       return { err: "", pass: true };
     } catch (error) {
@@ -504,6 +510,7 @@ export default class ReadArticle extends Vue {
   }
   publish() {
     this.showPublish = true;
+    console.log(this.blog);
     this.dialog.setModel(this.blog);
     let imgEs = document.querySelectorAll(".mo2content img");
     const array = [...imgEs];
