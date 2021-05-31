@@ -1,6 +1,6 @@
 {
   "name": "mo2front",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -11,6 +11,10 @@
   "files": [
     "src/utils/**",
     "src/models/**",
+    "src/components/MO2Dialog.vue",
+    "src/components/InputList.vue",
+    "src/components/ImageCropper.vue",
+    "src/components/ImgSelector.vue",
     "*.json"
   ],
   "dependencies": {

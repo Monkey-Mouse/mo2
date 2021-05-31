@@ -43,7 +43,7 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import InputList from "../components/InputList.vue";
 import Cropper from "../components/ImageCropper.vue";
-import { InputProp } from "@/models";
+import { InputProp } from "../models";
 import { Prop } from "vue-property-decorator";
 @Component({
   components: {
