@@ -29,9 +29,9 @@ func (c *Controller) Score(ctx *gin.Context, u dto.LoginUserInfo) (status int, b
 		Operation:       loghelper.SCORE,
 		OperationTarget: score.Target[:],
 	})
-	reScore := ""
+	reScore := "重新"
 	if err != nil {
-		reScore = "重新"
+		reScore = ""
 	}
 	notifyLogClient.LogInfo(loghelper.Log{
 		Operator:             u.ID,
@@ -39,14 +39,28 @@ func (c *Controller) Score(ctx *gin.Context, u dto.LoginUserInfo) (status int, b
 		OperationTarget:      score.Target,
 		OperationTargetOwner: b.AuthorID,
 		LogLevel:             logservice.LogModel_INFO,
-		ExtraMessage:         fmt.Sprintf(`给你的文章<a href="/article/%s">%s</a>%s打分：%f`, score.Target.Hex(), b.Title, reScore, score.Score),
+		ExtraMessage:         fmt.Sprintf(`给你的文章<a href="/article/%s">%s</a>%s打分：%.1f`, score.Target.Hex(), b.Title, reScore, score.Score),
 	})
+	sum, num := 0.0, 0
 	if err != nil {
-		database.ScoreBlog(ctx, &b, -1, float64(score.Score))
+		sum, num = database.ScoreBlog(ctx, &b, -1, float64(score.Score))
 	} else {
 		ss := strings.Split(v.ExtraMessage, "打分：")
 		f, _ := strconv.ParseFloat(ss[1], 64)
-		database.ScoreBlog(ctx, &b, f, score.Score)
+		sum, num = database.ScoreBlog(ctx, &b, f, score.Score)
 	}
-	return 200, gin.H{"success": true}, nil
+	return 200, gin.H{"sum": sum, "num": num}, nil
+}
+func (c *Controller) IsScored(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
+	score := &dto.ScoreReq{}
+	err = ctx.BindJSON(score)
+	if err != nil {
+		return 400, nil, err
+	}
+	_, err = notifyLogClient.Client.Exist(ctx, &logservice.ExtRequest{
+		Operator:        u.ID[:],
+		Operation:       loghelper.SCORE,
+		OperationTarget: score.Target[:],
+	})
+	return 200, err == nil, nil
 }

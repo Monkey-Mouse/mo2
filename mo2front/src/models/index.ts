@@ -6,6 +6,8 @@ export interface BlogBrief {
     description?: string;
     entityInfo: EntityInfo;
     authorId: string;
+    score_sum?: number;
+    score_num?: number;
 }
 export const BlankUser = {
     name: "",

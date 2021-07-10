@@ -137,3 +137,9 @@ export async function RestoreBlog(id: string, query: { draft: boolean }) {
 export async function SetBlogType(b: { y_doc: string, is_y_doc: boolean, id: string }) {
     return (await axios.post<{ token: string }>('/api/blogs/doctype', b)).data
 }
+export async function ScoreBlog(b: { score: number, target: string }) {
+    return (await axios.post<{sum:number,num:number}>('/api/blogs/score', b)).data
+}
+export async function IsScoredBlog(b: { score: number, target: string }) {
+    return (await axios.post<boolean>('/api/blogs/isscored', b)).data
+}

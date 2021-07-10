@@ -64,16 +64,17 @@ func insertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	return
 }
 
-func ScoreBlog(ctx context.Context, b *model.Blog, prev float64, now float64) {
+func ScoreBlog(ctx context.Context, b *model.Blog, prev float64, now float64) (sum float64, num int) {
 	col := chooseCol(false)
-	sum := b.ScoreSum + now
-	num := b.ScoreNum
+	sum = b.ScoreSum + now
+	num = b.ScoreNum
 	if prev < 0 {
 		num++
 	} else {
 		sum -= prev
 	}
 	col.UpdateByID(ctx, b.ID, bson.D{{"$set", bson.M{"score_sum": sum, "score_num": num}}})
+	return
 }
 
 // upsertBlog

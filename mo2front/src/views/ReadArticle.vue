@@ -35,6 +35,12 @@
                   blog.entityInfo.createTime.substr(0, 10)
                 }}</span>
                 <v-spacer />
+                <v-rating
+                  v-if="!draft&&blog.score_num"
+                  :length="5"
+                  :value="blog.score_sum/blog.score_num"
+                  readonly
+                ></v-rating>
                 <v-tooltip v-if="draft" bottom>
                   <template v-slot:activator="{ on, attrs }">
                     <v-btn
@@ -141,14 +147,21 @@
             />
             <div style="padding-bottom: 1rem"></div>
             <v-row v-if="!draft">
-              <v-col class="offset-lg-9 offset-8"
+              <v-rating
+                v-if="!draft"
+                :length="5"
+                :value="blog.score_sum/blog.score_num"
+                @input="rateChange"
+              ></v-rating>
+              <v-spacer/>
+              <v-col cols="auto"
                 ><v-icon @click="toggleLike">{{
                   liked ? "mdi-thumb-up" : "mdi-thumb-up-outline"
                 }}</v-icon
                 >{{ praiseNum }}</v-col
               >
-              <v-col><v-icon @click="share">mdi-share</v-icon></v-col>
-              <v-col class=""
+              <v-col cols="auto"><v-icon @click="share">mdi-share</v-icon></v-col>
+              <v-col cols="auto"
                 ><v-icon @click="loadComment">mdi-message-reply-outline</v-icon
                 >{{ commentNum }}</v-col
               >
@@ -348,9 +361,11 @@ import {
   globaldic,
   InitLoader,
   IsBlogLiked,
+  IsScoredBlog,
   Prompt,
   RecycleBlog,
   RestoreBlog,
+  ScoreBlog,
   ShareToQQ,
   ShowLogin,
   ToggleLikeBlog,
@@ -470,6 +485,14 @@ export default class ReadArticle extends Vue {
 
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
+  }
+  async rateChange(rate:number){
+    const p = IsScoredBlog({score:rate,target:this.blog.id})
+    const re = await ScoreBlog({score:rate,target:this.blog.id})
+    this.blog.score_sum = re.sum;
+    this.blog.score_num = re.num;
+    const sed = await p
+    Prompt((sed?"重新":"")+ "打分成功！",3000)
   }
   get deleteContent() {
     return (
