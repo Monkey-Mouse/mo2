@@ -1,6 +1,6 @@
 {
   "name": "mo2front",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -15,6 +15,7 @@
     "src/components/InputList.vue",
     "src/components/ImageCropper.vue",
     "src/components/ImgSelector.vue",
+    "src/components/Editor/**",
     "*.json"
   ],
   "dependencies": {

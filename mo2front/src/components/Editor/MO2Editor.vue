@@ -85,7 +85,7 @@
           color="amber"
         ></v-progress-circular>
         <v-switch
-          :disabled="authorId !== user.id"
+          :disabled="!user || authorId !== user.id"
           hint="collab"
           persistent-hint
           v-else
@@ -280,7 +280,7 @@
             >
               <v-icon>mdi-arrow-split-horizontal</v-icon>
             </v-btn>
-            <v-btn small @click="$refs.f.click()">
+            <v-btn :v-if="uploadImages" small @click="$refs.f.click()">
               <v-icon>mdi-image-plus</v-icon>
             </v-btn>
           </v-btn-toggle>
@@ -366,14 +366,14 @@ import {
   SetBlogType,
   timeout,
   UserRole,
-} from "@/utils";
+} from "../../utils";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import CodeBlockComponent from "./Lowlight/CodeBlockComponent.vue";
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor";
 
 // load all highlight.js languages
 import lowlight from "lowlight";
-import { User } from "@/models";
+import { User } from "../../models";
 
 @Component({
   components: {
@@ -391,7 +391,7 @@ export default class MO2Editor extends Vue {
     callback: (imgprop: { src: string; alt?: string; title?: string }) => void
   ) => Promise<void>;
   @Prop()
-  user: User;
+  user?: User;
   @Prop()
   authorId: string;
   @Prop()
@@ -561,11 +561,16 @@ export default class MO2Editor extends Vue {
   }
   uploadImages(files: File[]) {
     this.isuploading = true;
-    this.uploadImgs(files, this.editor.commands.setImage)
-      .then(() => (this.isuploading = false))
-      .catch(() => {
-        this.isuploading = false;
-      });
+    if (this.uploadImgs) {
+      this.uploadImgs(files, this.editor.commands.setImage)
+        .then(() => (this.isuploading = false))
+        .catch(() => {
+          this.isuploading = false;
+          this.$emit("upload img error");
+        });
+    } else {
+      this.$emit("upload img not permitted!");
+    }
   }
   mounted() {
     this.initEditor(this.content);
