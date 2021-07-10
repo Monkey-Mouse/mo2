@@ -16,6 +16,7 @@ import (
 const (
 	COMMENT   = 1
 	LIKE_BLOG = 2
+	SCORE     = 3
 )
 
 // Init log client

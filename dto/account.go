@@ -28,6 +28,11 @@ type LoginUserInfo struct {
 	Roles []model.Erole      `json:"roles" example:"ordinaryUser" `
 }
 
+type ScoreReq struct {
+	Score  float64
+	Target primitive.ObjectID
+}
+
 func (t LoginUserInfo) IsInRole(role string) bool {
 	return Contains(t.Roles, role)
 }
