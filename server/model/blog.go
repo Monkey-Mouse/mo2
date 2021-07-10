@@ -20,6 +20,8 @@ type Blog struct {
 	YDoc        string               `json:"y_doc,omitempty" bson:"y_doc,omitempty"`       // 用于collaboration
 	IsYDoc      bool                 `json:"is_y_doc,omitempty" bson:"is_y_doc,omitempty"` // 用于collaboration
 	YToken      primitive.ObjectID   `json:"y_token,omitempty" bson:"y_token,omitempty"`   //用于collaboration
+	ScoreSum    float64              `json:"score_sum" bson:"score_sum,omitempty"`
+	ScoreNum    int                  `json:"score_num" bson:"score_num,omitempty"`
 }
 
 type Filter struct {

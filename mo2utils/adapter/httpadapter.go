@@ -31,10 +31,10 @@ func ReAdapterWithUinfo(handler UserRequestHandler) gin.HandlerFunc {
 }
 
 func processResult(ctx *gin.Context, status int, json interface{}, err error) {
+	if status == 0 {
+		status = 200
+	}
 	if err != nil {
-		if status == 0 {
-			status = 200
-		}
 		ctx.AbortWithStatusJSON(status, badresponse.SetResponseError(err))
 		return
 	}

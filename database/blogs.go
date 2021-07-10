@@ -64,6 +64,19 @@ func insertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	return
 }
 
+func ScoreBlog(ctx context.Context, b *model.Blog, prev float64, now float64) (sum float64, num int) {
+	col := chooseCol(false)
+	sum = b.ScoreSum + now
+	num = b.ScoreNum
+	if prev < 0 {
+		num++
+	} else {
+		sum -= prev
+	}
+	col.UpdateByID(ctx, b.ID, bson.D{{"$set", bson.M{"score_sum": sum, "score_num": num}}})
+	return
+}
+
 // upsertBlog
 func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	col := chooseCol(isDraft)
@@ -171,9 +184,9 @@ func FindBlogsByUserId(id primitive.ObjectID, filter model.Filter) (b []model.Bl
 }
 
 //find blog by id
-func FindBlogById(id primitive.ObjectID, isDraft bool) (b model.Blog) {
+func FindBlogById(id primitive.ObjectID, isDraft bool, opts ...*options.FindOneOptions) (b model.Blog) {
 	col := chooseCol(isDraft)
-	err := col.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&b)
+	err := col.FindOne(context.TODO(), bson.D{{"_id", id}}, opts...).Decode(&b)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return

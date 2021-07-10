@@ -87,6 +87,8 @@ func SetupHandlers(c *Controller) {
 
 			user := blogs.Group("", model.OrdinaryUser)
 			{
+				user.POST("score", adapter.ReAdapterWithUinfo(c.Score))
+				user.POST("isscored", adapter.ReAdapterWithUinfo(c.IsScored))
 				user.POST("category", c.UpsertCategory)
 				user.GET("category", c.FindAllCategories)
 
