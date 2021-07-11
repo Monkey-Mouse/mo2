@@ -93,10 +93,25 @@ export async function addQuery(that: Vue, key: string, val: string | string[]) {
     query[key] = val;
     that.$router.replace({ query: query }).catch(() => { });
 }
-interface App { refresh: boolean, showLogin: () => void, Prompt(msg: string, timeout: number): void, isUser: boolean }
+interface App {
+    refresh: boolean,
+    showLogin: () => void,
+    Prompt(msg: string,
+        timeout: number): void,
+    isUser: boolean,
+    showGroup: boolean
+}
 var app: App;
 export function SetApp(params: App) {
     app = params;
+}
+export function NewGroup() {
+    if (!app.isUser) {
+        Prompt("Please login first!", 5000)
+        ShowLogin();
+        return;
+    }
+    app.showGroup = true
 }
 export function ShowLogin() {
     app.showLogin()
@@ -139,6 +154,7 @@ export function LoginBeforeNav(to, from, next) {
     if (app.isUser) {
         next()
     } else {
+        Prompt("Please login first!", 5000)
         ShowLogin()
     }
 }

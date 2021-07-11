@@ -6,7 +6,7 @@ export function ParseQuery(query: { [key: string]: any }) {
         if (element !== undefined && element !== null) {
             if (element instanceof Array) {
                 element.forEach(e => {
-                    queryList.push(`${key}[]=${e}`)
+                    queryList.push(`${key}=${e}`)
                 });
             } else queryList.push(`${key}=${element}`)
         }

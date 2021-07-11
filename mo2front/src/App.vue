@@ -186,7 +186,7 @@
         <v-list-item
           v-for="(item, n) in items"
           :key="n"
-          :to="item.href"
+          @click="navClick(item)"
           v-show="item.show"
           :exact="true"
         >
@@ -239,6 +239,14 @@
       </template>
     </v-navigation-drawer>
     <v-main>
+      <MO2Dialog
+        :confirm="newGroup"
+        :confirmText="'Create'"
+        :title="'New Group'"
+        :inputProps="groupProps"
+        :validator="groupValidator"
+        :show.sync="showGroup"
+      />
       <router-view
         ref="view"
         v-if="userload"
@@ -302,9 +310,10 @@
 <script lang="ts">
 import Vue from "vue";
 import AccountModal from "./components/AccountModal.vue";
+import MO2Dialog from "./components/MO2Dialog.vue";
 import Vuelidate from "vuelidate";
 import Component from "vue-class-component";
-import { BlankUser, BlogBrief, User } from "./models";
+import { BlankUser, BlogBrief, InputProp, Project, User } from "./models";
 import {
   GetArticles,
   GetInitials,
@@ -317,12 +326,16 @@ import {
   SetTheme,
   SetThemeColors,
   UserRole,
+  NewGroup,
+  UpsertProject,
+  GetErrorMsg,
 } from "./utils";
 import Avatar from "./components/UserAvatar.vue";
 import { Watch } from "vue-property-decorator";
 import "vue2-timeago/dist/vue2-timeago.css";
 import { VuetifyThemeVariant } from "vuetify/types/services/theme";
 import "@pwabuilder/pwainstall";
+import { required } from "vuelidate/lib/validators";
 // import "bulma/bulma.sass";
 Vue.use(Vuelidate);
 
@@ -330,6 +343,7 @@ Vue.use(Vuelidate);
   components: {
     AccountModal,
     Avatar,
+    MO2Dialog,
   },
 })
 export default class App extends Vue {
@@ -343,12 +357,44 @@ export default class App extends Vue {
   searchString = "";
   refresh = false;
   prompts: BlogBrief[] = [];
+  showGroup = false;
   searchLoader: LazyExecutor = new LazyExecutor(null, 200);
 
   prompt = false;
   pmsg = "";
   ptimeout = 5000;
   showInstall = false;
+
+  groupValidator = {
+    name: {
+      required: required,
+    },
+  };
+  groupProps: { [name: string]: InputProp } = {
+    name: {
+      errorMsg: {
+        required: "组名不可为空",
+      },
+      label: "Name",
+      default: "",
+      icon: "mdi-rename-box",
+      col: 12,
+      type: "text",
+    },
+  };
+  async newGroup(p: Project): Promise<{ err: string; pass: boolean }> {
+    try {
+      const proj = await UpsertProject(p);
+      this.$router.push(`/project/${proj.ID}`);
+      return { err: null, pass: true };
+    } catch (error) {
+      return { err: GetErrorMsg(error), pass: false };
+    }
+  }
+  navClick(item) {
+    if (item.click) item.click();
+    else this.$router.push(item.href);
+  }
   get installComponent(): any {
     return document?.querySelector("pwa-install");
   }
@@ -410,6 +456,14 @@ export default class App extends Vue {
       title: "New Article",
       icon: "mdi-file-document-edit",
       href: "/edit",
+      show: true,
+    },
+    {
+      title: "New Group",
+      icon: "mdi-account-group",
+      click: () => {
+        NewGroup();
+      },
       show: true,
     },
     {

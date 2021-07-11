@@ -25,7 +25,7 @@ func (c *Controller) UpsertProject(ctx *gin.Context, u dto.LoginUserInfo) (statu
 		return 200, p, nil
 	}
 	// 更新鉴权
-	prev, err := database.GetProject(ctx, bson.M{"_id": p.ID, "$or": bson.M{"manager_i_ds": u.ID, "owner_id": u.ID}})
+	prev, err := database.GetProject(ctx, bson.M{"_id": p.ID, "$or": bson.D{{"manager_i_ds", u.ID}, {"owner_id", u.ID}}})
 	if err != nil {
 		return 403, nil, fmt.Errorf("access denied")
 	}
@@ -52,10 +52,10 @@ func (c *Controller) ListProject(ctx *gin.Context, u dto.LoginUserInfo) (status 
 	exfilter := bson.M{}
 	if ierr == nil {
 		exfilter = bson.M{
-			"$or": bson.M{
-				"manager_i_ds": id,
-				"owner_id":     id,
-				"member_i_ds":  id,
+			"$or": bson.D{
+				{"manager_i_ds", id},
+				{"owner_id", id},
+				{"member_i_ds", id},
 			},
 		}
 	}

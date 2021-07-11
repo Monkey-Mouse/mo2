@@ -143,8 +143,14 @@ export interface DisplayNotification extends Notification {
     user?: User;
 }
 export interface Project {
-    id?: string;
-    entity_info?: EntityInfo;
-    name?: string;
-    avatar?: string;
+    EntityInfo?: EntityInfo;
+    ID: string;
+    Name: string;
+    Tags?: string[];
+    OwnerID: string;
+    ManagerIDs?: string[];
+    MemberIDs?: string[];
+    BlogIDs?: string[];
+    Description: string;
+    Avatar: string;
 }

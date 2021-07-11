@@ -13,7 +13,7 @@ import { ListProject } from "../utils/api";
 })
 export default class Project extends Vue {
   created() {
-    ListProject({ page: 0, pageSize: 10 });
+    ListProject({ Page: 0, PageSize: 1, Uid: "6047692a3ffb994a17160180" });
   }
 }
 </script>
