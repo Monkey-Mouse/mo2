@@ -134,5 +134,11 @@ func SetupHandlers(c *Controller) {
 			group.GET(":id", c.FindGroup)
 
 		}
+		proj := api.Group("project", model.OrdinaryUser)
+		{
+			proj.POST("", adapter.ReAdapterWithUinfo(c.UpsertProject))
+			proj.GET("", adapter.ReAdapterWithUinfo(c.ListProject))
+			proj.GET(":id", adapter.ReAdapterWithUinfo(c.GetProject))
+		}
 	}
 }
