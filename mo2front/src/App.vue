@@ -404,19 +404,19 @@ export default class App extends Vue {
       title: "My Home",
       icon: "mdi-account",
       href: "/account",
-      show: this.isUser,
+      show: true,
     },
     {
       title: "New Article",
       icon: "mdi-file-document-edit",
       href: "/edit",
-      show: this.isUser,
+      show: true,
     },
     {
       title: "Recycle Bin",
       icon: "mdi-delete",
       href: "/recycle",
-      show: this.isUser,
+      show: true,
     },
     { title: "About", icon: "mdi-alpha-a-circle", href: "/about", show: true },
   ];
@@ -425,9 +425,6 @@ export default class App extends Vue {
   }
   @Watch("user")
   userChange() {
-    this.items[3].show = this.isUser;
-    this.items[2].show = this.isUser;
-    this.items[1].show = this.isUser;
     try {
       if (this.isUser) {
         GetNotificationNums().then((d) => {
@@ -558,6 +555,9 @@ export default class App extends Vue {
     }, 2000);
   }
   showLogin() {
+    if (this.isUser) {
+      return;
+    }
     this.drawer = false;
     this.enable = true;
   }

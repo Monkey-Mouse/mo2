@@ -13,6 +13,10 @@ import {
 } from "../../models";
 import axios from "axios";
 export * from './like'
+export * from "./queryParser";
+export * from "./project";
+import { ParseQuery } from "./queryParser";
+
 
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
@@ -43,18 +47,6 @@ export async function GetUploadToken(fname: string) {
     return (await axios.get<ImgToken>('/api/img/' + fname)).data
 }
 
-export function ParseQuery(query: { [key: string]: any }) {
-    let queryStr = '?';
-    const queryList: string[] = [];
-    for (const key in query) {
-        const element = query[key];
-        if (element !== undefined && element !== null) {
-            queryList.push(`${key}=${element}`)
-        }
-    }
-    queryStr = queryStr + queryList.join('&');
-    return queryStr
-}
 export const GetArticles = async (query: { page: number; pageSize: number; draft: boolean; search?: string }) => {
     return (await axios.get<BlogBrief[]>('/api/blogs/query' + ParseQuery(query))).data
 }
@@ -138,7 +130,7 @@ export async function SetBlogType(b: { y_doc: string, is_y_doc: boolean, id: str
     return (await axios.post<{ token: string }>('/api/blogs/doctype', b)).data
 }
 export async function ScoreBlog(b: { score: number, target: string }) {
-    return (await axios.post<{sum:number,num:number}>('/api/blogs/score', b)).data
+    return (await axios.post<{ sum: number, num: number }>('/api/blogs/score', b)).data
 }
 export async function IsScoredBlog(b: { score: number, target: string }) {
     return (await axios.post<boolean>('/api/blogs/isscored', b)).data

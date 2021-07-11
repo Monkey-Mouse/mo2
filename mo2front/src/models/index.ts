@@ -142,3 +142,9 @@ export interface Notification {
 export interface DisplayNotification extends Notification {
     user?: User;
 }
+export interface Project {
+    id?: string;
+    entity_info?: EntityInfo;
+    name?: string;
+    avatar?: string;
+}
