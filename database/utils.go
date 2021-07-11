@@ -20,6 +20,13 @@ func GetCollection(colName string) *mongo.Collection {
 	return client.Database(dbName).Collection(colName)
 }
 
+func sanitizePagesize(pagesize int64) int64 {
+	if pagesize > 100 {
+		pagesize = 100
+	}
+	return pagesize
+}
+
 func getPaginationOption(page int64, pagesize int64) *options.FindOptions {
 	return options.Find().SetSkip(page * pagesize).SetLimit(pagesize)
 }

@@ -13,7 +13,11 @@ var dbName = "mo2"
 
 func connectMongoDB() {
 	// 设置客户端连接配置
-	clientOptions := options.Client().ApplyURI(os.Getenv("MO2_MONGO_URL"))
+	conn := os.Getenv("MO2_MONGO_URL")
+	if len(conn) == 0 {
+		conn = "mongodb://localhost"
+	}
+	clientOptions := options.Client().ApplyURI(conn)
 
 	// 连接到MongoDB
 	client, err := mongo.Connect(context.TODO(), clientOptions)
