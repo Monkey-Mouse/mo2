@@ -93,6 +93,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 			"key_words":   b.KeyWords,
 			"categories":  b.CategoryIDs,
 			"y_doc":       b.YDoc,
+			"project_id":  b.ProjectID,
 		}}},
 		options.Update().SetUpsert(true),
 	)
@@ -132,6 +133,7 @@ func UpsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	}
 	if !isDraft {
 		mo2utils.IndexBlog(b)
+		AddBlogToProj(context.TODO(), b.ProjectID, b.ID)
 	}
 	return
 }
@@ -201,7 +203,7 @@ func FindBlogs(filter model.Filter) (b []model.Blog) {
 	col := chooseCol(filter.IsDraft)
 	opts := getBlogListQueryOption().SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
 	f := bson.D{{"entity_info.isdeleted", filter.IsDeleted}}
-	if filter.Ids != nil {
+	if len(filter.Ids) != 0 {
 		f = bson.D{
 			{"entity_info.isdeleted", filter.IsDeleted},
 			{"_id", bson.M{"$in": filter.Ids}},
