@@ -35,7 +35,7 @@ axios.interceptors.response.use(response => {
       ShowLogin();
     }
   }
-  return error;
+  throw error;
 });
 
 new Vue({
