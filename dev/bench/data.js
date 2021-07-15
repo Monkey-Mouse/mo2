@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1625995406785,
+  "lastUpdate": 1626331234072,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -7790,6 +7790,56 @@ window.BENCHMARK_DATA = {
           {
             "name": "Benchmark_checkRL",
             "value": 1278,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "c56d0198ddd695972b08ad56471e01de223bebd2",
+          "message": "add proj backend",
+          "timestamp": "2021-07-10T07:40:35Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/295/commits/c56d0198ddd695972b08ad56471e01de223bebd2"
+        },
+        "date": 1626331233077,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 6537861,
+            "unit": "ns/op",
+            "extra": "164 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 444834,
+            "unit": "ns/op",
+            "extra": "3306 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1204,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 85693,
+            "unit": "ns/op",
+            "extra": "12963 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1119,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
           }
