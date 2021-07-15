@@ -51,7 +51,7 @@ import { Prop } from "vue-property-decorator";
     Cropper,
   },
 })
-export default class About extends Vue {
+export default class Mo2Dialog extends Vue {
   @Prop()
   confirm!: (any) => Promise<{ err: string; pass: boolean }>;
   @Prop()

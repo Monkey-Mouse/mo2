@@ -22,6 +22,7 @@ type Blog struct {
 	YToken      primitive.ObjectID   `json:"y_token,omitempty" bson:"y_token,omitempty"`   //用于collaboration
 	ScoreSum    float64              `json:"score_sum" bson:"score_sum,omitempty"`
 	ScoreNum    int                  `json:"score_num" bson:"score_num,omitempty"`
+	ProjectID   primitive.ObjectID   `json:"project_id" bson:"project_id"`
 }
 
 type Filter struct {

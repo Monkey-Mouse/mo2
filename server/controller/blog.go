@@ -447,5 +447,10 @@ func parseFilter(ctx *gin.Context) (filter model.Filter, mErr mo2errors.Mo2Error
 	}
 	filter.IsDraft = parseString2Bool(ctx.DefaultQuery("draft", "true"))
 	filter.IsDeleted = parseString2Bool(ctx.DefaultQuery("deleted", "false"))
+	ids := ctx.QueryArray("ids")
+	filter.Ids = make([]primitive.ObjectID, len(ids))
+	for i, v := range ids {
+		filter.Ids[i], _ = primitive.ObjectIDFromHex(v)
+	}
 	return
 }

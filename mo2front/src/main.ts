@@ -8,6 +8,8 @@ import vuetify from './plugins/vuetify';
 import VueCookies from 'vue-cookies'
 import sanitizeHtml from 'sanitize-html'
 import '@mdi/font/css/materialdesignicons.css'
+import axios from 'axios'
+import { ShowLogin } from './utils'
 const list = sanitizeHtml.defaults.allowedTags.concat(sanitizeHtml.defaults.selfClosing);
 const attrs = sanitizeHtml.defaults.allowedAttributes;
 attrs['*'] = ['href', 'align', 'alt', 'center', 'bgcolor', 'data-*', 'class', 'style']
@@ -24,6 +26,17 @@ Vue.use(VueCookies);
 // set default config
 Vue.$cookies.config('7d')
 Vue.config.productionTip = false
+
+axios.interceptors.response.use(response => {
+  return response;
+}, error => {
+  if (error.response.status === 403) {
+    if (error.response.data?.reason === "authentication failed") {
+      ShowLogin();
+    }
+  }
+  throw error;
+});
 
 new Vue({
   router,
