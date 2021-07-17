@@ -101,7 +101,7 @@ func SetupHandlers(c *Controller) {
 			find := blogs.Group("/find")
 			{
 				find.GET("own", c.FindBlogsByUser, model.OrdinaryUser)
-				find.GET("userId", c.FindBlogsByUserId)
+				find.GET("", c.FindBlogsByID)
 				find.GET("id", c.FindBlogById)
 			}
 		}
@@ -134,10 +134,11 @@ func SetupHandlers(c *Controller) {
 			group.GET(":id", c.FindGroup)
 
 		}
-		proj := api.Group("project", model.OrdinaryUser)
+		proj := api.Group("project")
 		{
-			proj.POST("", adapter.ReAdapterWithUinfo(c.UpsertProject))
+			proj.POST("", adapter.ReAdapterWithUinfo(c.UpsertProject), model.OrdinaryUser)
 			proj.GET("", adapter.ReAdapterWithUinfo(c.ListProject))
+			proj.DELETE(":id", adapter.ReAdapterWithUinfo(c.DeleteProject), model.OrdinaryUser)
 			proj.GET(":id", adapter.ReAdapterWithUinfo(c.GetProject))
 		}
 	}

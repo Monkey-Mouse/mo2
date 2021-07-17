@@ -7,7 +7,16 @@
             @keydown="keyDown"
             ref="s"
             contenteditable="true"
-            class="display-1 text-h3 pt-10 font-weight-thin ml-4 mr-4 mb-0 borderless"
+            class="
+              display-1
+              text-h3
+              pt-10
+              font-weight-thin
+              ml-4
+              mr-4
+              mb-0
+              borderless
+            "
           >
             {{ search }}
           </h1>
@@ -24,7 +33,7 @@
 
 <script lang="ts">
 import { BlogBrief } from "@/models";
-import { GetArticles, AutoLoader, AddMore, ElmReachedButtom } from "../utils";
+import { GetArticles, AutoLoader, AddMore, ElmReachedBottom } from "../utils";
 import Vue from "vue";
 import Component from "vue-class-component";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
@@ -98,7 +107,7 @@ export default class Search extends Vue implements AutoLoader<BlogBrief> {
     (this.$refs.s as HTMLElement).focus();
   }
   public ReachedButtom() {
-    ElmReachedButtom(this, ({ page, pageSize }) =>
+    ElmReachedBottom(this, ({ page, pageSize }) =>
       GetArticles({
         page: page,
         pageSize: pageSize,

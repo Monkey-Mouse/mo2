@@ -67,14 +67,24 @@
           :uploadImgs="uploadImgs"
           @imgselect="(img) => (model[key] = img)"
         />
-        <v-select
+        <v-autocomplete
           v-else-if="value['type'] === 'select'"
           v-model="model[key]"
           :items="value['options']"
           deletable-chips
           chips
           :label="value.label"
-          multiple
+          :multiple="value.multiple"
+        />
+        <v-combobox
+          v-else-if="value['type'] === 'combo'"
+          v-model="model[key]"
+          :items="value['options']"
+          deletable-chips
+          chips
+          :label="value.label"
+          :multiple="value.multiple"
+          :messages="value.message"
         />
         <v-file-input
           v-else-if="value['type'] === 'file'"

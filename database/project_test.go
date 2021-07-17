@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestCreateProject(t *testing.T) {
@@ -26,14 +25,5 @@ func TestListProject(t *testing.T) {
 	if err != nil {
 		t.Errorf("error: %v", err)
 		return
-	}
-}
-
-func TestAddBlogToProj(t *testing.T) {
-	p := &Project{}
-	UpsertProject(context.TODO(), p, nil)
-	err := AddBlogToProj(context.TODO(), primitive.NewObjectID(), p.ID)
-	if err != nil {
-		t.Errorf("error: %v", err)
 	}
 }

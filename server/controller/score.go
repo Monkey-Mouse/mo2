@@ -14,6 +14,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func checkOwnerOrManager(p *database.Project, u dto.LoginUserInfo) bool {
+	if p.OwnerID == u.ID {
+		return true
+	}
+	for _, v := range p.ManagerIDs {
+		if v == u.ID {
+			return true
+		}
+	}
+	return false
+}
+
 func (c *Controller) Score(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
 	score := &dto.ScoreReq{}
 	err = ctx.BindJSON(score)
@@ -23,6 +35,12 @@ func (c *Controller) Score(ctx *gin.Context, u dto.LoginUserInfo) (status int, b
 	b := database.FindBlogById(score.Target, false, &options.FindOneOptions{
 		Projection: bson.D{{"content", 0}, {"y_doc", 0}},
 	})
+	if !b.ProjectID.IsZero() {
+		p, err := database.GetProject(ctx, bson.M{"_id": b.ProjectID, "tags": "课程"})
+		if err == nil && !checkOwnerOrManager(p, u) {
+			return 403, nil, fmt.Errorf("该文章只有所属项目的管理员有权利打分")
+		}
+	}
 
 	v, err := notifyLogClient.Client.Exist(ctx, &logservice.ExtRequest{
 		Operator:        u.ID[:],

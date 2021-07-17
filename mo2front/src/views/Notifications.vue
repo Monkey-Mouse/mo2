@@ -59,7 +59,7 @@ import {
   GetNotifications,
   GetUserDatas,
   AutoLoader,
-  ElmReachedButtom,
+  ElmReachedBottom,
   AddMore,
 } from "@/utils";
 import Vue from "vue";
@@ -79,7 +79,8 @@ import Nothing from "../components/NothingHere.vue";
 })
 export default class Notifications
   extends Vue
-  implements AutoLoader<DisplayNotification> {
+  implements AutoLoader<DisplayNotification>
+{
   datalist: DisplayNotification[] = [];
   page = 0;
   pagesize = 10;
@@ -115,7 +116,7 @@ export default class Notifications
     });
   }
   ReachedButtom() {
-    ElmReachedButtom(this, (q) => this.loadMoreData(q.page, q.pageSize));
+    ElmReachedBottom(this, (q) => this.loadMoreData(q.page, q.pageSize));
   }
 }
 </script>

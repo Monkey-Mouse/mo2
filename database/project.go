@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Monkey-Mouse/mo2/server/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,6 +13,13 @@ import (
 const projStr = "group"
 
 var ProjCol = GetCollection(projStr)
+
+func init() {
+	ProjCol.Indexes().CreateMany(context.TODO(), append([]mongo.IndexModel{
+		{Keys: bson.M{"tags": 1}},
+		{Keys: bson.M{"owner_id": 1}},
+	}, model.IndexModels...))
+}
 
 type Project struct {
 	ID          primitive.ObjectID   `bson:"_id,omitempty"`
@@ -32,6 +38,9 @@ func UpsertProject(ctx context.Context, p *Project, update bson.M) (*mongo.Updat
 	if p.ID.IsZero() {
 		p.ID = primitive.NewObjectID()
 		p.EntityInfo = model.Entity{}
+		p.BlogIDs = []primitive.ObjectID{}
+		p.ManagerIDs = []primitive.ObjectID{}
+		p.MemberIDs = []primitive.ObjectID{}
 		p.EntityInfo.Create()
 	} else {
 		p.EntityInfo.Update()
@@ -43,7 +52,9 @@ func UpsertProject(ctx context.Context, p *Project, update bson.M) (*mongo.Updat
 	if err != nil {
 		return nil, err
 	}
-	p.ID = re.UpsertedID.(primitive.ObjectID)
+	if re.UpsertedID != nil {
+		p.ID = re.UpsertedID.(primitive.ObjectID)
+	}
 	return re, nil
 }
 
@@ -62,17 +73,6 @@ func GetProject(ctx context.Context, query interface{}) (p *Project, err error) 
 	err = ProjCol.FindOne(ctx, query).Decode(p)
 	return
 }
-
-func AddBlogToProj(ctx context.Context, pid primitive.ObjectID, bid primitive.ObjectID) error {
-	if pid.IsZero() {
-		return nil
-	}
-	proj, err := UpsertProject(ctx, &Project{ID: pid}, bson.M{"$push": bson.M{"blog_i_ds": bid}})
-	if err != nil {
-		return err
-	}
-	if proj.UpsertedCount == 0 {
-		return fmt.Errorf("project not found")
-	}
-	return nil
+func DeleteProject(ctx context.Context, id primitive.ObjectID) (*mongo.DeleteResult, error) {
+	return ProjCol.DeleteOne(ctx, bson.M{"_id": id})
 }

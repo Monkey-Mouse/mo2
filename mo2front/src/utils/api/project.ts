@@ -14,4 +14,7 @@ export async function UpsertProject(p: Project) {
 export async function GetProject(id: string) {
     return (await axios.get<Project>('/api/project/' + id)).data
 }
+export async function DeleteProject(id: string) {
+    return (await axios.delete('/api/project/' + id)).data
+}
 

@@ -369,6 +369,12 @@ export default class App extends Vue {
     name: {
       required: required,
     },
+    description: {
+      required: required,
+    },
+    tags: {
+      required: required,
+    },
   };
   groupProps: { [name: string]: InputProp } = {
     name: {
@@ -380,6 +386,29 @@ export default class App extends Vue {
       icon: "mdi-rename-box",
       col: 12,
       type: "text",
+    },
+    description: {
+      errorMsg: {
+        required: "组描述不可为空",
+      },
+      label: "Description",
+      default: "",
+      icon: "mdi-text",
+      col: 12,
+      type: "textarea",
+    },
+    tags: {
+      errorMsg: {
+        required: "标签不可为空",
+      },
+      label: "Description",
+      default: [],
+      icon: "mdi-text",
+      col: 12,
+      type: "combo",
+      options: ["课程", "娱乐", "互联网", "教育"],
+      message: "enter添加自定义tag",
+      multiple: true,
     },
   };
   async newGroup(p: Project): Promise<{ err: string; pass: boolean }> {

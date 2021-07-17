@@ -56,6 +56,7 @@ import {
   GetArticle,
   GetCates,
   GetErrorMsg,
+  ListProject,
   Prompt,
   UploadImgToQiniu,
   UploadMD,
@@ -145,19 +146,38 @@ export default class EditArticle extends Vue {
     categories: {
       errorMsg: {},
       label: "Categories",
+      default: [],
+      col: 12,
+      options: [],
+      type: "select",
+      multiple: true,
+    },
+    project_id: {
+      errorMsg: {},
+      label: "Group",
       default: "",
       col: 12,
       options: [],
       type: "select",
+      multiple: false,
     },
   };
 
   created() {
     this.init();
-    GetCates(this.user.id).then((data) => {
+    const p1 = GetCates(this.user.id).then((data) => {
       this.inputProps.categories.options = data.map((v, i, a) => {
         return { text: v.name, value: v.id };
       });
+    });
+    const p2 = ListProject({ Page: 0, PageSize: 100, Uid: this.user.id }).then(
+      (data) => {
+        this.inputProps.project_id.options = data.map((v, i, a) => {
+          return { text: v.Name, value: v.ID };
+        });
+      }
+    );
+    Promise.all([p1, p2]).then(() => {
       this.propLoad = true;
     });
   }
@@ -304,8 +324,7 @@ export default class EditArticle extends Vue {
       list.push({ src: i.src, active: false });
     });
     list.push({
-      src:
-        "//cdn.mo2.leezeeyee.com/60365aae06fd3124561400c3/1614260703850314778image.png",
+      src: "//cdn.mo2.leezeeyee.com/60365aae06fd3124561400c3/1614260703850314778image.png",
       active: false,
     });
     list[0].active = true;

@@ -151,6 +151,10 @@ export const UploadImgToQiniu = async (
 
 }
 export function LoginBeforeNav(to, from, next) {
+    if (!app) {
+        next()
+        return
+    }
     if (app.isUser) {
         next()
     } else {

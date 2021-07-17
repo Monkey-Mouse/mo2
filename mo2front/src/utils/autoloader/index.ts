@@ -20,7 +20,7 @@ export function InitLoader<T>(loader: AutoLoader<T>) {
     loader.nomore = false;
     loader.loading = true;
 }
-export function ElmReachedButtom<T>(elm: AutoLoader<T>, getMore: (query: { page: number; pageSize: number }) => Promise<T[]>) {
+export function ElmReachedBottom<T>(elm: AutoLoader<T>, getMore: (query: { page: number; pageSize: number }) => Promise<T[]>) {
     if (elm.loading === false && !elm.nomore) {
         elm.loading = true;
         getMore({

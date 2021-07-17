@@ -8,6 +8,7 @@ export interface BlogBrief {
     authorId: string;
     score_sum?: number;
     score_num?: number;
+    project_id?: string;
 }
 export const BlankUser = {
     name: "",
@@ -61,6 +62,7 @@ export interface BlogUpsert {
     is_y_doc?: boolean;
     y_token?: string;
     authorId?: string;
+    project_id?:string;
 }
 export interface UserSettings {
     avatar?: string;
@@ -79,6 +81,7 @@ export interface User extends UserListData {
     roles?: string[];
     entityInfo?: EntityInfo;
 }
+type Options = Array<Option>|Array<string>;
 export interface InputProp {
     errorMsg: { [name: string]: string };
     col?: number;
@@ -87,8 +90,9 @@ export interface InputProp {
     label?: string;
     default: any;
     accept?: string;
-    options?: Option[];
+    options?: Options;
     message?: string;
+    multiple?:boolean;
     iconClick?: (prop: InputProp) => void;
     onChange?: (c: any) => void;
 }
@@ -144,13 +148,13 @@ export interface DisplayNotification extends Notification {
 }
 export interface Project {
     EntityInfo?: EntityInfo;
-    ID: string;
-    Name: string;
+    ID?: string;
+    Name?: string;
     Tags?: string[];
-    OwnerID: string;
+    OwnerID?: string;
     ManagerIDs?: string[];
     MemberIDs?: string[];
     BlogIDs?: string[];
-    Description: string;
-    Avatar: string;
+    Description?: string;
+    Avatar?: string;
 }

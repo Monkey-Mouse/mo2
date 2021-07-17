@@ -89,6 +89,19 @@
       </v-row>
     </v-parallax>
     <v-container>
+      <v-container v-if="projects.length > 0" class="pa-10">
+        <v-row>
+          <v-col><div class="text-h2 text-center">Groups</div></v-col>
+        </v-row>
+        <v-row>
+          <v-divider />
+        </v-row>
+        <v-row class="pb-16">
+          <v-col v-for="(p, i) in projects" :key="i">
+            <project-item :project="p" />
+          </v-col>
+        </v-row>
+      </v-container>
       <v-tabs
         v-model="tab"
         background-color=" grey accent-4"
@@ -132,17 +145,18 @@
 </template>
 
 <script lang="ts">
-import { BlankUser, BlogBrief, User, InputProp } from "@/models";
+import { BlankUser, BlogBrief, User, InputProp, Project } from "@/models";
 import {
   AddMore,
   addQuery,
   AutoLoader,
-  ElmReachedButtom,
+  ElmReachedBottom,
   GetErrorMsg,
   GetOwnArticles,
   GetUserArticles,
   GetUserData,
   InitLoader,
+  ListProject,
   UpdateUserInfo,
   UploadImgToQiniu,
 } from "@/utils";
@@ -156,6 +170,7 @@ import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 import MO2Dialog from "../components/MO2Dialog.vue";
 import Cropper from "../components/ImageCropper.vue";
 import Category from "../components/Category.vue";
+import ProjectItem from "../components/ProjectItem.vue";
 import { IEmoji } from "node_modules/v-emoji-picker/lib/models/Emoji";
 
 const githubRule = helpers.regex(
@@ -170,12 +185,14 @@ const githubRule = helpers.regex(
     MO2Dialog,
     Cropper,
     Category,
+    ProjectItem,
   },
 })
 export default class Account extends Vue implements AutoLoader<BlogBrief> {
   @Prop()
   user!: User;
   displayUser: User = BlankUser;
+  projects: Project[] = [];
   uid!: string;
   datalist: BlogBrief[] = [];
   loading = true;
@@ -278,6 +295,7 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
       message: "设置主页字体颜色",
     },
   };
+
   async changeStatus(emoji: IEmoji) {
     this.user.settings.status = emoji.data;
     await UpdateUserInfo(this.user);
@@ -451,6 +469,11 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
         })
         .catch((err) => GetErrorMsg(err));
     }
+    this.projects = await ListProject({
+      PageSize: 100,
+      Page: 0,
+      Uid: this.uid,
+    });
   }
 
   @Watch("$route", { immediate: true, deep: true })
@@ -491,7 +514,7 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
 
   public ReachedButtom() {
     if (this.tab === "tab-1") {
-      ElmReachedButtom(this, ({ page, pageSize }) =>
+      ElmReachedBottom(this, ({ page, pageSize }) =>
         GetUserArticles({
           page: page,
           pageSize: pageSize,
@@ -500,7 +523,7 @@ export default class Account extends Vue implements AutoLoader<BlogBrief> {
         })
       );
     } else if (this.tab === "tab-2") {
-      ElmReachedButtom(this.draftProps, ({ page, pageSize }) =>
+      ElmReachedBottom(this.draftProps, ({ page, pageSize }) =>
         GetOwnArticles({ page: page, pageSize: pageSize, draft: true })
       );
     }

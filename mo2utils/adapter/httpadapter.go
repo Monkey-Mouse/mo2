@@ -3,6 +3,7 @@ package adapter
 import (
 	"github.com/Monkey-Mouse/mo2/dto"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/mo2utils/basiclog"
 	"github.com/Monkey-Mouse/mo2/server/controller/badresponse"
 	"github.com/gin-gonic/gin"
 )
@@ -35,6 +36,7 @@ func processResult(ctx *gin.Context, status int, json interface{}, err error) {
 		status = 200
 	}
 	if err != nil {
+		basiclog.ErrLogger.Println(err)
 		ctx.AbortWithStatusJSON(status, badresponse.SetResponseError(err))
 		return
 	}

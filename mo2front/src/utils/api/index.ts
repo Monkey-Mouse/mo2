@@ -68,7 +68,13 @@ export const GetOwnArticles = async (query: { page: number; pageSize: number; dr
 }
 
 export const GetUserArticles = async (query: { page: number; pageSize: number; draft: boolean; id: string; }) => {
-    return (await axios.get<BlogBrief[]>('/api/blogs/find/userId' + ParseQuery(query))).data
+    return await GetXXXArticles({page:query.page,pageSize:query.pageSize,draft:query.draft,id:query.id,field:"author_id"})
+}
+export const GetProjectArticles = async (query: { page: number; pageSize: number; id: string; }) => {
+    return await GetXXXArticles({page:query.page,pageSize:query.pageSize,draft:false,id:query.id,field:"project_id"})
+}
+export const GetXXXArticles = async (query: { page: number; pageSize: number; draft: boolean; id: string;field:string }) => {
+    return (await axios.get<BlogBrief[]>('/api/blogs/find' + ParseQuery(query))).data
 }
 export async function DeleteArticle(id: string, query: { draft: boolean }) {
     (await axios.delete('/api/blogs/' + id + ParseQuery(query)))
