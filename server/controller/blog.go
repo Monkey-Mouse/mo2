@@ -420,7 +420,8 @@ func (c *Controller) FindBlogsByType(ctx *gin.Context) {
 // @Tags admin
 // @Success 200
 // @Router /api/admin/indexblogs [post]
-func (c *Controller) IndexAllBlogs(ctx *gin.Context) {
+func (c *Controller) IndexAll(ctx *gin.Context) {
+	mo2utils.IndexAccounts(database.FindAllAccounts())
 	mo2utils.IndexBlogs(database.FindBlogs(model.Filter{IsDeleted: false, IsDraft: false, Page: 0, PageSize: 1000}))
 	ctx.Status(200)
 }

@@ -91,14 +91,19 @@ export interface InputProp {
     default: any;
     accept?: string;
     options?: Options;
+    showAvatar?: boolean;
     message?: string;
     multiple?:boolean;
+    input?:string;
     iconClick?: (prop: InputProp) => void;
     onChange?: (c: any) => void;
+    loading?:boolean;
+    filter?:(item: any, queryText: string, itemText: string) => void
 }
 export interface Option {
     text: string;
     value: string;
+    avatar?:string;
 }
 export interface ApiError {
     reason: string;

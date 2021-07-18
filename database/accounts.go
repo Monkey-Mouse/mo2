@@ -162,6 +162,7 @@ func UpsertAccountWithF(a *model.Account, filter interface{}) (merr mo2errors.Mo
 			a.ID = id
 		}
 	}
+	mo2utils.IndexAccount(a)
 	if result.ModifiedCount != 0 {
 		merr.Init(mo2errors.Mo2NoError, "更新完成")
 	} else {
@@ -189,6 +190,7 @@ func DeleteAccountByEmail(email string) (a model.Account, e mo2errors.Mo2Errors)
 			e.Init(mo2errors.Mo2Error, err.Error())
 		}
 	}
+	mo2utils.DeleteAccountIndex(a.ID.Hex())
 	e.InitCode(mo2errors.Mo2NoError)
 	return
 }

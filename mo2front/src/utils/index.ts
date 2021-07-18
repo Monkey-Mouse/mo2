@@ -1,9 +1,10 @@
 import Vue from '*.vue';
-import { User, ApiError } from '../models/index'
+import { User, ApiError, InputProp, Option } from '../models/index'
 import { AxiosError } from 'axios';
 import * as qiniu from 'qiniu-js';
 import { VuetifyThemeVariant } from 'vuetify/types/services/theme';
-import { GetUploadToken, UpdateUserInfo } from './api';
+import { GetUploadToken, SearchUser, UpdateUserInfo } from './api';
+import { LazyExecutor } from './lazy-executor';
 export * from './api'
 export * from './autoloader'
 export * from './lazy-executor'
@@ -288,3 +289,35 @@ export function GenerateTOC() {
         })
     }, 100);
 };
+export const BuildOnUserChange = (lazySearcher: LazyExecutor, dic: { [key: string]: Option }) => (a: { input: string; val: InputProp; cu: string[] }) => {
+    a.val.input = a.input;
+    if (!a.input) {
+        return;
+    }
+    lazySearcher.Execute(() => {
+        a.val.loading = true;
+        SearchUser({ page: 0, pagesize: 5, query: a.input }).then((re) => {
+            const set = new Set<Option>(a.cu.map((id) => dic[id]));
+            re.map((u) => {
+                const v = {
+                    text: u.userName,
+                    value: u.id,
+                    avatar: u["settings.avatar"],
+                    email: u.email,
+                };
+                dic[u.id] = v;
+                set.add(v);
+            });
+            a.val.options = new Array(...set);
+            a.val.loading = false;
+        });
+    });
+}
+
+export const UserFilter = (item: any, queryText: string, itemText: string) => {
+    return (
+        (item.email + item.text)
+            .toLocaleLowerCase()
+            .indexOf(queryText.toLocaleLowerCase()) > -1
+    );
+}

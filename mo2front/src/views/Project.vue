@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts">
-import { BlogBrief, Project, InputProp, User } from "@/models";
+import { BlogBrief, Project, InputProp, User, Option } from "@/models";
 import {
   AddMore,
   AutoLoader,
@@ -62,6 +62,9 @@ import {
   UpsertProject,
   GetErrorMsg,
   Prompt,
+  LazyExecutor,
+  BuildOnUserChange,
+  UserFilter,
 } from "@/utils";
 import Vue from "vue";
 import Component from "vue-class-component";
@@ -70,12 +73,16 @@ import {
   DeleteProject,
   GetProject,
   GetProjectArticles,
+  GetUserDatas,
   ListProject,
+  SearchUser,
 } from "../utils/api";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
 import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
 import { required } from "vuelidate/lib/validators";
 import { Prop, Watch } from "vue-property-decorator";
+const lazySearcher = new LazyExecutor();
+const dic: { [key: string]: Option } = {};
 @Component({
   components: {
     BlogTimeLineList,
@@ -104,6 +111,8 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
     tags: {
       required: required,
     },
+    MemberIDs: {},
+    ManagerIDs: {},
   };
   groupProps: { [name: string]: InputProp } = {
     name: {
@@ -130,14 +139,40 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
       errorMsg: {
         required: "标签不可为空",
       },
-      label: "Description",
+      label: "Tags",
       default: [],
-      icon: "mdi-text",
+      icon: "mdi-tag-multiple",
       col: 12,
       type: "combo",
       options: ["课程", "娱乐", "互联网", "教育"],
       message: "enter添加自定义tag",
       multiple: true,
+    },
+    MemberIDs: {
+      errorMsg: {},
+      label: "Members",
+      default: [],
+      icon: "mdi-account-group",
+      col: 12,
+      type: "select",
+      options: [],
+      multiple: true,
+      showAvatar: true,
+      onChange: BuildOnUserChange(lazySearcher, dic),
+      filter: UserFilter,
+    },
+    ManagerIDs: {
+      errorMsg: {},
+      label: "Managers",
+      default: [],
+      icon: "mdi-account-supervisor",
+      col: 12,
+      type: "select",
+      options: [],
+      multiple: true,
+      showAvatar: true,
+      onChange: BuildOnUserChange(lazySearcher, dic),
+      filter: UserFilter,
     },
   };
   async updateGroup(p: Project): Promise<{ err: string; pass: boolean }> {
@@ -161,6 +196,26 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
       this.groupProps.name.default = this.proj.Name;
       this.groupProps.description.default = this.proj.Description;
       this.groupProps.tags.default = this.proj.Tags;
+      GetUserDatas(re.ManagerIDs).then((managers) => {
+        this.groupProps.ManagerIDs.default = re.ManagerIDs;
+        for (let index = 0; index < managers.length; index++) {
+          const u = managers[index];
+          dic[u.id] = { text: u.name, value: u.id, avatar: u.settings?.avatar };
+        }
+        this.groupProps.ManagerIDs.options = managers.map((u) => {
+          return { text: u.name, value: u.id, avatar: u.settings?.avatar };
+        });
+      });
+      GetUserDatas(re.MemberIDs).then((members) => {
+        for (let index = 0; index < members.length; index++) {
+          const u = members[index];
+          dic[u.id] = { text: u.name, value: u.id, avatar: u.settings?.avatar };
+        }
+        this.groupProps.MemberIDs.default = re.MemberIDs;
+        this.groupProps.MemberIDs.options = members.map((u) => {
+          return { text: u.name, value: u.id, avatar: u.settings?.avatar };
+        });
+      });
     });
     GetProjectArticles({
       page: this.page++,

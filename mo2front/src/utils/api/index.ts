@@ -37,7 +37,7 @@ export async function GetUserData(uid: string): Promise<User> {
     return re.data[0]
 }
 export async function GetUserDatas(uids: string[]): Promise<UserListData[]> {
-    if (uids.length === 0) {
+    if (!uids||uids.length === 0) {
         return [];
     }
     let re = await axios.get<UserListData[]>('/api/accounts/listBrief?id=' + uids.filter(onlyUnique).join('&id='));
@@ -140,4 +140,7 @@ export async function ScoreBlog(b: { score: number, target: string }) {
 }
 export async function IsScoredBlog(b: { score: number, target: string }) {
     return (await axios.post<boolean>('/api/blogs/isscored', b)).data
+}
+export async function SearchUser(query:{page: number; pagesize: number;query:string}) {
+    return (await axios.get<{userName:string;'settings.avatar':string;id:string;email:string}[]>('/api/accounts'+ParseQuery(query))).data
 }

@@ -16,6 +16,21 @@ import (
 
 const cookieExpiredTime int = 300000
 
+func (c *Controller) SearchAccount(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
+	query := ctx.Query("query")
+	page, pageSize, err := mo2utils.ParsePagination(ctx)
+	if err != nil {
+		return 400, nil, err
+	}
+	hits := mo2utils.QueryUser(query, int(page), int(pageSize))
+	var re = make([]map[string]interface{}, hits.Len())
+	for i, v := range hits {
+		re[i] = v.Fields
+	}
+	return 200, re, nil
+
+}
+
 // Log godoc
 // @Summary get user info
 // @Description get by check cookies
