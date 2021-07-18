@@ -197,7 +197,7 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
       this.groupProps.description.default = this.proj.Description;
       this.groupProps.tags.default = this.proj.Tags;
       GetUserDatas(re.ManagerIDs).then((managers) => {
-        this.groupProps.ManagerIDs.default = re.ManagerIDs;
+        this.groupProps.ManagerIDs.default = re.ManagerIDs ?? [];
         for (let index = 0; index < managers.length; index++) {
           const u = managers[index];
           dic[u.id] = { text: u.name, value: u.id, avatar: u.settings?.avatar };
@@ -211,7 +211,7 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
           const u = members[index];
           dic[u.id] = { text: u.name, value: u.id, avatar: u.settings?.avatar };
         }
-        this.groupProps.MemberIDs.default = re.MemberIDs;
+        this.groupProps.MemberIDs.default = re.MemberIDs ?? [];
         this.groupProps.MemberIDs.options = members.map((u) => {
           return { text: u.name, value: u.id, avatar: u.settings?.avatar };
         });

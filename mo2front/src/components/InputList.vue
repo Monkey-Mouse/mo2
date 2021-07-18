@@ -214,7 +214,7 @@ export default class InputList extends Vue {
       } else this.model[key] = this.inputProps[key].default;
     }
   }
-  initials(s) {
+  initials(s: string) {
     return GetInitials(s);
   }
   mounted() {
