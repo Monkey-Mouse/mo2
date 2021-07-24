@@ -31,6 +31,20 @@ func (c *Controller) SearchAccount(ctx *gin.Context, u dto.LoginUserInfo) (statu
 
 }
 
+func (c *Controller) AddActiveAccounts(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
+	accs := struct{ accs []model.Account }{}
+	err = ctx.BindJSON(&accs)
+	if err != nil {
+		return 400, nil, err
+	}
+	err = database.CreateActiveAccounts(ctx, accs.accs)
+	if err != nil {
+		return 500, nil, err
+	}
+	return 201, gin.H{"status": "ok"}, nil
+
+}
+
 // Log godoc
 // @Summary get user info
 // @Description get by check cookies

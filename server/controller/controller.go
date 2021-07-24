@@ -49,7 +49,7 @@ func SetupHandlers(c *Controller) {
 			noti.GET("num", c.GetNotificationNum)
 			noti.GET("", c.GetNotifications)
 		}
-		admin := api.Group("/admin")
+		admin := api.Group("/admin", model.GeneralAdmin)
 		{
 			admin.POST("index", c.IndexAll)
 		}
@@ -110,7 +110,8 @@ func SetupHandlers(c *Controller) {
 			accounts.POST("", c.AddAccount)
 			accounts.DELETE("", c.DeleteAccount, model.OrdinaryUser)
 			accounts.PUT("", c.UpdateAccount, model.OrdinaryUser)
-			accounts.POST("role", c.AddAccountRole, model.GeneralAdmin, model.OrdinaryUser)
+			accounts.POST("role", c.AddAccountRole, model.GeneralAdmin)
+			accounts.POST("addactive", adapter.ReAdapterWithUinfo(c.AddActiveAccounts), model.GeneralAdmin)
 			accounts.POST("login", c.LoginAccount)
 			accounts.POST("logout", c.LogoutAccount)
 			accounts.GET("detail/:id", c.ShowAccount)
