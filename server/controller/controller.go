@@ -136,7 +136,7 @@ func SetupHandlers(c *Controller) {
 			group.GET(":id", c.FindGroup)
 
 		}
-		proj := api.Group("project", model.Anonymous)
+		proj := api.Group("project", model.Anonymous, model.OrdinaryUser)
 		{
 			proj.POST("", adapter.ReAdapterWithUinfo(c.UpsertProject), model.OrdinaryUser)
 			proj.GET("", adapter.ReAdapterWithUinfo(c.ListProject))
