@@ -306,8 +306,12 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 // @Success 200
 // @Router /api/accounts/logout [post]
 func (c *Controller) LogoutAccount(ctx *gin.Context) {
-
-	ctx.SetCookie("jwtToken", "true", -1, "/", ctx.Request.Host, false, true)
+	//allocate an anonymous account
+	account := database.CreateAnonymousAccount()
+	s := dto.Account2SuccessLogin(account)
+	jwtToken := mo2utils.GenerateJwtCode(s)
+	//login success: to record the state
+	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
 	ctx.JSON(http.StatusOK, gin.H{"message": "logout success"})
 }
 
