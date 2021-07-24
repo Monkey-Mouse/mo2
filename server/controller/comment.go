@@ -16,11 +16,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var notifyLogClient = &loghelper.LogClient{}
-
-func init() {
-	notifyLogClient.Init("COMMENT_LOG")
-}
+var notifyLogClient = loghelper.GetNotifyLogClient()
 
 // GetComment get comments
 // @Summary get comments

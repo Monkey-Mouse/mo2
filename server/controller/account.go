@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/Monkey-Mouse/mo2/dto"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
+	emailservice "github.com/Monkey-Mouse/mo2/services/emailService"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -189,7 +190,7 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 	baseURL := "http://" + ctx.Request.Host + "/api/accounts/verify"
 	token := mo2utils.GenerateVerifyJwtToken(addAccount.Email)
 	url := baseURL + "?email=" + addAccount.Email + "&token=" + token
-	senderr := mo2utils.SendEmail(mo2utils.VerifyEmailMessage(url, addAccount.UserName, []string{addAccount.Email}), ctx.ClientIP())
+	senderr := emailservice.SendEmail(emailservice.VerifyEmailMessage(url, addAccount.UserName, []string{addAccount.Email}), ctx.ClientIP())
 	if senderr != nil {
 		ctx.AbortWithStatusJSON(senderr.ErrorCode, badresponse.SetResponseError(senderr))
 	}
