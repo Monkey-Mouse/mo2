@@ -506,6 +506,13 @@ export default class App extends Vue {
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
+  userChanged(){
+    GetUserInfoAsync().then((u) => {
+      this.user = u;
+      this.userload = true;
+      (window as any).loading_screen.finish();
+    });
+  }
   @Watch("user")
   userChange() {
     try {

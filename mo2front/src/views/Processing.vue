@@ -15,6 +15,7 @@
   </v-container>
 </template>
 <script lang="ts">
+import { UserChanged } from "@/utils";
 import axios, { AxiosError } from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
@@ -26,6 +27,7 @@ export default class Processing extends Vue {
     axios
       .get(this.$route.fullPath, { maxRedirects: 0 })
       .then((re) => {
+        UserChanged()
         this.$router.push(
           (re.request.responseURL as string).replace('http://','https://').substring(
             window.location.host.length + window.location.protocol.length + 2
@@ -33,6 +35,7 @@ export default class Processing extends Vue {
         );
       })
       .catch((err: AxiosError) => {
+        UserChanged()
         this.$router.push(
           (err.request.responseURL as string).replace('http://','https://').substring(
             window.location.host.length + window.location.protocol.length + 2

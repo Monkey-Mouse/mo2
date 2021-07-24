@@ -101,11 +101,15 @@ interface App {
         timeout: number): void,
     isUser: boolean,
     showGroup: boolean,
-    logOut:()=>Promise<void>
+    logOut:()=>Promise<void>,
+    userChanged:()=>void
 }
 var app: App;
 export function SetApp(params: App) {
     app = params;
+}
+export function UserChanged() {
+    app?.userChanged()
 }
 export async function logOut() {
     await app.logOut();
