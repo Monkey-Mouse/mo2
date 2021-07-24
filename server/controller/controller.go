@@ -110,7 +110,7 @@ func SetupHandlers(c *Controller) {
 			accounts.POST("", c.AddAccount)
 			accounts.DELETE("", c.DeleteAccount, model.OrdinaryUser)
 			accounts.PUT("", c.UpdateAccount, model.OrdinaryUser)
-			accounts.POST("role", c.AddAccountRole, model.GeneralAdmin)
+			accounts.POST("role", c.AddAccountRole)
 			accounts.POST("addactive", adapter.ReAdapterWithUinfo(c.AddActiveAccounts), model.GeneralAdmin)
 			accounts.POST("login", c.LoginAccount)
 			accounts.POST("logout", c.LogoutAccount)
