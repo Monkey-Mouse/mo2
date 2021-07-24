@@ -341,17 +341,8 @@ func FindAccountInfo(id primitive.ObjectID) (u dto.UserInfo, exist bool) {
 }
 
 // ListAccountsBrief find from a list of id
-func ListAccountsBrief(idStrs []string) (bs []dto.UserInfoBrief) {
-	ids := make([]primitive.ObjectID, len(idStrs))
-	i := 0
-	for _, idStr := range idStrs {
-		id, err := primitive.ObjectIDFromHex(idStr)
-		if err != nil {
-			return
-		}
-		ids[i] = id
-		i++
-	}
+func ListAccountsBrief(ids []primitive.ObjectID) (bs []dto.UserInfoBrief) {
+
 	cursor, err := accCol.Find(context.TODO(),
 		bson.D{
 			{"_id",

@@ -358,9 +358,19 @@ func (c *Controller) ListAccountsInfo(ctx *gin.Context) {
 	userIDstrs, exist := ctx.GetQueryArray("id")
 	var bs []dto.UserInfoBrief
 	if !exist && !mo2utils.IsEnvRelease() {
-		bs = database.ListAllAccountsBrief()
+		return
 	} else {
-		bs = database.ListAccountsBrief(userIDstrs)
+		ids := make([]primitive.ObjectID, len(userIDstrs))
+		i := 0
+		for _, idStr := range userIDstrs {
+			id, err := primitive.ObjectIDFromHex(idStr)
+			if err != nil {
+				return
+			}
+			ids[i] = id
+			i++
+		}
+		bs = database.ListAccountsBrief(ids)
 	}
 	ctx.JSON(http.StatusOK, bs)
 }

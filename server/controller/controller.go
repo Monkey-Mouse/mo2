@@ -142,6 +142,7 @@ func SetupHandlers(c *Controller) {
 			proj.GET("", adapter.ReAdapterWithUinfo(c.ListProject))
 			proj.DELETE(":id", adapter.ReAdapterWithUinfo(c.DeleteProject), model.OrdinaryUser)
 			proj.GET(":id", adapter.ReAdapterWithUinfo(c.GetProject))
+			proj.POST("join", adapter.ReAdapterWithUinfo(c.JoinProject))
 		}
 	}
 }
