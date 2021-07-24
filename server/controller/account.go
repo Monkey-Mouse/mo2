@@ -262,7 +262,7 @@ func (c *Controller) VerifyEmail(ctx *gin.Context) {
 	jwtToken := mo2utils.GenerateJwtCode(s)
 	//login success: to record the state
 	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
-	ctx.Redirect(http.StatusPermanentRedirect, "http://"+ctx.Request.Host)
+	ctx.Redirect(http.StatusPermanentRedirect, "https://"+ctx.Request.Host)
 }
 
 // LoginAccount godoc
