@@ -27,14 +27,14 @@ export default class Processing extends Vue {
       .get(this.$route.fullPath, { maxRedirects: 0 })
       .then((re) => {
         this.$router.push(
-          (re.request.responseURL as string).substring(
+          (re.request.responseURL as string).replace('http://','https://').substring(
             window.location.host.length + window.location.protocol.length + 2
           )
         );
       })
       .catch((err: AxiosError) => {
         this.$router.push(
-          (err.request.responseURL as string).substring(
+          (err.request.responseURL as string).replace('http://','https://').substring(
             window.location.host.length + window.location.protocol.length + 2
           )
         );

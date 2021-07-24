@@ -235,7 +235,8 @@ export default class AccountModal extends Vue {
   }
   @Watch('enable')
   enableChange(){
-    this.email = this.user.email;
+    this.emailOrName = this.user.email;
+    this.email = this.user.email
   }
 
   created() {

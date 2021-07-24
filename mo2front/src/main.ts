@@ -30,6 +30,9 @@ Vue.config.productionTip = false
 axios.interceptors.response.use(response => {
   return response;
 }, error => {
+  if (!error.response) {
+    throw error
+  }
   if (error.response.status === 403) {
     if (error.response.data?.reason === "authentication failed") {
       ShowLogin();
