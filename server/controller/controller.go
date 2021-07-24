@@ -136,13 +136,13 @@ func SetupHandlers(c *Controller) {
 			group.GET(":id", c.FindGroup)
 
 		}
-		proj := api.Group("project")
+		proj := api.Group("project", model.Anonymous)
 		{
 			proj.POST("", adapter.ReAdapterWithUinfo(c.UpsertProject), model.OrdinaryUser)
 			proj.GET("", adapter.ReAdapterWithUinfo(c.ListProject))
 			proj.DELETE(":id", adapter.ReAdapterWithUinfo(c.DeleteProject), model.OrdinaryUser)
 			proj.GET(":id", adapter.ReAdapterWithUinfo(c.GetProject))
-			proj.POST("join", adapter.ReAdapterWithUinfo(c.JoinProject))
+			proj.POST("join", adapter.ReAdapterWithUinfo(c.JoinProject), model.OrdinaryUser)
 		}
 	}
 }

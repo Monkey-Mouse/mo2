@@ -180,7 +180,7 @@ import { GetErrorMsg, GithubOauth, LoginAsync, RegisterAsync } from "../utils";
 import { AxiosError } from "axios";
 import Vue from "vue";
 import Component from "vue-class-component";
-import { Prop } from "vue-property-decorator";
+import { Prop, Watch } from "vue-property-decorator";
 import {
   required,
   minLength,
@@ -233,9 +233,13 @@ export default class AccountModal extends Vue {
       this.seconds > 0
     );
   }
+  @Watch('enable')
+  enableChange(){
+    this.email = this.user.email;
+  }
 
   created() {
-    this.email = "";
+    this.email = this.user.email;
     this.password = "";
     setInterval(() => {
       this.seconds--;

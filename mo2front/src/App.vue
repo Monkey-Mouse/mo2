@@ -414,7 +414,7 @@ export default class App extends Vue {
   async newGroup(p: Project): Promise<{ err: string; pass: boolean }> {
     try {
       const proj = await UpsertProject(p);
-      this.$router.push(`/project/${proj.ID}`);
+      this.$router.push(`/project/${proj.project.ID}`);
       return { err: null, pass: true };
     } catch (error) {
       return { err: GetErrorMsg(error), pass: false };
@@ -539,13 +539,11 @@ export default class App extends Vue {
   get initials(): string {
     return GetInitials(this.user.name);
   }
-  logOut() {
-    Logout().then(() => {
-      GetUserInfoAsync().then((u) => {
-        this.user = u;
-        this.snackbar = true;
-      });
-    });
+  async logOut() {
+    await Logout()
+    const u = await GetUserInfoAsync();
+    this.user = u;
+    this.snackbar = true;
   }
   publishClick() {
     (this.$refs["view"] as any).publish();
@@ -637,9 +635,12 @@ export default class App extends Vue {
       this.showInstall = !this.installComponent.getInstalledStatus();
     }, 2000);
   }
-  showLogin() {
+  showLogin(email:string=undefined) {
     if (this.isUser) {
       return;
+    }
+    if (email) {
+      this.user.email = email
     }
     this.drawer = false;
     this.enable = true;

@@ -73,7 +73,7 @@ func (c *Controller) UpsertProject(ctx *gin.Context, u dto.LoginUserInfo) (statu
 				for _, v := range infos {
 					url := "https://www.motwo.cn/project/" + p.ID.Hex()
 					token := mo2utils.GenerateJwtCode(dto.LoginUserInfo{Email: v.Email, ID: p.ID, Name: "manager_i_ds"})
-					emailservice.SendEmail(emailservice.InvitationMessage(url+"?token="+token, p.Name, []string{v.Email}), ctx.ClientIP())
+					emailservice.SendEmail(emailservice.InvitationMessage(url+"?token="+token+"&email="+v.Email, p.Name, []string{v.Email}), ctx.ClientIP())
 				}
 			}
 		}
@@ -83,7 +83,7 @@ func (c *Controller) UpsertProject(ctx *gin.Context, u dto.LoginUserInfo) (statu
 				for _, v := range infos {
 					url := "https://www.motwo.cn/project/" + p.ID.Hex()
 					token := mo2utils.GenerateJwtCode(dto.LoginUserInfo{Email: v.Email, ID: p.ID, Name: "member_i_ds"})
-					emailservice.SendEmail(emailservice.InvitationMessage(url+"?token="+token, p.Name, []string{v.Email}), ctx.ClientIP())
+					emailservice.SendEmail(emailservice.InvitationMessage(url+"?token="+token+"&email="+v.Email, p.Name, []string{v.Email}), ctx.ClientIP())
 				}
 			}
 		}
@@ -108,7 +108,11 @@ func (c *Controller) JoinProject(ctx *gin.Context, u dto.LoginUserInfo) (status 
 	if err != nil {
 		return 500, nil, err
 	}
-	return 200, gin.H{"status": "ok"}, nil
+	p, err := database.GetProject(ctx, bson.M{"_id": info.ID})
+	if err != nil {
+		return 500, nil, err
+	}
+	return 200, p, nil
 }
 
 func (c *Controller) ListProject(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {

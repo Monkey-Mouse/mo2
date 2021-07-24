@@ -96,15 +96,19 @@ export async function addQuery(that: Vue, key: string, val: string | string[]) {
 }
 interface App {
     refresh: boolean,
-    showLogin: () => void,
+    showLogin: (email:string) => void,
     Prompt(msg: string,
         timeout: number): void,
     isUser: boolean,
-    showGroup: boolean
+    showGroup: boolean,
+    logOut:()=>Promise<void>
 }
 var app: App;
 export function SetApp(params: App) {
     app = params;
+}
+export async function logOut() {
+    await app.logOut();
 }
 export function NewGroup() {
     if (!app.isUser) {
@@ -114,8 +118,8 @@ export function NewGroup() {
     }
     app.showGroup = true
 }
-export function ShowLogin() {
-    app.showLogin()
+export function ShowLogin(email:string=undefined) {
+    app.showLogin(email)
 }
 export function Prompt(msg: string, timeout: number) {
     app.Prompt(msg, timeout)

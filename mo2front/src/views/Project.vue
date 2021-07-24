@@ -65,6 +65,8 @@ import {
   LazyExecutor,
   BuildOnUserChange,
   UserFilter,
+  logOut,
+  ShowLogin,
 } from "@/utils";
 import Vue from "vue";
 import Component from "vue-class-component";
@@ -74,6 +76,7 @@ import {
   GetProject,
   GetProjectArticles,
   GetUserDatas,
+  JoinProject,
   ListProject,
   SearchUser,
 } from "../utils/api";
@@ -179,7 +182,10 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
     try {
       p.ID = this.proj.ID;
       const proj = await UpsertProject(p);
-      this.proj = proj;
+      this.proj = proj.project;
+      if (proj.invite) {
+        Prompt("邀请已发送",5000);
+      }
       return { err: null, pass: true };
     } catch (error) {
       return { err: GetErrorMsg(error), pass: false };
@@ -225,6 +231,29 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
       AddMore(this, val);
       this.firstloading = false;
     });
+    const token = this.$route.query["token"] as string
+    const email = this.$route.query["email"] as string
+    if (token&&email) {
+      if (email!==this.user.email) {
+        if (this.user.roles.indexOf('OrdinaryUser')>-1) {
+          logOut().then(()=>{
+            ShowLogin(email);
+          }); 
+        } else ShowLogin(email);
+      } else JoinProject({token:token}).then(p=>{
+        this.proj = p;
+      })
+    }
+  }
+  @Watch("user")
+  userChange() {
+    const token = this.$route.query["token"] as string
+    const email = this.$route.query["email"] as string
+    if (token&&email&&email===this.user.email) {
+      JoinProject({token:token}).then(p=>{
+        this.proj = p;
+      })
+    }
   }
   public ReachedButtom() {
     ElmReachedBottom(this, ({ page, pageSize }) =>
