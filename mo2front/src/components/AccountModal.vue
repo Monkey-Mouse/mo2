@@ -235,6 +235,9 @@ export default class AccountModal extends Vue {
   }
   @Watch('enable')
   enableChange(){
+    if (this.user.email.indexOf('@mo2')>-1) {
+      return
+    }
     this.emailOrName = this.user.email;
     this.email = this.user.email
   }
