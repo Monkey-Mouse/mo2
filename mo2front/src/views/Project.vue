@@ -30,7 +30,7 @@
         <div class=" text-body-1">{{proj.Description}}</div>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row class="mb-2">
       <v-col class=" text-center">
         <v-chip
           v-for="tag in proj.Tags"
@@ -41,6 +41,51 @@
         </v-chip>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-row class="mb-2">
+          <v-col class="text-h4 text-center">Owner</v-col>
+        </v-row>
+        <v-row class="mb-3">
+          <user-item :user="owner"/>
+        </v-row>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-container >
+          <v-row>
+            <v-col class="text-h4 text-center">Managers</v-col>
+          </v-row>
+          <v-row v-if="managers.length>0" class="mb-3">
+            <v-col v-for="(v,i) in managers" :key="i">
+              <user-item :user="v"/>
+            </v-col>
+          </v-row>
+          <v-row v-else class="mb-3">
+            <v-col class="text-center">
+              No Manager Yet
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-col>
+    </v-row>
+    <v-container >
+      <v-row>
+        <v-col class="text-h4 text-center">Members</v-col>
+      </v-row>
+      <v-row v-if="members.length>0" class="mb-3">
+        <v-col v-for="(v,i) in members" :key="i">
+          <user-item :user="v"/>
+        </v-col>
+      </v-row>
+      <v-row v-else class="mb-3">
+        <v-col class="text-center">
+          No Member Yet
+        </v-col>
+      </v-row>
+    </v-container>
+    <!-- <v-row>
+      <v-col class="text-h4 text-center">Articles</v-col>
+    </v-row> -->
     <v-row>
       <v-divider/>
     </v-row>
@@ -54,7 +99,15 @@
 </template>
 
 <script lang="ts">
-import { BlogBrief, Project, InputProp, User, Option } from "@/models";
+import {
+  BlogBrief,
+  Project,
+  InputProp,
+  User,
+  Option,
+  UserListData,
+  BlankUser,
+} from "@/models";
 import {
   AddMore,
   AutoLoader,
@@ -75,13 +128,16 @@ import {
   DeleteProject,
   GetProject,
   GetProjectArticles,
+  GetUserData,
   GetUserDatas,
+  GetUserInfoAsync,
   JoinProject,
   ListProject,
   SearchUser,
 } from "../utils/api";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
 import BlogSkeleton from "../components/BlogTimeLineSkeleton.vue";
+import UserItem from "../components/UserItem.vue";
 import { required } from "vuelidate/lib/validators";
 import { Prop, Watch } from "vue-property-decorator";
 const lazySearcher = new LazyExecutor();
@@ -91,11 +147,13 @@ const dic: { [key: string]: Option } = {};
     BlogTimeLineList,
     BlogSkeleton,
     MO2Dialog,
+    UserItem,
   },
 })
 export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
   @Prop()
   user: User;
+  owner: User = BlankUser;
   datalist: BlogBrief[] = [];
   loading = true;
   firstloading = true;
@@ -104,6 +162,8 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
   nomore = false;
   proj: Project = {};
   showGroup = false;
+  managers: UserListData[] = [];
+  members: UserListData[] = [];
   groupValidator = {
     name: {
       required: required,
@@ -184,7 +244,7 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
       const proj = await UpsertProject(p);
       this.proj = proj.project;
       if (proj.invite) {
-        Prompt("邀请已发送",5000);
+        Prompt("邀请已发送", 5000);
       }
       return { err: null, pass: true };
     } catch (error) {
@@ -196,13 +256,26 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
     Prompt("删除成功", 5000);
     this.$router.back();
   }
+  async joinProj(query: { token: string }) {
+    const p = await JoinProject(query);
+    if (p.ManagerIDs?.length > this.proj.ManagerIDs?.length) {
+      this.managers.push(this.user);
+    } else if (p.MemberIDs?.length > this.proj.MemberIDs?.length) {
+      this.members.push(this.user);
+    }
+    return p;
+  }
   created() {
     GetProject(this.$route.params["id"]).then((re) => {
       this.proj = re;
       this.groupProps.name.default = this.proj.Name;
       this.groupProps.description.default = this.proj.Description;
       this.groupProps.tags.default = this.proj.Tags;
+      GetUserData(this.proj.OwnerID).then((u) => {
+        this.owner = u;
+      });
       GetUserDatas(re.ManagerIDs).then((managers) => {
+        this.managers = managers;
         this.groupProps.ManagerIDs.default = re.ManagerIDs ?? [];
         for (let index = 0; index < managers.length; index++) {
           const u = managers[index];
@@ -213,6 +286,7 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
         });
       });
       GetUserDatas(re.MemberIDs).then((members) => {
+        this.members = members;
         for (let index = 0; index < members.length; index++) {
           const u = members[index];
           dic[u.id] = { text: u.name, value: u.id, avatar: u.settings?.avatar };
@@ -231,28 +305,29 @@ export default class ProjectPage extends Vue implements AutoLoader<BlogBrief> {
       AddMore(this, val);
       this.firstloading = false;
     });
-    const token = this.$route.query["token"] as string
-    const email = this.$route.query["email"] as string
-    if (token&&email) {
-      if (email!==this.user.email) {
-        if (this.user.roles.indexOf('OrdinaryUser')>-1) {
-          logOut().then(()=>{
+    const token = this.$route.query["token"] as string;
+    const email = this.$route.query["email"] as string;
+    if (token && email) {
+      if (email !== this.user.email) {
+        if (this.user.roles.indexOf("OrdinaryUser") > -1) {
+          logOut().then(() => {
             ShowLogin(email);
-          }); 
+          });
         } else ShowLogin(email);
-      } else JoinProject({token:token}).then(p=>{
-        this.proj = p;
-      })
+      } else
+        this.joinProj({ token: token }).then((p) => {
+          this.proj = p;
+        });
     }
   }
   @Watch("user")
   userChange() {
-    const token = this.$route.query["token"] as string
-    const email = this.$route.query["email"] as string
-    if (token&&email&&email===this.user.email) {
-      JoinProject({token:token}).then(p=>{
+    const token = this.$route.query["token"] as string;
+    const email = this.$route.query["email"] as string;
+    if (token && email && email === this.user.email) {
+      this.joinProj({ token: token }).then((p) => {
         this.proj = p;
-      })
+      });
     }
   }
   public ReachedButtom() {

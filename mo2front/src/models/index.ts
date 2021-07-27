@@ -24,6 +24,7 @@ export interface UserListData {
     id: string;
     name: string;
     settings?: UserSettings;
+    email: string;
 }
 export interface DisplayBlogBrief extends BlogBrief {
     userLoad: boolean;
@@ -62,7 +63,7 @@ export interface BlogUpsert {
     is_y_doc?: boolean;
     y_token?: string;
     authorId?: string;
-    project_id?:string;
+    project_id?: string;
 }
 export interface UserSettings {
     avatar?: string;
@@ -81,7 +82,7 @@ export interface User extends UserListData {
     roles?: string[];
     entityInfo?: EntityInfo;
 }
-type Options = Array<Option>|Array<string>;
+type Options = Array<Option> | Array<string>;
 export interface InputProp {
     errorMsg: { [name: string]: string };
     col?: number;
@@ -93,17 +94,17 @@ export interface InputProp {
     options?: Options;
     showAvatar?: boolean;
     message?: string;
-    multiple?:boolean;
-    input?:string;
+    multiple?: boolean;
+    input?: string;
     iconClick?: (prop: InputProp) => void;
     onChange?: (c: any) => void;
-    loading?:boolean;
-    filter?:(item: any, queryText: string, itemText: string) => void
+    loading?: boolean;
+    filter?: (item: any, queryText: string, itemText: string) => void
 }
 export interface Option {
     text: string;
     value: string;
-    avatar?:string;
+    avatar?: string;
 }
 export interface ApiError {
     reason: string;
