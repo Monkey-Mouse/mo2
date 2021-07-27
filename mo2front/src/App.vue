@@ -303,7 +303,7 @@
         >冀ICP备20007570号-2</a
       >
     </v-footer>
-    <pwa-install style="display: none"></pwa-install>
+    <pwa-install></pwa-install>
   </v-app>
 </template>
 
@@ -667,6 +667,9 @@ export default class App extends Vue {
 @import "./assets/main.scss";
 </style>
 <style>
+#openButton {
+  display: none !important;
+}
 .clickable {
   cursor: pointer;
 }
