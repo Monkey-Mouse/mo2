@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/Monkey-Mouse/mo2/dto"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
+	emailservice "github.com/Monkey-Mouse/mo2/services/emailService"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -15,6 +16,35 @@ import (
 )
 
 const cookieExpiredTime int = 300000
+
+func (c *Controller) SearchAccount(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
+	query := ctx.Query("query")
+	page, pageSize, err := mo2utils.ParsePagination(ctx)
+	if err != nil {
+		return 400, nil, err
+	}
+	hits := mo2utils.QueryUser(query, int(page), int(pageSize))
+	var re = make([]map[string]interface{}, hits.Len())
+	for i, v := range hits {
+		re[i] = v.Fields
+	}
+	return 200, re, nil
+
+}
+
+func (c *Controller) AddActiveAccounts(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
+	accs := struct{ accs []model.Account }{}
+	err = ctx.BindJSON(&accs)
+	if err != nil {
+		return 400, nil, err
+	}
+	err = database.CreateActiveAccounts(ctx, accs.accs)
+	if err != nil {
+		return 500, nil, err
+	}
+	return 201, gin.H{"status": "ok"}, nil
+
+}
 
 // Log godoc
 // @Summary get user info
@@ -160,7 +190,7 @@ func (c *Controller) AddAccount(ctx *gin.Context) {
 	baseURL := "http://" + ctx.Request.Host + "/api/accounts/verify"
 	token := mo2utils.GenerateVerifyJwtToken(addAccount.Email)
 	url := baseURL + "?email=" + addAccount.Email + "&token=" + token
-	senderr := mo2utils.SendEmail(mo2utils.VerifyEmailMessage(url, addAccount.UserName, []string{addAccount.Email}), ctx.ClientIP())
+	senderr := emailservice.SendEmail(emailservice.VerifyEmailMessage(url, addAccount.UserName, []string{addAccount.Email}), ctx.ClientIP())
 	if senderr != nil {
 		ctx.AbortWithStatusJSON(senderr.ErrorCode, badresponse.SetResponseError(senderr))
 	}
@@ -232,7 +262,7 @@ func (c *Controller) VerifyEmail(ctx *gin.Context) {
 	jwtToken := mo2utils.GenerateJwtCode(s)
 	//login success: to record the state
 	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
-	ctx.Redirect(http.StatusPermanentRedirect, "http://"+ctx.Request.Host)
+	ctx.Redirect(http.StatusPermanentRedirect, "https://"+ctx.Request.Host)
 }
 
 // LoginAccount godoc
@@ -276,8 +306,12 @@ func (c *Controller) LoginAccount(ctx *gin.Context) {
 // @Success 200
 // @Router /api/accounts/logout [post]
 func (c *Controller) LogoutAccount(ctx *gin.Context) {
-
-	ctx.SetCookie("jwtToken", "true", -1, "/", ctx.Request.Host, false, true)
+	//allocate an anonymous account
+	account := database.CreateAnonymousAccount()
+	s := dto.Account2SuccessLogin(account)
+	jwtToken := mo2utils.GenerateJwtCode(s)
+	//login success: to record the state
+	ctx.SetCookie("jwtToken", jwtToken, cookieExpiredTime, "/", ctx.Request.Host, false, true)
 	ctx.JSON(http.StatusOK, gin.H{"message": "logout success"})
 }
 
@@ -328,9 +362,19 @@ func (c *Controller) ListAccountsInfo(ctx *gin.Context) {
 	userIDstrs, exist := ctx.GetQueryArray("id")
 	var bs []dto.UserInfoBrief
 	if !exist && !mo2utils.IsEnvRelease() {
-		bs = database.ListAllAccountsBrief()
+		return
 	} else {
-		bs = database.ListAccountsBrief(userIDstrs)
+		ids := make([]primitive.ObjectID, len(userIDstrs))
+		i := 0
+		for _, idStr := range userIDstrs {
+			id, err := primitive.ObjectIDFromHex(idStr)
+			if err != nil {
+				return
+			}
+			ids[i] = id
+			i++
+		}
+		bs = database.ListAccountsBrief(ids)
 	}
 	ctx.JSON(http.StatusOK, bs)
 }

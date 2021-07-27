@@ -303,7 +303,7 @@
         >冀ICP备20007570号-2</a
       >
     </v-footer>
-    <pwa-install></pwa-install>
+    <pwa-install usecustom="true"></pwa-install>
   </v-app>
 </template>
 
@@ -369,6 +369,12 @@ export default class App extends Vue {
     name: {
       required: required,
     },
+    description: {
+      required: required,
+    },
+    tags: {
+      required: required,
+    },
   };
   groupProps: { [name: string]: InputProp } = {
     name: {
@@ -381,11 +387,34 @@ export default class App extends Vue {
       col: 12,
       type: "text",
     },
+    description: {
+      errorMsg: {
+        required: "组描述不可为空",
+      },
+      label: "Description",
+      default: "",
+      icon: "mdi-text",
+      col: 12,
+      type: "textarea",
+    },
+    tags: {
+      errorMsg: {
+        required: "标签不可为空",
+      },
+      label: "Description",
+      default: [],
+      icon: "mdi-text",
+      col: 12,
+      type: "combo",
+      options: ["课程", "娱乐", "互联网", "教育"],
+      message: "enter添加自定义tag",
+      multiple: true,
+    },
   };
   async newGroup(p: Project): Promise<{ err: string; pass: boolean }> {
     try {
       const proj = await UpsertProject(p);
-      this.$router.push(`/project/${proj.ID}`);
+      this.$router.push(`/project/${proj.project.ID}`);
       return { err: null, pass: true };
     } catch (error) {
       return { err: GetErrorMsg(error), pass: false };
@@ -477,6 +506,13 @@ export default class App extends Vue {
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
+  userChanged() {
+    GetUserInfoAsync().then((u) => {
+      this.user = u;
+      this.userload = true;
+      (window as any).loading_screen.finish();
+    });
+  }
   @Watch("user")
   userChange() {
     try {
@@ -510,13 +546,11 @@ export default class App extends Vue {
   get initials(): string {
     return GetInitials(this.user.name);
   }
-  logOut() {
-    Logout().then(() => {
-      GetUserInfoAsync().then((u) => {
-        this.user = u;
-        this.snackbar = true;
-      });
-    });
+  async logOut() {
+    await Logout();
+    const u = await GetUserInfoAsync();
+    this.user = u;
+    this.snackbar = true;
   }
   publishClick() {
     (this.$refs["view"] as any).publish();
@@ -608,9 +642,12 @@ export default class App extends Vue {
       this.showInstall = !this.installComponent.getInstalledStatus();
     }, 2000);
   }
-  showLogin() {
+  showLogin(email: string = undefined) {
     if (this.isUser) {
       return;
+    }
+    if (email) {
+      this.user.email = email;
     }
     this.drawer = false;
     this.enable = true;

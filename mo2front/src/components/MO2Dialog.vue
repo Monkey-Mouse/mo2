@@ -65,7 +65,7 @@ export default class Mo2Dialog extends Vue {
   @Prop()
   confirmText!: string;
   @Prop()
-  uploadImgs: (
+  uploadImgs?: (
     blobs: File[],
     callback: (imgprop: { src: string }) => void
   ) => Promise<void>;

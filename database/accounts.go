@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
+	"time"
 
 	"github.com/Monkey-Mouse/mo2/dto"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
@@ -53,6 +53,23 @@ func FindAccountByEmail(email string) (account model.Account, e mo2errors.Mo2Err
 	return
 }
 
+func CreateActiveAccounts(ctx context.Context, accs []model.Account) error {
+	docs := make([]interface{}, len(accs))
+	for i, v := range accs {
+		v.EntityInfo = model.InitEntity()
+		bs, err := bcrypt.GenerateFromPassword([]byte(v.HashedPwd), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		v.HashedPwd = string(bs)
+		v.Infos = map[string]string{model.IsActive: model.True}
+		v.Settings = map[string]string{}
+		docs[i] = v
+	}
+	_, err := accCol.InsertMany(ctx, docs)
+	return err
+}
+
 // EnsureEmailUnique return true if unique, else return false
 // 	if not unique, check whether the user exists
 // 								if active, already exists, return false
@@ -83,7 +100,6 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(newAccount.Password), bcrypt.DefaultCost)
 	if err != nil {
 		panic(err)
-		return
 	}
 	//var account model.Account
 	account = model.Account{
@@ -105,7 +121,7 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 				return
 			}
 			DeleteAccount(acc.ID)
-			insertResult, err = accCol.InsertOne(context.TODO(), account)
+			_, err = accCol.InsertOne(context.TODO(), account)
 		} else {
 			return
 		}
@@ -162,6 +178,7 @@ func UpsertAccountWithF(a *model.Account, filter interface{}) (merr mo2errors.Mo
 			a.ID = id
 		}
 	}
+	mo2utils.IndexAccount(a)
 	if result.ModifiedCount != 0 {
 		merr.Init(mo2errors.Mo2NoError, "更新完成")
 	} else {
@@ -189,6 +206,7 @@ func DeleteAccountByEmail(email string) (a model.Account, e mo2errors.Mo2Errors)
 			e.Init(mo2errors.Mo2Error, err.Error())
 		}
 	}
+	mo2utils.DeleteAccountIndex(a.ID.Hex())
 	e.InitCode(mo2errors.Mo2NoError)
 	return
 }
@@ -198,7 +216,7 @@ func CreateAnonymousAccount() (a model.Account) {
 	a = model.Account{
 		ID:         primitive.NewObjectID(),
 		UserName:   "visitor",
-		Email:      fmt.Sprint(rand.Int()) + "@mo2.com",
+		Email:      fmt.Sprint(time.Now().Nanosecond()) + "@mo2.com",
 		HashedPwd:  "#2a$10$rXMPcOyfgdU6y5n3pkYQAukc3avJE9CLsx1v0Kn99GKV1NpREvN2i",
 		EntityInfo: model.InitEntity(),
 		Roles:      []string{model.Anonymous},
@@ -323,17 +341,8 @@ func FindAccountInfo(id primitive.ObjectID) (u dto.UserInfo, exist bool) {
 }
 
 // ListAccountsBrief find from a list of id
-func ListAccountsBrief(idStrs []string) (bs []dto.UserInfoBrief) {
-	ids := make([]primitive.ObjectID, len(idStrs))
-	i := 0
-	for _, idStr := range idStrs {
-		id, err := primitive.ObjectIDFromHex(idStr)
-		if err != nil {
-			return
-		}
-		ids[i] = id
-		i++
-	}
+func ListAccountsBrief(ids []primitive.ObjectID) (bs []dto.UserInfoBrief) {
+
 	cursor, err := accCol.Find(context.TODO(),
 		bson.D{
 			{"_id",

@@ -25,7 +25,7 @@ import {
   GetArticles,
   AutoLoader,
   AddMore,
-  ElmReachedButtom,
+  ElmReachedBottom,
   GetOwnArticles,
 } from "../utils";
 import Vue from "vue";
@@ -60,7 +60,7 @@ export default class Recycle extends Vue implements AutoLoader<BlogBrief> {
     AddMore(this, val);
   }
   public ReachedButtom() {
-    ElmReachedButtom(this, ({ page, pageSize }) =>
+    ElmReachedBottom(this, ({ page, pageSize }) =>
       GetArticles({
         page: page,
         pageSize: pageSize,

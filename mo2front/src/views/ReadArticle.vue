@@ -36,10 +36,11 @@
                 }}</span>
                 <v-spacer />
                 <v-rating
-                  v-if="!draft&&blog.score_num"
+                  v-if="!draft && blog.score_num"
                   :length="5"
-                  :value="blog.score_sum/blog.score_num"
+                  :value="blog.score_sum / blog.score_num"
                   readonly
+                  half-increments
                 ></v-rating>
                 <v-tooltip v-if="draft" bottom>
                   <template v-slot:activator="{ on, attrs }">
@@ -146,21 +147,24 @@
               @confirm="confirmDelete"
             />
             <div style="padding-bottom: 1rem"></div>
-            <v-row v-if="!draft">
+            <v-row v-if="!draft" class="pt-6">
               <v-rating
                 v-if="!draft"
                 :length="5"
-                :value="blog.score_sum/blog.score_num"
+                :value="blog.score_sum / blog.score_num"
                 @input="rateChange"
+                half-increments
               ></v-rating>
-              <v-spacer/>
+              <v-spacer />
               <v-col cols="auto"
                 ><v-icon @click="toggleLike">{{
                   liked ? "mdi-thumb-up" : "mdi-thumb-up-outline"
                 }}</v-icon
                 >{{ praiseNum }}</v-col
               >
-              <v-col cols="auto"><v-icon @click="share">mdi-share</v-icon></v-col>
+              <v-col cols="auto"
+                ><v-icon @click="share">mdi-share</v-icon></v-col
+              >
               <v-col cols="auto"
                 ><v-icon @click="loadComment">mdi-message-reply-outline</v-icon
                 >{{ commentNum }}</v-col
@@ -486,13 +490,13 @@ export default class ReadArticle extends Vue {
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
-  async rateChange(rate:number){
-    const p = IsScoredBlog({score:rate,target:this.blog.id})
-    const re = await ScoreBlog({score:rate,target:this.blog.id})
+  async rateChange(rate: number) {
+    const p = IsScoredBlog({ score: rate, target: this.blog.id });
+    const re = await ScoreBlog({ score: rate, target: this.blog.id });
     this.blog.score_sum = re.sum;
     this.blog.score_num = re.num;
-    const sed = await p
-    Prompt((sed?"重新":"")+ "打分成功！",3000)
+    const sed = await p;
+    Prompt((sed ? "重新" : "") + "打分成功！", 3000);
   }
   get deleteContent() {
     return (
@@ -549,8 +553,7 @@ export default class ReadArticle extends Vue {
       list.push({ src: i.src, active: false });
     });
     list.push({
-      src:
-        "//cdn.mo2.leezeeyee.com/60365aae06fd3124561400c3/1614260703850314778image.png",
+      src: "//cdn.mo2.leezeeyee.com/60365aae06fd3124561400c3/1614260703850314778image.png",
       active: false,
     });
     list[0].active = true;

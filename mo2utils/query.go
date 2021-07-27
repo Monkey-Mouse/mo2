@@ -19,7 +19,10 @@ func ParsePagination(ctx *gin.Context) (page int64, pagesize int64, err error) {
 	}
 	ps, ext := ctx.GetQuery("pagesize")
 	if !ext {
-		return
+		ps, ext = ctx.GetQuery("pageSize")
+		if !ext {
+			return
+		}
 	}
 	pagesize, err = strconv.ParseInt(ps, 10, 64)
 	if err != nil {

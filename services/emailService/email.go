@@ -24,14 +24,14 @@ type Mo2Email struct {
 }
 
 var emailChan chan<- *Mo2Email
-var initialed = false
 var blockMap = concurrent.NewMap()
-var bmChan = make(chan *concurrent.Map, 0)
+var bmChan = make(chan *concurrent.Map)
 var sec int64 = 5
 var max int64 = 10
 var blockTime int = 3600
 var blockFilter = bloom.NewWithEstimates(10000, 0.01)
 var lock = sync.Mutex{}
+var starter = sync.Once{}
 
 // SetFrequencyLimit set shortest resend time
 func SetFrequencyLimit(seconds int64, limit int64, blocksec int) {
@@ -52,46 +52,37 @@ func getBM() (bm *concurrent.Map) {
 // QueueEmail add email to send queue
 func QueueEmail(email *Mo2Email, remoteAddr string) (err *mo2errors.Mo2Errors) {
 	bm := getBM()
-	if !initialed {
-		startEmailService()
-	}
+	starter.Do(startEmailService)
 	if blockFilter.TestString(remoteAddr) {
 		err = mo2errors.New(http.StatusForbidden, "IP blocked! 检测到此IP潜在的ddos行为")
 		return
 	}
 	lock.Lock()
+	defer lock.Unlock()
 	val, ok := bm.Load(remoteAddr)
 	if !ok {
 		bm.Store(remoteAddr, int64(1))
 		emailChan <- email
-		lock.Unlock()
 		return
 	}
 	num := val.(int64)
 	if num >= max {
 		err = mo2errors.New(http.StatusTooManyRequests, "请求次数过多")
 		blockFilter.AddString(remoteAddr)
-		lock.Unlock()
 		return
 	}
 	bm.Store(remoteAddr, num+1)
-	lock.Unlock()
 	emailChan <- email
 	return
 }
 
 // startEmailService start go routine for send email
 func startEmailService() {
-	if initialed {
-		return
-	}
 	emailc := make(chan *Mo2Email, 100)
 	go startWorker(emailc)
 	go cleaner()
 	go blockReseter()
 	emailChan = emailc
-	initialed = true
-	return
 }
 func cleaner() {
 	seconds := time.Second * time.Duration(sec)

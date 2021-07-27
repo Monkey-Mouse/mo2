@@ -27,7 +27,7 @@
 
 <script lang="ts">
 import { BlogBrief } from "@/models";
-import { GetArticles, AutoLoader, AddMore, ElmReachedButtom } from "../utils";
+import { GetArticles, AutoLoader, AddMore, ElmReachedBottom } from "../utils";
 import Vue from "vue";
 import Component from "vue-class-component";
 import BlogTimeLineList from "../components/BlogTimeLineList.vue";
@@ -59,7 +59,7 @@ export default class Home extends Vue implements AutoLoader<BlogBrief> {
     AddMore(this, val);
   }
   public ReachedButtom() {
-    ElmReachedButtom(this, ({ page, pageSize }) =>
+    ElmReachedBottom(this, ({ page, pageSize }) =>
       GetArticles({
         page: page,
         pageSize: pageSize,

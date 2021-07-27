@@ -69,7 +69,8 @@
                     (blog.cover
                       ? blog.cover
                       : '//cdn.mo2.leezeeyee.com/404.jpg') +
-                    ((blog.cover && blog.cover.indexOf('//cdn.mo2.leezeeyee.com') > 0)
+                    (blog.cover &&
+                    blog.cover.indexOf('//cdn.mo2.leezeeyee.com') > 0
                       ? '~cover'
                       : '')
                   "
@@ -77,7 +78,8 @@
                     (blog.cover
                       ? blog.cover
                       : '//cdn.mo2.leezeeyee.com/404.jpg') +
-                    ((blog.cover && blog.cover.indexOf('//cdn.mo2.leezeeyee.com') > 0)
+                    (blog.cover &&
+                    blog.cover.indexOf('//cdn.mo2.leezeeyee.com') > 0
                       ? '~thumb'
                       : '')
                   "
@@ -98,21 +100,17 @@
               </v-col>
             </v-row>
             <v-divider dark></v-divider>
-            <v-card-actions
-              v-on:click.prevent
-              v-on:click.stop
-              class="pa-4 unclickable"
-            >
-              Rate this
+            <v-card-actions class="pa-4">
+              Rate
               <v-spacer></v-spacer>
               <span class="text--lighten-2 caption mr-2">
-                ({{ blog.rate }})
+                ({{ blog.score_sum / blog.score_num }}) by
+                {{ blog.score_num }} voter
               </span>
               <v-rating
-                v-model="blog.rate"
-                background-color="white"
+                :value="blog.score_sum / blog.score_num"
                 color="yellow accent-4"
-                @change="rateChange(blog)"
+                readonly
                 dense
                 half-increments
                 hover

@@ -67,14 +67,75 @@
           :uploadImgs="uploadImgs"
           @imgselect="(img) => (model[key] = img)"
         />
-        <v-select
+        <v-autocomplete
           v-else-if="value['type'] === 'select'"
           v-model="model[key]"
           :items="value['options']"
           deletable-chips
           chips
           :label="value.label"
-          multiple
+          :multiple="value.multiple"
+          :loading="value.loading"
+          :filter="value.filter"
+          @update:search-input="
+            (s) => {
+              if (value.onChange)
+                value.onChange({ input: s, val: value, cu: model[key] });
+            }
+          "
+          :search-input="value.input"
+        >
+          <template v-if="value['showAvatar']" v-slot:selection="data">
+            <v-chip
+              v-bind="data.attrs"
+              :input-value="data.selected"
+              close
+              @click="data.select"
+              @click:close="
+                () => {
+                  let index = -1;
+                  if (data.item.value)
+                    index = model[key].indexOf(data.item.value);
+                  else index = model[key].indexOf(data.item);
+                  if (index >= 0) model[key].splice(index, 1);
+                }
+              "
+            >
+              <v-avatar left>
+                <v-img
+                  v-if="data.item.avatar"
+                  :src="data.item.avatar + '~thumb'"
+                ></v-img>
+                <span v-else class="white--text headline">{{
+                  initials(data.item.text)
+                }}</span>
+              </v-avatar>
+              {{ data.item.text }}
+            </v-chip>
+          </template>
+          <template v-if="value['showAvatar']" v-slot:item="data">
+            <template>
+              <v-list-item-avatar @click="value.input = ''">
+                <img v-if="data.item.avatar" :src="data.item.avatar" />
+                <span v-else class="white--text headline">{{
+                  initials(data.item.text)
+                }}</span>
+              </v-list-item-avatar>
+              <v-list-item-content @click="value.input = ''">
+                <v-list-item-title v-text="data.item.text"></v-list-item-title>
+              </v-list-item-content>
+            </template>
+          </template>
+        </v-autocomplete>
+        <v-combobox
+          v-else-if="value['type'] === 'combo'"
+          v-model="model[key]"
+          :items="value['options']"
+          deletable-chips
+          chips
+          :label="value.label"
+          :multiple="value.multiple"
+          :messages="value.message"
         />
         <v-file-input
           v-else-if="value['type'] === 'file'"
@@ -127,6 +188,7 @@ import Vue from "vue";
 import Component from "vue-class-component";
 import { Prop, Watch } from "vue-property-decorator";
 import ImgSelector from "./ImgSelector.vue";
+import { GetInitials } from "@/utils";
 
 @Component({
   components: {
@@ -154,6 +216,9 @@ export default class InputList extends Vue {
         this.imgVals[key] = this.inputProps[key].default;
       } else this.model[key] = this.inputProps[key].default;
     }
+  }
+  initials(s: string) {
+    return GetInitials(s);
   }
   mounted() {
     this.$emit("update:anyError", this.$v.$anyError);

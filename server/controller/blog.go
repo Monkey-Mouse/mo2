@@ -260,12 +260,13 @@ func (c *Controller) FindBlogsByUser(ctx *gin.Context) {
 // @Failure 401 {object} badresponse.ResponseError
 // @Failure 404 {object} badresponse.ResponseError
 // @Router /api/blogs/find/userId [get]
-func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
+func (c *Controller) FindBlogsByID(ctx *gin.Context) {
 	filter, mErr := parseFilter(ctx)
 	if mErr.IsError() {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, badresponse.SetResponseError(mErr))
 		return
 	}
+	field := ctx.Query("field")
 	id, err := primitive.ObjectIDFromHex(ctx.Query("id"))
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, badresponse.SetResponseReason("非法输入"))
@@ -280,7 +281,7 @@ func (c *Controller) FindBlogsByUserId(ctx *gin.Context) {
 		}
 	}
 	if !filter.IsDraft || !mErr.IsError() {
-		blogs := database.FindBlogsByUserId(id, filter)
+		blogs := database.FindBlogsByValue(field, id, filter)
 		ctx.JSON(http.StatusOK, blogs)
 		return
 	}
@@ -419,7 +420,8 @@ func (c *Controller) FindBlogsByType(ctx *gin.Context) {
 // @Tags admin
 // @Success 200
 // @Router /api/admin/indexblogs [post]
-func (c *Controller) IndexAllBlogs(ctx *gin.Context) {
+func (c *Controller) IndexAll(ctx *gin.Context) {
+	mo2utils.IndexAccounts(database.FindAllAccounts())
 	mo2utils.IndexBlogs(database.FindBlogs(model.Filter{IsDeleted: false, IsDraft: false, Page: 0, PageSize: 1000}))
 	ctx.Status(200)
 }

@@ -42,6 +42,7 @@ func createBlogIndexes(col *mongo.Collection) {
 		{Keys: bson.M{"ket_words": 1}},
 		{Keys: bson.M{"author_id": 1}},
 		{Keys: bson.M{"categories": 1}},
+		{Keys: bson.M{"project_id": 1}},
 	}, model.IndexModels...))
 }
 func chooseCol(isDraft bool) (col *mongo.Collection) {
@@ -133,7 +134,6 @@ func UpsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 	}
 	if !isDraft {
 		mo2utils.IndexBlog(b)
-		AddBlogToProj(context.TODO(), b.ProjectID, b.ID)
 	}
 	return
 }
@@ -167,17 +167,20 @@ func ProcessBlog(isDraft bool, b *model.Blog, operation string) (mErr mo2errors.
 
 //find blog by user
 func FindBlogsByUser(u dto.LoginUserInfo, filter model.Filter) (b []model.Blog) {
-	return FindBlogsByUserId(u.ID, filter)
+	return FindBlogsByValue("author_id", u.ID, filter)
 }
 func getBlogListQueryOption() *options.FindOptions {
 	return options.Find().SetSort(bson.D{{"entity_info.update_time", -1}}).SetProjection(bson.D{{"content", 0}, {"y_doc", 0}})
 }
 
-//find blog by userId
-func FindBlogsByUserId(id primitive.ObjectID, filter model.Filter) (b []model.Blog) {
+//find blog by value
+func FindBlogsByValue(field string, val interface{}, filter model.Filter) (b []model.Blog) {
 	col := chooseCol(filter.IsDraft)
 	opts := getBlogListQueryOption().SetSkip(int64(filter.Page * filter.PageSize)).SetLimit(int64(filter.PageSize))
-	cursor, err := col.Find(context.TODO(), bson.M{"author_id": id, "entity_info.isdeleted": filter.IsDeleted}, opts)
+	cursor, err := col.Find(context.TODO(), bson.M{field: val, "entity_info.isdeleted": filter.IsDeleted}, opts)
+	if err != nil {
+		panic(err)
+	}
 	err = cursor.All(context.TODO(), &b)
 	if err != nil {
 		panic(err)

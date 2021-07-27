@@ -9,7 +9,7 @@ import VueCookies from 'vue-cookies'
 import sanitizeHtml from 'sanitize-html'
 import '@mdi/font/css/materialdesignicons.css'
 import axios from 'axios'
-import { ShowLogin } from './utils'
+import { GetErrorMsg, Prompt, ShowLogin } from './utils'
 const list = sanitizeHtml.defaults.allowedTags.concat(sanitizeHtml.defaults.selfClosing);
 const attrs = sanitizeHtml.defaults.allowedAttributes;
 attrs['*'] = ['href', 'align', 'alt', 'center', 'bgcolor', 'data-*', 'class', 'style']
@@ -30,10 +30,17 @@ Vue.config.productionTip = false
 axios.interceptors.response.use(response => {
   return response;
 }, error => {
+  if (!error.response) {
+    throw error
+  }
   if (error.response.status === 403) {
     if (error.response.data?.reason === "authentication failed") {
       ShowLogin();
     }
+  }
+  const reg = new RegExp("[\\u4E00-\\u9FFF]+","g");
+  if (error.response.data?.reason&&reg.test(error.response.data?.reason)) {
+    Prompt(GetErrorMsg(error),5000)
   }
   throw error;
 });
