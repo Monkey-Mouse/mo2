@@ -303,7 +303,7 @@
         >冀ICP备20007570号-2</a
       >
     </v-footer>
-    <pwa-install></pwa-install>
+    <pwa-install style="display: none"></pwa-install>
   </v-app>
 </template>
 
@@ -506,7 +506,7 @@ export default class App extends Vue {
   get isUser() {
     return this.user.roles && this.user.roles.indexOf(UserRole) >= 0;
   }
-  userChanged(){
+  userChanged() {
     GetUserInfoAsync().then((u) => {
       this.user = u;
       this.userload = true;
@@ -547,7 +547,7 @@ export default class App extends Vue {
     return GetInitials(this.user.name);
   }
   async logOut() {
-    await Logout()
+    await Logout();
     const u = await GetUserInfoAsync();
     this.user = u;
     this.snackbar = true;
@@ -642,12 +642,12 @@ export default class App extends Vue {
       this.showInstall = !this.installComponent.getInstalledStatus();
     }, 2000);
   }
-  showLogin(email:string=undefined) {
+  showLogin(email: string = undefined) {
     if (this.isUser) {
       return;
     }
     if (email) {
-      this.user.email = email
+      this.user.email = email;
     }
     this.drawer = false;
     this.enable = true;

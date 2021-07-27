@@ -116,7 +116,10 @@
           <template v-if="value['showAvatar']" v-slot:item="data">
             <template>
               <v-list-item-avatar @click="value.input = ''">
-                <img :src="data.item.avatar" />
+                <img v-if="data.item.avatar" :src="data.item.avatar" />
+                <span v-else class="white--text headline">{{
+                  initials(data.item.text)
+                }}</span>
               </v-list-item-avatar>
               <v-list-item-content @click="value.input = ''">
                 <v-list-item-title v-text="data.item.text"></v-list-item-title>
