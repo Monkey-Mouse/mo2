@@ -15,7 +15,7 @@ import (
 
 func (c *Controller) UpsertProject(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
 	p := &database.Project{}
-	err = ctx.BindJSON(&p)
+	err = ctx.BindJSON(p)
 	if err != nil {
 		return 400, nil, err
 	}
