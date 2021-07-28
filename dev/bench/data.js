@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1627484753329,
+  "lastUpdate": 1627484958902,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -8898,6 +8898,56 @@ window.BENCHMARK_DATA = {
           {
             "name": "Benchmark_checkRL",
             "value": 1091,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "9a0bc6c599a55b6abd0f2a9011fb2de50e590384",
+          "message": "[test] add test for upsert project 40%",
+          "timestamp": "2021-07-27T15:07:03Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/300/commits/9a0bc6c599a55b6abd0f2a9011fb2de50e590384"
+        },
+        "date": 1627484957991,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 6773475,
+            "unit": "ns/op",
+            "extra": "175 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 465709,
+            "unit": "ns/op",
+            "extra": "3343 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1191,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 88731,
+            "unit": "ns/op",
+            "extra": "13358 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1155,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
           }
