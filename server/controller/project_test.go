@@ -341,3 +341,54 @@ func TestController_JoinProject(t *testing.T) {
 		})
 	}
 }
+
+func TestController_ListProject(t *testing.T) {
+	ctx := &gin.Context{}
+	patches := gomonkey.ApplyMethod(reflect.TypeOf(ctx), "BindQuery",
+		func(_ *gin.Context, obj interface{}) error {
+			filter := obj.(*listFilter)
+			*filter = listFilter{
+				Page:     0,
+				PageSize: 10,
+				Tags:     []string{},
+				Uid:      primitive.NewObjectID().Hex(),
+			}
+			return nil
+		},
+	)
+	defer patches.Reset()
+	type args struct {
+		ctx *gin.Context
+		u   dto.LoginUserInfo
+	}
+	tests := []struct {
+		name       string
+		c          *Controller
+		args       args
+		wantStatus int
+		wantBody   interface{}
+		wantErr    bool
+	}{
+		{name: "test 200", c: &Controller{},
+			args: args{
+				ctx: ctx,
+				u:   dto.LoginUserInfo{ID: primitive.NewObjectID()},
+			}, wantStatus: 200, wantBody: []*database.Project{}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Controller{}
+			gotStatus, gotBody, err := c.ListProject(tt.args.ctx, tt.args.u)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Controller.ListProject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotStatus != tt.wantStatus {
+				t.Errorf("Controller.ListProject() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
+			}
+			if !reflect.DeepEqual(gotBody, tt.wantBody) {
+				t.Errorf("Controller.ListProject() gotBody = %v, want %v", gotBody, tt.wantBody)
+			}
+		})
+	}
+}

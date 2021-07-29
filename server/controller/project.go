@@ -113,13 +113,15 @@ func (c *Controller) JoinProject(ctx *gin.Context, u dto.LoginUserInfo) (status 
 	return 200, p, nil
 }
 
+type listFilter struct {
+	Page     int64
+	PageSize int64
+	Tags     []string
+	Uid      string
+}
+
 func (c *Controller) ListProject(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
-	var filter struct {
-		Page     int64
-		PageSize int64
-		Tags     []string
-		Uid      string
-	}
+	var filter listFilter
 	err = ctx.BindQuery(&filter)
 	if err != nil {
 		return 400, nil, err
