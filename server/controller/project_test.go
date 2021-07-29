@@ -158,3 +158,62 @@ func TestController_UpsertProject(t *testing.T) {
 		}
 	})
 }
+
+func TestController_GetProject(t *testing.T) {
+	ctx := &gin.Context{
+		Params: gin.Params{{Key: "id", Value: primitive.NewObjectID().Hex()}},
+	}
+	ctx1 := &gin.Context{}
+	p := &database.Project{}
+	database.UpsertProject(ctx, p, nil)
+	defer database.DeleteProject(ctx, p.ID)
+	ctx2 := &gin.Context{
+		Params: gin.Params{{Key: "id", Value: p.ID.Hex()}},
+	}
+	type args struct {
+		ctx *gin.Context
+		u   dto.LoginUserInfo
+	}
+	tests := []struct {
+		name       string
+		c          *Controller
+		args       args
+		wantStatus int
+		wantBody   interface{}
+		wantErr    bool
+	}{
+		{name: "test 404", c: &Controller{},
+			args: args{
+				ctx: ctx,
+			}, wantStatus: 404, wantBody: nil, wantErr: true},
+		{name: "test 400", c: &Controller{},
+			args: args{
+				ctx: ctx1,
+			}, wantStatus: 400, wantBody: nil, wantErr: true},
+		{name: "test 200", c: &Controller{},
+			args: args{
+				ctx: ctx2,
+			}, wantStatus: 200, wantBody: p, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Controller{}
+			gotStatus, gotBody, err := c.GetProject(tt.args.ctx, tt.args.u)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Controller.GetProject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotStatus != tt.wantStatus {
+				t.Errorf("Controller.GetProject() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
+			}
+			if gotBody != nil {
+				p1 := gotBody.(*database.Project)
+				p2 := tt.wantBody.(*database.Project)
+				p1.EntityInfo = p2.EntityInfo
+			}
+			if !reflect.DeepEqual(gotBody, tt.wantBody) {
+				t.Errorf("Controller.GetProject() gotBody = %v, want %v", gotBody, tt.wantBody)
+			}
+		})
+	}
+}
