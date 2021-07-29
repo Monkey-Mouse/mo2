@@ -217,3 +217,59 @@ func TestController_GetProject(t *testing.T) {
 		})
 	}
 }
+
+func TestController_DeleteProject(t *testing.T) {
+	ctx := &gin.Context{
+		Params: gin.Params{{Key: "id", Value: primitive.NewObjectID().Hex()}},
+	}
+	ctx1 := &gin.Context{}
+	uid := primitive.NewObjectID()
+	p := &database.Project{
+		OwnerID: uid,
+	}
+	database.UpsertProject(ctx, p, nil)
+	ctx2 := &gin.Context{
+		Params: gin.Params{{Key: "id", Value: p.ID.Hex()}},
+	}
+	defer database.DeleteProject(ctx, p.ID)
+	type args struct {
+		ctx *gin.Context
+		u   dto.LoginUserInfo
+	}
+	tests := []struct {
+		name       string
+		c          *Controller
+		args       args
+		wantStatus int
+		wantBody   interface{}
+		wantErr    bool
+	}{
+		{name: "test 404", c: &Controller{},
+			args: args{
+				ctx: ctx,
+				u:   dto.LoginUserInfo{ID: uid},
+			}, wantStatus: 404, wantBody: nil, wantErr: true},
+		{name: "test 400", c: &Controller{},
+			args: args{
+				ctx: ctx1,
+			}, wantStatus: 400, wantBody: nil, wantErr: true},
+		{name: "test 200", c: &Controller{},
+			args: args{
+				ctx: ctx2,
+				u:   dto.LoginUserInfo{ID: uid},
+			}, wantStatus: 200, wantBody: nil, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Controller{}
+			gotStatus, _, err := c.DeleteProject(tt.args.ctx, tt.args.u)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Controller.DeleteProject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotStatus != tt.wantStatus {
+				t.Errorf("Controller.DeleteProject() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
+			}
+		})
+	}
+}

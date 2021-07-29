@@ -168,11 +168,11 @@ func (c *Controller) DeleteProject(ctx *gin.Context, u dto.LoginUserInfo) (statu
 	}
 	_, err = database.GetProject(ctx, bson.M{"_id": id, "owner_id": u.ID})
 	if err != nil {
-		return 403, nil, fmt.Errorf("access denied")
+		return 404, nil, fmt.Errorf("not found")
 	}
 	p, err := database.DeleteProject(ctx, id)
 	if err != nil {
-		return 404, nil, fmt.Errorf("not found")
+		return 500, nil, err
 	}
 	return 200, p, nil
 
