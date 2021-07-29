@@ -8,11 +8,12 @@ import (
 
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
+	"github.com/Monkey-Mouse/mo2/server/model"
+	emailservice "github.com/Monkey-Mouse/mo2/services/emailService"
 	"github.com/agiledragon/gomonkey"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func buildUpsertProjectCtx(
@@ -48,12 +49,6 @@ func TestController_UpsertProject(t *testing.T) {
 				MemberIDs:  []primitive.ObjectID{primitive.NewObjectID()},
 			},
 			nil)
-		patches.ApplyFunc(database.UpsertProject,
-			func(ctx context.Context,
-				p *database.Project, update bson.M) (*mongo.UpdateResult, error) {
-				return nil, nil
-			},
-		)
 		defer patches.Reset()
 		id := primitive.NewObjectID()
 		s, b, err := NewController().UpsertProject(ctx, dto.LoginUserInfo{
@@ -65,7 +60,8 @@ func TestController_UpsertProject(t *testing.T) {
 		if s != 200 {
 			t.Errorf("should produce status 200, but %v", s)
 		}
-		p := b.(*database.Project)
+		m := b.(gin.H)
+		p := m["project"].(*database.Project)
 		if len(p.ManagerIDs) > 0 {
 			t.Errorf("insert project should not have managerids")
 		}
@@ -75,6 +71,90 @@ func TestController_UpsertProject(t *testing.T) {
 		if p.OwnerID != id {
 			t.Errorf("ownerid %v should equal to userid %v", p.OwnerID, id)
 		}
-
+		_, err = database.DeleteProject(ctx, p.ID)
+		if err != nil {
+			t.Error(err)
+		}
+	})
+	t.Run("test 404", func(t *testing.T) {
+		patches, ctx := buildUpsertProjectCtx(
+			database.Project{
+				ID: primitive.NewObjectID(),
+			},
+			nil)
+		defer patches.Reset()
+		id := primitive.NewObjectID()
+		s, _, err := NewController().UpsertProject(ctx, dto.LoginUserInfo{
+			ID: id,
+		})
+		if err == nil {
+			t.Error("should throw err but didn't ")
+		}
+		if s != 404 {
+			t.Errorf("should produce status 404, but %v", s)
+		}
+	})
+	t.Run("test update  group", func(t *testing.T) {
+		database.AccCol.Drop(context.TODO())
+		database.ProjCol.Drop(context.TODO())
+		uid := primitive.NewObjectID()
+		proj := &database.Project{
+			Tags:    []string{"xxx", "课x"},
+			OwnerID: uid,
+		}
+		email := "xxx@xx"
+		err := database.CreateActiveAccounts(context.TODO(), []model.Account{
+			{ID: uid, Email: email, UserName: "xxx", HashedPwd: "xxxxx"},
+		})
+		if err != nil {
+			t.Errorf("insert user data err %v", err)
+		}
+		_, err = database.UpsertProject(context.TODO(), proj, nil)
+		if err != nil {
+			t.Errorf("upsert data %v err %v", proj, err)
+		}
+		proj.ManagerIDs = []primitive.ObjectID{}
+		patches, ctx := buildUpsertProjectCtx(
+			database.Project{
+				ID:         proj.ID,
+				Tags:       []string{"xxx", "课程"},
+				ManagerIDs: []primitive.ObjectID{uid},
+				MemberIDs:  []primitive.ObjectID{primitive.NewObjectID()},
+				OwnerID:    uid,
+			},
+			nil)
+		patches.ApplyMethod(reflect.TypeOf(ctx), "ClientIP", func(*gin.Context) string {
+			return "xxxx"
+		})
+		receivers := []string{}
+		patches.ApplyFunc(emailservice.SendEmail, func(mail *emailservice.Mo2Email,
+			senderAddr string) (err *mo2errors.Mo2Errors) {
+			receivers = mail.Receivers
+			return nil
+		})
+		defer patches.Reset()
+		s, b, err := NewController().UpsertProject(ctx, dto.LoginUserInfo{
+			ID: uid,
+		})
+		if err != nil {
+			t.Error("should not throw err but throw " + err.Error())
+		}
+		if s != 200 {
+			t.Errorf("should produce status 200, but %v", s)
+		}
+		m := b.(gin.H)
+		p := m["project"].(*database.Project)
+		if len(p.ManagerIDs) > 0 {
+			t.Errorf("insert project should not have managerids")
+		}
+		if len(p.MemberIDs) > 0 {
+			t.Errorf("insert project should not have memberids")
+		}
+		if len(receivers) != 1 {
+			t.Errorf("receivers should contain 1 email, but %v", len(receivers))
+		}
+		if receivers[0] != email {
+			t.Errorf("receivers should only contain %v, but %v", email, receivers)
+		}
 	})
 }
