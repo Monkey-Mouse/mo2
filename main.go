@@ -36,7 +36,6 @@ func init() {
 		docs.SwaggerInfo.Schemes = []string{"https"}
 		docs.SwaggerInfo.Host = "www.motwo.cn"
 	}
-	go mo2utils.UploadCDN()
 	mo2ticker.ExecuteFunc(24*time.Hour, func() {
 		if mErr := database.DeleteExpireItems(); mErr.IsError() {
 			log.Println(mErr)
