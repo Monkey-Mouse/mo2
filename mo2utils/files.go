@@ -49,7 +49,7 @@ func IsEnvRelease() (release bool) {
 // UploadCDN upload frontend files to cdn
 func UploadCDN() {
 	if IsEnvRelease() {
-		rootPath := "./dist"
+		rootPath := "/home/dist"
 		uploadRootPath := "dist"
 		ProcessAllFiles(rootPath, uploadRootPath, func(parameter ...string) {
 			qiniuFile(parameter[0], parameter[2])

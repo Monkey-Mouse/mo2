@@ -1,1 +1,0 @@
-npx vue-cli-service lint --fix
