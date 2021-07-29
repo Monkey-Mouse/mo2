@@ -19,6 +19,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// AccCol account collection
 var AccCol = GetCollection("accounts")
 
 func CreateAccountIndex() (err error) {
