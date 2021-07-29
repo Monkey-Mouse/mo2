@@ -19,7 +19,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var accCol = GetCollection("accounts")
+// AccCol account collection
+var AccCol = GetCollection("accounts")
 
 func CreateAccountIndex() (err error) {
 	//ensure index
@@ -42,7 +43,7 @@ func CreateAccountIndex() (err error) {
 
 // FindAccountByEmail get account by email
 func FindAccountByEmail(email string) (account model.Account, e mo2errors.Mo2Errors) {
-	if err := accCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
+	if err := AccCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
 		if err == mongo.ErrNoDocuments {
 			e.Init(mo2errors.Mo2NotFound, err.Error())
 		} else {
@@ -66,7 +67,7 @@ func CreateActiveAccounts(ctx context.Context, accs []model.Account) error {
 		v.Settings = map[string]string{}
 		docs[i] = v
 	}
-	_, err := accCol.InsertMany(ctx, docs)
+	_, err := AccCol.InsertMany(ctx, docs)
 	return err
 }
 
@@ -111,7 +112,7 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 		Settings:   map[string]string{model.Avatar: ""},
 	}
 	model.AddRoles(&account, model.OrdinaryUser)
-	insertResult, err := accCol.InsertOne(context.TODO(), account)
+	insertResult, err := AccCol.InsertOne(context.TODO(), account)
 	if err != nil {
 		merr := err.(mongo.WriteException).WriteErrors[0]
 		if merr.Code == 11000 {
@@ -121,7 +122,7 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 				return
 			}
 			DeleteAccount(acc.ID)
-			_, err = accCol.InsertOne(context.TODO(), account)
+			_, err = AccCol.InsertOne(context.TODO(), account)
 		} else {
 			return
 		}
@@ -139,7 +140,7 @@ func InitAccount(newAccount model.AddAccount, token string) (account model.Accou
 // FindAccountByName as name
 func FindAccountByName(name string) (a model.Account, exist bool) {
 	exist = false
-	if err := accCol.FindOne(context.TODO(), bson.D{{"username", name}}).Decode(&a); err != nil {
+	if err := AccCol.FindOne(context.TODO(), bson.D{{"username", name}}).Decode(&a); err != nil {
 		if err != mongo.ErrNoDocuments {
 			panic(err)
 		}
@@ -157,7 +158,7 @@ func UpsertAccount(a *model.Account) (merr mo2errors.Mo2Errors) {
 }
 func UpsertAccountWithF(a *model.Account, filter interface{}) (merr mo2errors.Mo2Errors) {
 	a.EntityInfo.Update()
-	result, err := accCol.UpdateOne(context.TODO(), filter, bson.M{
+	result, err := AccCol.UpdateOne(context.TODO(), filter, bson.M{
 		"$set": bson.M{
 			"username":    a.UserName,
 			"email":       a.Email,
@@ -188,7 +189,7 @@ func UpsertAccountWithF(a *model.Account, filter interface{}) (merr mo2errors.Mo
 }
 
 func DeleteAccount(id primitive.ObjectID) (a model.Account, e mo2errors.Mo2Errors) {
-	if err := accCol.FindOneAndDelete(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
+	if err := AccCol.FindOneAndDelete(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
 		if err == mongo.ErrNoDocuments {
 			e.Init(mo2errors.Mo2NotFound, err.Error())
 		} else {
@@ -199,7 +200,7 @@ func DeleteAccount(id primitive.ObjectID) (a model.Account, e mo2errors.Mo2Error
 }
 
 func DeleteAccountByEmail(email string) (a model.Account, e mo2errors.Mo2Errors) {
-	if err := accCol.FindOneAndDelete(context.TODO(), bson.D{{"email", email}}).Decode(&a); err != nil {
+	if err := AccCol.FindOneAndDelete(context.TODO(), bson.D{{"email", email}}).Decode(&a); err != nil {
 		if err == mongo.ErrNoDocuments {
 			e.Init(mo2errors.Mo2NotFound, err.Error())
 		} else {
@@ -228,7 +229,7 @@ func CreateAnonymousAccount() (a model.Account) {
 // GenerateEmailToken generate token for email of an account
 func GenerateEmailToken(addAccount model.AddAccount) (account *model.Account, err error) {
 	//use email to verify
-	if err = accCol.FindOne(context.TODO(), bson.D{{"email", addAccount.Email}}).Decode(&account); err != nil {
+	if err = AccCol.FindOne(context.TODO(), bson.D{{"email", addAccount.Email}}).Decode(&account); err != nil {
 		return
 	}
 	if account.Infos == nil {
@@ -244,7 +245,7 @@ func VerifyEmail(info model.VerifyEmail) (account model.Account, err error) {
 	//use email to verify
 	email := info.Email
 	// verify email
-	if err = accCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
+	if err = AccCol.FindOne(context.TODO(), bson.D{{"email", email}}).Decode(&account); err != nil {
 		return
 	}
 	if account.Infos[model.Token] == info.Token {
@@ -299,7 +300,7 @@ func VerifyAccount(info model.LoginAccount) (account model.Account, err error) {
 // FindAccount find
 func FindAccount(id primitive.ObjectID) (a model.Account, exist bool) {
 	exist = false
-	if err := accCol.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
+	if err := AccCol.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&a); err != nil {
 		if err != mongo.ErrNoDocuments {
 			panic(err)
 		}
@@ -321,7 +322,7 @@ func FindAllAccountsInfo() (us []dto.UserInfo) {
 
 // FindAllAccounts find
 func FindAllAccounts() (as []model.Account) {
-	results, err := accCol.Find(context.TODO(), bson.D{{}})
+	results, err := AccCol.Find(context.TODO(), bson.D{{}})
 	if err != nil {
 		panic(err)
 	}
@@ -343,7 +344,7 @@ func FindAccountInfo(id primitive.ObjectID) (u dto.UserInfo, exist bool) {
 // ListAccountsBrief find from a list of id
 func ListAccountsBrief(ids []primitive.ObjectID) (bs []dto.UserInfoBrief) {
 
-	cursor, err := accCol.Find(context.TODO(),
+	cursor, err := AccCol.Find(context.TODO(),
 		bson.D{
 			{"_id",
 				bson.D{

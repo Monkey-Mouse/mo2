@@ -6,6 +6,7 @@ require (
 	github.com/Monkey-Mouse/go-abac v0.0.0-20210325070221-9ac98bef4f09
 	github.com/Monkey-Mouse/mo2log v0.0.3-0.20210409155342-f06e35c43372
 	github.com/RoaringBitmap/roaring v0.5.5 // indirect
+	github.com/agiledragon/gomonkey v2.0.2+incompatible // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/aws/aws-sdk-go v1.38.16 // indirect
 	github.com/blevesearch/bleve v1.0.14

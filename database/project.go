@@ -34,6 +34,8 @@ type Project struct {
 	EntityInfo  model.Entity         `bson:"entity_info"`
 }
 
+// UpsertProject 插入或更新project
+// - 如果插入，ManagerIDs和MemberIDs会被设置为空数组
 func UpsertProject(ctx context.Context, p *Project, update bson.M) (*mongo.UpdateResult, error) {
 	if p.ID.IsZero() {
 		p.ID = primitive.NewObjectID()

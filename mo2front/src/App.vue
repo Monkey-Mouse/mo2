@@ -149,14 +149,7 @@
         >
           <div
             :class="notificationNum !== 0 ? 'clickable' : ''"
-            @click="
-              () => {
-                if (notificationNum !== 0) {
-                  $router.push('/notifications');
-                  notificationNum = 0;
-                }
-              }
-            "
+            @click="notifyClick"
           >
             <avatar :size="40" :user="user" />
           </div>
@@ -411,6 +404,12 @@ export default class App extends Vue {
       multiple: true,
     },
   };
+  notifyClick() {
+    if (this.notificationNum !== 0) {
+      this.$router.push("/notifications");
+      this.notificationNum = 0;
+    }
+  }
   async newGroup(p: Project): Promise<{ err: string; pass: boolean }> {
     try {
       const proj = await UpsertProject(p);

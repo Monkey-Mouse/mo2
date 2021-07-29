@@ -15,24 +15,22 @@ import (
 
 func (c *Controller) UpsertProject(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
 	p := &database.Project{}
-	err = ctx.BindJSON(&p)
+	err = ctx.BindJSON(p)
 	if err != nil {
 		return 400, nil, err
 	}
 	if p.ID.IsZero() {
 		p.OwnerID = u.ID
-		p.ManagerIDs = []primitive.ObjectID{}
-		p.MemberIDs = []primitive.ObjectID{}
 		_, err = database.UpsertProject(ctx, p, nil)
 		if err != nil {
 			return 500, nil, err
 		}
-		return 200, p, nil
+		return 200, gin.H{"invite": false, "project": p}, nil
 	}
 	// 更新鉴权
 	prev, err := database.GetProject(ctx, bson.M{"_id": p.ID, "$or": []bson.M{{"manager_i_ds": u.ID}, {"owner_id": u.ID}}})
 	if err != nil {
-		return 403, nil, fmt.Errorf("access denied")
+		return 404, nil, fmt.Errorf("project not found")
 	}
 	p.OwnerID = prev.OwnerID
 	invite := false

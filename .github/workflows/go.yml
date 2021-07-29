@@ -43,7 +43,7 @@ jobs:
         env:
           CI: true
           MO2_MONGO_URL: mongodb://127.0.0.1:27017
-        run: go test ./... -coverprofile=coverage.txt -covermode=atomic
+        run: go test ./... -gcflags=all=-l -coverprofile=coverage.txt -covermode=atomic
 
       - name: CodeCov
         run: bash <(curl -s https://codecov.io/bash)
