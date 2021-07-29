@@ -8,6 +8,7 @@ import (
 
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
 	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
 	"github.com/Monkey-Mouse/mo2/server/model"
 	emailservice "github.com/Monkey-Mouse/mo2/services/emailService"
@@ -157,4 +158,237 @@ func TestController_UpsertProject(t *testing.T) {
 			t.Errorf("receivers should only contain %v, but %v", email, receivers)
 		}
 	})
+}
+
+func TestController_GetProject(t *testing.T) {
+	ctx := &gin.Context{
+		Params: gin.Params{{Key: "id", Value: primitive.NewObjectID().Hex()}},
+	}
+	ctx1 := &gin.Context{}
+	p := &database.Project{}
+	database.UpsertProject(ctx, p, nil)
+	defer database.DeleteProject(ctx, p.ID)
+	ctx2 := &gin.Context{
+		Params: gin.Params{{Key: "id", Value: p.ID.Hex()}},
+	}
+	type args struct {
+		ctx *gin.Context
+		u   dto.LoginUserInfo
+	}
+	tests := []struct {
+		name       string
+		c          *Controller
+		args       args
+		wantStatus int
+		wantBody   interface{}
+		wantErr    bool
+	}{
+		{name: "test 404", c: &Controller{},
+			args: args{
+				ctx: ctx,
+			}, wantStatus: 404, wantBody: nil, wantErr: true},
+		{name: "test 400", c: &Controller{},
+			args: args{
+				ctx: ctx1,
+			}, wantStatus: 400, wantBody: nil, wantErr: true},
+		{name: "test 200", c: &Controller{},
+			args: args{
+				ctx: ctx2,
+			}, wantStatus: 200, wantBody: p, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Controller{}
+			gotStatus, gotBody, err := c.GetProject(tt.args.ctx, tt.args.u)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Controller.GetProject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotStatus != tt.wantStatus {
+				t.Errorf("Controller.GetProject() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
+			}
+			if gotBody != nil {
+				p1 := gotBody.(*database.Project)
+				p2 := tt.wantBody.(*database.Project)
+				p1.EntityInfo = p2.EntityInfo
+			}
+			if !reflect.DeepEqual(gotBody, tt.wantBody) {
+				t.Errorf("Controller.GetProject() gotBody = %v, want %v", gotBody, tt.wantBody)
+			}
+		})
+	}
+}
+
+func TestController_DeleteProject(t *testing.T) {
+	ctx := &gin.Context{
+		Params: gin.Params{{Key: "id", Value: primitive.NewObjectID().Hex()}},
+	}
+	ctx1 := &gin.Context{}
+	uid := primitive.NewObjectID()
+	p := &database.Project{
+		OwnerID: uid,
+	}
+	database.UpsertProject(ctx, p, nil)
+	ctx2 := &gin.Context{
+		Params: gin.Params{{Key: "id", Value: p.ID.Hex()}},
+	}
+	defer database.DeleteProject(ctx, p.ID)
+	type args struct {
+		ctx *gin.Context
+		u   dto.LoginUserInfo
+	}
+	tests := []struct {
+		name       string
+		c          *Controller
+		args       args
+		wantStatus int
+		wantBody   interface{}
+		wantErr    bool
+	}{
+		{name: "test 404", c: &Controller{},
+			args: args{
+				ctx: ctx,
+				u:   dto.LoginUserInfo{ID: uid},
+			}, wantStatus: 404, wantBody: nil, wantErr: true},
+		{name: "test 400", c: &Controller{},
+			args: args{
+				ctx: ctx1,
+			}, wantStatus: 400, wantBody: nil, wantErr: true},
+		{name: "test 200", c: &Controller{},
+			args: args{
+				ctx: ctx2,
+				u:   dto.LoginUserInfo{ID: uid},
+			}, wantStatus: 200, wantBody: nil, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Controller{}
+			gotStatus, _, err := c.DeleteProject(tt.args.ctx, tt.args.u)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Controller.DeleteProject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotStatus != tt.wantStatus {
+				t.Errorf("Controller.DeleteProject() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
+			}
+		})
+	}
+}
+
+func TestController_JoinProject(t *testing.T) {
+	email := "xxxx"
+	ctx := &gin.Context{}
+	uid := primitive.NewObjectID()
+	p := &database.Project{
+		OwnerID: uid,
+	}
+	database.UpsertProject(ctx, p, nil)
+	ctx1 := &gin.Context{}
+
+	t1 := mo2utils.GenerateJwtCode(dto.LoginUserInfo{Email: "xx", ID: p.ID, Name: "member_i_ds"})
+
+	token := mo2utils.GenerateJwtCode(dto.LoginUserInfo{Email: email, ID: p.ID, Name: "member_i_ds"})
+	ctx2 := &gin.Context{}
+
+	defer database.DeleteProject(ctx, p.ID)
+	type args struct {
+		ctx   *gin.Context
+		u     dto.LoginUserInfo
+		token string
+	}
+	tests := []struct {
+		name       string
+		c          *Controller
+		args       args
+		wantStatus int
+		wantBody   interface{}
+		wantErr    bool
+	}{
+		{name: "test 400", c: &Controller{},
+			args: args{
+				ctx:   ctx,
+				u:     dto.LoginUserInfo{Email: email},
+				token: "",
+			}, wantStatus: 400, wantBody: nil, wantErr: true},
+		{name: "test 400 wrong email", c: &Controller{},
+			args: args{
+				ctx:   ctx1,
+				u:     dto.LoginUserInfo{Email: email},
+				token: t1,
+			}, wantStatus: 400, wantBody: nil, wantErr: true},
+		{name: "test 200", c: &Controller{},
+			args: args{
+				ctx:   ctx2,
+				u:     dto.LoginUserInfo{Email: email},
+				token: token,
+			}, wantStatus: 200, wantBody: nil, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pat := gomonkey.ApplyMethod(reflect.TypeOf(tt.args.ctx), "Query", func(*gin.Context, string) string {
+				return tt.args.token
+			})
+			defer pat.Reset()
+			c := &Controller{}
+			gotStatus, _, err := c.JoinProject(tt.args.ctx, tt.args.u)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Controller.JoinProject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotStatus != tt.wantStatus {
+				t.Errorf("Controller.JoinProject() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
+			}
+		})
+	}
+}
+
+func TestController_ListProject(t *testing.T) {
+	ctx := &gin.Context{}
+	patches := gomonkey.ApplyMethod(reflect.TypeOf(ctx), "BindQuery",
+		func(_ *gin.Context, obj interface{}) error {
+			filter := obj.(*listFilter)
+			*filter = listFilter{
+				Page:     0,
+				PageSize: 10,
+				Tags:     []string{},
+				Uid:      primitive.NewObjectID().Hex(),
+			}
+			return nil
+		},
+	)
+	defer patches.Reset()
+	type args struct {
+		ctx *gin.Context
+		u   dto.LoginUserInfo
+	}
+	tests := []struct {
+		name       string
+		c          *Controller
+		args       args
+		wantStatus int
+		wantBody   interface{}
+		wantErr    bool
+	}{
+		{name: "test 200", c: &Controller{},
+			args: args{
+				ctx: ctx,
+				u:   dto.LoginUserInfo{ID: primitive.NewObjectID()},
+			}, wantStatus: 200, wantBody: []*database.Project{}, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Controller{}
+			gotStatus, gotBody, err := c.ListProject(tt.args.ctx, tt.args.u)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Controller.ListProject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotStatus != tt.wantStatus {
+				t.Errorf("Controller.ListProject() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
+			}
+			if !reflect.DeepEqual(gotBody, tt.wantBody) {
+				t.Errorf("Controller.ListProject() gotBody = %v, want %v", gotBody, tt.wantBody)
+			}
+		})
+	}
 }

@@ -113,13 +113,15 @@ func (c *Controller) JoinProject(ctx *gin.Context, u dto.LoginUserInfo) (status 
 	return 200, p, nil
 }
 
+type listFilter struct {
+	Page     int64
+	PageSize int64
+	Tags     []string
+	Uid      string
+}
+
 func (c *Controller) ListProject(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
-	var filter struct {
-		Page     int64
-		PageSize int64
-		Tags     []string
-		Uid      string
-	}
+	var filter listFilter
 	err = ctx.BindQuery(&filter)
 	if err != nil {
 		return 400, nil, err
@@ -168,11 +170,11 @@ func (c *Controller) DeleteProject(ctx *gin.Context, u dto.LoginUserInfo) (statu
 	}
 	_, err = database.GetProject(ctx, bson.M{"_id": id, "owner_id": u.ID})
 	if err != nil {
-		return 403, nil, fmt.Errorf("access denied")
+		return 404, nil, fmt.Errorf("not found")
 	}
 	p, err := database.DeleteProject(ctx, id)
 	if err != nil {
-		return 404, nil, fmt.Errorf("not found")
+		return 500, nil, err
 	}
 	return 200, p, nil
 
