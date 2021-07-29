@@ -8,6 +8,7 @@ import (
 
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils"
 	"github.com/Monkey-Mouse/mo2/mo2utils/mo2errors"
 	"github.com/Monkey-Mouse/mo2/server/model"
 	emailservice "github.com/Monkey-Mouse/mo2/services/emailService"
@@ -269,6 +270,73 @@ func TestController_DeleteProject(t *testing.T) {
 			}
 			if gotStatus != tt.wantStatus {
 				t.Errorf("Controller.DeleteProject() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
+			}
+		})
+	}
+}
+
+func TestController_JoinProject(t *testing.T) {
+	email := "xxxx"
+	ctx := &gin.Context{}
+	uid := primitive.NewObjectID()
+	p := &database.Project{
+		OwnerID: uid,
+	}
+	database.UpsertProject(ctx, p, nil)
+	ctx1 := &gin.Context{}
+
+	t1 := mo2utils.GenerateJwtCode(dto.LoginUserInfo{Email: "xx", ID: p.ID, Name: "member_i_ds"})
+
+	token := mo2utils.GenerateJwtCode(dto.LoginUserInfo{Email: email, ID: p.ID, Name: "member_i_ds"})
+	ctx2 := &gin.Context{}
+
+	defer database.DeleteProject(ctx, p.ID)
+	type args struct {
+		ctx   *gin.Context
+		u     dto.LoginUserInfo
+		token string
+	}
+	tests := []struct {
+		name       string
+		c          *Controller
+		args       args
+		wantStatus int
+		wantBody   interface{}
+		wantErr    bool
+	}{
+		{name: "test 400", c: &Controller{},
+			args: args{
+				ctx:   ctx,
+				u:     dto.LoginUserInfo{Email: email},
+				token: "",
+			}, wantStatus: 400, wantBody: nil, wantErr: true},
+		{name: "test 400 wrong email", c: &Controller{},
+			args: args{
+				ctx:   ctx1,
+				u:     dto.LoginUserInfo{Email: email},
+				token: t1,
+			}, wantStatus: 400, wantBody: nil, wantErr: true},
+		{name: "test 200", c: &Controller{},
+			args: args{
+				ctx:   ctx2,
+				u:     dto.LoginUserInfo{Email: email},
+				token: token,
+			}, wantStatus: 200, wantBody: nil, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pat := gomonkey.ApplyMethod(reflect.TypeOf(tt.args.ctx), "Query", func(*gin.Context, string) string {
+				return tt.args.token
+			})
+			defer pat.Reset()
+			c := &Controller{}
+			gotStatus, _, err := c.JoinProject(tt.args.ctx, tt.args.u)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Controller.JoinProject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotStatus != tt.wantStatus {
+				t.Errorf("Controller.JoinProject() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
 			}
 		})
 	}
