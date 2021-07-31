@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1627707376389,
+  "lastUpdate": 1627707704161,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -9678,6 +9678,60 @@ window.BENCHMARK_DATA = {
             "value": 1086,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "1769712655@qq.com",
+            "name": "chronos",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "1769712655@qq.com",
+            "name": "chronos",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "890c0d35f9e0cbc21d37b7bd7605b4315c78fc6f",
+          "message": "[fix] username",
+          "timestamp": "2021-07-31T12:57:39+08:00",
+          "tree_id": "b5d0911e182fd8ce7b3f26c87e2a3f6a14e9bf29",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/890c0d35f9e0cbc21d37b7bd7605b4315c78fc6f"
+        },
+        "date": 1627707703270,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7440833,
+            "unit": "ns/op",
+            "extra": "136 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 527159,
+            "unit": "ns/op",
+            "extra": "2517 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1457,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 115063,
+            "unit": "ns/op",
+            "extra": "10000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1388,
+            "unit": "ns/op",
+            "extra": "994452 times\n2 procs"
           }
         ]
       }
