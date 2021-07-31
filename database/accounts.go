@@ -54,20 +54,22 @@ func FindAccountByEmail(email string) (account model.Account, e mo2errors.Mo2Err
 	return
 }
 
-func CreateActiveAccounts(ctx context.Context, accs []model.Account) error {
+func CreateActiveAccounts(ctx context.Context, accs []model.Account, pass string) error {
 	docs := make([]interface{}, len(accs))
+	bs, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	p := string(bs)
 	for i, v := range accs {
 		v.EntityInfo = model.InitEntity()
-		bs, err := bcrypt.GenerateFromPassword([]byte(v.HashedPwd), bcrypt.DefaultCost)
-		if err != nil {
-			return err
-		}
-		v.HashedPwd = string(bs)
+
+		v.HashedPwd = p
 		v.Infos = map[string]string{model.IsActive: model.True}
 		v.Settings = map[string]string{}
 		docs[i] = v
 	}
-	_, err := AccCol.InsertMany(ctx, docs)
+	_, err = AccCol.InsertMany(ctx, docs)
 	return err
 }
 

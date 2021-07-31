@@ -34,11 +34,12 @@ func (c *Controller) SearchAccount(ctx *gin.Context, u dto.LoginUserInfo) (statu
 
 func (c *Controller) AddActiveAccounts(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
 	accs := struct{ accs []model.Account }{}
+	pass := ctx.Query("pass")
 	err = ctx.BindJSON(&accs)
 	if err != nil {
 		return 400, nil, err
 	}
-	err = database.CreateActiveAccounts(ctx, accs.accs)
+	err = database.CreateActiveAccounts(ctx, accs.accs, pass)
 	if err != nil {
 		return 500, nil, err
 	}

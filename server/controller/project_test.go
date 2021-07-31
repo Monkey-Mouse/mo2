@@ -106,7 +106,7 @@ func TestController_UpsertProject(t *testing.T) {
 		email := "xxx@xx"
 		err := database.CreateActiveAccounts(context.TODO(), []model.Account{
 			{ID: uid, Email: email, UserName: "xxx", HashedPwd: "xxxxx"},
-		})
+		}, "xxxxx")
 		if err != nil {
 			t.Errorf("insert user data err %v", err)
 		}
