@@ -117,6 +117,7 @@ func SetupHandlers(c *Controller) {
 			accounts.GET("detail/:id", c.ShowAccount)
 			accounts.GET("listBrief", c.ListAccountsInfo)
 			accounts.GET("", adapter.ReAdapterWithUinfo(c.SearchAccount))
+			accounts.POST("ids", adapter.ReAdapterWithUinfo(c.GetAccountIDs))
 		}
 		comment := api.Group("/comment", model.Anonymous, model.OrdinaryUser)
 		{

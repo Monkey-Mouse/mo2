@@ -6,7 +6,9 @@ import (
 	emailservice "github.com/Monkey-Mouse/mo2/services/emailService"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"net/http"
 
@@ -16,6 +18,32 @@ import (
 )
 
 const cookieExpiredTime int = 300000
+
+type emails struct {
+	Emails []string
+}
+
+func (c *Controller) GetAccountIDs(
+	ctx *gin.Context,
+	u dto.LoginUserInfo) (status int, body interface{}, err error) {
+	emails := emails{}
+	err = ctx.BindJSON(&emails)
+	if err != nil {
+		return 400, nil, err
+	}
+	cu, err := database.AccCol.Find(
+		ctx,
+		bson.M{"email": bson.M{"$in": emails.Emails}},
+		options.Find().SetProjection(bson.M{"_id": 1}),
+	)
+	if err != nil {
+		return 500, nil, err
+	}
+	re := make([]primitive.ObjectID, 0)
+	cu.All(ctx, &re)
+	return 200, re, nil
+
+}
 
 func (c *Controller) SearchAccount(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
 	query := ctx.Query("query")
@@ -33,13 +61,13 @@ func (c *Controller) SearchAccount(ctx *gin.Context, u dto.LoginUserInfo) (statu
 }
 
 func (c *Controller) AddActiveAccounts(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
-	accs := struct{ accs []model.Account }{}
+	accs := struct{ Accs []model.Account }{}
 	pass := ctx.Query("pass")
 	err = ctx.BindJSON(&accs)
 	if err != nil {
 		return 400, nil, err
 	}
-	err = database.CreateActiveAccounts(ctx, accs.accs, pass)
+	err = database.CreateActiveAccounts(ctx, accs.Accs, pass)
 	if err != nil {
 		return 500, nil, err
 	}

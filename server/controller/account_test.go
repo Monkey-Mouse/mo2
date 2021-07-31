@@ -3,12 +3,14 @@ package controller
 import (
 	"net/http"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/dto"
 	"github.com/Monkey-Mouse/mo2/server/model"
-
+	"github.com/agiledragon/gomonkey"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -194,4 +196,45 @@ func TestController_LoginAccount(t *testing.T) {
 
 	database.DeleteAccount(id)
 	database.DeleteAccount(id1)
+}
+
+func TestController_GetAccountIDs(t *testing.T) {
+	ctx := &gin.Context{}
+	p := gomonkey.ApplyMethod(reflect.TypeOf(ctx), "BindJSON",
+		func(_ *gin.Context, obj interface{}) error {
+			emails := obj.(*emails)
+			emails.Emails = []string{"aaaaa"}
+			return nil
+		},
+	)
+	defer p.Reset()
+	type args struct {
+		ctx *gin.Context
+		u   dto.LoginUserInfo
+	}
+	tests := []struct {
+		name       string
+		c          *Controller
+		args       args
+		wantStatus int
+		wantBody   interface{}
+		wantErr    bool
+	}{
+		{name: "test get acc ids", c: NewController(), args: args{
+			ctx: ctx,
+		}, wantStatus: 200, wantBody: nil, wantErr: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Controller{}
+			gotStatus, _, err := c.GetAccountIDs(tt.args.ctx, tt.args.u)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Controller.GetAccountIDs() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotStatus != tt.wantStatus {
+				t.Errorf("Controller.GetAccountIDs() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
+			}
+		})
+	}
 }
