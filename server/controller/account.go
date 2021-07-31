@@ -34,7 +34,7 @@ func (c *Controller) GetAccountIDs(
 	cu, err := database.AccCol.Find(
 		ctx,
 		bson.M{"email": bson.M{"$in": emails.Emails}},
-		options.Find().SetProjection(bson.M{"name": 1, "email": 1, "settings": 1}),
+		options.Find().SetProjection(bson.M{"username": 1, "email": 1, "settings": 1}),
 	)
 	if err != nil {
 		return 500, nil, err
