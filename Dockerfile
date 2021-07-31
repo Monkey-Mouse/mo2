@@ -1,11 +1,3 @@
-FROM node:12.18 AS front
-WORKDIR /home/mo2front
-COPY ./mo2front .
-RUN npm cache clean --force
-RUN npm install
-RUN npm run build
-
-
 #build stage
 FROM golang:1.16 AS builder
 RUN apt-get install git
@@ -22,7 +14,6 @@ COPY . /go/bin
 FROM ubuntu:latest
 RUN apt-get update
 RUN apt-get install ca-certificates -y
-COPY --from=front /home/dist /app/dist
 WORKDIR /app
 RUN chmod -R 777 .
 COPY --from=builder /go/bin /app

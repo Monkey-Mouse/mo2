@@ -28,11 +28,12 @@ func GenerateUploadToken(saveKey string) (token string) {
 
 // GenerateOverwriteToken generate qiniu upload token
 func GenerateOverwriteToken(saveKey string, overwriteKey string) (token string) {
+
 	var putPolicy = storage.PutPolicy{
 		Scope:        fmt.Sprintf("%s:%s", bucket, overwriteKey),
 		Expires:      7200,
 		FsizeLimit:   1024 * 1024 * 20,
-		SaveKey:      saveKey,
+		SaveKey:      overwriteKey,
 		ForceSaveKey: true,
 	}
 	return putPolicy.UploadToken(mac)
