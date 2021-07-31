@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1627699903207,
+  "lastUpdate": 1627707022910,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -9570,6 +9570,60 @@ window.BENCHMARK_DATA = {
             "value": 1151,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "1769712655@qq.com",
+            "name": "chronos",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "1769712655@qq.com",
+            "name": "chronos",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "78f4e28fedc591a33ae7a8df08ac6306b5301325",
+          "message": "🐛 [fix] get account ids bug",
+          "timestamp": "2021-07-31T12:46:08+08:00",
+          "tree_id": "ad089475132952d2e540fa51940e71a822a8fe70",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/78f4e28fedc591a33ae7a8df08ac6306b5301325"
+        },
+        "date": 1627707021710,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7881776,
+            "unit": "ns/op",
+            "extra": "136 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 550957,
+            "unit": "ns/op",
+            "extra": "2518 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1478,
+            "unit": "ns/op",
+            "extra": "971889 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 113876,
+            "unit": "ns/op",
+            "extra": "10000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1350,
+            "unit": "ns/op",
+            "extra": "888542 times\n2 procs"
           }
         ]
       }
