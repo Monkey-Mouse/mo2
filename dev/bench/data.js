@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1627574110588,
+  "lastUpdate": 1627698381126,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -9462,6 +9462,60 @@ window.BENCHMARK_DATA = {
             "value": 1353,
             "unit": "ns/op",
             "extra": "828973 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "1769712655@qq.com",
+            "name": "chronos",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "1769712655@qq.com",
+            "name": "chronos",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "6dde30f60cd93e6a16cd4908bf89d058dd64cf97",
+          "message": "Merge branch 'main' of github.com:Monkey-Mouse/mo2",
+          "timestamp": "2021-07-31T10:21:39+08:00",
+          "tree_id": "eac8e918abe7a299b64d13adbd63945bbda92849",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/6dde30f60cd93e6a16cd4908bf89d058dd64cf97"
+        },
+        "date": 1627698379868,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7255720,
+            "unit": "ns/op",
+            "extra": "162 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 492508,
+            "unit": "ns/op",
+            "extra": "2534 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1298,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 102501,
+            "unit": "ns/op",
+            "extra": "10000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1354,
+            "unit": "ns/op",
+            "extra": "883899 times\n2 procs"
           }
         ]
       }
