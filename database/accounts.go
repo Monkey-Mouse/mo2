@@ -67,6 +67,7 @@ func CreateActiveAccounts(ctx context.Context, accs []model.Account, pass string
 		v.HashedPwd = p
 		v.Infos = map[string]string{model.IsActive: model.True}
 		v.Settings = map[string]string{}
+		v.Roles = []string{model.OrdinaryUser}
 		docs[i] = v
 	}
 	_, err = AccCol.InsertMany(ctx, docs)
