@@ -39,8 +39,11 @@ func (c *Controller) GetAccountIDs(
 	if err != nil {
 		return 500, nil, err
 	}
-	re := make([]primitive.ObjectID, 0)
-	cu.All(ctx, &re)
+	re := make([]dto.UserInfoBrief, 0)
+	err = cu.All(ctx, &re)
+	if err != nil {
+		return 500, nil, err
+	}
 	return 200, re, nil
 
 }
