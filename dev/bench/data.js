@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1627698381126,
+  "lastUpdate": 1627699903207,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -9516,6 +9516,60 @@ window.BENCHMARK_DATA = {
             "value": 1354,
             "unit": "ns/op",
             "extra": "883899 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "1769712655@qq.com",
+            "name": "chronos",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "1769712655@qq.com",
+            "name": "chronos",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "60e78e708367195c2cd814733357b8032a2472b4",
+          "message": "✨ [feature] add get account ids",
+          "timestamp": "2021-07-31T10:47:43+08:00",
+          "tree_id": "61d25f7d3b91ba7dc8f5cb27457b9d5b27833d06",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/60e78e708367195c2cd814733357b8032a2472b4"
+        },
+        "date": 1627699902445,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7719415,
+            "unit": "ns/op",
+            "extra": "147 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 517607,
+            "unit": "ns/op",
+            "extra": "2581 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1194,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 102347,
+            "unit": "ns/op",
+            "extra": "9807 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1151,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
           }
         ]
       }
