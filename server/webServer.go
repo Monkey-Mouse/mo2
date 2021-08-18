@@ -1,13 +1,8 @@
 package server
 
 import (
-	"io"
-	"log"
-	"os"
-
 	_ "github.com/Monkey-Mouse/mo2/docs"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
-	"github.com/Monkey-Mouse/mo2/mo2utils/basiclog"
 	"github.com/Monkey-Mouse/mo2/server/controller"
 	"github.com/Monkey-Mouse/mo2/server/middleware"
 
@@ -24,14 +19,14 @@ import (
 // RunServer start web server
 func RunServer() {
 
-	if gin.Mode() == gin.ReleaseMode {
-		gin.DisableConsoleColor()
-		f, _ := os.OpenFile("logs/gin.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		errf, _ := os.OpenFile("logs/err.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		gin.DefaultWriter = io.MultiWriter(f)
-		gin.DefaultErrorWriter = io.MultiWriter(errf)
-		basiclog.SetLoggeer(log.New(f, "[INFO]", 0), log.New(errf, "[ERROR]", 0))
-	}
+	// if gin.Mode() == gin.ReleaseMode {
+	// 	gin.DisableConsoleColor()
+	// 	f, _ := os.OpenFile("logs/gin.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// 	errf, _ := os.OpenFile("logs/err.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// 	gin.DefaultWriter = io.MultiWriter(f)
+	// 	gin.DefaultErrorWriter = io.MultiWriter(errf)
+	// 	basiclog.SetLoggeer(log.New(f, "[INFO]", 0), log.New(errf, "[ERROR]", 0))
+	// }
 	r := gin.Default()
 	r.Use(static.Serve("/", static.LocalFile("dist", true)))
 	c := controller.NewController()

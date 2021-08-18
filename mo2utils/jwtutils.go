@@ -2,13 +2,11 @@ package mo2utils
 
 import (
 	"errors"
-	"io/ioutil"
 	"math/rand"
-	"os"
-	"path"
 	"time"
 
 	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/mo2utils/redisutil"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -25,23 +23,33 @@ type JwtInfoClaims struct {
 	jwt.StandardClaims
 }
 
-var key []byte = make([]byte, 16)
+const keystr = "MO2_KEY"
 
-func init() {
-	initKey()
-}
-func initKey() (err error) {
-	os.Mkdir("./secrets", 0755)
-	path := path.Join("./secrets", "mo2.secret")
-	bytes, err := ioutil.ReadFile(path)
+// GetKey from redis or create new key
+func GetKey() (key []byte, err error) {
+	key = make([]byte, 16)
+	red := redisutil.GetRedisClient()
+	skey, err := red.Get(keystr).Result()
 	if err != nil {
-
 		rand.Seed(time.Now().UnixNano())
 		_, err = rand.Read(key)
-		err = ioutil.WriteFile(path, key, 0)
-		return
+		if err != nil {
+			return nil, err
+		}
+		suc, err := red.SetNX(keystr, string(key), time.Hour*2400).Result()
+		if err != nil {
+			return nil, err
+		}
+		if !suc {
+			skey, err = red.Get(keystr).Result()
+			if err != nil {
+				return nil, err
+			}
+			key = []byte(skey)
+		}
+		return key, nil
 	}
-	key = bytes
+	key = []byte(skey)
 	return
 }
 
@@ -49,7 +57,7 @@ func initKey() (err error) {
 //if token is valid, return nil
 func ParseJwt(tokenString string) (userInfo dto.LoginUserInfo, err error) {
 	token, err := jwt.ParseWithClaims(tokenString, &JwtLoginClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return key, nil
+		return GetKey()
 	})
 	if err != nil {
 		return
@@ -78,6 +86,10 @@ func GenerateJwtCode(info dto.LoginUserInfo) string {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// Sign and get the complete encoded token as a string using the secret
+	key, err := GetKey()
+	if err != nil {
+		panic(err)
+	}
 	tokenString, err := token.SignedString(key)
 	if err != nil {
 		panic(err)
@@ -106,6 +118,10 @@ func GenerateJwtToken(info string, expireAt time.Time) string {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// Sign and get the complete encoded token as a string using the secret
+	key, err := GetKey()
+	if err != nil {
+		panic(err)
+	}
 	tokenString, err := token.SignedString(key)
 	if err != nil {
 		panic(err)
