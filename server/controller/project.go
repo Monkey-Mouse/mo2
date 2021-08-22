@@ -6,6 +6,7 @@ import (
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/dto"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/server/model"
 	emailservice "github.com/Monkey-Mouse/mo2/services/emailService"
 	"github.com/gin-gonic/gin"
 	"github.com/willf/bloom"
@@ -14,7 +15,7 @@ import (
 )
 
 func (c *Controller) UpsertProject(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
-	p := &database.Project{}
+	p := &model.Project{}
 	err = ctx.BindJSON(p)
 	if err != nil {
 		return 400, nil, err
@@ -69,7 +70,7 @@ func (c *Controller) UpsertProject(ctx *gin.Context, u dto.LoginUserInfo) (statu
 			infos := database.ListAccountsBrief(invitations)
 			if len(infos) > 0 {
 				for _, v := range infos {
-					url := "https://www.motwo.cn/project/" + p.ID.Hex()
+					url := "https://" + ctx.Request.Host + "/project/" + p.ID.Hex()
 					token := mo2utils.GenerateJwtCode(dto.LoginUserInfo{Email: v.Email, ID: p.ID, Name: "manager_i_ds"})
 					emailservice.SendEmail(emailservice.InvitationMessage(url+"?token="+token+"&email="+v.Email, p.Name, []string{v.Email}), ctx.ClientIP())
 				}
@@ -79,7 +80,7 @@ func (c *Controller) UpsertProject(ctx *gin.Context, u dto.LoginUserInfo) (statu
 			infos := database.ListAccountsBrief(meminvitations)
 			if len(infos) > 0 {
 				for _, v := range infos {
-					url := "https://www.motwo.cn/project/" + p.ID.Hex()
+					url := "https://" + ctx.Request.Host + "/project/" + p.ID.Hex()
 					token := mo2utils.GenerateJwtCode(dto.LoginUserInfo{Email: v.Email, ID: p.ID, Name: "member_i_ds"})
 					emailservice.SendEmail(emailservice.InvitationMessage(url+"?token="+token+"&email="+v.Email, p.Name, []string{v.Email}), ctx.ClientIP())
 				}
@@ -102,7 +103,7 @@ func (c *Controller) JoinProject(ctx *gin.Context, u dto.LoginUserInfo) (status 
 	if info.Email != u.Email {
 		return 400, nil, fmt.Errorf("wrong email")
 	}
-	_, err = database.UpsertProject(ctx, &database.Project{ID: info.ID}, bson.M{"$addToSet": bson.M{info.Name: u.ID}})
+	_, err = database.UpsertProject(ctx, &model.Project{ID: info.ID}, bson.M{"$addToSet": bson.M{info.Name: u.ID}})
 	if err != nil {
 		return 500, nil, err
 	}
@@ -161,6 +162,13 @@ func (c *Controller) GetProject(ctx *gin.Context, u dto.LoginUserInfo) (status i
 		return 404, nil, fmt.Errorf("not found")
 	}
 	return 200, p, nil
+}
+func (c *Controller) SearchProject(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
+	query := ctx.Query("search")
+	page := ctx.GetInt("page")
+	pagesize := ctx.GetInt("pagesize")
+	co := mo2utils.QueryProject(query, page, pagesize)
+	return 200, co, nil
 }
 func (c *Controller) DeleteProject(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
 	sid, _ := ctx.Params.Get("id")

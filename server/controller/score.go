@@ -7,6 +7,7 @@ import (
 
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/dto"
+	"github.com/Monkey-Mouse/mo2/server/model"
 	"github.com/Monkey-Mouse/mo2/services/loghelper"
 	"github.com/Monkey-Mouse/mo2log/service/logservice"
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func checkOwnerOrManager(p *database.Project, u dto.LoginUserInfo) bool {
+func checkOwnerOrManager(p *model.Project, u dto.LoginUserInfo) bool {
 	if p.OwnerID == u.ID {
 		return true
 	}

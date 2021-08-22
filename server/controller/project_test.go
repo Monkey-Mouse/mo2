@@ -18,11 +18,11 @@ import (
 )
 
 func buildUpsertProjectCtx(
-	proj database.Project, err error) (*gomonkey.Patches, *gin.Context) {
+	proj model.Project, err error) (*gomonkey.Patches, *gin.Context) {
 	ctx := &gin.Context{}
 
 	patches := gomonkey.ApplyMethod(reflect.TypeOf(ctx), "BindJSON", func(_ *gin.Context, obj interface{}) error {
-		p := obj.(*database.Project)
+		p := obj.(*model.Project)
 		*p = proj
 		return err
 	})
@@ -32,7 +32,7 @@ func buildUpsertProjectCtx(
 func TestController_UpsertProject(t *testing.T) {
 	t.Run("test 400", func(t *testing.T) {
 		patches, ctx := buildUpsertProjectCtx(
-			database.Project{},
+			model.Project{},
 			fmt.Errorf("test err"))
 		defer patches.Reset()
 		s, _, err := NewController().UpsertProject(ctx, dto.LoginUserInfo{})
@@ -45,7 +45,7 @@ func TestController_UpsertProject(t *testing.T) {
 	})
 	t.Run("test insert", func(t *testing.T) {
 		patches, ctx := buildUpsertProjectCtx(
-			database.Project{
+			model.Project{
 				ManagerIDs: []primitive.ObjectID{primitive.NewObjectID()},
 				MemberIDs:  []primitive.ObjectID{primitive.NewObjectID()},
 			},
@@ -62,7 +62,7 @@ func TestController_UpsertProject(t *testing.T) {
 			t.Errorf("should produce status 200, but %v", s)
 		}
 		m := b.(gin.H)
-		p := m["project"].(*database.Project)
+		p := m["project"].(*model.Project)
 		if len(p.ManagerIDs) > 0 {
 			t.Errorf("insert project should not have managerids")
 		}
@@ -79,7 +79,7 @@ func TestController_UpsertProject(t *testing.T) {
 	})
 	t.Run("test 404", func(t *testing.T) {
 		patches, ctx := buildUpsertProjectCtx(
-			database.Project{
+			model.Project{
 				ID: primitive.NewObjectID(),
 			},
 			nil)
@@ -99,7 +99,7 @@ func TestController_UpsertProject(t *testing.T) {
 		database.AccCol.Drop(context.TODO())
 		database.ProjCol.Drop(context.TODO())
 		uid := primitive.NewObjectID()
-		proj := &database.Project{
+		proj := &model.Project{
 			Tags:    []string{"xxx", "课x"},
 			OwnerID: uid,
 		}
@@ -116,7 +116,7 @@ func TestController_UpsertProject(t *testing.T) {
 		}
 		proj.ManagerIDs = []primitive.ObjectID{}
 		patches, ctx := buildUpsertProjectCtx(
-			database.Project{
+			model.Project{
 				ID:         proj.ID,
 				Tags:       []string{"xxx", "课程"},
 				ManagerIDs: []primitive.ObjectID{uid},
@@ -144,7 +144,7 @@ func TestController_UpsertProject(t *testing.T) {
 			t.Errorf("should produce status 200, but %v", s)
 		}
 		m := b.(gin.H)
-		p := m["project"].(*database.Project)
+		p := m["project"].(*model.Project)
 		if len(p.ManagerIDs) > 0 {
 			t.Errorf("insert project should not have managerids")
 		}
@@ -165,7 +165,7 @@ func TestController_GetProject(t *testing.T) {
 		Params: gin.Params{{Key: "id", Value: primitive.NewObjectID().Hex()}},
 	}
 	ctx1 := &gin.Context{}
-	p := &database.Project{}
+	p := &model.Project{}
 	database.UpsertProject(ctx, p, nil)
 	defer database.DeleteProject(ctx, p.ID)
 	ctx2 := &gin.Context{
@@ -208,8 +208,8 @@ func TestController_GetProject(t *testing.T) {
 				t.Errorf("Controller.GetProject() gotStatus = %v, want %v", gotStatus, tt.wantStatus)
 			}
 			if gotBody != nil {
-				p1 := gotBody.(*database.Project)
-				p2 := tt.wantBody.(*database.Project)
+				p1 := gotBody.(*model.Project)
+				p2 := tt.wantBody.(*model.Project)
 				p1.EntityInfo = p2.EntityInfo
 			}
 			if !reflect.DeepEqual(gotBody, tt.wantBody) {
@@ -225,7 +225,7 @@ func TestController_DeleteProject(t *testing.T) {
 	}
 	ctx1 := &gin.Context{}
 	uid := primitive.NewObjectID()
-	p := &database.Project{
+	p := &model.Project{
 		OwnerID: uid,
 	}
 	database.UpsertProject(ctx, p, nil)
@@ -279,7 +279,7 @@ func TestController_JoinProject(t *testing.T) {
 	email := "xxxx"
 	ctx := &gin.Context{}
 	uid := primitive.NewObjectID()
-	p := &database.Project{
+	p := &model.Project{
 		OwnerID: uid,
 	}
 	database.UpsertProject(ctx, p, nil)
@@ -373,7 +373,7 @@ func TestController_ListProject(t *testing.T) {
 			args: args{
 				ctx: ctx,
 				u:   dto.LoginUserInfo{ID: primitive.NewObjectID()},
-			}, wantStatus: 200, wantBody: []*database.Project{}, wantErr: false},
+			}, wantStatus: 200, wantBody: []*model.Project{}, wantErr: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

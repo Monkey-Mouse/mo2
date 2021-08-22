@@ -144,6 +144,7 @@ func SetupHandlers(c *Controller) {
 			proj.DELETE(":id", adapter.ReAdapterWithUinfo(c.DeleteProject), model.OrdinaryUser)
 			proj.GET(":id", adapter.ReAdapterWithUinfo(c.GetProject))
 			proj.POST("join", adapter.ReAdapterWithUinfo(c.JoinProject), model.OrdinaryUser)
+			proj.POST("search", adapter.ReAdapterWithUinfo(c.SearchProject))
 		}
 	}
 }
