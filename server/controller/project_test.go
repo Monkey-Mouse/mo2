@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"reflect"
 	"testing"
 
@@ -19,7 +20,11 @@ import (
 
 func buildUpsertProjectCtx(
 	proj model.Project, err error) (*gomonkey.Patches, *gin.Context) {
-	ctx := &gin.Context{}
+	ctx := &gin.Context{
+		Request: &http.Request{
+			Host: "xxxxxx",
+		},
+	}
 
 	patches := gomonkey.ApplyMethod(reflect.TypeOf(ctx), "BindJSON", func(_ *gin.Context, obj interface{}) error {
 		p := obj.(*model.Project)
