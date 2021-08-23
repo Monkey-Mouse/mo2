@@ -1,8 +1,11 @@
 package server
 
 import (
+	"log"
+
 	_ "github.com/Monkey-Mouse/mo2/docs"
 	"github.com/Monkey-Mouse/mo2/mo2utils"
+	"github.com/Monkey-Mouse/mo2/mo2utils/basiclog"
 	"github.com/Monkey-Mouse/mo2/server/controller"
 	"github.com/Monkey-Mouse/mo2/server/middleware"
 
@@ -18,7 +21,7 @@ import (
 
 // RunServer start web server
 func RunServer() {
-
+	basiclog.SetLoggeer(log.Default(), log.Default())
 	// if gin.Mode() == gin.ReleaseMode {
 	// 	gin.DisableConsoleColor()
 	// 	f, _ := os.OpenFile("logs/gin.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
