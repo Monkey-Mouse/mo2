@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 
@@ -60,6 +61,7 @@ func Query(index string, query query.Query, page int, pagesize int, fields []str
 	searchRequest.Highlight = bleve.NewHighlightWithStyle("html")
 	searchResult := &bleve.SearchResult{}
 	_ = JsonRPC(searchURL+index, http.MethodPost, searchRequest, searchResult)
+	log.Println(searchResult)
 	return searchResult
 }
 
