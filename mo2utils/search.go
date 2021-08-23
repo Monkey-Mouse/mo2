@@ -31,7 +31,7 @@ func IndexAccount(account *model.Account) {
 	mo2search.Index(userIndex, account.ID.Hex(), account)
 }
 func IndexProject(project *model.Project) {
-	mo2search.Index(userIndex, project.ID.Hex(), project)
+	mo2search.Index(projectIndex, project.ID.Hex(), project)
 }
 
 // IndexBlogs index multiple blogs
