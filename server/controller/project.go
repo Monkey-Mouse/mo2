@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/Monkey-Mouse/mo2/database"
 	"github.com/Monkey-Mouse/mo2/dto"
@@ -165,8 +166,14 @@ func (c *Controller) GetProject(ctx *gin.Context, u dto.LoginUserInfo) (status i
 }
 func (c *Controller) SearchProject(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
 	query := ctx.Query("search")
-	page := ctx.GetInt("page")
-	pagesize := ctx.GetInt("pagesize")
+	page, err := strconv.Atoi(ctx.Query("page"))
+	if err != nil {
+		return 400, nil, err
+	}
+	pagesize, err := strconv.Atoi(ctx.Query("pagesize"))
+	if err != nil {
+		return 400, nil, err
+	}
 	co := mo2utils.QueryProject(query, page, pagesize)
 	return 200, co, nil
 }
