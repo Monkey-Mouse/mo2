@@ -60,13 +60,13 @@ func QueryUser(search string, page int, pagesize int) search.DocumentMatchCollec
 }
 func QueryProject(search string, page int, pagesize int) search.DocumentMatchCollection {
 	queryN := bleve.NewMatchQuery(search)
-	queryN.SetField("name")
+	queryN.SetField("Name")
 	queryN.SetBoost(5)
 	queryD := bleve.NewMatchQuery(search)
-	queryD.SetField("description")
+	queryD.SetField("Description")
 	queryD.SetBoost(1)
 	queryT := bleve.NewMatchQuery(search)
-	queryT.SetField("tags")
+	queryT.SetField("Tags")
 	queryT.SetBoost(5)
 
 	query := bleve.NewDisjunctionQuery(queryT, queryD, queryN)
