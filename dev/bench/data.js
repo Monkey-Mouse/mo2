@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1629710154300,
+  "lastUpdate": 1629711306268,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -10108,6 +10108,60 @@ window.BENCHMARK_DATA = {
           {
             "name": "Benchmark_checkRL",
             "value": 1120,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "1769712655@qq.com",
+            "name": "chronos",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "1769712655@qq.com",
+            "name": "chronos",
+            "username": "Chronostasys"
+          },
+          "distinct": true,
+          "id": "a253b9766d606f3c22d13d30f19dd64db1182a8b",
+          "message": "feat: add log",
+          "timestamp": "2021-08-23T17:30:21+08:00",
+          "tree_id": "1a6cae4591dffb2ffb77c4f38e69c2d0678b1f35",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/a253b9766d606f3c22d13d30f19dd64db1182a8b"
+        },
+        "date": 1629711305120,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 6716498,
+            "unit": "ns/op",
+            "extra": "165 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 663062,
+            "unit": "ns/op",
+            "extra": "3082 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1323,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 98074,
+            "unit": "ns/op",
+            "extra": "11922 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1181,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
           }
