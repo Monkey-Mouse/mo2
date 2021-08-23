@@ -175,7 +175,14 @@ func (c *Controller) SearchProject(ctx *gin.Context, u dto.LoginUserInfo) (statu
 		return 400, nil, err
 	}
 	co := mo2utils.QueryProject(query, page, pagesize)
-	return 200, co, nil
+	dic := make([]map[string]interface{}, 0)
+	for i, v := range co {
+		dic[i] = v.Fields
+		for fk, f := range v.Fragments {
+			dic[i][fk] = f
+		}
+	}
+	return 200, dic, nil
 }
 func (c *Controller) DeleteProject(ctx *gin.Context, u dto.LoginUserInfo) (status int, body interface{}, err error) {
 	sid, _ := ctx.Params.Get("id")
