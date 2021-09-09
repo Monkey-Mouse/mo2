@@ -95,6 +95,7 @@ func upsertBlog(b *model.Blog, isDraft bool) (mErr mo2errors.Mo2Errors) {
 			"categories":  b.CategoryIDs,
 			"y_doc":       b.YDoc,
 			"project_id":  b.ProjectID,
+			"coauthors":   b.CoAuthorIDs,
 		}}},
 		options.Update().SetUpsert(true),
 	)

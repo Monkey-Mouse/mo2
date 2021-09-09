@@ -23,6 +23,7 @@ type Blog struct {
 	ScoreSum    float64              `json:"score_sum" bson:"score_sum,omitempty"`
 	ScoreNum    int                  `json:"score_num" bson:"score_num,omitempty"`
 	ProjectID   primitive.ObjectID   `json:"project_id" bson:"project_id"`
+	CoAuthorIDs []primitive.ObjectID `json:"coauthors,omitempty" bson:"coauthors"`
 }
 
 type Filter struct {
