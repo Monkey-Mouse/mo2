@@ -11,7 +11,7 @@ COPY . /go/bin
 
 
 #final stage
-FROM ubuntu:latest
+FROM ubuntu:groovy-20210614
 RUN apt-get update
 RUN apt-get install ca-certificates -y
 WORKDIR /app
