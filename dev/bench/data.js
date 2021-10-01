@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1631149188300,
+  "lastUpdate": 1633128724819,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -10324,6 +10324,56 @@ window.BENCHMARK_DATA = {
           {
             "name": "Benchmark_checkRL",
             "value": 1275,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "d029568bdd7bc8ad5c1a84d6e3b8ed15305c8bc3",
+          "message": "[Snyk] Security upgrade ubuntu from latest to 20.04",
+          "timestamp": "2021-09-09T00:55:56Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/304/commits/d029568bdd7bc8ad5c1a84d6e3b8ed15305c8bc3"
+        },
+        "date": 1633128723630,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7220842,
+            "unit": "ns/op",
+            "extra": "159 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 453877,
+            "unit": "ns/op",
+            "extra": "2920 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1189,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 100249,
+            "unit": "ns/op",
+            "extra": "11908 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1126,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
           }
