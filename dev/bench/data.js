@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1666750812032,
+  "lastUpdate": 1666950969208,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -10624,6 +10624,60 @@ window.BENCHMARK_DATA = {
           {
             "name": "Benchmark_checkRL",
             "value": 1113,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49905799+Chronostasys@users.noreply.github.com",
+            "name": "Boxiu Lee",
+            "username": "Chronostasys"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "bef4ad1ff22c89761f4b146fda0351af80f11c9f",
+          "message": "Merge pull request #309 from Monkey-Mouse/snyk-fix-ba51f8d7b8a7862826b745bfaacee275\n\n[Snyk] Security upgrade ubuntu from latest to 22.04",
+          "timestamp": "2022-10-28T17:52:23+08:00",
+          "tree_id": "880d2b404ed634679c7c5ac4f855ba0cea3a8308",
+          "url": "https://github.com/Monkey-Mouse/mo2/commit/bef4ad1ff22c89761f4b146fda0351af80f11c9f"
+        },
+        "date": 1666950968468,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 6770653,
+            "unit": "ns/op",
+            "extra": "182 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 482238,
+            "unit": "ns/op",
+            "extra": "2768 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1188,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 101131,
+            "unit": "ns/op",
+            "extra": "12194 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1064,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
           }
