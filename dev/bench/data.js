@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1666950969208,
+  "lastUpdate": 1681828817125,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -10680,6 +10680,56 @@ window.BENCHMARK_DATA = {
             "value": 1064,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "d4041b841166de5de34204428a490fcaa34d4ae9",
+          "message": "[Snyk] Security upgrade ubuntu from 22.04 to 22.10",
+          "timestamp": "2023-01-19T06:11:59Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/310/commits/d4041b841166de5de34204428a490fcaa34d4ae9"
+        },
+        "date": 1681828815948,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 10127964,
+            "unit": "ns/op",
+            "extra": "112 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 593882,
+            "unit": "ns/op",
+            "extra": "2378 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1389,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 153898,
+            "unit": "ns/op",
+            "extra": "9382 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1266,
+            "unit": "ns/op",
+            "extra": "954481 times\n2 procs"
           }
         ]
       }
