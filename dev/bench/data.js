@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1685343080149,
+  "lastUpdate": 1688567996774,
   "repoUrl": "https://github.com/Monkey-Mouse/mo2",
   "entries": {
     "Benchmark": [
@@ -10830,6 +10830,56 @@ window.BENCHMARK_DATA = {
             "value": 1178,
             "unit": "ns/op",
             "extra": "1000000 times\n2 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "committer": {
+            "name": "Monkey-Mouse",
+            "username": "Monkey-Mouse"
+          },
+          "id": "dcde3326ecf84b05a435dd5a59962e09ba3cb567",
+          "message": "[Snyk] Security upgrade ubuntu from 22.04 to kinetic",
+          "timestamp": "2023-01-19T06:11:59Z",
+          "url": "https://github.com/Monkey-Mouse/mo2/pull/313/commits/dcde3326ecf84b05a435dd5a59962e09ba3cb567"
+        },
+        "date": 1688567995943,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "Benchmark_Middleware_redis",
+            "value": 7526804,
+            "unit": "ns/op",
+            "extra": "147 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_Middleware_memory",
+            "value": 489325,
+            "unit": "ns/op",
+            "extra": "2709 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRoles",
+            "value": 1197,
+            "unit": "ns/op",
+            "extra": "1000000 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_redisCheckRL",
+            "value": 99386,
+            "unit": "ns/op",
+            "extra": "12654 times\n2 procs"
+          },
+          {
+            "name": "Benchmark_checkRL",
+            "value": 1173,
+            "unit": "ns/op",
+            "extra": "922446 times\n2 procs"
           }
         ]
       }
